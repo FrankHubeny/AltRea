@@ -8,7 +8,7 @@
 - ConclusionsNotTheSame: The conclusions of blocks are not the same.
 - DisjunctNotFound: The disjunct from the disjunction on the specified line was not found
     as one of the assumptions starting a block.
-- NoSuchNumber: The referenced line does not exist in the proof.
+- NoSuchLine: The referenced line does not exist in the proof.
 - NotAntecedent: The statement is not the antecedent of the implication.
 - NotAssumption: The referenced statement is not an assumption, the first line of a block.
 - NotConjunction: The statement is not a conjunction.
@@ -22,7 +22,7 @@
 - ScopeError: The referenced statement is not accessible.
 """
 
-from sympy.logic.boolalg import And, Or, Not, Implies, Equivalent
+from sympy.logic.boolalg import And, Or, Not, Implies, Equivalent, Xor, Nand, Nor, Xnor
 from sympy.core.symbol import Symbol
 
 class AssumptionNotFound(Exception):
@@ -34,8 +34,8 @@ class AssumptionNotFound(Exception):
     """
 
     def __init__(self, 
-                 assumption: Not | And | Or | Implies | Equivalent | Symbol, 
-                 disjunction: Not | And | Or | Implies | Equivalent | Symbol
+                 assumption: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,
+                 disjunction: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,
                  ):
         self.assumption = assumption
         self.disjunction = disjunction
@@ -43,6 +43,25 @@ class AssumptionNotFound(Exception):
     def __str__(self):
         return f'The assumption {self.assumption} does not match a disjunct in {self.disjunction}.'
 
+class BlocksDisjunctsNotEqual(Exception):
+    """The number of blocks and the number of disjuncts in the statement are not the same.
+    
+    Parameter:
+        blockids: A list of blockids
+        disjunction: The disjunction with not enough or too many disjuncts.
+    """
+
+    def __init__(
+            self, 
+            disjunction: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,
+            blockids: list
+            ):
+        self.blockids = blockids
+        self.disjunction = disjunction
+    
+    def __str__(self):
+        return f'The number of disjuncts in {self.disjunction} is not the same as the number of blocks {self.blockids}.'
+    
 class BlockNotAvailable(Exception):
     """The block is outside the scope of the current block.
     
@@ -68,6 +87,19 @@ class BlockNotClosed(Exception):
 
     def __str__(self):
         return f'The block {self.block} is unavailable because it has not been closed.'
+    
+class BlockScopeError(Exception):
+    """The referenced block is not accessible to the proof.
+    
+    Parameter:
+        blockid: The name of the block that is accessible.
+    """
+
+    def __init__(self, blockid: str):
+        self.blockid = blockid
+
+    def __str__(self):
+        return f'The block {self.blockid} is not accessible.'
     
 class BlockClosed(Exception):
     """A proof line cannot be added to a block that is closed.
@@ -144,7 +176,7 @@ class DisjunctNotFound(Exception):
         return f'The disjunct {self.disjunct} from the disjunction {self.disjunction} on lin {self.line}\
             was not found as an assumption of any of the referenced blocks.'
     
-class NoSuchNumber(Exception):
+class NoSuchLine(Exception):
     """The referenced line does not exist in the proof.
 
     Parameter:
@@ -228,7 +260,20 @@ class NotContradiction(Exception):
 
     def __str__(self):
         return f'The statements at lines {self.start} and {self.end} are not contradictions.'
+
+class NotDeMorgan(Exception):
+    """The statement cannot be used in a DeMorgan rule.
     
+    Parameter:
+        statement: The statement that caused the error.
+    """
+
+    def __init__(self, line: int, statement: Not | And | Or):
+        self.statement = statement
+
+    def __str__(self):
+        return f'The statement {self.statement} on line {self.line} cannot be used in a DeMorgan rule.'
+       
 class NotDisjunction(Exception):
     """The statement is not a disjunction.
     
@@ -259,6 +304,22 @@ class NotFalse(Exception):
     def __str__(self):
         return f'The line {self.line} contains {self.statement} which is not False.'
 
+class NotModusPonens(Exception):
+    """The two statements cannot be used for implication elimination or modus ponens.
+
+    Parameters:
+        line: The number of the line claimed to be False.
+        statement: The startment on the line.
+    """
+
+    def __init__(self, 
+                 firststatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,  
+                 secondstatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol):
+        self.firststatement = firststatement
+        self.secondstatement = secondstatement
+
+    def __str__(self):
+        return f'The two statements {self.firststatement} and {self.secondstatement} cannot be used in implication elimination.'
 
 class NotSameBlock(Exception):
     """Two referenced statements are not from the same block.

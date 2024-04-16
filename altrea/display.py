@@ -27,46 +27,43 @@ def metadata(p: altrea.tf.Proof):
     else:
         print('Completed: No')
     print('Lines: {}'.format(len(p.lines)-1))
-    blocks = -1
-    for i in p.blockcounts:
-        blocks += i
-    print('blocks: {}'.format(blocks))
 
-def show(p: altrea.tf.Proof, color: int = 1):
+def show(p: altrea.tf.Proof, color: int = 1, latex: int = 1):
     """Display a proof line by line.
     
     Parameters:
         p: The proof containing the lines.
     """
 
-    newp = []
-    for i in range(len(p.lines)):
-        if p.lines[i][0] == sympy.S.false:
-            statement = '$\\bot$'
-        else:
-            if color == 1 and p.status != p.complete and p.lines[i][1] <= p.level:
-                statement = ''.join(['$\\color{red}',sympy.latex(p.lines[i][0]),'$'])
-            else:
-                statement = ''.join(['$',sympy.latex(p.lines[i][0]),'$'])
-            if color == 1 and p.status != p.complete and p.lines[i][2] == p.currentblockid + 1:
-                block = ''.join(['$\\color{red}',str(p.lines[i][2]),'$'])
-            else:
-                block = p.lines[i][2]
-        newp.append([statement,
-                     p.lines[i][1],
-                     block,
-                     p.lines[i][3],
-                     p.lines[i][4],
-                     p.lines[i][5],
-                     p.lines[i][6]
-                     ]
-                    )
     indx = ['Line']
     for i in range(len(p.lines)-1):
         indx.append(i + 1)
-    df = pandas.DataFrame(newp, index=indx, columns=p.columns)
-    print('{}'.format(p.name))
-    df.style.highlight_max()
+    if latex == 1:
+        newp = []
+        for i in range(len(p.lines)):
+            if p.lines[i][0] == sympy.S.false:
+                statement = '$\\bot$'
+            else:
+                if color == 1 and p.status != p.complete and p.lines[i][1] <= p.level and i > 0:
+                    statement = ''.join(['$\\color{red}',sympy.latex(p.lines[i][0]),'$'])
+                else:
+                    statement = ''.join(['$',sympy.latex(p.lines[i][0]),'$'])
+                if color == 1 and p.status != p.complete and p.lines[i][1] == p.level + 1:
+                    block = ''.join(['$\\color{red}',str(p.lines[i][2]),'$'])
+                else:
+                    block = p.lines[i][2]
+            newp.append([statement,
+                        p.lines[i][1],
+                        block,
+                        p.lines[i][3],
+                        p.lines[i][4],
+                        p.lines[i][5],
+                        p.lines[i][6]
+                        ]
+            )
+        df = pandas.DataFrame(newp, index=indx, columns=p.columns)
+    else:
+        df = pandas.DataFrame(p.lines, index=indx, columns=p.columns)
     return df
 
 def truthtable(p: altrea.tf.Proof):

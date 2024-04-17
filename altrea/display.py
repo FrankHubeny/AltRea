@@ -6,11 +6,11 @@
 """
 
 import pandas
-import sympy
+#import sympy
 
 import altrea
 
-def metadata(p: altrea.tf.Proof):
+def metadata(p: altrea.truthfunction.Proof):
     """Display the metadata associated with a proof.
     
     Parameters:
@@ -28,7 +28,7 @@ def metadata(p: altrea.tf.Proof):
         print('Completed: No')
     print('Lines: {}'.format(len(p.lines)-1))
 
-def show(p: altrea.tf.Proof, color: int = 1, latex: int = 1):
+def show(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
     """Display a proof line by line.
     
     Parameters:
@@ -41,13 +41,13 @@ def show(p: altrea.tf.Proof, color: int = 1, latex: int = 1):
     if latex == 1:
         newp = []
         for i in range(len(p.lines)):
-            if p.lines[i][0] == sympy.S.false:
+            if p.lines[i][0] == False:
                 statement = '$\\bot$'
             else:
                 if color == 1 and p.status != p.complete and p.lines[i][1] <= p.level and i > 0:
-                    statement = ''.join(['$\\color{red}',sympy.latex(p.lines[i][0]),'$'])
+                    statement = ''.join(['$\\color{red}',p.lines[i][0].latex(),'$'])
                 else:
-                    statement = ''.join(['$',sympy.latex(p.lines[i][0]),'$'])
+                    statement = ''.join(['$',p.lines[i][0].latex(),'$'])
                 if color == 1 and p.status != p.complete and p.lines[i][1] == p.level + 1:
                     block = ''.join(['$\\color{red}',str(p.lines[i][2]),'$'])
                 else:
@@ -66,32 +66,32 @@ def show(p: altrea.tf.Proof, color: int = 1, latex: int = 1):
         df = pandas.DataFrame(p.lines, index=indx, columns=p.columns)
     return df
 
-def truthtable(p: altrea.tf.Proof):
-    """Display a truth table built from a conjunction of the premises implying the goal.
+# def truthtable(p: altrea.truthfunction.Proof):
+#     """Display a truth table built from a conjunction of the premises implying the goal.
     
-    Paramters:
-        p: The proof containing the premises and goal.
-    """
+#     Paramters:
+#         p: The proof containing the premises and goal.
+#     """
 
-    premises = sympy.S.true
-    for i in p.premises:
-        premises = sympy.logic.boolalg.And(premises, i)
-    expr = sympy.logic.boolalg.Implies(premises, p.goal)
-    vars = list(expr.free_symbols)
-    table = sympy.logic.boolalg.truth_table(expr, vars)
-    letters = '['
-    for s in vars:
-        letters += ''.join([str(s), ', '])
-    letters = letters[:-2] + ']'
-    idx = []
-    for i in range(2**len(vars)):
-        idx.append(i)
-    expr = ''.join(['$',sympy.latex(expr),'$'])
-    print('Truth table for {}'.format(p.name))
-    df = pandas.DataFrame(table, index=idx, columns=[letters, expr])
-    return df
+#     premises = True
+#     for i in p.premises:
+#         premises = sympy.logic.boolalg.And(premises, i)
+#     expr = sympy.logic.boolalg.Implies(premises, p.goal)
+#     vars = list(expr.free_symbols)
+#     table = sympy.logic.boolalg.truth_table(expr, vars)
+#     letters = '['
+#     for s in vars:
+#         letters += ''.join([str(s), ', '])
+#     letters = letters[:-2] + ']'
+#     idx = []
+#     for i in range(2**len(vars)):
+#         idx.append(i)
+#     expr = ''.join(['$',sympy.latex(expr),'$'])
+#     print('Truth table for {}'.format(p.name))
+#     df = pandas.DataFrame(table, index=idx, columns=[letters, expr])
+#     return df
 
-def showblocklist(p: altrea.tf.Proof):
+def showblocklist(p: altrea.truthfunction.Proof):
     """Display the blocklist of a proof.
     
     Parameters:

@@ -90,3 +90,16 @@ def truthtable(p: altrea.tf.Proof):
     print('Truth table for {}'.format(p.name))
     df = pandas.DataFrame(table, index=idx, columns=[letters, expr])
     return df
+
+def showblocklist(p: altrea.tf.Proof):
+    """Display the blocklist of a proof.
+    
+    Parameters:
+        p: The proof that contains the blocklist.
+    """
+
+    indx = []
+    for i in range(len(p.blocklist)):
+        indx.append(i)
+    df = pandas.DataFrame(p.blocklist, index=indx, columns=['Level', 'Block'])
+    return df

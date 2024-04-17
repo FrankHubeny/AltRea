@@ -198,7 +198,7 @@ class NoSuchBlock(Exception):
         self.blockid = blockid
 
     def __str__(self):
-        return f'The referenced line number {self.blockid} does not exist in the proof.'
+        return f'The referenced block number {self.blockid} does not exist in the proof.'
     
 class NotAntecedent(Exception):
     """The statement is not the antecedent of the implication.
@@ -303,6 +303,24 @@ class NotFalse(Exception):
 
     def __str__(self):
         return f'The line {self.line} contains {self.statement} which is not False.'
+    
+class NotEquivalence(Exception):
+    """The statements cannot be used in an equivalence rule.
+
+    Parameters:
+        line: The number of the line claimed to be False.
+        statement: The startment on the line.
+    """
+
+    def __init__(self, 
+                firststatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,  
+                secondstatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol):
+        self.firststatement = firststatement
+        self.secondstatement = secondstatement
+
+    def __str__(self):
+        return f'The statements {self.firststatement} and {self.secondstatement} cannot be used in an equivalence rule.'
+
 
 class NotModusPonens(Exception):
     """The two statements cannot be used for implication elimination or modus ponens.

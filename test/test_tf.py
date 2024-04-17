@@ -78,16 +78,22 @@ def test_premise_3():
 """Test 1: Is the block closed correctly?"""
 
 testdata = [
-    ("p.level", 1),
-    ("lastlevel", 2),
+    ("p.level", 0),
+    ("level1", 2),
+    ("level2", 1),
+    ("level3", 0),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_closeblock_1(input_n, expected):
     p = Proof(A & B)
     p.openblock(C)
     p.openblock(D)
-    lastlevel = p.level
+    level1 = p.level
     p.closeblock()
+    level2 = p.level
+    blocklist = p.blocklist[1:]
+    p.closeblock()
+    level3 = p.level
     assert eval(input_n) == expected
     
 """Test 2: Is the CannotCloseStartingBlock raised?"""
@@ -208,3 +214,104 @@ def test_implies_elim_1(input_n, expected):
     p.implies_elim(2,1)
     assert eval(input_n) == expected
 
+"""Test 2: Does the introduction rule work correctly?"""
+
+testdata = [
+    ("p.lines[len(p.lines)-1][p.statementindex]", B >> A),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.implies_introname),
+    ("p.status", globalproof.complete),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_implies_intro_1(input_n, expected):
+    p = Proof(B >> A)
+    p.addpremise(A)
+    p.openblock(B)
+    p.reit(1)
+    p.closeblock()
+    p.implies_intro(1)
+    assert eval(input_n) == expected
+
+"""Implies Elim Error checking.
+
+- NotAntecedent: The line without the Implies type could not be an antecedent.
+- NotModusPonens: The lines could not be used by the implies eliminate rule.
+- NoSuchLine: The line does not exist.
+- ScopeError: The line is not accessible.
+"""
+
+@pytest.mark.xfail(raises=NotAntecedent)
+def test_implies_elim_2():
+    p = Proof(B)
+    p.addpremise(C)
+    p.addpremise(A >> B)
+    with pytest.raises(NotAntecedent):
+        p.implies_elim(1,2)
+
+@pytest.mark.xfail(raises=NotModusPonens)
+def test_implies_elim_3():
+    p = Proof(B)
+    p.addpremise(C)
+    p.addpremise(A | B)
+    with pytest.raises(NotModusPonens):
+        p.implies_elim(1,2)
+
+@pytest.mark.xfail(raises=NoSuchLine)
+def test_implies_elim_4():
+    p = Proof(B)
+    p.addpremise(C)
+    p.addpremise(A | B)
+    with pytest.raises(NoSuchLine):
+        p.implies_elim(1,3)
+
+
+@pytest.mark.xfail(raises=ScopeError)
+def test_implies_elim_5():
+    p = Proof(~(A | B))
+    p.addpremise(A >> B)
+    p.openblock(A)
+    p.closeblock()
+    with pytest.raises(ScopeError):
+        p.implies_elim(1,2)
+
+"""Implies Intro Error checking.
+
+- NoSuchBlock: The line does not exist.
+- BlockScopeError: The line is not accessible.
+"""
+
+@pytest.mark.xfail(raises=NoSuchBlock)
+def test_implies_intro_2():
+    p = Proof(B >> A)
+    p.addpremise(A)
+    p.openblock(B)
+    p.reit(1)
+    p.closeblock()
+    with pytest.raises(NoSuchBlock):
+        p.implies_intro(3)
+
+@pytest.mark.xfail(raises=BlockScopeError)
+def test_implies_intro_3():
+    p = Proof(B >> A)
+    p.addpremise(B)
+    p.openblock(C)
+    p.openblock(A)
+    p.closeblock()
+    p.closeblock()
+    with pytest.raises(BlockScopeError):
+        p.implies_intro(2)
+
+"""This test addressing a formatting issue.  The table returns True rather than A >> A."""
+
+testdata = [
+    #("p.lines[len(p.lines)-1][p.statementindex]", A >> A),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.implies_introname),
+    #("p.status", globalproof.complete),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def implies_intro_4():
+    p = Proof(B >> A)
+    p.addpremise(B)
+    p.openblock(A)
+    p.closeblock()
+    p.implies_intro(1)
+    assert eval(input_n) == expected

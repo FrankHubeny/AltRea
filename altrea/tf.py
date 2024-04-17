@@ -278,18 +278,14 @@ class Proof:
         """
 
         if self.status != self.complete:
-            end = len(self.lines)-1
-            blockid = self.lines[end][self.blockidindex]
-            if blockid == 0:
+            if self.currentblockid == 0:
                 raise altrea.exception.CannotCloseStartingBlock()
-            else:
-                self.level -= 1
-                self.blocklist[blockid][1].append(end)
-                for i in range(len(self.blocklist)):
-                    if self.blocklist[i][0] == self.level and len(self.blocklist[i][1]) == 1:
-                        self.currentblock = self.blocklist[i][1]
-                        self.currentblockid = i
-                        break
+            self.blocklist[self.currentblockid][1].append(len(self.lines)-1)
+            self.level -= 1
+            for b in range(len(self.blocklist)-1):
+                if self.blocklist[b][0] == self.level and len(self.blocklist[b][1]) == 1:
+                    self.currentblockid = b
+                    self.currentblock = self.blocklist[b][1]
 
     def demorgan(self, line: int, comments: str = ''):
         """DeMorgan's rules for not, and and or are automatically constructed given a line number
@@ -409,9 +405,69 @@ class Proof:
                 newcomment
             ])
 
-    def equivalent_elim(self, first: int, second: int, comments: str = ''):
+    def doublenegative(self, line: int, comments: str = ''):
         pass
-
+    
+    def equivalent_elim(self, first: int, second: int, comments: str = ''):
+        """Given an iff statement and a proposition one can derive the other proposition.
+        
+        Parameters:
+            first: A statement containing either a proposition or an iff statement.
+            second: A second statement containing either a proposition or an iff statement.
+            comments: Comments on this line of the proof.
+        
+        Exceptions:
+            NoSuchLine: The line does not exist in the proof.
+            NotEquivalence: The two statements cannot be used in equivalence elimination.
+            ScopeError: The line is not accessible.
+        """
+        if self.status != self.complete:
+            try:
+                firstlevel, firststatement = self.getlevelstatement(first)
+            except:
+                raise altrea.exception.NoSuchLine(first)
+            if firstlevel > self.level:
+                raise altrea.exception.ScopeError(first)
+            
+            try:
+                secondlevel, secondstatement = self.getlevelstatement(second)
+            except:
+                raise altrea.exception.NoSuchLine(second)
+            if secondlevel > self.level:
+                raise altrea.exception.ScopeError(first)
+            
+            if type(firststatement) == Equivalent:
+                if firststatement.args[0] == secondstatement:
+                    final = firststatement.args[1]
+                elif firststatement.args[1] == secondstatement:
+                    final = firststatement.args[0]
+                else:
+                    raise altrea.exception.NotEquivalence(firststatement, secondstatement)
+            elif type(secondstatement) == Equivalent:
+                if secondstatement.args[0] == firststatement:
+                    final = secondstatement.args[1]
+                elif secondstatement.args[1] == firststatement:
+                    final = secondstatement.args[0]
+                else:
+                    raise altrea.exception.NotEquivalence(firststatement, secondstatement)
+            else:
+                raise altrea.exception.NotEquivalence(firststatement, secondstatement)
+            
+            self.checkcomplete(final)
+            if self.status == self.complete:
+                newcomment = self.complete
+            else:
+                newcomment = comments
+            self.lines.append([
+                final, 
+                self.level, 
+                self.currentblockid, 
+                self.equivalent_elimname, 
+                self.reftwolines(first, second), 
+                '', 
+                newcomment
+            ])
+                
     def equivalent_intro(self, blockids: list, comments: str = ''):
         pass
 
@@ -547,6 +603,24 @@ class Proof:
             blockid: The block identified by [start, end].
             comments: Comments added to the line.
 
+        Examples:
+            >>> p = Proof(P >> (Q >> P))
+            >>> p.openblock(P)
+            >>> p.openblock(Q)
+            >>> p.reit(1)
+            >>> p.closeblock()
+            >>> p.implies_intro(2)
+            >>> p.closeblock()
+            >>> p.implies_intro(1)
+            >>> show(p, latex=0)
+                                  Statement  Level  Block  ... Lines Blocks   Comment
+            Line  Implies(P, Implies(Q, P))      0      0  ...
+            1                             P      1      1  ...
+            2                             Q      2      2  ...
+            3                             P      2      2  ...     1
+            4                 Implies(Q, P)      1      1  ...            2
+            5     Implies(P, Implies(Q, P))      0      0  ...            1  COMPLETE
+
         Exceptions:
             BlockScopeError: The referenced block id is not accessible.
             NoSuchBlock: The block id does not exist.
@@ -560,12 +634,22 @@ class Proof:
             if level != self.level + 1:
                 raise altrea.exception.BlockScopeError(blockid)
             implication = Implies(antecedent, consequent)
-            self.addstatement(
-                statement=implication, 
-                rule=self.implies_introname, 
-                blocks=blockid,
-                comments=comments
-            )
+
+            self.checkcomplete(implication)
+            if self.status == self.complete:
+                newcomment = self.complete
+            else:
+                newcomment = comments
+            self.lines.append(
+                [implication, 
+                self.level, 
+                self.currentblockid, 
+                self.implies_introname, 
+                '', 
+                blockid, 
+                newcomment
+                ]
+            )                   
             
     def lem(self, first: int, second: int, comments: str = ''):
         """Add a line justified by the Law of Excluded Middle (LEM) rule.
@@ -626,18 +710,6 @@ class Proof:
                 blocks=self.reftwolines(first, second),
                 comments=comments
             )
-
-    def nand_elim(self, line: int, comments: str = ''):
-        pass
-
-    def nand_intro(self, line: int, comments: str = ''):
-        pass
-
-    def nor_elim(self, line: int, comments: str = ''):
-        pass
-
-    def nor_intro(self, line: int, comments: str = ''):
-        pass
 
     def not_elim(self, first: int, second: int, comments: str = ''):
         """When two statements are contradictory a false line can be derived.

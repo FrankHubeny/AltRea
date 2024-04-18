@@ -30,6 +30,9 @@ class Wff:
     
     def eval(self, value: bool):
         self.value = value
+
+    def equals(self, otherwff):
+        return str(self) == str(otherwff)
     
 
 class And(Wff):

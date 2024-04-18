@@ -22,8 +22,7 @@
 - ScopeError: The referenced statement is not accessible.
 """
 
-from sympy.logic.boolalg import And, Or, Not, Implies, Equivalent, Xor, Nand, Nor, Xnor
-from sympy.core.symbol import Symbol
+from altrea.boolean import  Not, And, Or, Implies, Iff, Wff
 
 class AssumptionNotFound(Exception):
     """The assumption from a block does not match a disjunct of the disjunction.
@@ -34,8 +33,8 @@ class AssumptionNotFound(Exception):
     """
 
     def __init__(self, 
-                 assumption: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,
-                 disjunction: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,
+                 assumption:  Not | And | Or | Implies | Iff | Wff,
+                 disjunction:  Not | And | Or | Implies | Iff | Wff,
                  ):
         self.assumption = assumption
         self.disjunction = disjunction
@@ -53,7 +52,7 @@ class BlocksDisjunctsNotEqual(Exception):
 
     def __init__(
             self, 
-            disjunction: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,
+            disjunction: Not | And | Or | Implies | Iff | Wff,
             blockids: list
             ):
         self.blockids = blockids
@@ -86,7 +85,7 @@ class BlockNotClosed(Exception):
         self.blockid = blockid
 
     def __str__(self):
-        return f'The block {self.block} is unavailable because it has not been closed.'
+        return f'The block {self.blockid} is unavailable because it has not been closed.'
     
 class BlockScopeError(Exception):
     """The referenced block is not accessible to the proof.
@@ -145,8 +144,8 @@ class ConclusionsNotTheSame(Exception):
     """
 
     def __init__(self, 
-                 conclusion: Not | And | Or | Implies | Equivalent | Symbol, 
-                 nonmatching: Not | And | Or | Implies | Equivalent | Symbol
+                 conclusion: Not | And | Or | Implies | Iff | Wff, 
+                 nonmatching: Not | And | Or | Implies | Iff | Wff
                  ):
         self.conclusion = conclusion
         self.nonmatching = nonmatching
@@ -165,7 +164,7 @@ class DisjunctNotFound(Exception):
     """
 
     def __init__(self, 
-                 disjunct: Not | And | Or | Implies | Equivalent | Symbol, 
+                 disjunct: Not | And | Or | Implies | Iff | Wff, 
                  disjunction: Or, 
                  line: int):
         self.disjunct = disjunct
@@ -189,7 +188,7 @@ class NoSuchLine(Exception):
         return f'The referenced line number {self.line} does not exist in the proof.'
 
 class NoSuchBlock(Exception):
-    """The referenced block number does not exist in the proof.
+    """The referenced block number does not exist in the proof or the block has not been closed.
 
     Parameter:
         blockid: The line number requested by the call.
@@ -198,7 +197,7 @@ class NoSuchBlock(Exception):
         self.blockid = blockid
 
     def __str__(self):
-        return f'The referenced block number {self.blockid} does not exist in the proof.'
+        return f'The referenced block number {self.blockid} does not exist in the proof or the block has not been closed.'
     
 class NotAntecedent(Exception):
     """The statement is not the antecedent of the implication.
@@ -209,8 +208,8 @@ class NotAntecedent(Exception):
     """
 
     def __init__(self, 
-                 antecedent: Not | And | Or | Implies | Equivalent | Symbol, 
-                 implication: Not | And | Or | Implies | Equivalent | Symbol
+                 antecedent: Not | And | Or | Implies | Iff | Wff, 
+                 implication: Not | And | Or | Implies | Iff | Wff
                  ):
         self.antecedent = antecedent
         self.implication = implication
@@ -229,7 +228,7 @@ class NotAssumption(Exception):
         self.line = line
 
     def __str__(self):
-        return f'The original statement {self.statement} does not match the rebuilt one: {self.rebuiltstatement}.'
+        return f'The statement on line {self.line} is not an assumption.'
 
 class NotConjunction(Exception):
     """The statement is not a conjunction.
@@ -239,7 +238,7 @@ class NotConjunction(Exception):
         statement: The statement that caused the error.
     """
 
-    def __init__(self, line, statement: Not | And | Or | Implies | Equivalent | Symbol):
+    def __init__(self, line, statement: Not | And | Or | Implies | Iff | Wff):
         self.line = line
         self.statement = statement
 
@@ -269,6 +268,7 @@ class NotDeMorgan(Exception):
     """
 
     def __init__(self, line: int, statement: Not | And | Or):
+        self.line = line
         self.statement = statement
 
     def __str__(self):
@@ -282,7 +282,7 @@ class NotDisjunction(Exception):
         statement: The statement that caused the error.
     """
 
-    def __init__(self, line: int, statement: Not | And | Or | Implies | Equivalent | Symbol):
+    def __init__(self, line: int, statement: Not | And | Or | Implies | Iff | Wff):
         self.line = line
         self.statement = statement
 
@@ -297,7 +297,7 @@ class NotFalse(Exception):
         statement: The startment on the line.
     """
 
-    def __init__(self, line: int, statement: Not | And | Or | Implies | Equivalent | Symbol):
+    def __init__(self, line: int, statement: Not | And | Or | Implies | Iff | Wff):
         self.line = line
         self.statement = statement
 
@@ -313,8 +313,8 @@ class NotEquivalence(Exception):
     """
 
     def __init__(self, 
-                firststatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,  
-                secondstatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol):
+                firststatement: Not | And | Or | Implies | Iff | Wff,  
+                secondstatement: Not | And | Or | Implies | Iff | Wff):
         self.firststatement = firststatement
         self.secondstatement = secondstatement
 
@@ -331,8 +331,8 @@ class NotModusPonens(Exception):
     """
 
     def __init__(self, 
-                 firststatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol,  
-                 secondstatement: Not | And | Or | Implies | Equivalent | Xor | Nand | Nor | Xnor | Symbol):
+                 firststatement: Not | And | Or | Implies | Iff | Wff,  
+                 secondstatement: Not | And | Or | Implies | Iff | Wff):
         self.firststatement = firststatement
         self.secondstatement = secondstatement
 
@@ -403,6 +403,18 @@ class NotSameStatements(Exception):
 
     def __str__(self):
         return f'The statement {self.firststatement} is not the same as the second {self.secondstatement}.'
+
+class NoValuePassed(Exception):
+    """No value was passed to the function when at least one was expected.
+    
+    """
+    
+    def __init__(self, functionname: str):
+        self.functionname = functionname
+
+
+    def __str__(self):
+        return f'No value was pass to the function {self.functionname} when at least one was expected.'
     
 class PremiseAtLowestLevel(Exception):
     """A premise can only be added at the lowest level of the proof.
@@ -411,7 +423,7 @@ class PremiseAtLowestLevel(Exception):
         premise: The premise that was added after other statements besides Premise were added.
     """
 
-    def __init__(self, premise: Not | And | Or | Implies | Equivalent | Symbol):
+    def __init__(self, premise: Not | And | Or | Implies | Iff | Wff):
         self.premise = premise
     
     def __str__(self):

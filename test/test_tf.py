@@ -217,12 +217,12 @@ def test_implies_elim_1(input_n, expected):
 """Test 2: Does the introduction rule work correctly?"""
 
 testdata = [
-    ("p.lines[len(p.lines)-1][p.statementindex]", Implies(B, A)),
+    ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Implies(B, A))),
     ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.implies_introname),
     ("p.status", globalproof.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def tesst_implies_intro_1(input_n, expected):
+def test_implies_intro_1(input_n, expected):
     p = Proof(Implies(B, A))
     p.addpremise(A)
     p.openblock(B)
@@ -312,4 +312,25 @@ def test_intro_4(input_n, expected):
     p.openblock(A)
     p.closeblock()
     p.implies_intro(1)
+    assert eval(input_n) == expected
+
+"""LEM TESTS"""
+
+"""Test 1: Does the LEM rule work correctly?"""
+
+testdata = [
+    ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Or(A, Not(A)))),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.lem_name),
+    ("p.status", globalproof.complete),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_lem_1(input_n, expected):
+    p = Proof(Or(A, Not(A)))
+    p.openblock(A)
+    p.or_intro(1, right=Not(A))
+    p.closeblock()
+    p.openblock(Not(A))
+    p.or_intro(3, left=A)
+    p.closeblock()
+    p.lem(1,2)
     assert eval(input_n) == expected

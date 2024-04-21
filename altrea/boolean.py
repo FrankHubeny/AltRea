@@ -15,12 +15,12 @@ class Wff:
     """
 
     is_variable = True
-    value = True
     lb = '('
     rb = ')'
     
     def __init__(self, name: str):
         self.name = name
+        self.booleanvalue = None
 
     def __str__(self):
         return f'{self.name}'
@@ -28,12 +28,14 @@ class Wff:
     def latex(self):
         return f'{self.name}'
     
-    def eval(self, value: bool):
-        self.value = value
+    def setvalue(self, value: bool):
+        self.booleanvalue = value
 
     def equals(self, otherwff):
         return str(self) == str(otherwff)
     
+    def getvalue(self):
+        return self.booleanvalue   
 
 class And(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -47,6 +49,7 @@ class And(Wff):
         self.right = right
         self.connector = '&'
         self.latexconnector = '\\wedge'
+        self.booleanvalue = left.booleanvalue and right.booleanvalue
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
@@ -68,109 +71,26 @@ class And(Wff):
         else:
             return f'{self.lb}{self.left.latex()}{self.rb} {self.latexconnector} {self.lb}{self.right.latex()}{self.rb}'
         
-    def eval(self):
-        return self.left.value and self.right.value
-    
-class Or(Wff):
-    """A well formed formula with two arguments which are also well formed formulas connected
-    by logical or.
-    """
+    def getvalue(self):
+        return self.left.getvalue() and self.right.getvalue()
 
-    is_variable = False
-
-    def __init__(self, left: Wff, right: Wff):
-        self.left = left
-        self.right = right
-        self.connector = '|'
-        self.latexconnector = '\\vee'
-
-    def __str__(self):
-        if self.left.is_variable and self.right.is_variable:
-            return f'{self.left} {self.connector} {self.right}'
-        elif self.left.is_variable:
-            return f'{self.left} {self.connector} ({self.right})'
-        elif self.right.is_variable:
-            return f'({self.left}) {self.connector} {self.right}'
-        else:
-            return f'({self.left}) {self.connector} ({self.right})'
-        
-    def latex(self):
-        if self.left.is_variable and self.right.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
-        elif self.left.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} ({self.right.latex()})'
-        elif self.right.is_variable:
-            return f'({self.left.latex()}) {self.latexconnector} {self.right.latex()}'
-        else:
-            return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
-        
-    def eval(self):
-        return self.left.value or self.right.value
-    
-class Not(Wff):
-    """A well formed formula with one argument which is also a well formed formula joined
-    with logical not.
+class F(Wff):
+    """This well formed formula is the result of a contradiction in a proof which may be useful for explosions.
     """
 
     is_variable = True
 
-    def __init__(self, negated: Wff):
-        self.negated = negated
-        self.connector = '~'
-        self.latexconnector = '\\lnot '
+    def __init__(self):
+        self.contradiction = '\\bot'
 
     def __str__(self):
-        if self.negated.is_variable:
-            return f'{self.connector}{self.negated}'
-        else:
-            return f'{self.connector}({self.negated})'
-        
+        return 'X'
+    
     def latex(self):
-        if self.negated.is_variable:
-            return f'{self.latexconnector}{self.negated.latex()}'
-        else:
-            return f'{self.latexconnector}({self.negated.latex()})'
+        return self.contradiction
     
-    def eval(self):
-        return not self.negated.value
-
-    
-class Implies(Wff):
-    """A well formed formula with two arguments which are also well formed formulas joined
-    by implies.  The antecedent is the first of the two arguments.  The consequent is the
-    second.
-    """
-
-    is_variable = False
-
-    def __init__(self, left: Wff, right: Wff):
-        self.left = left
-        self.right = right
-        self.connector = '->'
-        self.latexconnector = '\\to'
-    
-    def __str__(self):
-        if self.left.is_variable and self.right.is_variable:
-            return f'{self.left} {self.connector} {self.right}'
-        elif self.left.is_variable:
-            return f'{self.left} {self.connector} ({self.right})'
-        elif self.right.is_variable:
-            return f'({self.left}) {self.connector} {self.right}'
-        else:
-            return f'({self.left}) {self.connector} ({self.right})'
-        
-    def latex(self):
-        if self.left.is_variable and self.right.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
-        elif self.left.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} ({self.right.latex()})'
-        elif self.right.is_variable:
-            return f'({self.left.latex()}) {self.latexconnector} {self.right.latex()}'
-        else:
-            return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
-        
-    def eval(self):
-        return (not self.left.value) or self.right.value
+    def getvalue(self):
+        return False
 
 class Iff(Wff):
     """A well formed formula with two arguments which are also well formed formulas
@@ -184,6 +104,109 @@ class Iff(Wff):
         self.right = right
         self.connector = '<->'
         self.latexconnector = '\\leftrightarrow'
+        self.booleanvalue = ((not left.booleanvalue) or right.booleanvalue) and ((not right.booleanvalue) or left.booleanvalue)
+
+    def __str__(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left} {self.connector} {self.right}'
+        elif self.left.is_variable:
+            return f'{self.left} {self.connector} ({self.right})'
+        elif self.right.is_variable:
+            return f'({self.left}) {self.connector} {self.right}'
+        else:
+            return f'({self.left}) {self.connector} ({self.right})'
+        
+    def latex(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
+        elif self.left.is_variable:
+            return f'{self.left.latex()} {self.latexconnector} ({self.right.latex()})'
+        elif self.right.is_variable:
+            return f'({self.left.latex()}) {self.latexconnector} {self.right.latex()}'
+        else:
+            return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
+
+class Implies(Wff):
+    """A well formed formula with two arguments which are also well formed formulas joined
+    by implies.  The antecedent is the first of the two arguments.  The consequent is the
+    second.
+    """
+
+    is_variable = False
+
+    def __init__(self, left: Wff, right: Wff):
+        self.left = left
+        self.right = right
+        self.connector = '->'
+        self.latexconnector = '\\to'
+        self.booleanvalue = None
+        #self.booleanvalue = (not left.booleanvalue) or right.booleanvalue
+    
+    def __str__(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left} {self.connector} {self.right}'
+        elif self.left.is_variable:
+            return f'{self.left} {self.connector} ({self.right})'
+        elif self.right.is_variable:
+            return f'({self.left}) {self.connector} {self.right}'
+        else:
+            return f'({self.left}) {self.connector} ({self.right})'
+        
+    def latex(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
+        elif self.left.is_variable:
+            return f'{self.left.latex()} {self.latexconnector} ({self.right.latex()})'
+        elif self.right.is_variable:
+            return f'({self.left.latex()}) {self.latexconnector} {self.right.latex()}'
+        else:
+            return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
+        
+    def getvalue(self):
+        return (not self.left.getvalue()) or self.right.getvalue()
+
+class Not(Wff):
+    """A well formed formula with one argument which is also a well formed formula joined
+    with logical not.
+    """
+
+    is_variable = True
+
+    def __init__(self, negated: Wff):
+        self.negated = negated
+        self.connector = '~'
+        self.latexconnector = '\\lnot '
+        self.booleanvalue = None
+        #self.booleanvalue = not negated.booleanvalue
+
+    def __str__(self):
+        if self.negated.is_variable:
+            return f'{self.connector}{self.negated}'
+        else:
+            return f'{self.connector}({self.negated})'
+        
+    def latex(self):
+        if self.negated.is_variable:
+            return f'{self.latexconnector}{self.negated.latex()}'
+        else:
+            return f'{self.latexconnector}({self.negated.latex()})'
+    
+    def getvalue(self):
+        return not self.negated.getvalue()
+
+class Or(Wff):
+    """A well formed formula with two arguments which are also well formed formulas connected
+    by logical or.
+    """
+
+    is_variable = False
+
+    def __init__(self, left: Wff, right: Wff):
+        self.left = left
+        self.right = right
+        self.connector = '|'
+        self.latexconnector = '\\vee'
+        self.booleanvalue = left.booleanvalue or right.booleanvalue
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
@@ -205,32 +228,22 @@ class Iff(Wff):
         else:
             return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
         
-    def eval(self):
-        return ((not self.left.value) or self.right.value) and ((not self.right.value) or self.left.value)
-        
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
-F = Wff('F')
-G = Wff('G')
-H = Wff('H')
-I = Wff('I')
-J = Wff('J')
-K = Wff('K')
-L = Wff('L')
-M = Wff('M')
-N = Wff('N')
-O = Wff('O')
-P = Wff('P')
-Q = Wff('Q')
-R = Wff('R')
-S = Wff('S')
-T = Wff('T')
-U = Wff('U')
-V = Wff('V')
-W = Wff('W')
-X = Wff('X')
-Y = Wff('Y')
-Z = Wff('Z')
+    def getvalue(self):
+        return self.left.getvalue() or self.right.getvalue()
+
+class T():
+    """A well formed formula which is always true."""
+
+    is_variable = False
+
+    def __init__(self):
+        self.tautology = '\\top'
+
+    def __str__(self):
+        return 'T'
+    
+    def latex(self):
+        return self.tautology
+    
+    def getvalue(self):
+        return True

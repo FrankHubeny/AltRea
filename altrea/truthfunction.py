@@ -1,22 +1,24 @@
 # altrea/newtf.py
 
-"""Provides functions to construct a proof in propositional logic.
+"""The module provides functions to construct a proof in propositional logic.
 
 The module contains thhree groups of functions: 
 
 - Supporting functions called by other functions for routine procesing.
-- Basic rules upon which other (derived) rules can be derived.
+- Basic rules for the list of logical operators that one accepts for the logic.
 - Derived rules which are short cuts for a proof using basic rules.
 
 The following methods support other functions.  They are not intended to be called by the user directly.
 
+- `checkavailable(rulename, comments)` - Based on the logic specified check if a warning comment 
+should be posted for the proof line overwriting any comments provided by the user.
 - `checkcomplete(statement)` - Mark the proof completed if the statement equals the goal.
-- `reftwolines(first, second)` - Join thw integers together into a string to record as set of lines or blocks.
 - `getlevelblockstatements(blockid)` - Get the level, assumption statement and conclusion statement for the blockid.
 - `getlevelstatement(line)` - Get the level and statement for the line id.
+- `reftwolines(first, second)` - Join thw integers together into a string to record as set of lines or blocks.
 
-The following are basic rules which the user may call after initializing a Proof.  
-The list contains the logics that permit these rules.
+The following are basic rules which the user may call after initializing a Proof.  Depending on
+which logical operators one has, the basic list may include only a subset of this list.
 
 - `addpremise` - ['C', 'CI', 'CO', 'I'] Add a premise
 - `and_elim` - ['C', 'CI', 'CO', 'I'] Conjunction Elimination
@@ -40,15 +42,33 @@ One of the examples associated with each rule shows the derivation of this rule 
 - `demorgan` - ['C', 'CI', 'CO', 'I'] DeMorgan's Rules
 - `doublenegation` - ['C', 'CI', 'CO', 'I'] Double Negation (both introduction and elimination)
 
+The entire AltRea software is designed to be simple to read so that those who are skeptical
+about a proof's accuracy do not receive additional doubt coming from the software constructing
+the proof.  The display module uses pandas, but the rules use only basic python code coming
+from the altrea.boolean.py, altrea.exception.py and altrea.truthfunction.py files.
+
+Anyone finding an issue with the code, whether a python programmer, a user or a logician
+question some implementation may raise raise the issue in GitHub.
+
+It is also designed to help those learning python.  If you created a virtual environment
+which you like should, you can find this software in your virtual directory under Lib/altrea.  You are
+welcome and encouraged to copy these files to a local directory under a new name, say, "myaltrea".
+Then import from these files rather than the altrea files to experiment with using python. 
+
+Examples:
+    >>> from myaltrea.boolean import And, Or, Not, Implies, Iff, Wff
+    >>> import myaltrea.exception
+
+
 """
 
-from altrea.boolean import And, Or, Not, Implies, Iff, Wff
+from altrea.boolean import And, Or, Not, Implies, Iff, Wff, F, T
 import altrea.exception
 
 class Proof:
     """
-    This class contains methods to construct, verify, display, save and retrieve proofs in 
-    in truth functional logic.
+    This class contains methods to construct and verify proofs in 
+    in various truth functional logics.
     """
 
     columns = ['Statement', 'Level', 'Block', 'Rule', 'Lines', 'Blocks', 'Comment']
@@ -62,6 +82,7 @@ class Proof:
     lowestlevel = 0
     complete = 'COMPLETE'
     completemessage = 'The proof is complete.'
+    stopped = 'STOPPED'
     goalname = 'Goal'
     premisename = 'Premise'
     assumptionname = 'Assumption'
@@ -86,11 +107,27 @@ class Proof:
     xnor_introname = 'Xnor Intro'
     xnor_elimname = 'Xnor Elim'
     lem_name = 'LEM'
-    doublenegative_name = 'Double Negative'
+    dn_introname = 'DN Intro'
+    dn_elimname = 'DN Elim'
     demorgan_name = 'DeMorgan'
     explosionname = 'Explosion'
-    falsename = 'Contradiction'
-    warningmessage = 'Warning'
+    falsename = F()
+    blankstatement = ''
+    stopped_connector = ': '
+    stopped_string = 'String input is not recognized.'
+    stopped_linescope = 'Reference line is out of scope.'
+    stopped_blockscope = 'Referenced block is out of scope.'
+    stopped_nosuchline = 'The referenced line does not exist.'
+    stopped_nosuchblock = 'The referenced block does not exist.'
+    stopped_notconjunction = 'The referenced line is not a conjunction.'
+    stopped_notcontradiction = 'The referenced lines are not contradictory.'
+    stopped_notfalse = 'The referenced line is not false.'
+    connectors = {
+        'C': ['$\\wedge$', '$\\vee$', '$\\lnot$', '$\\rightarrow$', '$\\leftrightarrow$'],
+        'CI': ['$\\wedge$', '$\\vee$', '$\\lnot$', '$\\rightarrow$', '$\\leftrightarrow$'],
+        'CO': ['$\\wedge$', '$\\vee$', '$\\lnot$', '$\\rightarrow$', '$\\leftrightarrow$'],
+        'I': ['$\\wedge$', '$\\vee$', '$\\lnot$', '$\\rightarrow$', '$\\leftrightarrow$'],
+    }
     logicdictionary = {
         'C': 'Classical Propositional Logic',
         'CI': 'Classical Implicational Propostional Logic',
@@ -99,16 +136,23 @@ class Proof:
     }
     availablelogics = {
         'addpremise': ['C', 'CI', 'CO', 'I'],
+        'addgoal': ['C', 'CI', 'CO', 'I'],
         'and_elim': ['C', 'CI', 'CO', 'I'],
         'and_intro': ['C', 'CI', 'CO', 'I'],
+        'closeblock': ['C', 'CI', 'CO', 'I'],
         'demorgan': ['C', 'CI', 'CO', 'I'],
-        'doublenegative': ['C', 'CI', 'CO', 'I'],
+        'dn_elim': ['C', 'CI', 'CO', 'I'],
+        'dn_intro': ['C', 'CI', 'CO', 'I'],
         'explosion': ['C', 'CI', 'CO', 'I'],
         'iff_elim': ['C', 'CI', 'CO', 'I'],
         'iff_intro': ['C', 'CI', 'CO', 'I'],
         'implies_elim': ['C', 'CI', 'CO', 'I'],
         'implies_intro': ['C', 'CI', 'CO', 'I'],
         'lem': ['C', 'CI', 'CO', 'I'],
+        'not_elim': ['C', 'CI', 'CO', 'I'],
+        'nand_intro': ['C', 'CI', 'CO', 'I'],
+        'nand_elim': ['C', 'CI', 'CO', 'I'],
+        'nor_intro': ['C', 'CI', 'CO', 'I'],
         'not_elim': ['C', 'CI', 'CO', 'I'],
         'not_intro': ['C', 'CI', 'CO', 'I'],
         'openblock': ['C', 'CI', 'CO', 'I'],
@@ -118,7 +162,7 @@ class Proof:
     }
 
     def __init__(self, 
-                 goal: Not | And | Or | Implies | Iff | Wff, 
+                 goal: And | Or | Not | Implies | Iff | Wff | F | T = None, 
                  name: str = None, 
                  logic: str = 'C',
                  comments: str = ''):
@@ -132,6 +176,10 @@ class Proof:
             
         self.name = name
         self.goal = goal
+        if goal != None:
+            self.goals = [goal]
+        else:
+            self.goals = []
         self.comments = comments
         self.logic = logic
         self.currentblock = [1]
@@ -140,20 +188,44 @@ class Proof:
         self.blocks = []
         self.level = self.lowestlevel
         self.status = ''
+        self.stoppedmessage = ''
         self.premises = []
-        self.lines = [[goal, 0, 0, self.goalname, '', '', self.comments]]
+        if type(goal) == str:
+            self.status = self.stopped
+            self.stoppedmessage = ''.join([self.stopped, self.stopped_connector, self.stopped_string])
+            self.lines = [[goal, 0, 0, self.goalname, '', '', self.stoppedmessage]]
+        else:
+            self.lines = [[goal, 0, 0, self.goalname, '', '', self.comments]]
 
-    def checkcomplete(self, statement):
-        """Check if the goal has been found and the proof is over.  If so update the status."""
+    """SUPPORT FUNCTIONS"""
 
-        if statement.equals(self.goal) and self.level == self.lowestlevel:
-            self.status = self.complete
+    def checkcomplete(self):
+        """Check if the goal has been found and the proof is over."""
 
-    def reftwolines(self, first: int, second: int) -> str:
-        """Join two integers representing line ids or block ids as strings together."""
+        return self.status == self.complete or self.status == self.stopped
+   
+    def availablecomplete(self, 
+                          rulename: str, 
+                          statement:  And | Or | Not | Implies | Iff | Wff | F | T = None, 
+                          comments: str = ''):
+        """Check if the user's declared logic can use this rule.  If not, leave a message for the user.
+        Also check if the proof is complete and if so leave a message that the proof is finished.
+        
+        Parameters:
+            rulename: The function name representing the rule where this is called.
+            comments: Any comments the user has provided which may be overwritten.
+        """
 
-        return ''.join([str(first), ', ', str(second)])
-    
+        if self.level == 0:
+            if statement.equals(self.goal):
+                self.status = self.complete
+        newcomment = comments
+        if self.checkcomplete():
+            newcomment = ''.join([self.complete, self.stopped, self.stoppedmessage])
+        if self.logic not in self.availablelogics.get(rulename):
+            newcomment = ''.join(['Rule ', rulename, ' violates ', self.logic])
+        return newcomment
+
     def getlevelblockstatements(self, blockid: int) -> tuple:
         """Given a block id, return the level the block is in and the assumption and conclusion statements."""
 
@@ -169,114 +241,119 @@ class Proof:
         statement = self.lines[line][self.statementindex]
         return level, statement
 
-    #def addstatement(self, 
-        #              statement: Not | And | Or | Implies | Iff | Wff, 
-        #              rule: str, 
-        #              lines: list = '', 
-        #              blocks: list = '', 
-        #              comments: str =''):
-        # if self.status != self.complete:
-        #     if type(statement) == str:
-        #         raise altrea.exception.StringType(statement)
-        #     else:
-        #         self.checkcomplete(statement)
-        #         if self.status == self.complete:
-        #             newcomment = self.complete
-        #         else:
-        #             newcomment = comments
-        #         self.lines.append([
-        #             statement, 
-        #             self.level, 
-        #             self.currentblockid, 
-        #             rule, 
-        #             lines, 
-        #             blocks, 
-        #             newcomment
-        #             ]
-        #         )
+    def reftwolines(self, first: int, second: int) -> str:
+        """Join two integers representing line ids or block ids as strings together."""
 
-    """The following functions are those intended to be called by the user."""
+        return ''.join([str(first), ', ', str(second)])
+    
+    def stopproof(self, message: str, statement, rule: str, lines: str, blocks: str):
+        self.status = self.stopped
+        self.stoppedmessage = ''.join([self.stopped, self.stopped_connector, message])
+        self.lines.append(
+            [
+                statement, 
+                self.level, 
+                self.currentblockid, 
+                rule, 
+                lines, 
+                blocks, 
+                self.stoppedmessage
+            ]
+        )
+ 
+    """BASIC RULES"""
+
+    def addgoal(self,
+                goal: And | Or | Not | Implies | Iff | Wff | F | T, 
+                comments: str = ''):
+        """Add a goal to the proof.
+        
+        Parameters:
+            goal: The goal to add to the proof.
+            comments: Comments for this line of the proof.
+        """
+
+        if not self.checkcomplete():
+            if type(goal) == str:
+                self.stopproof(self.stopped_string, goal, self.goalname, 0, 0)
+            else:
+                self.goals.append(goal)
+                if self.goal == None:
+                    self.goal = goal
+                    self.lines[0][self.statementindex] = goal
+                # newcomment = self.availablecomplete('addgoal', goal, comments)
+                # self.lines.append(
+                #     [
+                #         goal, 
+                #         0, 
+                #         0, 
+                #         self.goalname, 
+                #         '', 
+                #         '', 
+                #         newcomment
+                #     ]
+                # )
 
     def addpremise(self, 
-                   premise: Not | And | Or | Implies | Iff | Wff, 
+                   premise: And | Or | Not | Implies | Iff | Wff | F | T, 
                    comments: str = ''):
         """Add a premise to the proof.
         
         Parameters:
             premise: The premise to add to the proof.
             comments: Comments for this line of the proof.
-
-        Exceptions:
-            PremiseAtLowestLevel: A premise can only be added at the lowest level of the proof.
-            StringType: The premise should not be entered as a string type.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             if type(premise) == str:
-                raise altrea.exception.StringType(premise)
-            if self.level > 0:
-                raise altrea.exception.PremiseAtLowestLevel(premise)
-            self.premises.append(premise)
-            self.checkcomplete(premise)
-            if self.status == self.complete:
-                newcomment = self.complete
+                self.stopproof(self.stopped_string, premise, self.premisename, '', '')
             else:
-                newcomment = comments
-            self.lines.append([
-                premise, 
-                self.level, 
-                self.currentblockid, 
-                self.premisename, 
-                '', 
-                '', 
-                newcomment
-            ])
+                self.premises.append(premise)
+                newcomment = self.availablecomplete('addpremise', premise, comments)
+                self.lines.append(
+                    [
+                        premise, 
+                        0, 
+                        self.currentblockid, 
+                        self.premisename, 
+                        '', 
+                        '', 
+                        newcomment
+                    ]
+                )
         
     def and_elim(self, line: int, comments: str = ''):
         """A conjunction is split into its individual conjuncts.
         
-        Arguments:
+        Parameters:
             line: The line number of the conjunction to be split.
-
-        Exceptions:
-            NotConjunction: The statement is not a conjunction.
-            NoSuchLine: The referenced line does not exist in the proof.
-            ScopeError: The referenced statement is not accessible.
+            comments: Optional user comments for the line.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 level, statement = self.getlevelstatement(line)
+                if level > self.level:
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.and_elimname, str(line), '')
+                elif type(statement) != And:
+                    self.stopproof(self.stopped_notconjunction, self.blankstatement, self.and_elimname, str(line), '')
+                else:
+                    for conjunct in [statement.left, statement.right]:
+                        newcomment = self.availablecomplete('and_elim', conjunct, comments)
+                        self.lines.append(
+                            [
+                                conjunct, 
+                                self.level, 
+                                self.currentblockid, 
+                                self.and_elimname, 
+                                str(line), 
+                                '',
+                                newcomment
+                            ]
+                        )                 
             except:
-                raise altrea.exception.NoSuchLine(line)
-            if level > self.level:
-                raise altrea.exception.ScopeError(line)
-            if type(statement) != And:
-                raise altrea.exception.NotConjunction(line, statement)
-            else:
-                for conjunct in [statement.left, statement.right]:
-                    self.checkcomplete(self.falsename)
-                    if self.status == self.complete:
-                        newcomment = self.complete
-                    else:
-                        newcomment = comments
-                    self.lines.append(
-                        [conjunct, 
-                        self.level, 
-                        self.currentblockid, 
-                        self.and_elimname, 
-                        str(line), 
-                        '',
-                        newcomment
-                        ]
-                    )                 
-
-                    #self.addstatement(
-                        #statement=conjunct, 
-                       #     rule=self.and_elimname, 
-                       #     lines=str(line),
-                       #     comments=comments
-                       # )
+                self.stopproof(self.stopped_nosuchline, self.blankstatement, self.and_elimname, str(line), '')
+            
     
     def and_intro(self, first: int, second: int, comments: str = ''):
         """The statement at first line number is joined with And to the statement at second
@@ -291,7 +368,7 @@ class Proof:
             ScopeError: The line must be in a level less than or equal to the current level.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 firstlevel, firstconjunct = self.getlevelstatement(first)
             except:
@@ -308,19 +385,16 @@ class Proof:
         
             andstatement = And(firstconjunct, secondconjunct)
 
-            self.checkcomplete(self.falsename)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
+            newcomment = self.availablecomplete('and_intro', andstatement, comments)
             self.lines.append(
-                [andstatement, 
-                self.level, 
-                self.currentblockid, 
-                self.and_introname, 
-                self.reftwolines(first, second), 
-                '',
-                newcomment
+                [
+                    andstatement, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.and_introname, 
+                    self.reftwolines(first, second), 
+                    '',
+                    newcomment
                 ]
             )                 
 
@@ -352,7 +426,7 @@ class Proof:
             CannotCloseStartingBlock: The lowest block is closed by completing the proof.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             if self.currentblockid == 0:
                 raise altrea.exception.CannotCloseStartingBlock()
             self.blocklist[self.currentblockid][1].append(len(self.lines)-1)
@@ -426,7 +500,7 @@ class Proof:
             ScopeError: The line is not accessible.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 level, statement = self.getlevelstatement(line)
             except:
@@ -463,97 +537,154 @@ class Proof:
             else:
                 raise altrea.exception.NotDeMorgan(line, statement)
             
-            self.checkcomplete(final)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
-            self.lines.append([
-                final, 
-                self.level, 
-                self.currentblockid, 
-                self.demorgan_name, 
-                str(line), 
-                '', 
-                newcomment
-            ])
+            newcomment = self.availablecomplete('demorgan', final, comments)
+            self.lines.append(
+                [
+                    final, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.demorgan_name, 
+                    str(line), 
+                    '', 
+                    newcomment]
+            )
 
-    def doublenegation(self, line: int, comments: str = ''):
-        try:
-            level, statement = self.getlevelstatement(line)
-        except:
-            raise altrea.exception.NoSuchLine(line)
-        if level > self.level:
-            raise altrea.exception.ScopeError(line)
-        if type(statement) == Not and type(statement.negated) == Not:
-            newstatement = statement.negated.negated
-        else:
+    def dn_intro(self, line: int, comments: str = ''):
+        '''This rule adds a double negation to the statement referenced by the line number
+        
+        Parameters:
+            line: The line number containing the statement.
+            comments: User comments on this line.
+
+        Exception:
+            NoSuchLine: The line is not in the proof.
+            ScopeError: The refernced line is not accessible.
+        '''
+
+        if not self.checkcomplete():
+            try:
+                level, statement = self.getlevelstatement(line)
+            except:
+                raise altrea.exception.NoSuchLine(line)
+            if level > self.level:
+                raise altrea.exception.ScopeError(line)
             newstatement = Not(Not(statement))
             
-        self.checkcomplete(newstatement)
-        if self.status == self.complete:
-            newcomment = self.complete
-        else:
-            newcomment = comments
-        self.lines.append([
-            newstatement, 
-            self.level, 
-            self.currentblockid, 
-            self.doublenegative_name, 
-            str(line), 
-            '', 
-            newcomment
-        ])
+            newcomment = self.availablecomplete('dn_intro', newstatement, comments)
+            self.lines.append(
+                [
+                    newstatement, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.dn_introname, 
+                    str(line), 
+                    '', 
+                    newcomment
+                ]
+            )
+
+    def dn_elim(self, line: int, comments: str = ''):
+        '''This rule removes a double negation from a statement.
+        
+        Parameters:
+            line: The line number containing the double negation.
+            comments: User comments on this line.
+
+        Exception:
+            NoSuchLine: The line is not in the proof.
+            NotDoubleNegation: The referenced line is not a double negation statement.
+            ScopeError: The refernced line is not accessible.
+        '''
+
+        if not self.checkcomplete():
+            try:
+                level, statement = self.getlevelstatement(line)
+            except:
+                raise altrea.exception.NoSuchLine(line)
+            if level > self.level:
+                raise altrea.exception.ScopeError(line)
+            if type(statement) == Not and type(statement.negated) == Not:
+                newstatement = statement.negated.negated
+            else:
+                raise altrea.exception.NotDoubleNegation(line, statement)
+            
+            newcomment = self.availablecomplete('dn_elim', newstatement, comments)
+            self.lines.append(
+                [
+                    newstatement, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.dn_elimname, 
+                    str(line), 
+                    '', 
+                    newcomment
+                ]
+            )
 
     def explosion(self, 
-                  expr: Not | And | Or | Implies | Iff | Wff, 
+                  statement: And | Or | Not | Implies | Iff | Wff | F | T, 
                   comments: str = ''):
-        """An arbitrary statement is entered in the proof given a false statement preceding it.
+        """An arbitrary statement is entered in the proof given a false statement immediately preceding it.
         
         Parameters:
             expr: The statement to add to the proof.
-            line: The line number of the proof containing the statement False.
+            statement: The new statment to insert.
             comments: A optional comment for this line of the proof.
+
+        Examples:
+            >>> from altrea.boolean import And, Not, Wff
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> A = Wff('A')
+            >>> B = Wff('B')
+            >>> p = Proof(And(A, B))
+            >>> p.addpremise(A)
+            >>> p.addpremise(Not(A))
+            >>> p.not_elim(1, 2)
+            >>> p.explosion(And(A, B), 3)
+            >>> show(p, latex=0)
+              Statement  Level  Block       Rule Lines Blocks   Comment
+            C     A & B      0      0       Goal
+            1         A      0      0    Premise
+            2        ~A      0      0    Premise
+            3         X      0      0   Not Elim  1, 2
+            4     A & B      0      0  Explosion     3         COMPLETE
 
         Exceptions:
             BlockClosed: A line cannot be added to a closed block.
             NoSuchLine: The referenced line does not exist in the proof.
             NotFalse: The referenced statement is not False.
-            StringType: The statement should not be a string.
         """
         
-        if self.status != self.complete:
-            if type(expr) == str:
-                raise altrea.exception.StringType(expr)
-            line = len(self.lines) - 1
-            if line == 0:
-                raise altrea.exception.NoSuchLine(line)
-            blockid = self.lines[line][self.blockidindex]
-            if len(self.blocklist[blockid][1]) == 2:
-                raise altrea.exception.BlockClosed(blockid)
+        if not self.checkcomplete():
+            if type(statement) == str:
+                self.stopproof(self.stopped_string, statement, self.explosionname, '', '')
             else:
-                level, falsestatement = self.getlevelstatement(line)
-                if level != self.level:
-                    raise altrea.exception.ScopeError(line)
-                if falsestatement != self.falsename:
-                    raise altrea.exception.NotFalse(line, falsestatement)
+                line = len(self.lines) - 1
+                if line == 0:
+                    raise altrea.exception.NoSuchLine(line)
+                blockid = self.lines[line][self.blockidindex]
+                if len(self.blocklist[blockid][1]) == 2:
+                    raise altrea.exception.BlockClosed(blockid)
                 else:
-
-                    self.checkcomplete(self.falsename)
-                    if self.status == self.complete:
-                        newcomment = self.complete
+                    level, falsestatement = self.getlevelstatement(line)
+                    if level != self.level or blockid != self.currentblockid:
+                        raise altrea.exception.ScopeError(line)
+                    if falsestatement != self.falsename:
+                        raise altrea.exception.NotFalse(line, falsestatement)
                     else:
-                        newcomment = comments
-                    self.lines.append(
-                        [expr, 
-                        self.level, 
-                        self.currentblockid, 
-                        self.explosionname, 
-                        line, 
-                        '',
-                        newcomment
-                        ]
-                    )                 
+                        newcomment = self.availablecomplete('explosion', statement, comments)
+                        self.lines.append(
+                            [
+                                statement, 
+                                self.level, 
+                                self.currentblockid, 
+                                self.explosionname, 
+                                line, 
+                                '',
+                                newcomment
+                            ]
+                        )                 
     
     def iff_elim(self, first: int, second: int, comments: str = ''):
         """Given an iff statement and a proposition one can derive the other proposition.
@@ -568,7 +699,7 @@ class Proof:
             NotEquivalence: The two statements cannot be used in equivalence elimination.
             ScopeError: The line is not accessible.
         """
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 firstlevel, firststatement = self.getlevelstatement(first)
             except:
@@ -600,11 +731,7 @@ class Proof:
             else:
                 raise altrea.exception.NotEquivalence(firststatement, secondstatement)
             
-            self.checkcomplete(final)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
+            newcomment = self.availablecomplete('iff_elim', final, comments)
             self.lines.append([
                 final, 
                 self.level, 
@@ -616,7 +743,19 @@ class Proof:
             ])
                 
     def iff_intro(self, first: int, second: int, comments: str = ''):
-        if self.status != self.complete:
+        """Derive a live using the if and only if symbol.
+        
+        Parameters:
+            first: The first block to obtain an implication going in one direction.
+            second: The second block to obtain an implication going in the other direction.
+            comments: Comments entered by the user for this line.
+
+        Exceptions:
+            NoSuchBlock: The block referred to does not exist.
+            NotSameLevel: The blocks are not at the same level.
+        """
+
+        if not self.checkcomplete():
             try:
                 firstlevel, firstassumption, firstconclusion = self.getlevelblockstatements(first)
             except:
@@ -633,20 +772,18 @@ class Proof:
             if firstconclusion != secondassumption:
                 raise altrea.exception.NotSameStatements(firstconclusion, secondassumption)
             newstatement = Iff(firstassumption, firstconclusion)
-            self.checkcomplete(newstatement)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
-            self.lines.append([
-                newstatement, 
-                self.level, 
-                self.currentblockid, 
-                self.equivalent_introname, 
-                '',
-                self.reftwolines(first, second), 
-                newcomment
-            ])           
+            newcomment = self.availablecomplete('iff_intro', newstatement, comments)
+            self.lines.append(
+                [
+                    newstatement, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.equivalent_introname, 
+                    '',
+                    self.reftwolines(first, second), 
+                    newcomment
+                ]
+            )           
            
     def implies_elim(self, first: int, second: int, comments: str = ''):
         """From an implication and its antecedent derive the consequent.
@@ -677,7 +814,7 @@ class Proof:
             ScopeError: The referenced statement is not accessible.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 firstlevel, firststatement = self.getlevelstatement(first)
             except:
@@ -696,38 +833,32 @@ class Proof:
                 if secondstatement != firststatement.left:
                     raise altrea.exception.NotAntecedent(firststatement, secondstatement)
                 else:
-                    self.checkcomplete(firststatement.right)
-                    if self.status == self.complete:
-                        newcomment = self.complete
-                    else:
-                        newcomment = comments
-                    self.lines.append([
-                        firststatement.right, 
-                        self.level, 
-                        self.currentblockid, 
-                        self.implies_elimname, 
-                        self.reftwolines(first, second), 
-                        '', 
-                        newcomment
+                    newcomment = self.availablecomplete('implies_elim', firststatement.right, comments)
+                    self.lines.append(
+                        [
+                            firststatement.right, 
+                            self.level, 
+                            self.currentblockid, 
+                            self.implies_elimname, 
+                            self.reftwolines(first, second), 
+                            '', 
+                            newcomment
                         ]
                     )
             elif type(secondstatement) == Implies:
                 if firststatement != secondstatement.left:
                     raise altrea.exception.NotAntecedent(secondstatement, firststatement)
                 else:
-                    self.checkcomplete(secondstatement.right)
-                    if self.status == self.complete:
-                        newcomment = self.complete
-                    else:
-                        newcomment = comments
-                    self.lines.append([
-                        secondstatement.right, 
-                        self.level, 
-                        self.currentblockid, 
-                        self.implies_elimname, 
-                        self.reftwolines(first, second), 
-                        '', 
-                        newcomment
+                    newcomment = self.availablecomplete('implies_elim', secondstatement.right, comments)
+                    self.lines.append(
+                        [
+                            secondstatement.right, 
+                            self.level, 
+                            self.currentblockid, 
+                            self.implies_elimname, 
+                            self.reftwolines(first, second), 
+                            '', 
+                            newcomment
                         ]
                     )                   
             else:
@@ -763,7 +894,7 @@ class Proof:
             NoSuchBlock: The block id does not exist.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 level, antecedent, consequent = self.getlevelblockstatements(blockid)
             except:
@@ -772,19 +903,16 @@ class Proof:
                 raise altrea.exception.BlockScopeError(blockid)
             implication = Implies(antecedent, consequent)
 
-            self.checkcomplete(implication)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
+            newcomment = self.availablecomplete('implies_intro', implication, comments)
             self.lines.append(
-                [implication, 
-                self.level, 
-                self.currentblockid, 
-                self.implies_introname, 
-                '', 
-                blockid, 
-                newcomment
+                [
+                    implication, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.implies_introname, 
+                    '', 
+                    blockid, 
+                    newcomment
                 ]
             )                   
             
@@ -824,7 +952,7 @@ class Proof:
             NoSuchBlock: The block id does not exist.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 firstlevel, firstassumption, firstconclusion = self.getlevelblockstatements(first)
             except:
@@ -845,21 +973,30 @@ class Proof:
             if not firstconclusion.equals(secondconclusion):
                 raise altrea.exception.NotSameStatements(firstconclusion, secondconclusion)
 
-            self.checkcomplete(final)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
+            newcomment = self.availablecomplete('lem', final, comments)
             self.lines.append(
-                [final, 
-                self.level, 
-                self.currentblockid, 
-                self.lem_name, 
-                '', 
-                self.reftwolines(first, second),
-                newcomment
+                [
+                    final, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.lem_name, 
+                    '', 
+                    self.reftwolines(first, second),
+                    newcomment
                 ]
             )                 
+
+    def nand_elim(self, first: int, second: int, comments: str = ''):
+        pass
+
+    def nand_intro(self, first: int, second: int, comments: str = ''):
+        pass
+
+    def nor_elim(self, first: int, second: int, comments: str = ''):
+        pass
+
+    def nor_intro(self, first: int, second: int, comments: str = ''):
+        pass
 
     def not_elim(self, first: int, second: int, comments: str = ''):
         """When two statements are contradictory a false line can be derived.
@@ -869,45 +1006,58 @@ class Proof:
             second: The line number of the second statement.
             comments: An optional comment for this line.
 
+        Examples:
+            >>> from altrea.boolean import And, Not, Wff
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> A = Wff('A')
+            >>> B = Wff('B')
+            >>> p = Proof(And(A, B))
+            >>> p.addpremise(A)
+            >>> p.addpremise(Not(A))
+            >>> p.not_elim(1, 2)
+            >>> p.explosion(And(A, B), 3)
+            >>> show(p, latex=0)
+              Statement  Level  Block       Rule Lines Blocks   Comment
+            C     A & B      0      0       Goal
+            1         A      0      0    Premise
+            2        ~A      0      0    Premise
+            3         X      0      0   Not Elim  1, 2
+            4     A & B      0      0  Explosion     3         COMPLETE
+
         Exceptions:
             NoSuchLine: The referenced line does not exist in the proof.
-            NotContradiction: Two referenced statements are not contradictions.
             ScopeError: The referenced statement is not accessible.                       
         """
         
-        if self.status != self.complete:
-            try:
-                firstlevel, firststatement = self.getlevelstatement(first)
-            except:
-                raise altrea.exception.NoSuchLine(first)
-            if firstlevel > self.level:
-                raise altrea.exception.ScopeError(first)
-        
-            try:
-                secondlevel, secondstatement = self.getlevelstatement(second)
-            except:
-                raise altrea.exception.NoSuchLine(second)
-            if secondlevel > self.level:
-                raise altrea.exception.ScopeError(second)
-
-            if Not(firststatement) != secondstatement:
-                raise altrea.exception.NotContradiction(first, second)
-
-            self.checkcomplete(self.falsename)
-            if self.status == self.complete:
-                newcomment = self.complete
+        if not self.checkcomplete():
+            if (len(self.lines) <= first) or (len(self.lines) <= second):
+                if len(self.lines) <= first:
+                    self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(first), '')
+                else:
+                    self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(second), '')
             else:
-                newcomment = comments
-            self.lines.append(
-                [self.falsename, 
-                self.level, 
-                self.currentblockid, 
-                self.not_elimname, 
-                self.reftwolines(first, second), 
-                '',
-                newcomment
-                ]
-            )                 
+                firstlevel, firststatement = self.getlevelstatement(first)
+                secondlevel, secondstatement = self.getlevelstatement(second)
+                if not Not(firststatement).equals(secondstatement) and not Not(secondstatement).equals(firststatement):
+                    self.stopproof(self.stopped_notcontradiction, self.blankstatement, self.not_elimname, self.reftwolines(first, second), '')
+                elif firstlevel > self.level:
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, str(first), '')
+                elif secondlevel > self.level:
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, str(second), '')
+                else:
+                    newcomment = self.availablecomplete('not_elim', self.falsename, comments)
+                    self.lines.append(
+                        [
+                            self.falsename, 
+                            self.level, 
+                            self.currentblockid, 
+                        self.not_elimname, 
+                        self.reftwolines(first, second), 
+                        '',
+                        newcomment
+                    ]
+                )                 
                
     def not_intro(self, blockid: int | str, comments: str = ''):
         """When an assumption generates a contradiction, the negation of the assumption
@@ -924,34 +1074,31 @@ class Proof:
             BlockScopeError: The referenced block is not accessible.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:   
                 level, assumption, conclusion = self.getlevelblockstatements(blockid)
             except:
                 raise altrea.exception.NoSuchBlock(blockid)
             if level != self.level + 1:
                 raise altrea.exception.BlockScopeError(blockid)
-            if conclusion != self.falsename:
-                raise altrea.exception.NotFalse(blockid, conclusion)
-
-            self.checkcomplete(Not(assumption))
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
+            if not conclusion.equals(self.falsename):
+                raise altrea.exception.NotFalse(blockid, conclusion)       
+            statement = Not(assumption)
+            newcomment = self.availablecomplete('not_intro', statement, comments)
             self.lines.append(
-                [Not(assumption), 
-                self.level, 
-                self.currentblockid, 
-                self.not_introname, 
-                '', 
-                str(blockid),
-                newcomment
+                [
+                    statement, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.not_introname, 
+                    '', 
+                    str(blockid),
+                    newcomment
                 ]
             )                 
 
     def openblock(self, 
-                  statement: Not | And | Or | Implies | Iff | Wff,
+                  statement: And | Or | Not | Implies | Iff | Wff | F | T,
                   comments: str = ''):
         """Opens a uniquely identified block of statements with an assumption.
         
@@ -980,28 +1127,28 @@ class Proof:
             statement: The assumption that starts the block of derived statements.
         """
 
-        if self.status != self.complete:
-            self.level += 1
-            nextline = len(self.lines)
-            self.currentblock = [nextline]
-            self.blocklist.append([self.level, self.currentblock])
-            self.currentblockid = len(self.blocklist) - 1
-
-            self.checkcomplete(statement)
-            if self.status == self.complete:
-                newcomment = self.complete
+        if not self.checkcomplete():
+            if type(statement) == str:
+                self.stopproof(self.stopped_string, statement, self.assumptionname, '', '')
             else:
-                newcomment = comments
-            self.lines.append(
-                [statement, 
-                self.level, 
-                self.currentblockid, 
-                self.assumptionname, 
-                '', 
-                '',
-                newcomment
-                ]
-            )                 
+                self.level += 1
+                nextline = len(self.lines)
+                self.currentblock = [nextline]
+                self.blocklist.append([self.level, self.currentblock])
+                self.currentblockid = len(self.blocklist) - 1
+
+                newcomment = self.availablecomplete('openblock', statement, comments)
+                self.lines.append(
+                    [
+                        statement, 
+                        self.level, 
+                        self.currentblockid, 
+                        self.assumptionname, 
+                        '', 
+                        '',
+                        newcomment
+                    ]
+                )                 
 
     def or_elim(self, line: int, blockids: list, comments: str = ''):
         """Check the correctness of a disjunction elimination line before adding it to the proof.
@@ -1013,7 +1160,7 @@ class Proof:
             ScopeError: The referenced statement is not accessible.
         """
 
-        if self.status != self.complete:
+        if not self.checkcomplete():
             level, disjunction = self.getlevelstatement(line)
             if type(disjunction) != Or:
                 raise altrea.exception.NotDisjunction(line, disjunction)
@@ -1041,26 +1188,23 @@ class Proof:
             if firstconclusion != secondconclusion:
                 raise altrea.exception.ConclusionsNotTheSame(firstconclusion, secondconclusion)
 
-            self.checkcomplete(firstconclusion)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
+            newcomment = self.availablecomplete('or_elim', firstconclusion, comments)
             self.lines.append(
-                [firstconclusion, 
-                self.level, 
-                self.currentblockid, 
-                self.or_elimname, 
-                '', 
-                self.reftwolines(blockids[0], blockids[1]),
-                newcomment
+                [
+                    firstconclusion, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.or_elimname, 
+                    '', 
+                    self.reftwolines(blockids[0], blockids[1]),
+                    newcomment
                 ]
             )                 
             
     def or_intro(self, 
                  line: int,
-                 left: Not | And | Or | Implies | Iff | Wff = None,
-                 right: Not | And | Or | Implies | Iff | Wff = None,   
+                 left: And | Or | Not | Implies | Iff | Wff | F | T = None,
+                 right: And | Or | Not | Implies | Iff | Wff | F | T = None,   
                  comments: str = ''):
         """The newdisjunct statement and the statement at the line number become a disjunction.
         
@@ -1095,44 +1239,42 @@ class Proof:
 
         Exceptions:
             NoSuchLine: The referenced line does not exist in the proof.
+            NoValuePassed: 
             ScopeError: The referenced statement is not accessible.
-            StringType: The statement should not be a string.
         """
 
-        if self.status != self.complete:
-            try:
-                level, statement = self.getlevelstatement(line)
-            except:
-                raise altrea.exception.NoSuchLine(line)
-            if level > self.level:
-                raise altrea.exception.ScopeError(line)
-            
-            if left is None and right is None:
-                raise altrea.exception.NoValuePassed('or_intro')
-            elif left is None:
-                if type(right) == str:
-                    raise altrea.exception.StringType(right)
-                disjunction = Or(statement, right)
-            elif right is None:
-                if type(left) == str:
-                    raise altrea.exception.StringType(left)
-                disjunction = Or(left, statement)
-
-            self.checkcomplete(disjunction)
-            if self.status == self.complete:
-                newcomment = self.complete
+        if not self.checkcomplete():
+            if type(left) == str:
+                self.stopproof(self.stopped_string, left, self.or_introname, str(line), '')
+            elif type(right) == str:
+                self.stopproof(self.stopped_string, right, self.or_introname, str(line), '')
             else:
-                newcomment = comments
-            self.lines.append(
-                [disjunction, 
-                self.level, 
-                self.currentblockid, 
-                self.or_introname, 
-                str(line), 
-                '',
-                newcomment
-                ]
-            )                 
+                try:
+                    level, statement = self.getlevelstatement(line)
+                except:
+                    raise altrea.exception.NoSuchLine(line)
+                if level > self.level:
+                 raise altrea.exception.ScopeError(line)
+            
+                if left is None and right is None:
+                    raise altrea.exception.NoValuePassed('or_intro')
+                elif left is None:
+                    disjunction = Or(statement, right)
+                elif right is None:
+                    disjunction = Or(left, statement)
+
+                newcomment = self.availablecomplete('or_intro', disjunction, comments)
+                self.lines.append(
+                    [
+                        disjunction, 
+                        self.level, 
+                        self.currentblockid, 
+                        self.or_introname, 
+                        str(line), 
+                        '',
+                        newcomment
+                    ]
+                )                 
        
     def reit(self, line: int, comments: str = ''):
         """A statement that already exists which can be accessed can be reused.
@@ -1155,7 +1297,7 @@ class Proof:
 
         """
         
-        if self.status != self.complete:
+        if not self.checkcomplete():
             try:
                 level, statement = self.getlevelstatement(line)
             except:
@@ -1163,19 +1305,16 @@ class Proof:
             if level > self.level:
                 raise altrea.exception.ScopeError(line)
         
-            self.checkcomplete(statement)
-            if self.status == self.complete:
-                newcomment = self.complete
-            else:
-                newcomment = comments
+            newcomment = self.availablecomplete('reit', statement, comments)
             self.lines.append(
-                [statement, 
-                self.level, 
-                self.currentblockid, 
-                self.reitname, 
-                str(line), 
-                '',
-                newcomment
+                [
+                    statement, 
+                    self.level, 
+                    self.currentblockid, 
+                    self.reitname, 
+                    str(line), 
+                    '',
+                    newcomment
                 ]
             )                 
     

@@ -229,21 +229,6 @@ class NotAssumption(Exception):
 
     def __str__(self):
         return f'The statement on line {self.line} is not an assumption.'
-
-class NotConjunction(Exception):
-    """The statement is not a conjunction.
-    
-    Parameter:
-        line: The line number of the statement in the proof.
-        statement: The statement that caused the error.
-    """
-
-    def __init__(self, line, statement: Not | And | Or | Implies | Iff | Wff):
-        self.line = line
-        self.statement = statement
-
-    def __str__(self):
-        return f'The statement {self.statement} on line {self.line} is not a conjunction.'
     
 class NotContradiction(Exception):
     """Two referenced statements are not contradictions.
@@ -253,12 +238,18 @@ class NotContradiction(Exception):
         end: The last line of the alleged contradiction.
     """
 
-    def __init__(self, start: int, end: int):
-        self.start = start
-        self.end = end
+    def __init__(self, 
+                 first: int, 
+                 firststatement:  Not | And | Or | Implies | Iff | Wff,
+                 second: int,
+                 secondstatement: Not | And | Or | Implies | Iff | Wff):
+        self.first = first
+        self.firststatement = firststatement
+        self.second = second
+        self.secondstatement = secondstatement
 
     def __str__(self):
-        return f'The statements at lines {self.start} and {self.end} are not contradictions.'
+        return f'The statement {self.firststatement} at line {self.first} and the statement {self.secondstatement} at line {self.second} are not contradictoryS.'
 
 class NotDeMorgan(Exception):
     """The statement cannot be used in a DeMorgan rule.
@@ -289,8 +280,8 @@ class NotDisjunction(Exception):
     def __str__(self):
         return f'The statement {self.statement} on line {self.line} is not a disjunction.'
 
-class NotFalse(Exception):
-    """The referenced statement is not False.
+class NotDoubleNegation(Exception):
+    """The referenced statement is not a double negation statement.
 
     Parameters:
         line: The number of the line claimed to be False.
@@ -302,7 +293,7 @@ class NotFalse(Exception):
         self.statement = statement
 
     def __str__(self):
-        return f'The line {self.line} contains {self.statement} which is not False.'
+        return f'The line {self.line} contains {self.statement} which is not a double negation.' 
     
 class NotEquivalence(Exception):
     """The statements cannot be used in an equivalence rule.
@@ -321,6 +312,20 @@ class NotEquivalence(Exception):
     def __str__(self):
         return f'The statements {self.firststatement} and {self.secondstatement} cannot be used in an equivalence rule.'
 
+class NotFalse(Exception):
+    """The referenced statement is not False.
+
+    Parameters:
+        line: The number of the line claimed to be False.
+        statement: The startment on the line.
+    """
+
+    def __init__(self, line: int, statement: Not | And | Or | Implies | Iff | Wff):
+        self.line = line
+        self.statement = statement
+
+    def __str__(self):
+        return f'The line {self.line} contains {self.statement} which is not False.' 
 
 class NotModusPonens(Exception):
     """The two statements cannot be used for implication elimination or modus ponens.
@@ -415,20 +420,7 @@ class NoValuePassed(Exception):
 
     def __str__(self):
         return f'No value was pass to the function {self.functionname} when at least one was expected.'
-    
-class PremiseAtLowestLevel(Exception):
-    """A premise can only be added at the lowest level of the proof.
-    
-    Parameter:
-        premise: The premise that was added after other statements besides Premise were added.
-    """
-
-    def __init__(self, premise: Not | And | Or | Implies | Iff | Wff):
-        self.premise = premise
-    
-    def __str__(self):
-        return f'The premise {self.premise} was added after proof lines besides Premise or Goal were added.'
-    
+        
 class ScopeError(Exception):
     """The referenced statement is not accessible.
 
@@ -443,16 +435,3 @@ class ScopeError(Exception):
 
     def __str__(self):
         return f'A referenced line or block {self.lineblock} is not available for use.  Perhaps you need to close a block.'
-
-class StringType(Exception):
-    """The expression is of string type not a sympy boolean type.
-
-    Parameters:
-        expr: The expression that should be a boolean type.
-    """
-
-    def __init__(self, expr: str):
-        self.expr = expr
-
-    def __str__(self):
-        return f'The expression {self.expr} is of string type not sympy boolean type. Try writing it without quotes.'

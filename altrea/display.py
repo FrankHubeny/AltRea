@@ -6,7 +6,6 @@
 """
 
 import pandas
-#import sympy
 
 import altrea
 
@@ -35,7 +34,7 @@ def show(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
         p: The proof containing the lines.
     """
 
-    indx = ['Line']
+    indx = [p.logic]
     for i in range(len(p.lines)-1):
         indx.append(i + 1)
     if latex == 1:
@@ -45,9 +44,15 @@ def show(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
                 statement = '$\\bot$'
             else:
                 if color == 1 and p.status != p.complete and p.lines[i][1] <= p.level and i > 0:
-                    statement = ''.join(['$\\color{red}',p.lines[i][0].latex(),'$'])
+                    try:
+                        statement = ''.join(['$\\color{red}',p.lines[i][0].latex(),'$'])
+                    except AttributeError:
+                        statement = p.lines[i][0]
                 else:
-                    statement = ''.join(['$',p.lines[i][0].latex(),'$'])
+                    try:
+                        statement = ''.join(['$',p.lines[i][0].latex(),'$'])
+                    except AttributeError:
+                        statement = p.lines[i][0]
                 if color == 1 and p.status != p.complete and p.lines[i][1] == p.level + 1:
                     block = ''.join(['$\\color{red}',str(p.lines[i][2]),'$'])
                 else:
@@ -66,30 +71,60 @@ def show(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
         df = pandas.DataFrame(p.lines, index=indx, columns=p.columns)
     return df
 
-# def truthtable(p: altrea.truthfunction.Proof):
-#     """Display a truth table built from a conjunction of the premises implying the goal.
+def truthtable(premises: list, goal, letters: list):
+    """Display a truth table built from a conjunction of the premises implying the goal.
     
-#     Paramters:
-#         p: The proof containing the premises and goal.
-#     """
+    Paramters:
+        p: The proof containing the premises and goal.
+    """
 
-#     premises = True
-#     for i in p.premises:
-#         premises = sympy.logic.boolalg.And(premises, i)
-#     expr = sympy.logic.boolalg.Implies(premises, p.goal)
-#     vars = list(expr.free_symbols)
-#     table = sympy.logic.boolalg.truth_table(expr, vars)
-#     letters = '['
-#     for s in vars:
-#         letters += ''.join([str(s), ', '])
-#     letters = letters[:-2] + ']'
-#     idx = []
-#     for i in range(2**len(vars)):
-#         idx.append(i)
-#     expr = ''.join(['$',sympy.latex(expr),'$'])
-#     print('Truth table for {}'.format(p.name))
-#     df = pandas.DataFrame(table, index=idx, columns=[letters, expr])
-#     return df
+    from altrea.boolean import And, Or, Not, Implies, Iff, Wff
+
+    def makerow(value: bool, letters: list, goal):
+        row = []
+        letters[0].setvalue(value)
+        row.append(letters[0].booleanvalue)
+        for i in premises:
+            row.append(i.booleanvalue)
+        row.append(goal.booleanvalue)
+        return row
+    
+    columns = []
+    for i in letters:
+        columns.append(str(i))
+    for i in premises:
+        statement = ''.join(['$',i.latex(),'$'])
+        columns.append(statement)
+    statement = ''.join(['$',goal.latex(),'$'])
+    columns.append(statement)
+
+    rows = 2**len(letters)
+    index = []
+    for i in range(rows):
+        index.append(i)
+
+    table = []
+    if len(letters) == 1:
+        table.append(makerow(True, letters, goal))
+        table.append(makerow(False, letters, goal))
+        # row = []
+        # letters[0].setvalue(True)
+        # row.append(letters[0].booleanvalue)
+        # for i in premises:
+        #     row.append(i.booleanvalue)
+        # row.append(goal.booleanvalue)
+        # table.append(row)
+
+        # row = []
+        # letters[0].setvalue(False)
+        # row.append(letters[0].booleanvalue)
+        # for i in premises:
+        #     row.append(i.booleanvalue)
+        # row.append(goal.booleanvalue)
+        # table.append(row)
+        
+    df = pandas.DataFrame(table, index=index, columns=columns)
+    return df
 
 def showblocklist(p: altrea.truthfunction.Proof):
     """Display the blocklist of a proof.
@@ -102,4 +137,26 @@ def showblocklist(p: altrea.truthfunction.Proof):
     for i in range(len(p.blocklist)):
         indx.append(i)
     df = pandas.DataFrame(p.blocklist, index=indx, columns=['Level', 'Block'])
+    return df
+
+def availablelogics():
+    """Displays the available logics for proofs."""
+
+    from pandas import DataFrame
+    from altrea.boolean import Wff
+    from altrea.truthfunction import Proof
+    A = Wff('A')
+    p = Proof(A)
+    df = DataFrame(p.logicdictionary.items(), columns=['Rule', 'Logics Supporting It'])
+    return df
+
+def connectors():
+    """Displays the available logical connectors for a specific logic."""
+
+    from pandas import DataFrame
+    from altrea.boolean import Wff
+    from altrea.truthfunction import Proof
+    A = Wff('A')
+    p = Proof(A)
+    df = DataFrame(p.connectors.items(), columns=['Logic', 'Available Connectors'])
     return df

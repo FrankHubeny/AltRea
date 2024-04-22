@@ -1,15 +1,20 @@
+"""------------------------------------------------------------------------------
+                            Proof Initialization Testing
+                                    Proof
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""INIT TESTS"""
-
-"""Test 1: Are initialization parameters set correctly for a proof?"""
+"""------------------------------------------------------------------------------
+                                  PROOF
+                                Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("p.name", None), 
@@ -39,13 +44,17 @@ def test_init_2(input_n, expected):
     p = Proof()
     assert eval(input_n) == expected
 
-"""Stop Conditions"""
+"""------------------------------------------------------------------------------
+                                    PROOF
+                                  Stopped Run
+                                  
+                Logic Is Not Defined (stopped_undefinedlogic)
+------------------------------------------------------------------------------"""
 
-"""Is the premise entered as a string?"""
 
 testdata = [
-    ("p.lines[0][p.ruleindex]", globalproof.goalname),
-    ("p.lines[0][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_string),
+    ("p.lines[0][p.ruleindex]", t.goalname),
+    ("p.lines[0][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_init_stop_1(input_n, expected):

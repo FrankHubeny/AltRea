@@ -1,17 +1,24 @@
+"""------------------------------------------------------------------------------
+                                Add Goal Testing
+                                    addgoal
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""ADDGOAL TESTS"""
+"""------------------------------------------------------------------------------
+                                 ADDGOAL
+                                Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("len(p.lines)", 1),
-    ("p.lines[0][p.ruleindex]", globalproof.goalname),
+    ("p.lines[0][p.ruleindex]", t.goalname),
     ("p.lines[0][p.commentindex]", 'My Comment'),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -23,13 +30,17 @@ def test_addgoal_1(input_n, expected):
     p.addgoal(C, 'My Comment')
     assert eval(input_n) == expected
 
-"""ADDGOAL Stop Conditions"""
+"""------------------------------------------------------------------------------
+                                    ADDGOAL
+                                  Stopped Run
+                                  
+                        Input Is A String (stopped_string)
+------------------------------------------------------------------------------"""
 
-"""Is the premise entered as a string?"""
 
 testdata = [
     ("str(p.lines[0][p.statementindex])", ""),
-    ("p.lines[0][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_string),
+    ("p.lines[0][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_addgoal_stop_1(input_n, expected):

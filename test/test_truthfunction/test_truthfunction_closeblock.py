@@ -1,15 +1,20 @@
+"""------------------------------------------------------------------------------
+                            Close Block Testing
+                                closeblock
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof(A)
+t = Proof()
 
-"""CLOSEBLOCK TESTS"""
-
-"""Test 1: Is the block closed correctly?"""
+"""------------------------------------------------------------------------------
+                                CLOSEBLOCK
+                                Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("p.level", 0),
@@ -35,14 +40,18 @@ def test_closeblock_1(input_n, expected):
     level3 = p.level
     assert eval(input_n) == expected
     
-"""CLOSEBLOCK Stop Conditions"""
+"""------------------------------------------------------------------------------
+                                    CLOSEBLOCK
+                                  Stopped Run
+                                  
+                Closing the Zero Block (stopped_closezeroblock)
+------------------------------------------------------------------------------"""
 
-"""Can one close the zero block?"""
 
 testdata = [
     ("str(p.lines[2][p.statementindex])", ""),
-    ("p.lines[2][p.ruleindex]", globalproof.closeblockname),
-    ("p.lines[2][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_closezeroblock),
+    ("p.lines[2][p.ruleindex]", t.closeblockname),
+    ("p.lines[2][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_closezeroblock),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_stop_1(input_n, expected):

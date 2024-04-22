@@ -1,18 +1,44 @@
+"""------------------------------------------------------------------------------
+                                Nor Testing
+                            nor_intro   nor_elim
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""NOR TESTS"""
+"""------------------------------------------------------------------------------
+                                NOR_ELIM
+                                Clean Run
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does the nor elimination perform correctly?"""
+"""------------------------------------------------------------------------------
+                                NOR_ELIM
+                                Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
 
+"""------------------------------------------------------------------------------
+                                    NOR_INTRO
+                                    Clean Run
+------------------------------------------------------------------------------"""
 
+"""------------------------------------------------------------------------------
+                                    NOR_INTRO
+                                    Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does the nor introduction perform correctly?"""
-
+"""------------------------------------------------------------------------------
+                                    NOR_INTRO
+                                    Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
 

@@ -1,21 +1,25 @@
+"""------------------------------------------------------------------------------
+                            Implication Testing
+                        implies_intro implies_elim
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
-B = Wff('B')
 A = Wff('A')
-C = Wff('C')
-globalproof = Proof()
+B = Wff('B')
+t = Proof()
 
-"""IMPLIES TESTS"""
-
-"""Test 1: Does the elimination rule work correctly?"""
+"""------------------------------------------------------------------------------
+                               IMPLIES_ELIM
+                                Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(B)),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.implies_elimname),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.implies_elimname),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implies_elim_1(input_n, expected):
@@ -28,12 +32,28 @@ def test_implies_elim_1(input_n, expected):
     p.implies_elim(2,1)
     assert eval(input_n) == expected
 
+"""------------------------------------------------------------------------------
+                                IMPLIES_ELIM
+                                Stopped Run
+                                  
+                Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
+
+
+"""------------------------------------------------------------------------------
+                                IMPLIES_ELIM
+                                Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
+
+
 """Test 2: Does the introduction rule work correctly?"""
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Implies(B, A))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.implies_introname),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.implies_introname),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implies_intro_1(input_n, expected):
@@ -52,8 +72,8 @@ def test_implies_intro_1(input_n, expected):
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Implies(A, A))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.implies_introname),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.implies_introname),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_intro_4(input_n, expected):
@@ -65,3 +85,22 @@ def test_intro_4(input_n, expected):
     p.closeblock()
     p.implies_intro(1)
     assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                    IMPLIES_INTRO
+                                    Clean Run
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    IMPLIES_INTRO
+                                    Stopped Run
+                                  
+                        Block Does Not Exist (stopped_nosuchblock)
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    IMPLIES_INTRO
+                                    Stopped Run
+                                  
+                Block Is Outside Accessible Scope (stopped_blockscope)
+------------------------------------------------------------------------------"""

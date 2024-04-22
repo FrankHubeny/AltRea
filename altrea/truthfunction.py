@@ -126,6 +126,7 @@ class Proof:
     stopped_notdemorgan = 'The referenced line is not a DeMorgan statement.'
     stopped_notfalse = 'The referenced line is not false.'
     stopped_string = 'String input is not recognized.'
+    stopped_undefinedlogic = 'This logic has not been defined.'
     connectors = {
         'C': ['$\\wedge$', '$\\vee$', '$\\lnot$', '$\\rightarrow$', '$\\leftrightarrow$'],
         'CI': ['$\\wedge$', '$\\vee$', '$\\lnot$', '$\\rightarrow$', '$\\leftrightarrow$'],
@@ -176,7 +177,6 @@ class Proof:
             
         self.name = name
         self.goals = []
-        self.goalswff = []
         self.goals_string = ''
         self.goals_latex = ''
         self.derivedgoals = []
@@ -198,6 +198,22 @@ class Proof:
         """Check if the goal has been found and the proof is over."""
 
         return self.status == self.complete or self.status == self.stopped
+    
+    def checkline(self, line: int):
+        """Check if the line is an integer within the range of the proof lines."""
+
+        if type(line) == int:
+            return len(self.lines) > line and line > 0
+        else:
+            return False
+        
+    def checklinescope(self, level: int):
+        """Check is the line can be accessed by the current line."""
+
+        return level <= self.level
+    
+    def checkstring(self, wff: And | Or | Not | Implies | Iff | Wff | F | T):
+        return type(wff) == str
    
     def availablecomplete(self, 
                           rulename: str, 
@@ -211,7 +227,7 @@ class Proof:
             comments: Any comments the user has provided which may be overwritten.
         """
 
-        newcomment = comments
+        newcomment = self.status
         if self.level == 0:
             if str(statement) in self.goals:
                 if str(statement) not in self.derivedgoals:
@@ -220,20 +236,31 @@ class Proof:
                         newcomment = self.partialcompletion
                     else:
                         self.status = self.complete
-                        if comments == '':
-                            newcomment = self.complete
-                        else:
-                            newcomment = ''.join([newcomment, self.comments_connector, comments])
-
-        if self.status == self.stopped:
-            if comments == '':
-                newcomment = ''.join([self.stopped, self.stopped_connector, self.stoppedmessage])
+                        newcomment = self.complete
+        if comments == '':
+            return newcomment
+        else:
+            if newcomment == '':
+                return comments
             else:
-                newcomment = ''.join([self.stopped, self.stopped_connector, self.stoppedmessage, self.comments_connector, comments])
-
-        if self.logic not in self.availablelogics.get(rulename):
-            newcomment = ''.join(['Rule ', rulename, ' violates ', self.logic])
-        return newcomment
+                return ''.join([newcomment, self.comments_connector, comments])
+                    # if comments == '':
+                    #     newcomment = self.complete
+                    # else:
+                    #     newcomment = ''.join([newcomment, self.comments_connector, comments])
+        # if self.status == self.stopped:
+        #                 if comments == '':
+        #                     newcomment = ''.join([self.stopped, self.stopped_connector, self.stoppedmessage])
+        #                 else:
+        #                     newcomment = ''.join([self.stopped, self.stopped_connector, self.stoppedmessage, self.comments_connector, comments])
+        #             elif self.status == self.complete:
+        #                 if comments == '':
+        #                     newcomment = self.complete
+        #                 else:
+        #                     newcomment = ''.join([self.complete, self.stopped_connector, comments])
+        #             elif self.logic not in self.availablelogics.get(rulename):
+        #                 newcomment = ''.join(['Rule ', rulename, ' violates ', self.logic])
+        #return newcomment
 
     def getlevelblockstatements(self, blockid: int) -> tuple:
         """Given a block id, return the level the block is in and the assumption and conclusion statements."""
@@ -273,7 +300,7 @@ class Proof:
                 ]
             )
  
-    """BASIC RULES"""
+    """BASIC CLASSICAL RULES"""
 
     def addgoal(self,
                 goal: And | Or | Not | Implies | Iff | Wff | F | T, 
@@ -286,19 +313,18 @@ class Proof:
         """
 
         if not self.checkcomplete():
-            if type(goal) == str:
+            if self.checkstring(goal):
                 self.stopproof(self.stopped_string, goal, self.goalname, 0, 0)
             else:
                 self.goals.append(str(goal))
-                self.goalswff.append(goal)
                 if self.goals_string == '':
                     self.goals_string = str(goal)
                 else:
-                    self.goals_string = ''.join([', ',str(goal)])
+                    self.goals_string += ''.join([', ',str(goal)])
                 if self.goals_latex == '':
                     self.goals_latex = goal.latex()
                 else:
-                    self.goals_latex = ''.join([', ',goal.latex()]) 
+                    self.goals_latex += ''.join([', ',goal.latex()]) 
                 self.lines[0][self.statementindex] = self.goals_string
                 if self.lines[0][self.commentindex] == '':
                     self.lines[0][self.commentindex] = comments
@@ -316,7 +342,7 @@ class Proof:
         """
 
         if not self.checkcomplete():
-            if type(premise) == str:
+            if self.checkstring(premise):
                 self.stopproof(self.stopped_string, premise, self.premisename, '', '')
             else:
                 self.premises.append(premise)
@@ -339,14 +365,51 @@ class Proof:
         Parameters:
             line: The line number of the conjunction to be split.
             comments: Optional user comments for the line.
+
+        Examples:
+            The first example provides a proof that from the statement A & B one can derive 
+            two statements, A and B. 
+            
+            The starting point for the proof are named well-formed forumulas (Wff).  Although this
+            looks like a string 'A', the Wff('A') contains metadata associated with it.
+            From them more complicated well-formed formulas such as "And(A, B)" can be
+            formed.  Note that this formula is not the string 'A & B' although
+            it is displayed as such in the proof.  If one used "show(p, latex=1)" one
+            would see a latex display of the same well-formed formula.
+            
+            It is somewhat unusual that there are two goals, but this rule produces two
+            statements, one for each conjunct on lines 2 and 3 of the proof.  In the first
+            line with the "Goal" Rule they are separated by a comma.  An optional comment
+            appears for each goal which is visible in the Comment column separated by a " - ".
+
+            The comments on lines 2 and 3, "PARTIAL COMPLETION" and "COMPLETE" were generated
+            by AltRea.  This comment column can be used both by the user and AltRea to
+            provide a message about the proof.
+
+            >>> from altrea.boolean import And, Wff
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> A = Wff('A')
+            >>> B = Wff('B')
+            >>> p = Proof()
+            >>> p.addgoal(A, 'one')
+            >>> p.addgoal(B, 'two')
+            >>> p.addpremise(And(A, B))
+            >>> p.and_elim(1)
+            >>> show(p, latex=0)
+              Statement  Level  Block      Rule Lines Blocks             Comment
+            C      A, B      0      0      Goal                        one - two
+            1     A & B      0      0   Premise
+            2         A      0      0  And Elim     1         PARTIAL COMPLETION
+            3         B      0      0  And Elim     1                   COMPLETE
         """
 
         if not self.checkcomplete():
-            if len(self.lines) <= line:
+            if not self.checkline(line):
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.and_elimname, str(line), '')
             else:
                 level, statement = self.getlevelstatement(line)
-                if level > self.level:
+                if not self.checklinescope(level):
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.and_elimname, str(line), '')
                 elif type(statement) != And:
                     self.stopproof(self.stopped_notconjunction, self.blankstatement, self.and_elimname, str(line), '')
@@ -363,7 +426,9 @@ class Proof:
                                 '',
                                 newcomment
                             ]
-                        )                 
+                        )   
+                        if self.status == self.complete:
+                            break              
                 
     def and_intro(self, first: int, second: int, comments: str = ''):
         """The statement at first line number is joined with And to the statement at second
@@ -372,24 +437,61 @@ class Proof:
         Parameters:
             first: The line number of the first conjunct.
             second: The line number of the second conjunct.
+            comments: Optional comments that a user may enter.
 
-        Exceptions:
-            NoSuchLine: The line number is not in the proof.
-            ScopeError: The line must be in a level less than or equal to the current level.
+        Exception:
+            Start with two named well-formed formulas (Wff), "A" and "B" one can start a proof p.
+            This example will derive from those two statements given as premises in line 1 and 2
+            the statement displayed as "A & B" on line 3.  The comment on line 3 shows that
+            the proof is complete.  Also on line 3 is information on the lines (1 and 2) that were
+            referenced to justify the presence in the proof.
+
+            >>> from altrea.boolean import And, Wff
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> A = Wff('A')
+            >>> B = Wff('B')
+            >>> p = Proof()
+            >>> p.addgoal(And(A, B))
+            >>> p.addpremise(A)
+            >>> p.addpremise(B)
+            >>> p.and_intro(1, 2)
+            >>> show(p, latex=0)
+              Statement  Level  Block       Rule Lines Blocks   Comment
+            C     A & B      0      0       Goal
+            1         A      0      0    Premise
+            2         B      0      0    Premise
+            3     A & B      0      0  And Intro  1, 2         COMPLETE
+
+            This example shows an obvious result along with how a comment can be entered by the user.
+
+            >>> from altrea.boolean import And, Wff
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> A = Wff('A')
+            >>> p = Proof()
+            >>> p.addgoal(And(A, A))
+            >>> p.addpremise(A)
+            >>> p.and_intro(1, 1, 'Obvious result')
+            >>> show(p, latex=0)
+              Statement  Level  Block       Rule Lines Blocks                    Comment
+            C     A & A      0      0       Goal
+            1         A      0      0    Premise
+            2     A & A      0      0  And Intro  1, 1         COMPLETE - Obvious result
         """
 
         if not self.checkcomplete():
-            if len(self.lines) <= first:
+            if not self.checkline(first):
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.and_introname, str(first), '')
             else:
                 firstlevel, firstconjunct = self.getlevelstatement(first)
-                if firstlevel > self.level:
+                if not self.checklinescope(firstlevel):
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.and_introname, str(first), '')
-                elif len(self.lines) <= second:
+                elif not self.checkline(second):
                     self.stopproof(self.stopped_nosuchline, self.blankstatement, self.and_introname, str(second), '')
                 else:
                     secondlevel, secondconjunct = self.getlevelstatement(second)
-                    if secondlevel > self.level:
+                    if not self.checklinescope(secondlevel):
                         self.stopproof(self.stopped_linescope, self.blankstatement, self.and_introname, str(second), '')
                     else:
                         andstatement = And(firstconjunct, secondconjunct)
@@ -510,11 +612,11 @@ class Proof:
         """
 
         if not self.checkcomplete():
-            if len(self.lines) <= line:
+            if not self.checkline(line):
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.demorgan_name, str(line), '')
             else:
                 level, statement = self.getlevelstatement(line)
-                if level > self.level:
+                if not self.checklinescope(level):
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.demorgan_name, str(line), '')
                 elif type(statement) == Not:
                     if type(statement.negated) == And:
@@ -572,26 +674,26 @@ class Proof:
         '''
 
         if not self.checkcomplete():
-            try:
+            if not self.checkline(line):
+                self.stopproof(self.stopped_nosuchline, self.blankstatement, self.dn_introname, str(line), '')
+            else:
                 level, statement = self.getlevelstatement(line)
-            except:
-                raise altrea.exception.NoSuchLine(line)
-            if level > self.level:
-                raise altrea.exception.ScopeError(line)
-            newstatement = Not(Not(statement))
+                if not self.checklinescope(level):
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.dn_introname, str(line), '')
+                    newstatement = Not(Not(statement))
             
-            newcomment = self.availablecomplete('dn_intro', newstatement, comments)
-            self.lines.append(
-                [
-                    newstatement, 
-                    self.level, 
-                    self.currentblockid, 
-                    self.dn_introname, 
-                    str(line), 
-                    '', 
-                    newcomment
-                ]
-            )
+                    newcomment = self.availablecomplete('dn_intro', newstatement, comments)
+                    self.lines.append(
+                        [
+                            newstatement, 
+                           self.level, 
+                            self.currentblockid, 
+                            self.dn_introname, 
+                            str(line), 
+                            '', 
+                            newcomment
+                        ]
+                    )
 
     def dn_elim(self, line: int, comments: str = ''):
         '''This rule removes a double negation from a statement.

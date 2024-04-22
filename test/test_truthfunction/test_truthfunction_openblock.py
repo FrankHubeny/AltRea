@@ -1,23 +1,31 @@
+"""------------------------------------------------------------------------------
+                            Open Block Testing
+                                openblock
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""OPENBLOCK TESTS"""
+"""------------------------------------------------------------------------------
+                                    OPENBLOCK
+                                    Clean Run
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does openblock perform correctly?"""
-
-"""Stop Conditions"""
-
-"""Is the assumption entered as a string?"""
+"""------------------------------------------------------------------------------
+                                    OPENBLOCK
+                                   Stopped Run
+                                  
+                        Input Is String (stopped_string)
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("str(p.lines[1][p.statementindex])", "B"),
-    ("p.lines[1][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_string),
+    ("p.lines[1][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_openblock_stop_1(input_n, expected):

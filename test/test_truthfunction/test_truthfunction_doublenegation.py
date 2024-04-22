@@ -1,20 +1,25 @@
+"""------------------------------------------------------------------------------
+        Double Negation Introduction and Double Negation Elimination Testing
+                                dn_intro  dn_elim
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""DOUBLENEGATION TESTS"""
-
-"""Test 1: Does dn_elim remove two negations?"""
+"""------------------------------------------------------------------------------
+                                DN_ELIM
+                                Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Not(Not(A)))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.dn_introname),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.dn_introname),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_dn_elim_1(input_n, expected):
@@ -30,8 +35,8 @@ def test_dn_elim_1(input_n, expected):
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Not(Not(A)))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.dn_introname),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.dn_introname),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_dn_intro_1(input_n, expected):
@@ -43,3 +48,35 @@ def test_dn_intro_1(input_n, expected):
     p.dn_intro(1)
     assert eval(input_n) == expected
 
+"""------------------------------------------------------------------------------
+                                    DN_ELIM
+                                  Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    DN_ELIM
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    DN_INTRO
+                                    Clean Run
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    DN_INTRO
+                                  Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    DN_INTRO
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""

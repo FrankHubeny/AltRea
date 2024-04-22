@@ -1,19 +1,25 @@
+"""------------------------------------------------------------------------------
+                            Explosion Testing
+                                explosion
+------------------------------------------------------------------------------"""
+
 import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""EXPLOSION TESTS"""
+"""------------------------------------------------------------------------------
+                                EXPLOSION
+                                Clean Run
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does explosion perform correctly?"""
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(And(A, B))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.explosionname),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.explosionname),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_1(input_n, expected):
@@ -28,13 +34,17 @@ def test_explosion_1(input_n, expected):
     assert eval(input_n) == expected
 
 
-"""Stop Conditions"""
+"""------------------------------------------------------------------------------
+                                EXPLOSION
+                                Stopped Run
+                                  
+                Statement Is Not False (stopped_notfalse)
+------------------------------------------------------------------------------"""
 
-"""Is the statement entered as a string?"""
 
 testdata = [
     ("str(p.lines[4][p.statementindex])", "A"),
-    ("p.lines[4][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_string),
+    ("p.lines[4][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_stop_1(input_n, expected):

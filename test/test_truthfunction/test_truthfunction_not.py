@@ -1,19 +1,24 @@
+"""------------------------------------------------------------------------------
+                                Negation Testing
+                                not_intro   not_elim
+------------------------------------------------------------------------------"""
+
 import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""NOT TESTS"""
-
-"""Test 1: Does the not elimination perform correctly?"""
+"""------------------------------------------------------------------------------
+                                    NOT_ELIM
+                                   Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(F())),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.not_elimname),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.not_elimname),
     ("p.status", ""),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -27,14 +32,25 @@ def test_not_elim_1(input_n, expected):
     p.not_elim(1, 2)
     assert eval(input_n) == expected
 
-"""Stop Conditions"""
+"""------------------------------------------------------------------------------
+                                    NOT_ELIM
+                                  Stopped Run
+                                  
+                Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
 
-"""Does the line exist?"""
+"""------------------------------------------------------------------------------
+                                    NOT_ELIM
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
+
 
 testdata = [
-    ("str(p.lines[2][p.statementindex])", globalproof.blankstatement),
-    ("p.lines[2][p.ruleindex]", globalproof.not_elimname),
-    ("p.lines[2][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_nosuchline),
+    ("str(p.lines[2][p.statementindex])", t.blankstatement),
+    ("p.lines[2][p.ruleindex]", t.not_elimname),
+    ("p.lines[2][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_not_elim_stop_1a(input_n, expected):
@@ -48,9 +64,9 @@ def test_not_elim_stop_1a(input_n, expected):
     assert eval(input_n) == expected
 
 testdata = [
-    ("str(p.lines[2][p.statementindex])", globalproof.blankstatement),
-    ("p.lines[2][p.ruleindex]", globalproof.not_elimname),
-    ("p.lines[2][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_nosuchline),
+    ("str(p.lines[2][p.statementindex])", t.blankstatement),
+    ("p.lines[2][p.ruleindex]", t.not_elimname),
+    ("p.lines[2][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_not_elim_stop_1b(input_n, expected):
@@ -98,9 +114,9 @@ def test_not_elim_stop_2b(input_n, expected):
 """Are the two statements contradictory as assumed?"""
 
 testdata = [
-    ("str(p.lines[3][p.statementindex])", globalproof.blankstatement),
-    ("p.lines[3][p.ruleindex]", globalproof.not_elimname),
-    ("p.lines[3][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_notcontradiction),
+    ("str(p.lines[3][p.statementindex])", t.blankstatement),
+    ("p.lines[3][p.ruleindex]", t.not_elimname),
+    ("p.lines[3][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_notcontradiction),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_not_elim_stop_3(input_n, expected):
@@ -134,9 +150,9 @@ def test_not_elim_stop_4(input_n, expected):
 """Is the line within scope?"""
 
 testdata = [
-    ("str(p.lines[3][p.statementindex])", globalproof.blankstatement),
-    ("p.lines[3][p.ruleindex]", globalproof.not_elimname),
-    ("p.lines[3][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_linescope),
+    ("str(p.lines[3][p.statementindex])", t.blankstatement),
+    ("p.lines[3][p.ruleindex]", t.not_elimname),
+    ("p.lines[3][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_and_elim_stop_5(input_n, expected):
@@ -170,4 +186,21 @@ def test_and_elim_stop_6(input_n, expected):
     p.reit(1)
     assert eval(input_n) == expected
     
+"""------------------------------------------------------------------------------
+                                    NOT_INTRO
+                                    Clean Run
+------------------------------------------------------------------------------"""
 
+"""------------------------------------------------------------------------------
+                                    NOT_INTRO
+                                  Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    NOT_INTRO
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""

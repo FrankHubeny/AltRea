@@ -1,16 +1,43 @@
+"""------------------------------------------------------------------------------
+                                Nand Testing
+                            nand_intro   nand_elim
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""NAND TESTS"""
+"""------------------------------------------------------------------------------
+                                NAND_ELIM
+                                Clean Run
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does the nand elimination perform correctly?"""
+"""------------------------------------------------------------------------------
+                                NAND_ELIM
+                                Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
 
+"""------------------------------------------------------------------------------
+                                    NAND_INTRO
+                                    Clean Run
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does the nand introduction perform correctly?"""
+"""------------------------------------------------------------------------------
+                                    NAND_INTRO
+                                    Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
 
+"""------------------------------------------------------------------------------
+                                    NAND_INTRO
+                                    Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""

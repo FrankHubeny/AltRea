@@ -1,34 +1,57 @@
+"""------------------------------------------------------------------------------
+                                Or Testing
+                            or_intro   or_elim
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""OR TESTS"""
+"""------------------------------------------------------------------------------
+                                     OR_ELIM
+                                   Clean Run
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does the or elimination perform correctly?"""
+"""------------------------------------------------------------------------------
+                                    OR_ELIM
+                                  Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
 
-"""Or elimination error checking.
-            
-- AssumptionNotFound: The assumption from a block does not match a disjunct of the disjunction.
-- ConclusionsNotTheSame: The conclusions of blocks are not the same.
-- NoSuchLine: The referenced line does not exist in the proof.
-- ScopeError: The referenced statement is not accessible.
-"""
+"""------------------------------------------------------------------------------
+                                    OR_ELIM
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does the or introduction perform correctly?"""
+"""------------------------------------------------------------------------------
+                                    OR_INTRO
+                                    Clean Run
+------------------------------------------------------------------------------"""
 
+"""------------------------------------------------------------------------------
+                                    OR_INTRO
+                                  Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
 
-"""Stop Conditions"""
-
-"""Is the premise entered as a string on the left?"""
+"""------------------------------------------------------------------------------
+                                    OR_INTRO
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("str(p.lines[2][p.statementindex])", "C"),
-    ("p.lines[2][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_string),
+    ("p.lines[2][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_or_stop_1(input_n, expected):
@@ -60,7 +83,7 @@ def test_or_stop_2(input_n, expected):
 
 testdata = [
     ("str(p.lines[2][p.statementindex])", "C"),
-    ("p.lines[2][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_string),
+    ("p.lines[2][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_or_stop_3(input_n, expected):

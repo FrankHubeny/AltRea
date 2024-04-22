@@ -1,20 +1,25 @@
+"""------------------------------------------------------------------------------
+                            Add Premise Testing
+                                addpremise
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""ADDPREMISE TESTS"""
-
-"""Test: Is a premise entered correctly?"""
+"""------------------------------------------------------------------------------
+                                ADDPREMISE
+                                Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("len(p.lines)", 2),
     ("str(p.lines[1][0])", str(A)),
-    ("p.lines[1][p.ruleindex]", globalproof.premisename),
+    ("p.lines[1][p.ruleindex]", t.premisename),
     ("p.lines[1][p.commentindex]", "A comment"),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -26,14 +31,18 @@ def test_premise_1(input_n, expected):
     p.addpremise(A, "A comment")
     assert eval(input_n) == expected
 
-"""Stop Conditions"""
+"""------------------------------------------------------------------------------
+                                    ADDPREMISE
+                                  Stopped Run
+                                  
+                        String Input (stopped_string)
+------------------------------------------------------------------------------"""
 
-"""Is the premise entered as a string?"""
 
 testdata = [
     ("str(p.lines[1][p.statementindex])", "C"),
-    ("p.lines[1][p.ruleindex]", globalproof.premisename),
-    ("p.lines[1][p.commentindex]", globalproof.stopped + globalproof.stopped_connector + globalproof.stopped_string),
+    ("p.lines[1][p.ruleindex]", t.premisename),
+    ("p.lines[1][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_stop_1(input_n, expected):

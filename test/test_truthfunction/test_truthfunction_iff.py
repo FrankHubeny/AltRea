@@ -1,13 +1,51 @@
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+"""------------------------------------------------------------------------------
+                            If and Only Iff Testing
+                             iff_intro   iff_elim
+------------------------------------------------------------------------------"""
+
+import pytest
+
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""IFF TESTS"""
+"""------------------------------------------------------------------------------
+                                    IFF_ELIM
+                                    Clean Run
+------------------------------------------------------------------------------"""
 
-"""Test 1: Does the iff elimination perform correctly?"""
+"""------------------------------------------------------------------------------
+                                    IFF_ELIM
+                                  Stopped Run
+                                  
+                Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
 
 
-"""Test 1: Does the iff introduction perform correctly?"""
+"""------------------------------------------------------------------------------
+                                    IFF_ELIM
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    IFF_INTRO
+                                    Clean Run
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    IFF_INTRO
+                                  Stopped Run
+                                  
+                    Block Does Not Exist (stopped_nosuchblock)
+------------------------------------------------------------------------------"""
+
+"""------------------------------------------------------------------------------
+                                    IFF_INTRO
+                                  Stopped Run
+                                  
+                Block Is Outside Accessible Scope (stopped_blockscope)
+------------------------------------------------------------------------------"""

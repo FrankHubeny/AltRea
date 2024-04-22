@@ -1,20 +1,25 @@
+"""------------------------------------------------------------------------------
+                            DeMorgan Rules Testing
+                                    demorgan
+------------------------------------------------------------------------------"""
+
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.truthfunction import Proof
-from altrea.exception import *
 A = Wff('A')
 B = Wff('B')
-globalproof = Proof()
+t = Proof()
 
-"""DEMORGAN TESTS"""
-
-"""Test 1: Derive ~A | ~B from ~(A & B)."""
+"""------------------------------------------------------------------------------
+                                AND_ELIM
+                                Clean Run
+------------------------------------------------------------------------------"""
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Or(Not(A), Not(B)))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.demorgan_name),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.demorgan_name),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_demorgan_1(input_n, expected):
@@ -30,8 +35,8 @@ def test_demorgan_1(input_n, expected):
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(And(Not(A), Not(B)))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.demorgan_name),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.demorgan_name),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_demorgan_2(input_n, expected):
@@ -47,8 +52,8 @@ def test_demorgan_2(input_n, expected):
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Not(And(A, B)))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.demorgan_name),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.demorgan_name),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_demorgan_3(input_n, expected):
@@ -64,8 +69,8 @@ def test_demorgan_3(input_n, expected):
 
 testdata = [
     ("str(p.lines[len(p.lines)-1][p.statementindex])", str(Not(Or(A, B)))),
-    ("p.lines[len(p.lines)-1][p.ruleindex]", globalproof.demorgan_name),
-    ("p.status", globalproof.complete),
+    ("p.lines[len(p.lines)-1][p.ruleindex]", t.demorgan_name),
+    ("p.status", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_demorgan_4(input_n, expected):
@@ -76,5 +81,20 @@ def test_demorgan_4(input_n, expected):
     p.addpremise(And(Not(A), Not(B)))
     p.demorgan(1)
     assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                    DEMORGAN
+                                  Stopped Run
+                                  
+                    Line Does Not Exist (stopped_nosuchline)
+------------------------------------------------------------------------------"""
+
+
+"""------------------------------------------------------------------------------
+                                    DEMORGAN
+                                  Stopped Run
+                                  
+                Line Is Outside Accessible Scope (stopped_linescope)
+------------------------------------------------------------------------------"""
 
     

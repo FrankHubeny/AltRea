@@ -40,23 +40,31 @@ def show(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
     if latex == 1:
         newp = []
         for i in range(len(p.lines)):
-            if p.lines[i][0] == False:
-                statement = '$\\bot$'
+            if i == 0:
+                if p.goals_latex != '':
+                    statement = ''.join(['$', p.goals_latex, '$'])
+                else:
+                    statement = ' '
+            elif color == 1 and p.status != p.complete and p.lines[i][1] <= p.level and i > 0:
+                try:
+                    statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), '$'])
+                except AttributeError:
+                    statement = p.lines[i][0]
             else:
-                if color == 1 and p.status != p.complete and p.lines[i][1] <= p.level and i > 0:
-                    try:
-                        statement = ''.join(['$\\color{red}',p.lines[i][0].latex(),'$'])
-                    except AttributeError:
-                        statement = p.lines[i][0]
-                else:
-                    try:
-                        statement = ''.join(['$',p.lines[i][0].latex(),'$'])
-                    except AttributeError:
-                        statement = p.lines[i][0]
-                if color == 1 and p.status != p.complete and p.lines[i][1] == p.level + 1:
-                    block = ''.join(['$\\color{red}',str(p.lines[i][2]),'$'])
-                else:
-                    block = p.lines[i][2]
+                try:
+                    statement = ''.join(['$', p.lines[i][0].latex(), '$'])
+                except AttributeError:
+                    statement = p.lines[i][0]
+            if color == 1 and p.status != p.complete and p.lines[i][1] == p.level + 1:
+                block = ''.join(['$\\color{red}', str(p.lines[i][2]), '$'])
+            else:
+                block = p.lines[i][2]
+            if color == 1 and p.lines[i][6][0:8] == p.complete: 
+                statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), '$'])
+            if color == 1 and p.lines[i][6][0:18] == p.partialcompletion:
+                statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), '$'])
+            #else:
+             #   statement = p.lines[i][0]
             newp.append([statement,
                         p.lines[i][1],
                         block,

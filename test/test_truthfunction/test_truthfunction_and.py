@@ -309,6 +309,7 @@ def test_and_intro_clean_comments_2(input_n, expected):
                                   
                     Line Does Not Exist (stopped_nosuchline)
 ------------------------------------------------------------------------------"""
+
 # Line = 10
 testdata = [
     ("str(p.lines[3][p.statementindex])", t.blankstatement),
@@ -397,13 +398,13 @@ def test_and_intro_nosuchline_4(input_n, expected):
                 Line Is Outside Accessible Scope (stopped_linescope)
 ------------------------------------------------------------------------------"""
 
-# Line = -1.5
+# The referenced line is in a closed block
 testdata = [
     ("str(p.lines[3][p.statementindex])", t.blankstatement),
     ("(p.lines[3][p.levelindex])", 0),
     ("(p.lines[3][p.blockidindex])", 0),
     ("(p.lines[3][p.ruleindex])", t.and_introname),
-    ("(p.lines[3][p.linesindex])", "-1.5"),
+    ("(p.lines[3][p.linesindex])", "2"),
     ("(p.lines[3][p.blocksindex])", ""),
     ("(p.lines[3][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_linescope),
 ]

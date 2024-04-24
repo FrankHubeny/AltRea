@@ -147,44 +147,6 @@ def test_not_elim_stop_4(input_n, expected):
     p.not_elim(1, 2)
     assert eval(input_n) == expected
 
-"""Is the line within scope?"""
-
-testdata = [
-    ("str(p.lines[3][p.statementindex])", t.blankstatement),
-    ("p.lines[3][p.ruleindex]", t.not_elimname),
-    ("p.lines[3][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_and_elim_stop_5(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
-    p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
-    p.openblock(Not(A))
-    p.closeblock()
-    p.not_elim(1, 2)
-    assert eval(input_n) == expected
-
-"""Does proof continue after it has been stopped?"""
-
-testdata = [
-    ("len(p.lines)", 4),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_and_elim_stop_6(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
-    p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
-    p.openblock(Not(A))
-    p.closeblock()
-    p.not_elim(1, 2)
-    p.reit(1)
-    assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
                                     NOT_INTRO

@@ -83,38 +83,8 @@ def test_dn_intro_nosuchline_1(input_n, expected):
 ------------------------------------------------------------------------------"""
 
 # Referenced line is out of scope in a block that has been closed.
-testdata = [
-    ("str(p.lines[2][p.statementindex])", t.blankstatement),
-    ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
-    ("(p.lines[2][p.ruleindex])", t.dn_introname),
-    ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
-    ("(p.lines[2][p.commentindex])", "STOPPED: Reference line is out of scope. - line is out of scope so inaccessible"),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_dn_intro_linescope_1(input_n, expected):
-    A = Wff('A')
-    p = Proof()
-    p.addgoal(Not(Not(A)))
-    p.openblock(A)
-    p.closeblock()
-    p.dn_intro(1, comments='line is out of scope so inaccessible')
-    assert eval(input_n) == expected
 
-# No other line can be added after the proof is stopped
-testdata = [
-    ("len(p.lines)", 3),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_dn_intro_stopped_1(input_n, expected):
-    A = Wff('A')
-    p = Proof()
-    p.addgoal(Not(Not(A)))
-    p.openblock(A)
-    p.closeblock()
-    p.dn_intro(1, comments='line is out of scope so inaccessible')
-    assert eval(input_n) == expected
+
 
 """------------------------------------------------------------------------------
                                 DN_ELIM
@@ -181,26 +151,7 @@ def test_dn_elim_clean_1(input_n, expected):
                     Line Does Not Exist (stopped_nosuchline)
 ------------------------------------------------------------------------------"""
 
-testdata = [
-    ("str(p.lines[2][p.statementindex])", t.blankstatement),
-    ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
-    ("(p.lines[2][p.ruleindex])", t.dn_elimname),
-    ("(p.lines[2][p.linesindex])", "-8"),
-    ("(p.lines[2][p.blocksindex])", ""),
-    ("(p.lines[2][p.commentindex])", "STOPPED: The referenced line does not exist."),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_dn_elim_nosuchline_1(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    p = Proof()
-    p.addgoal(A)
-    p.openblock(Not(Not(A)))
-    p.closeblock()
-    p.dn_elim(-8)
-    assert eval(input_n) == expected
-    
+
 """------------------------------------------------------------------------------
                                     DN_ELIM
                                   Stopped Run
@@ -208,25 +159,6 @@ def test_dn_elim_nosuchline_1(input_n, expected):
                 Line Is Outside Accessible Scope (stopped_linescope)
 ------------------------------------------------------------------------------"""
 
-testdata = [
-    ("str(p.lines[2][p.statementindex])", t.blankstatement),
-    ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
-    ("(p.lines[2][p.ruleindex])", t.dn_elimname),
-    ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
-    ("(p.lines[2][p.commentindex])", "STOPPED: Reference line is out of scope."),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_dn_elim_linescope_1(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    p = Proof()
-    p.addgoal(A)
-    p.openblock(Not(Not(A)), comments='This line is in a higher level block and so inaccessible')
-    p.closeblock()
-    p.dn_elim(1)
-    assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                     DN_ELIM

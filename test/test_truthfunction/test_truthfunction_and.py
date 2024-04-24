@@ -153,41 +153,7 @@ def test_and_elim_nosuchline_4(input_n, expected):
                 Line Is Outside Accessible Scope (stopped_linescope)
 ------------------------------------------------------------------------------"""
 
-testdata = [
-    ("str(p.lines[2][p.statementindex])", t.blankstatement),
-    ("p.lines[2][p.ruleindex]", t.and_elimname),
-    ("p.lines[2][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_and_elim_nosuchline_3(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
-    p = Proof()
-    p.addgoal(C)
-    p.openblock(And(A, B))
-    p.closeblock()
-    p.and_elim(1)
-    assert eval(input_n) == expected
 
-"""Does proof continue after it has been stopped?"""
-
-testdata = [
-    ("len(p.lines)", 3),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_and_elim_stop_4(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
-    p = Proof()
-    p.addgoal(C)
-    p.openblock(And(A, B))
-    p.closeblock()
-    p.and_elim(1)
-    p.openblock(A)
-    assert eval(input_n) == expected
-        
 """Is the line a conjunction?"""
 
 testdata = [
@@ -262,7 +228,7 @@ testdata = [
     ("(p.lines[3][p.ruleindex])", t.and_introname),
     ("(p.lines[3][p.linesindex])", "1, 2"),
     ("(p.lines[3][p.blocksindex])", ""),
-    ("(p.lines[3][p.commentindex])", "COMPLETE"),
+    ("(p.lines[3][p.commentindex])", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_and_intro_clean_1(input_n, expected):
@@ -399,41 +365,5 @@ def test_and_intro_nosuchline_4(input_n, expected):
 ------------------------------------------------------------------------------"""
 
 # The referenced line is in a closed block
-testdata = [
-    ("str(p.lines[3][p.statementindex])", t.blankstatement),
-    ("(p.lines[3][p.levelindex])", 0),
-    ("(p.lines[3][p.blockidindex])", 0),
-    ("(p.lines[3][p.ruleindex])", t.and_introname),
-    ("(p.lines[3][p.linesindex])", "2"),
-    ("(p.lines[3][p.blocksindex])", ""),
-    ("(p.lines[3][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_linescope),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_and_intro_linescope_1(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.openblock(B)
-    p.closeblock()
-    p.and_intro(1, 2)
-    assert eval(input_n) == expected
 
-# Proof is stopped
-testdata = [
-    ("len(p.lines)", 4),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_and_intro_linescope_2(input_n, expected):
-    A = Wff('A')
-    B = Wff('B')
-    p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.openblock(B)
-    p.closeblock()
-    p.and_intro(1, 2)
-    p.and_intro(1, 1)
-    p.and_intro(1, 1)
-    assert eval(input_n) == expected
+

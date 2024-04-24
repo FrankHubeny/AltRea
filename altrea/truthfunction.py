@@ -1,4 +1,4 @@
-# altrea/newtf.py
+# altrea/truthfunction.py
 
 """The module provides functions to construct a proof in propositional logic.
 
@@ -71,7 +71,7 @@ class Proof:
     in various truth functional logics.
     """
 
-    columns = ['Statement', 'Level', 'Block', 'Rule', 'Lines', 'Blocks', 'Comment']
+    columns = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
     statementindex = 0
     levelindex = 1
     blockidindex = 2
@@ -117,17 +117,25 @@ class Proof:
     stopped = 'STOPPED'
     comments_connector = ' - '
     stopped_connector = ': '
+    stopped_alreadyavailable = 'The statement is already available at the current level.'
+    stopped_blockclosed = 'Referenced block is closed.'
+    stopped_blocknotclosed = 'Referenced block is not closed.'
     stopped_blockscope = 'Referenced block is out of scope.'
     stopped_closezeroblock = 'The lowest 0 block cannot be closed.'
+    stopped_notlem = 'The blocks will not work with LEM rule.'
     stopped_linescope = 'Reference line is out of scope.'
     stopped_nogoal = 'The proof does not yet have a goal.'
     stopped_nosuchline = 'The referenced line does not exist.'
     stopped_nosuchblock = 'The referenced block does not exist.'
+    stopped_notantecedent = 'One statement is not the antecedent of the other.'
     stopped_notconjunction = 'The referenced line is not a conjunction.'
     stopped_notcontradiction = 'The referenced lines are not contradictory.'
     stopped_notdemorgan = 'The referenced line is not a DeMorgan statement.'
     stopped_notdoublenegation = 'The referenced line is not a double negation.'
     stopped_notfalse = 'The referenced line is not false.'
+    stopped_notsameconclusion = 'The two conclusions are not the same.'
+    stopped_notsamelevel = 'The two blocks are not at the same level.'
+    stopped_novaluepassed = 'No value was passed to the function.'
     stopped_string = 'Input is not a Wff derived object.'
     stopped_undefinedlogic = 'This logic has not been defined.'
     connectors = {
@@ -169,7 +177,7 @@ class Proof:
         'reit': ['C', 'CI', 'CO', 'I'],
     }
 
-    def __init__(self, logic: str = 'C', name: str = None):
+    def __init__(self, logic: str = 'C', name: str = ''):
         """Create a Proof object with optional premises, but a specific goal.
         
         Parameters:
@@ -185,15 +193,20 @@ class Proof:
         self.derivedgoals = []
         self.comments = ''
         self.logic = logic
+        self.parentproofid = 0
         self.currentblock = [1]
         self.currentblockid = 0
-        self.blocklist = [[self.lowestlevel, self.currentblock]]
+        self.blocklist = [[self.lowestlevel, self.currentblock, self.parentproofid]]
         self.blocks = []
         self.level = self.lowestlevel
         self.status = ''
         self.stoppedmessage = ''
         self.premises = []
-        self.lines = [['', 0, 0, self.goalname, '', '', '']]
+        if self.logic in self.logicdictionary:
+            self.lines = [['', 0, 0, self.goalname, '', '', '']]
+        else:
+            self.status = self.stopped
+            self.lines = [['', 0, 0, self.goalname, '', '', ''.join([self.stopped, self.stopped_connector, self.stopped_undefinedlogic])]]
 
     """SUPPORT FUNCTIONS"""
 
@@ -220,8 +233,43 @@ class Proof:
 
         return level <= self.level 
     
+    def checkblockid(self, blockid: int):
+        """Check if the blockid is an actual block."""
+
+        # found = False
+        # for i in self.blocklist:
+        #     if i[0] == blockid:
+        #         found = True
+        #         break
+        return blockid >= 0 and blockid < len(self.blocklist)
+    
+    def checkblockclosed(self, blockid: int):
+        """Check if the blockid represents a closed block."""
+
+        # closed = False
+        # for i in self.blocklist:
+        #     if i[0] == blockid and len(i[1]) == 2:
+        #         closed = True
+        #         break
+        return len(self.blocklist[blockid][1]) == 2
+    
+    def checkblockscope(self, level: int):
+        """Check if the block can be accessed from the current level."""
+
+        return level == self.level + 1
+
+    def checkcurrentlevel(self, level: int):
+        """Check that the level of a statement one plans to use is at the current level."""
+
+        return level == self.level
+    
     def checkstring(self, wff: And | Or | Not | Implies | Iff | Wff | F | T):
-        return (type(wff) not in self.acceptedtypes) # or (type(wff) == None)
+        #return (type(wff) not in self.acceptedtypes) # or (type(wff) == None)
+        return type(wff) == str
+    
+    def checkacceptedtype(self, statement):
+
+        return type(statement) in self.acceptedtypes
    
     def availablecomplete(self, 
                           rulename: str, 
@@ -244,6 +292,7 @@ class Proof:
                         newcomment = self.partialcompletion
                     else:
                         self.status = self.complete
+                        self.blocklist[0][1].append(len(self.lines)-1)
                         newcomment = self.complete
         if comments == '':
             return newcomment
@@ -252,23 +301,6 @@ class Proof:
                 return comments
             else:
                 return ''.join([newcomment, self.comments_connector, comments])
-                    # if comments == '':
-                    #     newcomment = self.complete
-                    # else:
-                    #     newcomment = ''.join([newcomment, self.comments_connector, comments])
-        # if self.status == self.stopped:
-        #                 if comments == '':
-        #                     newcomment = ''.join([self.stopped, self.stopped_connector, self.stoppedmessage])
-        #                 else:
-        #                     newcomment = ''.join([self.stopped, self.stopped_connector, self.stoppedmessage, self.comments_connector, comments])
-        #             elif self.status == self.complete:
-        #                 if comments == '':
-        #                     newcomment = self.complete
-        #                 else:
-        #                     newcomment = ''.join([self.complete, self.stopped_connector, comments])
-        #             elif self.logic not in self.availablelogics.get(rulename):
-        #                 newcomment = ''.join(['Rule ', rulename, ' violates ', self.logic])
-        #return newcomment
 
     def getlevelblockstatements(self, blockid: int) -> tuple:
         """Given a block id, return the level the block is in and the assumption and conclusion statements."""
@@ -284,11 +316,31 @@ class Proof:
         level = self.lines[line][self.levelindex]
         statement = self.lines[line][self.statementindex]
         return level, statement
+    
+    def getproof(self, proofid: int) -> tuple:
+        """Returns the leve, assumption statement, conclusion statement and parent proof id."""
+
+        level = self.blocklist[proofid][0]
+        assumption = self.lines[self.blocklist[proofid][1][0]][self.statementindex]
+        conclusion = self.lines[self.blocklist[proofid][1][1]][self.statementindex]
+        parentproofid = self.blocklist[proofid][2]
+        return level, assumption, conclusion, parentproofid
+    
+    def getparentproofid(self, proofid: int) -> int:
+        """Returns the parent proof id of a given proof."""
+    
+        return self.blocklist[proofid][2]
 
     def reftwolines(self, first: int, second: int) -> str:
         """Join two integers representing line ids or block ids as strings together."""
 
         return ''.join([str(first), ', ', str(second)])
+    
+    def refproof(self, proofid: int):
+        """Formats a proof used in a proof."""
+
+        proof = self.blocklist[proofid][1]
+        return ''.join([str(proof[0]), '-', str(proof[1])])
     
     def stopproof(self, message: str, statement, rule: str, lines: str, blocks: str, comments: str = ''):
         self.status = self.stopped
@@ -348,12 +400,11 @@ class Proof:
 
         See Also:
             Proof, Wff
-
         """
 
         if not self.checkcomplete():
-            if type(goal) == str:
-            #if self.checkstring(goal):
+            #if type(goal) == str:
+            if self.checkstring(goal):
                 self.stopproof(self.stopped_string, goal, self.goalname, 0, 0, comments)
             else:
                 self.goals.append(str(goal))
@@ -382,8 +433,8 @@ class Proof:
         """
 
         if not self.checkcomplete():
-            if type(premise) == str:
-            #if self.checkstring(premise):
+            #if type(premise) == str:
+            if self.checkstring(premise):
                 self.stopproof(self.stopped_string, premise, self.premisename, '', '', comments)
             elif not self.checkhasgoal():
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.premisename, '', '', comments)
@@ -445,6 +496,14 @@ class Proof:
             1     A & B      0      0   Premise
             2         A      0      0  And Elim     1         PARTIAL COMPLETION
             3         B      0      0  And Elim     1                   COMPLETE
+
+            Most rules have a scope limited to the level they are on.  They cannot 
+            reference lines from a block above them nor from a line at a level
+            below them.  However, they can reiterate those statements from a lower level
+            to make them available for use on the current level.  Consider the following
+            stopped attempt to derive C >> (A & B) from the premise A & B.
+
+
         """
 
         if not self.checkcomplete():
@@ -454,8 +513,10 @@ class Proof:
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.premisename, '', '', comments)
             else:
                 level, statement = self.getlevelstatement(line)
-                if not self.checklinescope(level):
+                if not self.checkcurrentlevel(level):
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.and_elimname, str(line), '', comments)
+                #if not self.checklinescope(level):
+                #    self.stopproof(self.stopped_linescope, self.blankstatement, self.and_elimname, str(line), '', comments)
                 elif type(statement) != And:
                     self.stopproof(self.stopped_notconjunction, self.blankstatement, self.and_elimname, str(line), '', comments)
                 else:
@@ -508,7 +569,7 @@ class Proof:
             2         B      0      0    Premise
             3     A & B      0      0  And Intro  1, 2         COMPLETE
 
-            This example shows an obvious result along with how a comment can be entered by the user.
+            This example shows an obvious result along with how a comment can be entered by the user.  
 
             >>> from altrea.boolean import And, Wff
             >>> from altrea.truthfunction import Proof
@@ -523,6 +584,11 @@ class Proof:
             C     A & A      0      0       Goal
             1         A      0      0    Premise
             2     A & A      0      0  And Intro  1, 1         COMPLETE - Obvious result
+
+            In the previous examples all of the statements were on level 0, the same level.
+            Both the and_into and and_elim require that the statenents they use be on the 
+            same level as the current level.  However, one can use statements from a
+            lower level by reiterating then using the reit rule.  Here is an example of that.
         """
 
         if not self.checkcomplete():
@@ -532,13 +598,13 @@ class Proof:
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.and_elimname, '', '', comments)
             else:
                 firstlevel, firstconjunct = self.getlevelstatement(first)
-                if not self.checklinescope(firstlevel):
+                if not self.checkcurrentlevel(firstlevel):  
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.and_introname, str(first), '', comments)
                 elif not self.checkline(second):
                     self.stopproof(self.stopped_nosuchline, self.blankstatement, self.and_introname, str(second), '', comments)
                 else:
                     secondlevel, secondconjunct = self.getlevelstatement(second)
-                    if not self.checklinescope(secondlevel):
+                    if not self.checkcurrentlevel(secondlevel):  
                         self.stopproof(self.stopped_linescope, self.blankstatement, self.and_introname, str(second), '', comments)
                     else:
                         andstatement = And(firstconjunct, secondconjunct)
@@ -555,44 +621,44 @@ class Proof:
                             ]
                         )                 
 
-    def closeblock(self):
-        """Closes the block of statements that the proof is currently in.
+    # def closeblock(self):
+    #     """Closes the block of statements that the proof is currently in.
         
-        Examples:
-            >>> from sympy.abc import P, Q
-            >>> from altrea.tf import Proof
-            >>> from altrea.display import show
-            >>> p = Proof(P | ~P)
-            >>> p.openblock(P)
-            >>> p.or_intro(~P,1)
-            >>> p.closeblock()
-            >>> p.openblock(~P)
-            >>> p.or_intro(P,3)
-            >>> p.closeblock()
-            >>> p.lem(1,2)
-            >>> show(p, latex=0)
-                Statement  Level  Block        Rule Lines Blocks   Comment
-            Line    P | ~P      0      0        Goal
-            1            P      1      1  Assumption
-            2       P | ~P      1      1    Or Intro     1
-            3           ~P      1      2  Assumption
-            4       P | ~P      1      2    Or Intro     3
-            5       P | ~P      0      0         LEM         1, 2  COMPLETE
+    #     Examples:
+    #         >>> from sympy.abc import P, Q
+    #         >>> from altrea.tf import Proof
+    #         >>> from altrea.display import show
+    #         >>> p = Proof(P | ~P)
+    #         >>> p.openblock(P)
+    #         >>> p.or_intro(~P,1)
+    #         >>> p.closeblock()
+    #         >>> p.openblock(~P)
+    #         >>> p.or_intro(P,3)
+    #         >>> p.closeblock()
+    #         >>> p.lem(1,2)
+    #         >>> show(p, latex=0)
+    #             Statement  Level  Block        Rule Lines Blocks   Comment
+    #         Line    P | ~P      0      0        Goal
+    #         1            P      1      1  Assumption
+    #         2       P | ~P      1      1    Or Intro     1
+    #         3           ~P      1      2  Assumption
+    #         4       P | ~P      1      2    Or Intro     3
+    #         5       P | ~P      0      0         LEM         1, 2  COMPLETE
 
-        Exceptions:
-            CannotCloseStartingBlock: The lowest block is closed by completing the proof.
-        """
+    #     Exceptions:
+    #         CannotCloseStartingBlock: The lowest block is closed by completing the proof.
+    #     """
 
-        if not self.checkcomplete():
-            if self.currentblockid == 0:
-                self.stopproof(self.stopped_closezeroblock, self.blankstatement, self.closeblockname, '', '')
-            else:
-                self.blocklist[self.currentblockid][1].append(len(self.lines)-1)
-                self.level -= 1
-                for b in range(len(self.blocklist)-1):
-                    if self.blocklist[b][0] == self.level and len(self.blocklist[b][1]) == 1:
-                        self.currentblockid = b
-                        self.currentblock = self.blocklist[b][1]
+    #     if not self.checkcomplete():
+    #         if self.currentblockid == 0:
+    #             self.stopproof(self.stopped_closezeroblock, self.blankstatement, self.closeblockname, '', '')
+    #         else:
+    #             self.blocklist[self.currentblockid][1].append(len(self.lines)-1)
+    #             self.level -= 1
+    #             for b in range(len(self.blocklist)-1):
+    #                 if self.blocklist[b][0] == self.level and len(self.blocklist[b][1]) == 1:
+    #                     self.currentblockid = b
+    #                     self.currentblock = self.blocklist[b][1]
 
     def demorgan(self, line: int, comments: str = ''):
         """DeMorgan's rules for not, and and or are automatically constructed given a line number
@@ -652,63 +718,55 @@ class Proof:
             1      ~A & ~B      0      0   Premise
             2     ~(A | B)      0      0  DeMorgan     1                COMPLETE
 
-        Exceptions:
-            NotDeMorgan: The line could not be used by DeMorgan's rules.
-            NoSuchLine: The line does not exist.
-            ScopeError: The line is not accessible.
         """
 
         if not self.checkcomplete():
             if not self.checkline(line):
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.demorgan_name, str(line), '', comments)
-            elif not self.checkhasgoal():
-                self.stopproof(self.stopped_nogoal, self.blankstatement, self.demorgan_name, '', '', comments)
+            #elif not self.checkhasgoal():
+            #    self.stopproof(self.stopped_nogoal, self.blankstatement, self.demorgan_name, '', '', comments)
             else:
                 level, statement = self.getlevelstatement(line)
-                if not self.checklinescope(level):
+                if not self.checkcurrentlevel(level):  #not self.checklinescope(level):
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.demorgan_name, str(line), '', comments)
-                elif type(statement) == Not:
-                    if type(statement.negated) == And:
-                        andstatement = statement.negated
-                        firstsubstatement = andstatement.left
-                        secondsubstatement = andstatement.right
-                        final = Or(Not(firstsubstatement), Not(secondsubstatement))
-                    elif type(statement.negated) == Or:
-                        orstatement = statement.negated
-                        firstsubstatement = orstatement.left
-                        secondsubstatement = orstatement.right
-                        final = And(Not(firstsubstatement), Not(secondsubstatement))
-                    else:
-                        self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '', comments)
-                elif type(statement) == Or:
-                    firstsubstatement = statement.left
-                    secondsubstatement = statement.right               
-                    if type(firstsubstatement) == Not and type(secondsubstatement) == Not:
-                        final = Not(And(firstsubstatement.negated, secondsubstatement.negated))
-                    else:
-                        self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '', comments)
-                elif type(statement) == And:
-                    firstsubstatement = statement.left
-                    secondsubstatement = statement.right
-                    if type(firstsubstatement) == Not and type(secondsubstatement) == Not:
-                        final = Not(Or(firstsubstatement.negated, secondsubstatement.negated))
-                    else:
-                        self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '', comments)
                 else:
-                    self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '')
-            
-                newcomment = self.availablecomplete('demorgan', final, comments)
-                self.lines.append(
-                    [
-                        final, 
-                        self.level, 
-                        self.currentblockid, 
-                        self.demorgan_name, 
-                        str(line), 
-                        '', 
-                        newcomment
-                    ]
-                )
+                    if type(statement) == Not:
+                        if type(statement.negated) == And:
+                            andstatement = statement.negated
+                            firstsubstatement = andstatement.left
+                            secondsubstatement = andstatement.right
+                            final = Or(Not(firstsubstatement), Not(secondsubstatement))
+                            newcomment = self.availablecomplete('demorgan', final, comments)
+                            self.lines.append([final, self.level, self.currentblockid, self.demorgan_name, str(line), '', newcomment])
+                        elif type(statement.negated) == Or:
+                            orstatement = statement.negated
+                            firstsubstatement = orstatement.left
+                            secondsubstatement = orstatement.right
+                            final = And(Not(firstsubstatement), Not(secondsubstatement))
+                            newcomment = self.availablecomplete('demorgan', final, comments)
+                            self.lines.append([final, self.level, self.currentblockid, self.demorgan_name, str(line), '', newcomment])
+                        else:
+                            self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '', comments)
+                    elif type(statement) == Or:
+                        firstsubstatement = statement.left
+                        secondsubstatement = statement.right               
+                        if type(firstsubstatement) == Not and type(secondsubstatement) == Not:
+                            final = Not(And(firstsubstatement.negated, secondsubstatement.negated))
+                            newcomment = self.availablecomplete('demorgan', final, comments)
+                            self.lines.append([final, self.level, self.currentblockid, self.demorgan_name, str(line), '', newcomment])
+                        else:
+                            self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '', comments)
+                    elif type(statement) == And:
+                        firstsubstatement = statement.left
+                        secondsubstatement = statement.right
+                        if type(firstsubstatement) == Not and type(secondsubstatement) == Not:
+                            final = Not(Or(firstsubstatement.negated, secondsubstatement.negated))
+                            newcomment = self.availablecomplete('demorgan', final, comments)
+                            self.lines.append([final, self.level, self.currentblockid, self.demorgan_name, str(line), '', newcomment])
+                        else:
+                            self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '', comments)
+                    else:
+                        self.stopproof(self.stopped_notdemorgan, self.blankstatement, self.demorgan_name, str(line), '')
 
     def dn_intro(self, line: int, comments: str = ''):
         '''This rule adds a double negation to the statement referenced by the line number
@@ -746,7 +804,7 @@ class Proof:
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.dn_introname, '', '', comments)
             else:
                 level, statement = self.getlevelstatement(line)
-                if not self.checklinescope(level):
+                if not self.checkcurrentlevel(level): #not self.checklinescope(level):
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.dn_introname, str(line), '', comments)
                 else:
                     newstatement = Not(Not(statement))
@@ -799,7 +857,7 @@ class Proof:
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.dn_elimname, '', '', comments)
             else:
                 level, statement = self.getlevelstatement(line)
-                if not self.checklinescope(level):
+                if not self.checkcurrentlevel(level): #not self.checklinescope(level):
                     self.stopproof(self.stopped_linescope, self.blankstatement, self.dn_elimname, str(line), '', comments)
                 elif type(statement) == Not and type(statement.negated) == Not:
                     newstatement = statement.negated.negated
@@ -853,27 +911,49 @@ class Proof:
             2        ~A      0      0    Premise
             3         X      0      0   Not Elim  1, 2
             4     A & B      0      0  Explosion     3         COMPLETE
+
+            Errors are returned as STOPPED messages.  Here is an error noting that the previous
+            statement is not a contradiction.  To get that contradiction one need to first have a 
+            Not Elim line on two lines which are contradictory.
+
+            >>> from altrea.boolean import Not, And, Wff
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> A = Wff('A')
+            >>> B = Wff('B')
+            >>> p = Proof()
+            >>> p.addgoal(And(A, B))
+            >>> p.addpremise(A)
+            >>> p.addpremise(Not(A))
+            >>> # p.not_elim(1, 2)
+            >>> p.explosion(And(A, B))
+            >>> show(p, latex=0)
+              Statement  Level  ...  Blocks                                     Comment
+            C     A & B      0  ...
+            1         A      0  ...
+            2        ~A      0  ...
+            3                0  ...          STOPPED: The referenced line is not false.
         """
         
         if not self.checkcomplete():
-            if type(statement) == str:
-            #if self.checkstring(statement):
+            if self.checkstring(statement):
+            #if not self.checkacceptedtype(statement):
                 self.stopproof(self.stopped_string, statement, self.explosionname, '', '', comments)
             elif not self.checkhasgoal():
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.explosionname, '', '', comments)
             else:
                 line = len(self.lines) - 1
-                if line == 0:
-                    raise altrea.exception.NoSuchLine(line)
                 blockid = self.lines[line][self.blockidindex]
-                if len(self.blocklist[blockid][1]) == 2:
-                    raise altrea.exception.BlockClosed(blockid)
+                if line == 0:
+                    self.stopproof(self.stopped_nosuchline, self.blankstatement, self.explosionname, str(line), '', comments)
+                #elif len(self.blocklist[blockid][1]) == 2:
+                #    self.stopproof(self.stopped_blockclosed, self.blankstatement, self.explosionname, str(line), '', comments)
                 else:
                     level, falsestatement = self.getlevelstatement(line)
                     if level != self.level or blockid != self.currentblockid:
-                        raise altrea.exception.ScopeError(line)
-                    if falsestatement != self.falsename:
-                        raise altrea.exception.NotFalse(line, falsestatement)
+                        self.stopproof(self.stopped_blockscope, self.blankstatement, self.explosionname, str(line), '', comments)
+                    elif falsestatement != self.falsename:
+                        self.stopproof(self.stopped_notfalse, self.blankstatement, self.explosionname, str(line), '', comments)
                     else:
                         newcomment = self.availablecomplete('explosion', statement, comments)
                         self.lines.append(
@@ -882,7 +962,7 @@ class Proof:
                                 self.level, 
                                 self.currentblockid, 
                                 self.explosionname, 
-                                line, 
+                                str(line), 
                                 '',
                                 newcomment
                             ]
@@ -1005,62 +1085,87 @@ class Proof:
             2     Implies(A, B)      0      0       Premise
             3                 B      0      0  Implies Elim  1, 2         COMPLETE
 
-        Exceptions:
-            NotAntecedent: The statement is not the antecedent of the implication.
-            NoSuchLine: The referenced line does not exist in the proof.
-            NotModusPonens: The two statements cannot be used in implication elimination.
-            ScopeError: The referenced statement is not accessible.
         """
 
         if not self.checkcomplete():
-            try:
-                firstlevel, firststatement = self.getlevelstatement(first)
-            except:
-                raise altrea.exception.NoSuchLine(first)
-            if firstlevel > self.level:
-                raise altrea.exception.ScopeError(first)
-        
-            try:
-                secondlevel, secondstatement = self.getlevelstatement(second)
-            except:
-                raise altrea.exception.NoSuchLine(second)
-            if secondlevel > self.level:
-                raise altrea.exception.ScopeError(second)
-        
-            if type(firststatement) == Implies:
-                if secondstatement != firststatement.left:
-                    raise altrea.exception.NotAntecedent(firststatement, secondstatement)
-                else:
-                    newcomment = self.availablecomplete('implies_elim', firststatement.right, comments)
-                    self.lines.append(
-                        [
-                            firststatement.right, 
-                            self.level, 
-                            self.currentblockid, 
-                            self.implies_elimname, 
-                            self.reftwolines(first, second), 
-                            '', 
-                            newcomment
-                        ]
-                    )
-            elif type(secondstatement) == Implies:
-                if firststatement != secondstatement.left:
-                    raise altrea.exception.NotAntecedent(secondstatement, firststatement)
-                else:
-                    newcomment = self.availablecomplete('implies_elim', secondstatement.right, comments)
-                    self.lines.append(
-                        [
-                            secondstatement.right, 
-                            self.level, 
-                            self.currentblockid, 
-                            self.implies_elimname, 
-                            self.reftwolines(first, second), 
-                            '', 
-                            newcomment
-                        ]
-                    )                   
+            if not self.checkline(first):
+                self.stopproof(self.stopped_nosuchline, self.blankstatement, self.implies_elimname, '', '', comments)
             else:
-                raise altrea.exception.NotModusPonens(firststatement, secondstatement)
+                firstlevel, firststatement = self.getlevelstatement(first)
+                if not self.checkcurrentlevel(firstlevel): #not self.checklinescope(firstlevel):
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.implies_elimname, '', '', comments)
+                else:
+                    if not self.checkline(second):
+                        self.stopproof(self.stopped_nosuchline, self.blankstatement, self.implies_elimname, '', '', comments)
+                    else:
+                        secondlevel, secondstatement = self.getlevelstatement(second)
+                        if not self.checkcurrentlevel(secondlevel): #not self.checklinescope(secondlevel):
+                            self.stopproof(self.stopped_linescope, self.blankstatement, self.implies_elimname, '', '', comments)
+                        else:       
+                            if type(firststatement) == Implies:
+                                if secondstatement != firststatement.left:
+                                    self.stopproof(self.stopped_notantecedent, self.blankstatement, self.implies_elimname, '', '', comments)
+                                else:
+                                    newcomment = self.availablecomplete('implies_elim', firststatement.right, comments)
+                                    self.lines.append(
+                                        [
+                                            firststatement.right, 
+                                            self.level, 
+                                            self.currentblockid, 
+                                            self.implies_elimname, 
+                                            self.reftwolines(first, second), 
+                                            '', 
+                                            newcomment
+                                        ]
+                                    )
+                            elif type(secondstatement) == Implies:
+                                if firststatement != secondstatement.left:
+                                    self.stopproof(self.stopped_notantecedent, self.blankstatement, self.implies_elimname, '', '', comments)
+                                else:
+                                    newcomment = self.availablecomplete('implies_elim', secondstatement.right, comments)
+                                    self.lines.append(
+                                        [
+                                            secondstatement.right, 
+                                            self.level, 
+                                            self.currentblockid, 
+                                            self.implies_elimname, 
+                                            self.reftwolines(first, second), 
+                                            '', 
+                                            newcomment
+                                        ]
+                                    )                   
+                            else:
+                                self.stopproof(self.stopped_notantecedent, self.blankstatement, self.implies_elimname, '', '', comments)
+
+    def imp_int(self, comments: str = ''):
+        if not self.checkcomplete():
+            if self.currentblockid == 0:
+                self.stopproof(self.stopped_closezeroblock, self.blankstatement, self.closeblockname, '', '')
+            else:
+                proofid = self.currentblockid
+                self.blocklist[proofid][1].append(len(self.lines)-1)
+                self.level -= 1
+                level, antecedent, consequent, parentproofid = self.getproof(proofid)
+                self.currentblockid = parentproofid
+                self.currentblock = self.blocklist[parentproofid][1]
+                # for b in range(len(self.blocklist)-1):
+                #     if self.blocklist[b][0] == self.level and len(self.blocklist[b][1]) == 1:
+                #         self.currentblockid = b
+                #         self.currentblock = self.blocklist[b][1]
+                
+                implication = Implies(antecedent, consequent)
+                newcomment = self.availablecomplete('implies_intro', implication, comments)
+                self.lines.append(
+                    [
+                        implication, 
+                        self.level, 
+                        self.currentblockid, 
+                        self.implies_introname, 
+                        '', 
+                        self.refproof(proofid), 
+                        newcomment
+                    ]
+                )                   
 
     def implies_intro(self, blockid: int | str, comments: str = ''):
         """The command puts an implication as a line in the proof one level below the blockid.
@@ -1070,6 +1175,29 @@ class Proof:
             comments: Comments added to the line.
 
         Examples:
+            The following example shows how one can derive P >> P without any premise.  A block is opened
+            with the assumption P and then the block is closed.  With the closure of the block the last
+            line becomes the conclusion.  Since there is only one line in this block the antecedent
+            and the consequent are the same.
+
+            >>> from altrea.boolean import Wff, Implies
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> P = Wff('P')
+            >>> p = Proof()
+            >>> p.addgoal(Implies(P, P))
+            >>> p.openblock(P)
+            >>> p.closeblock()
+            >>> p.implies_intro(1)
+            >>> show(p, latex=0)
+              Statement  Level  Block           Rule Lines Blocks   Comment
+            C    P -> P      0      0           Goal
+            1         P      1      1     Assumption
+            2    P -> P      0      0  Implies Intro            1  COMPLETE
+
+            The following example is similar to the P >> P example except now there is a new well-formed-formula, Q,
+            involved.  
+
             >>> p = Proof(P >> (Q >> P))
             >>> p.openblock(P)
             >>> p.openblock(Q)
@@ -1087,32 +1215,31 @@ class Proof:
             4                 Implies(Q, P)      1      1  ...            2
             5     Implies(P, Implies(Q, P))      0      0  ...            1  COMPLETE
 
-        Exceptions:
-            BlockScopeError: The referenced block id is not accessible.
-            NoSuchBlock: The block id does not exist.
         """
 
         if not self.checkcomplete():
-            try:
+            if not self.checkblockid(blockid):
+                self.stopproof(self.stopped_nosuchblock, self.blankstatement, self.implies_introname, '', '', comments)
+            elif not self.checkblockclosed(blockid):
+                self.stopproof(self.stopped_blocknotclosed, self.blankstatement, self.implies_introname, '', '', comments)
+            else:
                 level, antecedent, consequent = self.getlevelblockstatements(blockid)
-            except:
-                raise altrea.exception.NoSuchBlock(blockid)
-            if level != self.level + 1:
-                raise altrea.exception.BlockScopeError(blockid)
-            implication = Implies(antecedent, consequent)
-
-            newcomment = self.availablecomplete('implies_intro', implication, comments)
-            self.lines.append(
-                [
-                    implication, 
-                    self.level, 
-                    self.currentblockid, 
-                    self.implies_introname, 
-                    '', 
-                    blockid, 
-                    newcomment
-                ]
-            )                   
+                if not self.checkblockscope(level):  #level != self.level + 1:
+                    self.stopproof(self.stopped_blockscope, self.blankstatement, self.implies_introname, '', '', comments)
+                else:
+                    implication = Implies(antecedent, consequent)
+                    newcomment = self.availablecomplete('implies_intro', implication, comments)
+                    self.lines.append(
+                        [
+                            implication, 
+                            self.level, 
+                            self.currentblockid, 
+                            self.implies_introname, 
+                            '', 
+                            str(blockid), 
+                            newcomment
+                        ]
+                    )                   
             
     def lem(self, first: int, second: int, comments: str = ''):
         """Add a line justified by the Law of Excluded Middle (LEM) rule.
@@ -1151,38 +1278,39 @@ class Proof:
         """
 
         if not self.checkcomplete():
-            try:
-                firstlevel, firstassumption, firstconclusion = self.getlevelblockstatements(first)
-            except:
-                raise altrea.exception.NoSuchBlock(first)
-            try:
-                secondlevel, secondassumption, secondconclusion = self.getlevelblockstatements(second)
-            except:
-                raise altrea.exception.NoSuchBlock(second)
-            if firstlevel != secondlevel:
-                raise altrea.exception.NotSameLevel(firstlevel, secondlevel)
-        
-            if  type(firstassumption) == Not and firstassumption.negated.equals(secondassumption):
-                final = firstconclusion       
-            elif type(secondassumption) == Not and secondassumption.negated.equals(firstassumption):
-                final = firstconclusion
+            if not self.checkblockid(first):
+                self.stopproof(self.stopped_nosuchblock, self.blankstatement, self.lem_name, '', '', comments)
             else:
-                raise altrea.exception.NotLemOpposites(firstassumption, secondassumption)
-            if not firstconclusion.equals(secondconclusion):
-                raise altrea.exception.NotSameStatements(firstconclusion, secondconclusion)
-
-            newcomment = self.availablecomplete('lem', final, comments)
-            self.lines.append(
-                [
-                    final, 
-                    self.level, 
-                    self.currentblockid, 
-                    self.lem_name, 
-                    '', 
-                    self.reftwolines(first, second),
-                    newcomment
-                ]
-            )                 
+                firstlevel, firstassumption, firstconclusion = self.getlevelblockstatements(first)
+                if not self.checkblockid(second):
+                    self.stopproof(self.stopped_nosuchblock, self.blankstatement, self.lem_name, '', '', comments)
+                else:
+                    secondlevel, secondassumption, secondconclusion = self.getlevelblockstatements(second)           
+                    if firstlevel != secondlevel:
+                        self.stopproof(self.stopped_notsamelevel, self.blankstatement, self.lem_name, '', '', comments)
+                    else:     
+                        if  type(firstassumption) == Not and firstassumption.negated.equals(secondassumption):
+                            final = firstconclusion       
+                        elif type(secondassumption) == Not and secondassumption.negated.equals(firstassumption):
+                            final = firstconclusion   
+                        else:
+                            self.stopproof(self.stopped_notlem, self.blankstatement, self.lem_name, '', '', comments)
+                        if not self.checkcomplete():
+                            if not firstconclusion.equals(secondconclusion):
+                                self.stopproof(self.stopped_notsameconclusion, self.blankstatement, self.lem_name, '', '', comments)
+                            else:
+                                newcomment = self.availablecomplete('lem', final, comments)
+                                self.lines.append(
+                                    [
+                                        final, 
+                                        self.level, 
+                                        self.currentblockid, 
+                                        self.lem_name, 
+                                        '', 
+                                        self.reftwolines(first, second),
+                                        newcomment
+                                    ]
+                                )                 
 
     def nand_elim(self, first: int, second: int, comments: str = ''):
         pass
@@ -1221,42 +1349,76 @@ class Proof:
             1         A      0      0    Premise
             2        ~A      0      0    Premise
             3         X      0      0   Not Elim  1, 2
-            4     A & B      0      0  Explosion     3         COMPLETE
-
-        Exceptions:
-            NoSuchLine: The referenced line does not exist in the proof.
-            ScopeError: The referenced statement is not accessible.                       
+            4     A & B      0      0  Explosion     3         COMPLETE                 
         """
         
         if not self.checkcomplete():
-            if (len(self.lines) <= first) or (len(self.lines) <= second):
-                if len(self.lines) <= first:
-                    self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(first), '', comments)
-                else:
-                    self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(second), '', comments)
+            # if (len(self.lines) <= first) or (len(self.lines) <= second):
+            #     if len(self.lines) <= first:
+            #         self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(first), '', comments)
+            #     else:
+            #         self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(second), '', comments)
+            if not self.checkline(first):
+                self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(first), '', comments)
+            elif not self.checkline(second):
+                self.stopproof(self.stopped_nosuchline, self.blankstatement, self.not_elimname, str(second), '', comments)
             else:
                 firstlevel, firststatement = self.getlevelstatement(first)
                 secondlevel, secondstatement = self.getlevelstatement(second)
-                if not Not(firststatement).equals(secondstatement) and not Not(secondstatement).equals(firststatement):
-                    self.stopproof(self.stopped_notcontradiction, self.blankstatement, self.not_elimname, self.reftwolines(first, second), '', comments)
-                elif firstlevel > self.level:
-                    self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, str(first), '', comments)
-                elif secondlevel > self.level:
-                    self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, str(second), '', comments)
+                if not self.checkcurrentlevel(firstlevel):
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, '', '', comments)
+                elif not self.checkcurrentlevel(secondlevel):
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, '', '', comments)
                 else:
-                    newcomment = self.availablecomplete('not_elim', self.falsename, comments)
-                    self.lines.append(
-                        [
-                            self.falsename, 
-                            self.level, 
-                            self.currentblockid, 
-                        self.not_elimname, 
-                        self.reftwolines(first, second), 
-                        '',
+                    if not Not(firststatement).equals(secondstatement) and not Not(secondstatement).equals(firststatement):
+                        self.stopproof(self.stopped_notcontradiction, self.blankstatement, self.not_elimname, self.reftwolines(first, second), '', comments)
+                    elif firstlevel > self.level:
+                        self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, str(first), '', comments)
+                    elif secondlevel > self.level:
+                        self.stopproof(self.stopped_linescope, self.blankstatement, self.not_elimname, str(second), '', comments)
+                    else:
+                        newcomment = self.availablecomplete('not_elim', self.falsename, comments)
+                        self.lines.append(
+                            [
+                                self.falsename, 
+                                self.level, 
+                                self.currentblockid, 
+                                self.not_elimname, 
+                                self.reftwolines(first, second), 
+                                '',
+                                newcomment
+                            ]
+                        )                 
+
+    def neg_int(self, comments: str = ''):
+        if not self.checkcomplete():
+            if self.currentblockid == 0:
+                self.stopproof(self.stopped_closezeroblock, self.blankstatement, self.closeblockname, '', '')
+            else:
+                proofid = self.currentblockid
+                level, antecedent, consequent, parentproofid = self.getproof(proofid)
+                self.blocklist[proofid][1].append(len(self.lines)-1)
+                self.level -= 1
+                self.currentblockid = parentproofid
+                self.currentblock = self.blocklist[parentproofid][1]
+                # for b in range(len(self.blocklist)-1):
+                #     if self.blocklist[b][0] == self.level and len(self.blocklist[b][1]) == 1:
+                #         self.currentblockid = b
+                #         self.currentblock = self.blocklist[b][1]
+                negation = Not(antecedent)
+                newcomment = self.availablecomplete('not_intro', negation, comments)
+                self.lines.append(
+                    [
+                        negation, 
+                        self.level, 
+                        self.currentblockid, 
+                        self.not_introname, 
+                        '', 
+                        self.refproof(proofid), 
                         newcomment
                     ]
-                )                 
-               
+                )                   
+
     def not_intro(self, blockid: int | str, comments: str = ''):
         """When an assumption generates a contradiction, the negation of the assumption
         can be used as a line of the proof in the next lower block.
@@ -1266,10 +1428,6 @@ class Proof:
         Parameter:
             blockid: The name of the block containing the assumption and contradiction.
 
-        Exceptions:
-            NotFalse: The conclusion statement of the block is not false.
-            NoSuchBlock: The referenced does not exist in the proof.
-            BlockScopeError: The referenced block is not accessible.
         """
 
         if not self.checkcomplete():
@@ -1328,14 +1486,15 @@ class Proof:
         if not self.checkcomplete():
             if type(statement) == str:
             #if self.checkstring(statement):
-                self.stopproof(self.stopped_string, statement, self.assumptionname, '', '', comments)
+                self.stopproof(self.stopped_string, self.blankstatement, self.assumptionname, '', '', comments)
             elif not self.checkhasgoal():
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.assumptionname, '', '', comments)
             else:
+                parentproofid = self.currentblockid
                 self.level += 1
                 nextline = len(self.lines)
                 self.currentblock = [nextline]
-                self.blocklist.append([self.level, self.currentblock])
+                self.blocklist.append([self.level, self.currentblock, parentproofid])
                 self.currentblockid = len(self.blocklist) - 1
 
                 newcomment = self.availablecomplete('openblock', statement, comments)
@@ -1354,11 +1513,7 @@ class Proof:
     def or_elim(self, line: int, blockids: list, comments: str = ''):
         """Check the correctness of a disjunction elimination line before adding it to the proof.
         
-        Exceptions:
-            AssumptionNotFound: The assumption from a block does not match a disjunct of the disjunction.
-            ConclusionsNotTheSame: The conclusions of blocks are not the same.
-            NoSuchLine: The referenced line does not exist in the proof.
-            ScopeError: The referenced statement is not accessible.
+
         """
 
         if not self.checkcomplete():
@@ -1401,7 +1556,7 @@ class Proof:
                     newcomment
                 ]
             )                 
-            
+
     def or_intro(self, 
                  line: int,
                  left: And | Or | Not | Implies | Iff | Wff | F | T = None,
@@ -1447,37 +1602,38 @@ class Proof:
         if not self.checkcomplete():
             if type(left) == str:
             #if self.checkstring(left):
-                self.stopproof(self.stopped_string, left, self.or_introname, str(line), '', comments)
+                self.stopproof(self.stopped_string, self.blankstatement, self.or_introname, str(line), '', comments)
             elif type(right) == str:
             #elif self.checkstring(right):
-                self.stopproof(self.stopped_string, right, self.or_introname, str(line), '', comments)
+                self.stopproof(self.stopped_string, self.blankstatement, self.or_introname, str(line), '', comments)
             else:
-                try:
+                if not self.checkline(line):
+                    self.stopproof(self.stopped_nosuchline, self.blankstatement, self.or_introname, str(line), '', comments)
+                else:
                     level, statement = self.getlevelstatement(line)
-                except:
-                    raise altrea.exception.NoSuchLine(line)
-                if level > self.level:
-                 raise altrea.exception.ScopeError(line)
+                    if not self.checkcurrentlevel(level): #not self.checklinescope(level): #level > self.level:
+                        self.stopproof(self.stopped_linescope, self.blankstatement, self.or_introname, str(line), '', comments)
+                    else:
             
-                if left is None and right is None:
-                    raise altrea.exception.NoValuePassed('or_intro')
-                elif left is None:
-                    disjunction = Or(statement, right)
-                elif right is None:
-                    disjunction = Or(left, statement)
-
-                newcomment = self.availablecomplete('or_intro', disjunction, comments)
-                self.lines.append(
-                    [
-                        disjunction, 
-                        self.level, 
-                        self.currentblockid, 
-                        self.or_introname, 
-                        str(line), 
-                        '',
-                        newcomment
-                    ]
-                )                 
+                        if left is None and right is None:
+                            self.stopproof(self.stopped_novaluepassed, self.blankstatement, self.or_introname, str(line), '', comments)
+                        else:
+                            if left is None:
+                                disjunction = Or(statement, right)
+                            elif right is None:
+                                disjunction = Or(left, statement)
+                            newcomment = self.availablecomplete('or_intro', disjunction, comments)
+                            self.lines.append(
+                                [
+                                    disjunction, 
+                                    self.level, 
+                                    self.currentblockid, 
+                                    self.or_introname, 
+                                    str(line), 
+                                    '',
+                                    newcomment
+                                ]
+                            )                 
        
     def reit(self, line: int, comments: str = ''):
         """A statement that already exists which can be accessed can be reused.
@@ -1486,38 +1642,50 @@ class Proof:
             line: The line number of the statement.
 
         Example:
-            >>> from altrea.tf import Proof
-            >>> ex = Proof([A], C >> A, 'Example using openblock')
-            >>> ex.openblock(C)
-            >>> ex.reit(1)
-            >>> ex.closeblock()
-            >>> ex.implies_intro('11')
-            The proof is complete.
-
-        Exceptions:
-            NoSuchLine: The referenced line does not exist in the proof.
-            ScopeError: The referenced statement is not accessible.
-
+            >>> from altrea.boolean import And, Or, Not, Wff, F, Implies
+            >>> from altrea.truthfunction import Proof
+            >>> from altrea.display import show
+            >>> A = Wff('A')
+            >>> B = Wff('B')
+            >>> p = Proof()
+            >>> p.addgoal(Implies(A, B))
+            >>> p.addpremise(B)
+            >>> p.openblock(A)
+            >>> p.reit(1)
+            >>> show(p, latex=0)
+              Statement  Level  Block         Rule Lines Blocks Comment
+            C    A -> B      0      0         Goal
+            1         B      0      0      Premise
+            2         A      1      1   Assumption
+            3         B      1      1  Reiteration     1
         """
         
         if not self.checkcomplete():
-            try:
+            if not self.checkline(line):
+                self.stopproof(self.stopped_nosuchline, self.blankstatement, self.reitname, str(line), '', comments)
+            else:
                 level, statement = self.getlevelstatement(line)
-            except:
-                raise altrea.exception.NoSuchLine(line)
-            if level > self.level:
-                raise altrea.exception.ScopeError(line)
-        
-            newcomment = self.availablecomplete('reit', statement, comments)
-            self.lines.append(
-                [
-                    statement, 
-                    self.level, 
-                    self.currentblockid, 
-                    self.reitname, 
-                    str(line), 
-                    '',
-                    newcomment
-                ]
-            )                 
+                if level >= self.level: #not self.checklinescope(level): #level > self.level:
+                    self.stopproof(self.stopped_linescope, self.blankstatement, self.reitname, str(line), '', comments)
+                else:
+                    found = False
+                    for i in self.lines:
+                        if i[self.statementindex] == statement and i[self.levelindex] == self.level:
+                            found = True
+                            break
+                    if found:
+                        self.stopproof(self.stopped_alreadyavailable, self.blankstatement, self.reitname, str(line), '', comments)
+                    else:
+                        newcomment = self.availablecomplete('reit', statement, comments)
+                        self.lines.append(
+                            [
+                                statement, 
+                                self.level, 
+                                self.currentblockid, 
+                                self.reitname, 
+                                str(line), 
+                                '',
+                                newcomment
+                            ]
+                        )                 
     

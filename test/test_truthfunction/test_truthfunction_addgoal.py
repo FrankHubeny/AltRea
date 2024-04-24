@@ -72,8 +72,7 @@ def test_addgoal_string_1(input_n, expected):
     p.addgoal('C')
     assert eval(input_n) == expected
 
-"""Does proof continue after it has been stopped?"""
-
+# Proof should not continue after it has stopped
 testdata = [
     ("len(p.lines)", 1),
 ]

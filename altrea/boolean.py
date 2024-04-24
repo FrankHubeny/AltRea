@@ -165,6 +165,30 @@ class Implies(Wff):
     def getvalue(self):
         return (not self.left.getvalue()) or self.right.getvalue()
 
+class N(Wff):
+    """A well-formed formula which is necessarily true."""
+
+    is_variable = True
+
+    def __init__(self, wff):
+        self.necessary = '\\Box'
+        self.wff = wff
+
+    def __str__(self):
+        if self.wff.is_variable:
+            return f'Nec {self.wff}'
+        else:
+            return f'Nec({self.wff})'
+    
+    def latex(self):
+        if self.wff.is_variable:
+            return f'{self.necessary} {self.wff}'
+        else:
+            return f'{self.necessary} ({self.wff})'
+    
+    def getvalue(self):
+        return True
+    
 class Not(Wff):
     """A well formed formula with one argument which is also a well formed formula joined
     with logical not.
@@ -231,6 +255,30 @@ class Or(Wff):
     def getvalue(self):
         return self.left.getvalue() or self.right.getvalue()
 
+class P(Wff):
+    """A well-formed formula which is possibly true."""
+
+    is_variable = True
+
+    def __init__(self, wff):
+        self.necessary = '\\Diamond'
+        self.wff = wff
+
+    def __str__(self):
+        if self.wff.is_variable:
+            return f'Pos {self.wff}'
+        else:
+            return f'Pos({self.wff})'
+    
+    def latex(self):
+        if self.wff.is_variable:
+            return f'{self.necessary} {self.wff}'
+        else:
+            return f'{self.necessary} ({self.wff})'
+    
+    def getvalue(self):
+        return True
+    
 class T():
     """A well formed formula which is always true."""
 
@@ -247,3 +295,5 @@ class T():
     
     def getvalue(self):
         return True
+
+

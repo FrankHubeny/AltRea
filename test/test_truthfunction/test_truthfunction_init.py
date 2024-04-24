@@ -17,8 +17,8 @@ t = Proof()
 ------------------------------------------------------------------------------"""
 
 testdata = [
-    ("p.name", None), 
-    ("p.blocklist", [ [0,[1]] ]),
+    ("p.name", ''), 
+    ("p.blocklist", [[0, [1], 0]] ),
     ("p.blocks", []),
     ("p.premises", []),
     ("p.status", ''),
@@ -26,22 +26,22 @@ testdata = [
     ("len(p.lines)", 1),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_init_1(input_n, expected):
+def test_init_clean_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
     assert eval(input_n) == expected
 
-"""Test 2: Are the additions of optional values set correctly?"""
-
+#Test 2: Are the additions of optional values set correctly?
 testdata = [
-    ("p.name", None),
+    ("p.name", "Some Name"),
+    ("p.logic", "CO"),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_init_2(input_n, expected):
+def test_init_clean_2(input_n, expected):
     A = Wff('A')
     B = Wff('B')
-    p = Proof()
+    p = Proof(name="Some Name", logic="CO")
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -51,28 +51,21 @@ def test_init_2(input_n, expected):
                 Logic Is Not Defined (stopped_undefinedlogic)
 ------------------------------------------------------------------------------"""
 
-
-testdata = [
-    ("p.lines[0][p.ruleindex]", t.goalname),
-    ("p.lines[0][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_init_stop_1(input_n, expected):
-    A = Wff('A')
-    p = Proof()
-    p.addgoal('A')
-    assert eval(input_n) == expected
-
-"""Does proof continue after it has been stopped?"""
-
 testdata = [
     ("len(p.lines)", 1),
+    ("str(p.lines[0][p.statementindex])", t.blankstatement),
+    ("(p.lines[0][p.levelindex])", 0),
+    ("(p.lines[0][p.blockidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.linesindex])", ""),
+    ("(p.lines[0][p.blocksindex])", ""),
+    ("p.lines[0][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_undefinedlogic),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_init_stop_2(input_n, expected):
-    A = Wff('A')
-    p = Proof()
-    p.addgoal('A')
-    p.addpremise(A)
+def test_init_undefinedlogic_1(input_n, expected):
+    C = Wff('C')
+    p = Proof(logic='X')
+    p.addgoal(C)
     assert eval(input_n) == expected
+
         

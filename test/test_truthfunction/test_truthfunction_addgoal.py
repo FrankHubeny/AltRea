@@ -20,10 +20,10 @@ t = Proof()
 testdata = [
     ("str(p.lines[0][p.statementindex])", str(A)),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goal_name),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("(p.lines[0][p.commentindex])", ""),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -37,10 +37,10 @@ def test_addgoal_clean_1(input_n, expected):
 testdata = [
     ("str(p.lines[0][p.statementindex])", str(A)+', '+str(B)),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goal_name),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("(p.lines[0][p.commentindex])", "My first goal - My second goal"),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)

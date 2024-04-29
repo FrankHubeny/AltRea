@@ -18,8 +18,7 @@ t = Proof()
 
 testdata = [
     ("p.name", ''), 
-    ("p.blocklist", [[0, [1], 0]] ),
-    ("p.blocks", []),
+    ("p.prooflist", [[0, [1], 0, []]] ),
     ("p.premises", []),
     ("p.status", ''),
     ("p.comments", ''),
@@ -55,10 +54,10 @@ testdata = [
     ("len(p.lines)", 1),
     ("str(p.lines[0][p.statementindex])", t.blankstatement),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", ''),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("p.lines[0][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_undefinedlogic),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)

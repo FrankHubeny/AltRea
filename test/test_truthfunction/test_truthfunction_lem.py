@@ -20,34 +20,34 @@ t = Proof()
 testdata = [
     ("str(p.lines[2][p.statementindex])", str(Or(A, Not(A)))),
     ("(p.lines[2][p.levelindex])", 1),
-    ("(p.lines[2][p.blockidindex])", 1),
-    ("(p.lines[2][p.ruleindex])", t.or_introname),
+    ("(p.lines[2][p.proofidindex])", 1),
+    ("(p.lines[2][p.ruleindex])", t.disjunction_intro_name),
     ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", ""),
     #
     ("str(p.lines[3][p.statementindex])", str(Not(A))),
     ("(p.lines[3][p.levelindex])", 1),
-    ("(p.lines[3][p.blockidindex])", 2),
-    ("(p.lines[3][p.ruleindex])", t.assumptionname),
+    ("(p.lines[3][p.proofidindex])", 2),
+    ("(p.lines[3][p.ruleindex])", t.hypothesis_name),
     ("(p.lines[3][p.linesindex])", ""),
-    ("(p.lines[3][p.blocksindex])", ""),
+    ("(p.lines[3][p.proofsindex])", ""),
     ("(p.lines[3][p.commentindex])", ""),
     #
     ("str(p.lines[4][p.statementindex])", str(Or(A, Not(A)))),
     ("(p.lines[4][p.levelindex])", 1),
-    ("(p.lines[4][p.blockidindex])", 2),
-    ("(p.lines[4][p.ruleindex])", t.or_introname),
+    ("(p.lines[4][p.proofidindex])", 2),
+    ("(p.lines[4][p.ruleindex])", t.disjunction_intro_name),
     ("(p.lines[4][p.linesindex])", "3"),
-    ("(p.lines[4][p.blocksindex])", ""),
+    ("(p.lines[4][p.proofsindex])", ""),
     ("(p.lines[4][p.commentindex])", ""),
     #
     ("str(p.lines[5][p.statementindex])", str(Or(A, Not(A)))),
     ("(p.lines[5][p.levelindex])", 0),
-    ("(p.lines[5][p.blockidindex])", 0),
+    ("(p.lines[5][p.proofidindex])", 0),
     ("(p.lines[5][p.ruleindex])", t.lem_name),
     ("(p.lines[5][p.linesindex])", ""),
-    ("(p.lines[5][p.blocksindex])", "1, 2"),
+    ("(p.lines[5][p.proofsindex])", "1, 2"),
     ("(p.lines[5][p.commentindex])", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -56,11 +56,11 @@ def _lem_1(input_n, expected):
     B = Wff('B')
     p = Proof()
     p.addgoal(Or(A, Not(A)))
-    p.openblock(A)
-    p.or_intro(1, right=Not(A))
+    p.hypothesis(A)
+    p.disjunction_intro(1, right=Not(A))
     p.closeblock()
-    p.openblock(Not(A))
-    p.or_intro(3, left=A)
+    p.hypothesis(Not(A))
+    p.disjunction_intro(3, left=A)
     p.closeblock()
     p.lem(1,2)
     assert eval(input_n) == expected
@@ -76,10 +76,10 @@ def _lem_1(input_n, expected):
 testdata = [
     ("str(p.lines[5][p.statementindex])", t.blankstatement),
     ("(p.lines[5][p.levelindex])", 0),
-    ("(p.lines[5][p.blockidindex])", 0),
+    ("(p.lines[5][p.proofidindex])", 0),
     ("(p.lines[5][p.ruleindex])", t.lem_name),
     ("(p.lines[5][p.linesindex])", ""),
-    ("(p.lines[5][p.blocksindex])", ""),
+    ("(p.lines[5][p.proofsindex])", ""),
     ("(p.lines[5][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_nosuchblock),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -88,11 +88,11 @@ def _lem_nosuchblock_1(input_n, expected):
     B = Wff('B')
     p = Proof()
     p.addgoal(Or(A, Not(A)))
-    p.openblock(A)
-    p.or_intro(1, right=Not(A))
+    p.hypothesis(A)
+    p.disjunction_intro(1, right=Not(A))
     p.closeblock()
-    p.openblock(Not(A))
-    p.or_intro(3, left=A)
+    p.hypothesis(Not(A))
+    p.disjunction_intro(3, left=A)
     p.closeblock()
     p.lem(3,2)
     assert eval(input_n) == expected
@@ -108,10 +108,10 @@ def _lem_nosuchblock_1(input_n, expected):
 testdata = [
     ("str(p.lines[5][p.statementindex])", t.blankstatement),
     ("(p.lines[5][p.levelindex])", 0),
-    ("(p.lines[5][p.blockidindex])", 0),
+    ("(p.lines[5][p.proofidindex])", 0),
     ("(p.lines[5][p.ruleindex])", t.lem_name),
     ("(p.lines[5][p.linesindex])", ""),
-    ("(p.lines[5][p.blocksindex])", ""),
+    ("(p.lines[5][p.proofsindex])", ""),
     ("(p.lines[5][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_notsamelevel),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -120,11 +120,11 @@ def _lem_1(input_n, expected):
     B = Wff('B')
     p = Proof()
     p.addgoal(Or(A, Not(A)))
-    p.openblock(A)
-    p.or_intro(1, right=Not(A))
+    p.hypothesis(A)
+    p.disjunction_intro(1, right=Not(A))
     # p.closeblock()
-    p.openblock(Not(A))
-    p.or_intro(3, left=A)
+    p.hypothesis(Not(A))
+    p.disjunction_intro(3, left=A)
     p.closeblock()
     p.closeblock()
     p.lem(1,2)
@@ -141,10 +141,10 @@ def _lem_1(input_n, expected):
 testdata = [
     ("str(p.lines[5][p.statementindex])", t.blankstatement),
     ("(p.lines[5][p.levelindex])", 0),
-    ("(p.lines[5][p.blockidindex])", 0),
+    ("(p.lines[5][p.proofidindex])", 0),
     ("(p.lines[5][p.ruleindex])", t.lem_name),
     ("(p.lines[5][p.linesindex])", ""),
-    ("(p.lines[5][p.blocksindex])", ""),
+    ("(p.lines[5][p.proofsindex])", ""),
     ("(p.lines[5][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_notlem),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -153,11 +153,11 @@ def _lem_notlem_1(input_n, expected):
     B = Wff('B')
     p = Proof()
     p.addgoal(Or(A, Not(A)))
-    p.openblock(A)
-    p.or_intro(1, right=Not(A))
+    p.hypothesis(A)
+    p.disjunction_intro(1, right=Not(A))
     p.closeblock()
-    p.openblock(A)
-    p.or_intro(3, left=A)
+    p.hypothesis(A)
+    p.disjunction_intro(3, left=A)
     p.closeblock()
     p.lem(1,2)
     assert eval(input_n) == expected
@@ -173,10 +173,10 @@ def _lem_notlem_1(input_n, expected):
 testdata = [
     ("str(p.lines[5][p.statementindex])", t.blankstatement),
     ("(p.lines[5][p.levelindex])", 0),
-    ("(p.lines[5][p.blockidindex])", 0),
+    ("(p.lines[5][p.proofidindex])", 0),
     ("(p.lines[5][p.ruleindex])", t.lem_name),
     ("(p.lines[5][p.linesindex])", ""),
-    ("(p.lines[5][p.blocksindex])", ""),
+    ("(p.lines[5][p.proofsindex])", ""),
     ("(p.lines[5][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_notsamelevel),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -185,11 +185,11 @@ def _lem_1(input_n, expected):
     B = Wff('B')
     p = Proof()
     p.addgoal(Or(A, Not(A)))
-    p.openblock(A)
-    p.or_intro(1, right=Not(A))
+    p.hypothesis(A)
+    p.disjunction_intro(1, right=Not(A))
     # p.closeblock()
-    p.openblock(Not(A))
-    p.or_intro(3, left=A)
+    p.hypothesis(Not(A))
+    p.disjunction_intro(3, left=A)
     p.closeblock()
     p.closeblock()
     p.lem(1,2)

@@ -1,6 +1,6 @@
 """------------------------------------------------------------------------------
                             If and Only Iff Testing
-                             iff_intro   iff_elim
+                             coimplication_intro   coimplication_elim
 ------------------------------------------------------------------------------"""
 
 import pytest
@@ -12,12 +12,12 @@ B = Wff('B')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                                    IFF_ELIM
+                                    coimplication_elim
                                     Clean Run
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    IFF_ELIM
+                                    coimplication_elim
                                   Stopped Run
                                   
                 Line Does Not Exist (stopped_nosuchline)
@@ -25,26 +25,26 @@ t = Proof()
 
 
 """------------------------------------------------------------------------------
-                                    IFF_ELIM
+                                    coimplication_elim
                                   Stopped Run
                                   
                 Line Is Outside Accessible Scope (stopped_linescope)
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    IFF_INTRO
+                                    coimplication_intro
                                     Clean Run
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    IFF_INTRO
+                                    coimplication_intro
                                   Stopped Run
                                   
                     Block Does Not Exist (stopped_nosuchblock)
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    IFF_INTRO
+                                    coimplication_intro
                                   Stopped Run
                                   
                 Block Is Outside Accessible Scope (stopped_blockscope)

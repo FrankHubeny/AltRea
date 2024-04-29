@@ -15,18 +15,61 @@ class Wff:
     """
 
     is_variable = True
+
     lb = '('
     rb = ')'
+
+    and_connector = '&'
+    and_latexconnector = '\\wedge'
+    and_treeconnector = 'And'
+    iff_connector = '<>'
+    iff_latexconnector = '\\leftrightarrow'
+    iff_treeconnector = 'Iff'
+    implies_connector = '>'
+    implies_latexconnector = '\\to'
+    implies_treeconnector = 'Implies'
+    necessary_connector = 'Nec'
+    necessary_latexconnector = '\\Box'
+    necessary_treeconnector = 'N'
+    not_connector = '~'
+    not_latexconnector = '\\lnot '
+    not_treeconnector = 'Not'
+    or_connector = '|'
+    or_latexconnector = '\\vee'
+    or_treeconnector = 'Or'
+    possible_connector = 'Pos'
+    possible_latexconnector = '\\Diamond'
+    possible_treeconnector = 'P'
+    wff_treeconnector = 'Wff'
+
+    f_name = 'X'
+    f_latexname = '\\bot'
+    t_name = 'T'
+    t_latexname = '\\top'
+
     
-    def __init__(self, name: str):
+    def __init__(self, name: str, latexname: str = ''):
         self.name = name
+        self.latexname = latexname
         self.booleanvalue = None
 
     def __str__(self):
         return f'{self.name}'
     
     def latex(self):
-        return f'{self.name}'
+        if self.latexname == '':
+            return f'{self.name}'
+        else:
+            return f'{self.latexname}'
+        
+    def tree(self):
+        return f'{self.wff_treeconnector}{self.lb}{self.name}{self.rb}'
+    
+    def pattern(self):
+        return '{}'
+    
+    def treetuple(self):
+        return self.name
     
     def setvalue(self, value: bool):
         self.booleanvalue = value
@@ -47,29 +90,36 @@ class And(Wff):
     def __init__(self, left: Wff, right: Wff):
         self.left = left
         self.right = right
-        self.connector = '&'
-        self.latexconnector = '\\wedge'
         self.booleanvalue = left.booleanvalue and right.booleanvalue
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left} {self.connector} {self.right}'
+            return f'{self.left} {self.and_connector} {self.right}'
         elif self.left.is_variable:
-            return f'{self.left} {self.connector} {self.lb}{self.right}{self.rb}'
+            return f'{self.left} {self.and_connector} {self.lb}{self.right}{self.rb}'
         elif self.right.is_variable:
-            return f'{self.lb}{self.left}{self.rb} {self.connector} {self.right}'
+            return f'{self.lb}{self.left}{self.rb} {self.and_connector} {self.right}'
         else:
-            return f'{self.lb}{self.left}{self.rb} {self.connector} {self.lb}{self.right}{self.rb}'
+            return f'{self.lb}{self.left}{self.rb} {self.and_connector} {self.lb}{self.right}{self.rb}'
         
     def latex(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
+            return f'{self.left.latex()} {self.and_latexconnector} {self.right.latex()}'
         elif self.left.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+            return f'{self.left.latex()} {self.and_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
         elif self.right.is_variable:
-            return f'{self.lb}{self.left.latex()}{self.rb} {self.latexconnector} {self.right.latex()}'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.and_latexconnector} {self.right.latex()}'
         else:
-            return f'{self.lb}{self.left.latex()}{self.rb} {self.latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.and_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.and_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def pattern(self):
+        return f'{self.and_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    
+    def treetuple(self):
+        return self.and_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
     def getvalue(self):
         return self.left.getvalue() and self.right.getvalue()
@@ -81,16 +131,25 @@ class F(Wff):
     is_variable = True
 
     def __init__(self):
-        self.contradiction = '\\bot'
+        self.value = False
 
     def __str__(self):
-        return 'X'
+        return f'{self.f_name}'
     
     def latex(self):
-        return self.contradiction
+        return f'{self.f_latexname}'
+    
+    def tree(self):
+        return f'{self.f_name}'
+    
+    def pattern(self):
+        return f'{self.f_name}'
+    
+    def treetuple(self):
+        return self.f_name
     
     def getvalue(self):
-        return False
+        return self.value
 
 class Iff(Wff):
     """A well formed formula with two arguments which are also well formed formulas
@@ -102,29 +161,36 @@ class Iff(Wff):
     def __init__(self, left: Wff, right: Wff):
         self.left = left
         self.right = right
-        self.connector = '<->'
-        self.latexconnector = '\\leftrightarrow'
         self.booleanvalue = ((not left.booleanvalue) or right.booleanvalue) and ((not right.booleanvalue) or left.booleanvalue)
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left} {self.connector} {self.right}'
+            return f'{self.left} {self.iff_connector} {self.right}'
         elif self.left.is_variable:
-            return f'{self.left} {self.connector} ({self.right})'
+            return f'{self.left} {self.iff_connector} {self.lb}{self.right}{self.rb}'
         elif self.right.is_variable:
-            return f'({self.left}) {self.connector} {self.right}'
+            return f'{self.lb}{self.left}{self.rb} {self.iff_connector} {self.right}'
         else:
-            return f'({self.left}) {self.connector} ({self.right})'
+            return f'{self.lb}{self.left}{self.rb} {self.iff_connector} {self.lb}{self.right}{self.rb}'
         
     def latex(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
+            return f'{self.left.latex()} {self.iff_latexconnector} {self.right.latex()}'
         elif self.left.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} ({self.right.latex()})'
+            return f'{self.left.latex()} {self.iff_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
         elif self.right.is_variable:
-            return f'({self.left.latex()}) {self.latexconnector} {self.right.latex()}'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.iff_latexconnector} {self.right.latex()}'
         else:
-            return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.iff_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.iff_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def pattern(self):
+        return f'{self.iff_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    
+    def treetuple(self):
+        return self.iff_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
 
 class Implies(Wff):
     """A well formed formula with two arguments which are also well formed formulas joined
@@ -137,30 +203,36 @@ class Implies(Wff):
     def __init__(self, left: Wff, right: Wff):
         self.left = left
         self.right = right
-        self.connector = '->'
-        self.latexconnector = '\\to'
         self.booleanvalue = None
-        #self.booleanvalue = (not left.booleanvalue) or right.booleanvalue
     
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left} {self.connector} {self.right}'
+            return f'{self.left} {self.implies_connector} {self.right}'
         elif self.left.is_variable:
-            return f'{self.left} {self.connector} ({self.right})'
+            return f'{self.left} {self.implies_connector} {self.lb}{self.right}{self.rb}'
         elif self.right.is_variable:
-            return f'({self.left}) {self.connector} {self.right}'
+            return f'{self.lb}{self.left}{self.rb} {self.implies_connector} {self.right}'
         else:
-            return f'({self.left}) {self.connector} ({self.right})'
+            return f'{self.lb}{self.left}{self.rb} {self.implies_connector} {self.lb}{self.right}{self.rb}'
         
     def latex(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
+            return f'{self.left.latex()} {self.implies_latexconnector} {self.right.latex()}'
         elif self.left.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} ({self.right.latex()})'
+            return f'{self.left.latex()} {self.implies_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
         elif self.right.is_variable:
-            return f'({self.left.latex()}) {self.latexconnector} {self.right.latex()}'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.implies_latexconnector} {self.right.latex()}'
         else:
-            return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.implies_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.implies_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def pattern(self):
+        return f'{self.implies_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    
+    def treetuple(self):
+        return self.implies_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
     def getvalue(self):
         return (not self.left.getvalue()) or self.right.getvalue()
@@ -171,20 +243,28 @@ class N(Wff):
     is_variable = True
 
     def __init__(self, wff):
-        self.necessary = '\\Box'
         self.wff = wff
 
     def __str__(self):
-        if self.wff.is_variable:
-            return f'Nec {self.wff}'
+        if self.is_variable:
+            return f'{self.necessary_connector} {self.wff}'
         else:
-            return f'Nec({self.wff})'
+            return f'{self.necessary_connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
-        if self.wff.is_variable:
-            return f'{self.necessary} {self.wff}'
+        if self.is_variable:
+            return f'{self.necessary_latexconnector} {self.wff}'
         else:
-            return f'{self.necessary} ({self.wff})'
+            return f'{self.necessary_latexconnector} {self.lb}{self.wff}{self.rb}'
+        
+    def tree(self):
+        return f'{self.necessary_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
+    
+    def pattern(self):
+        return f'{self.necessary_treeconnector}{self.lb}{self.wff.pattern()}{self.rb}'
+    
+    def treetuple(self):
+        return self.necessary_treeconnector, self.lb, self.wff.treetuple(), self.rb
     
     def getvalue(self):
         return True
@@ -198,22 +278,28 @@ class Not(Wff):
 
     def __init__(self, negated: Wff):
         self.negated = negated
-        self.connector = '~'
-        self.latexconnector = '\\lnot '
         self.booleanvalue = None
-        #self.booleanvalue = not negated.booleanvalue
 
     def __str__(self):
         if self.negated.is_variable:
-            return f'{self.connector}{self.negated}'
+            return f'{self.not_connector}{self.negated}'
         else:
-            return f'{self.connector}({self.negated})'
+            return f'{self.not_connector}{self.lb}{self.negated}{self.rb}'
         
     def latex(self):
         if self.negated.is_variable:
-            return f'{self.latexconnector}{self.negated.latex()}'
+            return f'{self.not_latexconnector}{self.negated.latex()}'
         else:
-            return f'{self.latexconnector}({self.negated.latex()})'
+            return f'{self.not_latexconnector}{self.lb}{self.negated.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.not_treeconnector}{self.lb}{self.negated.tree()}{self.rb}'
+    
+    def pattern(self):
+        return f'{self.not_treeconnector}{self.lb}{self.negated.pattern()}{self.rb}'
+    
+    def treetuple(self):
+        return self.not_treeconnector, self.lb, self.negated.treetuple(), self.rb
     
     def getvalue(self):
         return not self.negated.getvalue()
@@ -228,29 +314,36 @@ class Or(Wff):
     def __init__(self, left: Wff, right: Wff):
         self.left = left
         self.right = right
-        self.connector = '|'
-        self.latexconnector = '\\vee'
         self.booleanvalue = left.booleanvalue or right.booleanvalue
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left} {self.connector} {self.right}'
+            return f'{self.left} {self.or_connector} {self.right}'
         elif self.left.is_variable:
-            return f'{self.left} {self.connector} ({self.right})'
+            return f'{self.left} {self.or_connector} {self.lb}{self.right}{self.rb}'
         elif self.right.is_variable:
-            return f'({self.left}) {self.connector} {self.right}'
+            return f'{self.lb}{self.left}{self.rb} {self.or_connector} {self.right}'
         else:
-            return f'({self.left}) {self.connector} ({self.right})'
+            return f'{self.lb}{self.left}{self.rb} {self.or_connector} {self.lb}{self.right}{self.rb}'
         
     def latex(self):
         if self.left.is_variable and self.right.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
+            return f'{self.left.latex()} {self.or_latexconnector} {self.right.latex()}'
         elif self.left.is_variable:
-            return f'{self.left.latex()} {self.latexconnector} ({self.right.latex()})'
+            return f'{self.left.latex()} {self.or_latexconnector} {self.lb}{self.right.latex()})'
         elif self.right.is_variable:
-            return f'({self.left.latex()}) {self.latexconnector} {self.right.latex()}'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.or_latexconnector} {self.right.latex()}'
         else:
-            return f'({self.left.latex()}) {self.latexconnector} ({self.right.latex()})'
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.or_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.or_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def pattern(self):
+        return f'{self.or_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    
+    def treetuple(self):
+        return self.or_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
     def getvalue(self):
         return self.left.getvalue() or self.right.getvalue()
@@ -261,39 +354,56 @@ class P(Wff):
     is_variable = True
 
     def __init__(self, wff):
-        self.necessary = '\\Diamond'
         self.wff = wff
 
     def __str__(self):
-        if self.wff.is_variable:
-            return f'Pos {self.wff}'
+        if self.is_variable:
+            return f'{self.possible_connector} {self.wff}'
         else:
-            return f'Pos({self.wff})'
+            return f'{self.possible_connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
-        if self.wff.is_variable:
-            return f'{self.necessary} {self.wff}'
+        if self.is_variable:
+            return f'{self.possible_latexconnector} {self.wff}'
         else:
-            return f'{self.necessary} ({self.wff})'
+            return f'{self.possible_latexconnector} {self.lb}{self.wff}{self.rb}'
+        
+    def tree(self):
+        return f'{self.possible_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
+    
+    def pattern(self):
+        return f'{self.possible_treeconnector}{self.lb}{self.wff.pattern()}{self.rb}'
+    
+    def treetuple(self):
+        return self.possible_treeconnector, self.lb, self.wff.treetuple(), self.rb
     
     def getvalue(self):
         return True
     
-class T():
+class T(Wff):
     """A well formed formula which is always true."""
 
     is_variable = False
 
     def __init__(self):
-        self.tautology = '\\top'
+        self.value = True
 
     def __str__(self):
-        return 'T'
+        return f'{self.t_name}'
     
     def latex(self):
-        return self.tautology
+        return f'{self.t_latexname}'
+    
+    def tree(self):
+        return f'{self.t_name}'
+    
+    def pattern(self):
+        return f'{self.t_name}'
+    
+    def treetuple(self):
+        return self.t_name
     
     def getvalue(self):
-        return True
+        return self.value
 
 

@@ -1,6 +1,6 @@
 """------------------------------------------------------------------------------
                                 Or Testing
-                            or_intro   or_elim
+                            disjunction_intro   disjunction_elim
 ------------------------------------------------------------------------------"""
 
 import pytest
@@ -12,38 +12,38 @@ B = Wff('B')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                                     OR_ELIM
+                                     disjunction_elim
                                    Clean Run
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    OR_ELIM
+                                    disjunction_elim
                                   Stopped Run
                                   
                     Line Does Not Exist (stopped_nosuchline)
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    OR_ELIM
+                                    disjunction_elim
                                   Stopped Run
                                   
                 Line Is Outside Accessible Scope (stopped_linescope)
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    OR_INTRO
+                                    disjunction_intro
                                     Clean Run
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    OR_INTRO
+                                    disjunction_intro
                                   Stopped Run
                                   
                     Line Does Not Exist (stopped_nosuchline)
 ------------------------------------------------------------------------------"""
 
 """------------------------------------------------------------------------------
-                                    OR_INTRO
+                                    disjunction_intro
                                   Stopped Run
                                   
                 Line Is Outside Accessible Scope (stopped_linescope)
@@ -61,8 +61,8 @@ def _or_stop_1(input_n, expected):
     p = Proof()
     p.addgoal(A)
     p.addpremise(B)
-    p.or_intro(1, left='C')
-    p.or_intro(1, right=A)
+    p.disjunction_intro(1, left='C')
+    p.disjunction_intro(1, right=A)
     assert eval(input_n) == expected
 
 
@@ -81,7 +81,7 @@ def _or_stop_3(input_n, expected):
     p = Proof()
     p.addgoal(A)
     p.addpremise(B)
-    p.or_intro(1, right='C')
-    p.or_intro(1, right=A)
+    p.disjunction_intro(1, right='C')
+    p.disjunction_intro(1, right=A)
     assert eval(input_n) == expected
 

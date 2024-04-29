@@ -12,7 +12,7 @@ B = Wff('B')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                                AND_ELIM
+                                conjunction_elim
                                 Clean Run
 ------------------------------------------------------------------------------"""
 
@@ -20,26 +20,26 @@ t = Proof()
 testdata = [
     ("str(p.lines[0][p.statementindex])", str(Or(Not(A), Not(B)))),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goal_name),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("(p.lines[0][p.commentindex])", ""),
     #
     ("str(p.lines[1][p.statementindex])", str(Not(And(A, B)))),
     ("(p.lines[1][p.levelindex])", 0),
-    ("(p.lines[1][p.blockidindex])", 0),
-    ("(p.lines[1][p.ruleindex])", t.premisename),
+    ("(p.lines[1][p.proofidindex])", 0),
+    ("(p.lines[1][p.ruleindex])", t.premise_name),
     ("(p.lines[1][p.linesindex])", ""),
-    ("(p.lines[1][p.blocksindex])", ""),
+    ("(p.lines[1][p.proofsindex])", ""),
     ("(p.lines[1][p.commentindex])", ""),
     #
     ("str(p.lines[2][p.statementindex])", str(Or(Not(A), Not(B)))),
     ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
+    ("(p.lines[2][p.proofidindex])", 0),
     ("(p.lines[2][p.ruleindex])", t.demorgan_name),
     ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -56,26 +56,26 @@ def test_demorgan_clean_1(input_n, expected):
 testdata = [
     ("str(p.lines[0][p.statementindex])", str(And(Not(A), Not(B)))),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goal_name),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("(p.lines[0][p.commentindex])", ""),
     #
     ("str(p.lines[1][p.statementindex])", str(Not(Or(A, B)))),
     ("(p.lines[1][p.levelindex])", 0),
-    ("(p.lines[1][p.blockidindex])", 0),
-    ("(p.lines[1][p.ruleindex])", t.premisename),
+    ("(p.lines[1][p.proofidindex])", 0),
+    ("(p.lines[1][p.ruleindex])", t.premise_name),
     ("(p.lines[1][p.linesindex])", ""),
-    ("(p.lines[1][p.blocksindex])", ""),
+    ("(p.lines[1][p.proofsindex])", ""),
     ("(p.lines[1][p.commentindex])", ""),
     #
     ("str(p.lines[2][p.statementindex])", str(And(Not(A), Not(B)))),
     ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
+    ("(p.lines[2][p.proofidindex])", 0),
     ("(p.lines[2][p.ruleindex])", t.demorgan_name),
     ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -92,26 +92,26 @@ def test_demorgan_clean_2(input_n, expected):
 testdata = [
     ("str(p.lines[0][p.statementindex])", str(Not(And(A, B)))),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goal_name),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("(p.lines[0][p.commentindex])", ""),
     #
     ("str(p.lines[1][p.statementindex])", str(Or(Not(A), Not(B)))),
     ("(p.lines[1][p.levelindex])", 0),
-    ("(p.lines[1][p.blockidindex])", 0),
-    ("(p.lines[1][p.ruleindex])", t.premisename),
+    ("(p.lines[1][p.proofidindex])", 0),
+    ("(p.lines[1][p.ruleindex])", t.premise_name),
     ("(p.lines[1][p.linesindex])", ""),
-    ("(p.lines[1][p.blocksindex])", ""),
+    ("(p.lines[1][p.proofsindex])", ""),
     ("(p.lines[1][p.commentindex])", ""),
     #
     ("str(p.lines[2][p.statementindex])", str(Not(And(A, B)))),
     ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
+    ("(p.lines[2][p.proofidindex])", 0),
     ("(p.lines[2][p.ruleindex])", t.demorgan_name),
     ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -128,26 +128,26 @@ def test_demorgan_clean_3(input_n, expected):
 testdata = [
     ("str(p.lines[0][p.statementindex])", str(Not(Or(A, B)))),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goal_name),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("(p.lines[0][p.commentindex])", ""),
     #
     ("str(p.lines[1][p.statementindex])", str(And(Not(A), Not(B)))),
     ("(p.lines[1][p.levelindex])", 0),
-    ("(p.lines[1][p.blockidindex])", 0),
-    ("(p.lines[1][p.ruleindex])", t.premisename),
+    ("(p.lines[1][p.proofidindex])", 0),
+    ("(p.lines[1][p.ruleindex])", t.premise_name),
     ("(p.lines[1][p.linesindex])", ""),
-    ("(p.lines[1][p.blocksindex])", ""),
+    ("(p.lines[1][p.proofsindex])", ""),
     ("(p.lines[1][p.commentindex])", ""),
     #
     ("str(p.lines[2][p.statementindex])", str(Not(Or(A, B)))),
     ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
+    ("(p.lines[2][p.proofidindex])", 0),
     ("(p.lines[2][p.ruleindex])", t.demorgan_name),
     ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -171,10 +171,10 @@ def test_demorgan_clean_4(input_n, expected):
 testdata = [
     ("str(p.lines[2][p.statementindex])", t.blankstatement),
     ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
+    ("(p.lines[2][p.proofidindex])", 0),
     ("(p.lines[2][p.ruleindex])", t.demorgan_name),
     ("(p.lines[2][p.linesindex])", "2.5"),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -206,10 +206,10 @@ def test_demorgan_nosuchline_1(input_n, expected):
 testdata = [
     ("str(p.lines[2][p.statementindex])", t.blankstatement),
     ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
+    ("(p.lines[2][p.proofidindex])", 0),
     ("(p.lines[2][p.ruleindex])", t.demorgan_name),
     ("(p.lines[2][p.linesindex])", "1"),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_notdemorgan),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)

@@ -22,12 +22,12 @@ testdata = [
     ("p.lines[1][p.commentindex]", "opening the block"),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_openblock_stop_1(input_n, expected):
+def test_hypothesis_stop_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
     p.addgoal(A)
-    p.openblock(B, comments="opening the block")
+    p.hypothesis(B, comments="opening the block")
     assert eval(input_n) == expected
 
     
@@ -44,13 +44,13 @@ testdata = [
     ("len(p.lines)", 2),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_openblock_stop_1(input_n, expected):
+def test_hypothesis_stop_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
     p.addgoal(A)
-    p.openblock('B')
-    p.openblock(B)
+    p.hypothesis('B')
+    p.hypothesis(B)
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ def test_openblock_stop_1(input_n, expected):
     B = Wff('B')
     p = Proof()
     # p.addgoal(A)
-    p.openblock(B)
+    p.hypothesis(B)
     assert eval(input_n) == expected
 
 

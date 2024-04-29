@@ -1,6 +1,6 @@
 """------------------------------------------------------------------------------
                             Implication Testing
-                        implies_intro implies_elim
+                        implies_intro implication_elim
 ------------------------------------------------------------------------------"""
 
 import pytest
@@ -13,56 +13,56 @@ P = Wff('P')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                               IMPLIES_ELIM
+                               implication_elim
                                 Clean Run
 ------------------------------------------------------------------------------"""
 
 testdata = [
     ("str(p.lines[0][p.statementindex])", str(B)),
     ("(p.lines[0][p.levelindex])", 0),
-    ("(p.lines[0][p.blockidindex])", 0),
-    ("(p.lines[0][p.ruleindex])", t.goalname),
+    ("(p.lines[0][p.proofidindex])", 0),
+    ("(p.lines[0][p.ruleindex])", t.goal_name),
     ("(p.lines[0][p.linesindex])", ""),
-    ("(p.lines[0][p.blocksindex])", ""),
+    ("(p.lines[0][p.proofsindex])", ""),
     ("(p.lines[0][p.commentindex])", ""),
     #
     ("str(p.lines[1][p.statementindex])", str(A)),
     ("(p.lines[1][p.levelindex])", 0),
-    ("(p.lines[1][p.blockidindex])", 0),
-    ("(p.lines[1][p.ruleindex])", t.premisename),
+    ("(p.lines[1][p.proofidindex])", 0),
+    ("(p.lines[1][p.ruleindex])", t.premise_name),
     ("(p.lines[1][p.linesindex])", ""),
-    ("(p.lines[1][p.blocksindex])", ""),
+    ("(p.lines[1][p.proofsindex])", ""),
     ("(p.lines[1][p.commentindex])", ""),
     #
     ("str(p.lines[2][p.statementindex])", str(Implies(A, B))),
     ("(p.lines[2][p.levelindex])", 0),
-    ("(p.lines[2][p.blockidindex])", 0),
-    ("(p.lines[2][p.ruleindex])", t.premisename),
+    ("(p.lines[2][p.proofidindex])", 0),
+    ("(p.lines[2][p.ruleindex])", t.premise_name),
     ("(p.lines[2][p.linesindex])", ""),
-    ("(p.lines[2][p.blocksindex])", ""),
+    ("(p.lines[2][p.proofsindex])", ""),
     ("(p.lines[2][p.commentindex])", ""),
     #
     ("str(p.lines[3][p.statementindex])", str(B)),
     ("(p.lines[3][p.levelindex])", 0),
-    ("(p.lines[3][p.blockidindex])", 0),
-    ("(p.lines[3][p.ruleindex])", t.implies_elimname),
+    ("(p.lines[3][p.proofidindex])", 0),
+    ("(p.lines[3][p.ruleindex])", t.implication_elim_name),
     ("(p.lines[3][p.linesindex])", "2, 1"),
-    ("(p.lines[3][p.blocksindex])", ""),
+    ("(p.lines[3][p.proofsindex])", ""),
     ("(p.lines[3][p.commentindex])", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_implies_elim_clean_1(input_n, expected):
+def test_implication_elim_clean_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
     p.addgoal(B)
     p.addpremise(A)
     p.addpremise(Implies(A, B))
-    p.implies_elim(2,1)
+    p.implication_elim(2,1)
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
-                                IMPLIES_ELIM
+                                implication_elim
                                 Stopped Run
                                   
                 Line Does Not Exist (stopped_nosuchline)
@@ -72,47 +72,47 @@ def test_implies_elim_clean_1(input_n, expected):
 testdata = [
     ("str(p.lines[3][p.statementindex])", t.blankstatement),
     ("(p.lines[3][p.levelindex])", 0),
-    ("(p.lines[3][p.blockidindex])", 0),
-    ("(p.lines[3][p.ruleindex])", t.implies_elimname),
+    ("(p.lines[3][p.proofidindex])", 0),
+    ("(p.lines[3][p.ruleindex])", t.implication_elim_name),
     ("(p.lines[3][p.linesindex])", ""),
-    ("(p.lines[3][p.blocksindex])", ""),
+    ("(p.lines[3][p.proofsindex])", ""),
     ("(p.lines[3][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_implies_elim_nosuchline_1(input_n, expected):
+def test_implication_elim_nosuchline_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
     p.addgoal(B)
     p.addpremise(A)
     p.addpremise(Implies(A, B))
-    p.implies_elim(3,1)
+    p.implication_elim(3,1)
     assert eval(input_n) == expected
 
 # Second line does not exist
 testdata = [
     ("str(p.lines[3][p.statementindex])", t.blankstatement),
     ("(p.lines[3][p.levelindex])", 0),
-    ("(p.lines[3][p.blockidindex])", 0),
-    ("(p.lines[3][p.ruleindex])", t.implies_elimname),
+    ("(p.lines[3][p.proofidindex])", 0),
+    ("(p.lines[3][p.ruleindex])", t.implication_elim_name),
     ("(p.lines[3][p.linesindex])", ""),
-    ("(p.lines[3][p.blocksindex])", ""),
+    ("(p.lines[3][p.proofsindex])", ""),
     ("(p.lines[3][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_implies_elim_nosuchline_1(input_n, expected):
+def test_implication_elim_nosuchline_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
     p.addgoal(B)
     p.addpremise(A)
     p.addpremise(Implies(A, B))
-    p.implies_elim(2, 1.5)
+    p.implication_elim(2, 1.5)
     assert eval(input_n) == expected
     
 
 """------------------------------------------------------------------------------
-                                IMPLIES_ELIM
+                                implication_elim
                                 Stopped Run
                                   
                 Line Is Outside Accessible Scope (stopped_linescope)
@@ -121,7 +121,7 @@ def test_implies_elim_nosuchline_1(input_n, expected):
 # Line outside scope
 
 """------------------------------------------------------------------------------
-                                IMPLIES_ELIM
+                                implication_elim
                                 Stopped Run
                                   
                 Not antecedent (stopped_notantecedent)
@@ -131,21 +131,21 @@ def test_implies_elim_nosuchline_1(input_n, expected):
 testdata = [
     ("str(p.lines[3][p.statementindex])", t.blankstatement),
     ("(p.lines[3][p.levelindex])", 0),
-    ("(p.lines[3][p.blockidindex])", 0),
-    ("(p.lines[3][p.ruleindex])", t.implies_elimname),
+    ("(p.lines[3][p.proofidindex])", 0),
+    ("(p.lines[3][p.ruleindex])", t.implication_elim_name),
     ("(p.lines[3][p.linesindex])", ""),
-    ("(p.lines[3][p.blocksindex])", ""),
+    ("(p.lines[3][p.proofsindex])", ""),
     ("(p.lines[3][p.commentindex])", t.stopped + t.stopped_connector + t.stopped_notantecedent),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_implies_elim_notantecedent_1(input_n, expected):
+def test_implication_elim_notantecedent_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
     p.addgoal(B)
     p.addpremise(And(A, B))
     p.addpremise(Implies(A, B))
-    p.implies_elim(1, 2)
+    p.implication_elim(1, 2)
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------

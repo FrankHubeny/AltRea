@@ -19,7 +19,7 @@ t = Proof()
 testdata = [
     ("len(p.lines)", 2),
     ("str(p.lines[1][0])", str(A)),
-    ("p.lines[1][p.ruleindex]", t.premisename),
+    ("p.lines[1][p.ruleindex]", t.premise_name),
     ("p.lines[1][p.commentindex]", "A comment"),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
@@ -41,7 +41,7 @@ def test_premise_clean_1(input_n, expected):
 # Test input as string and that it stops
 testdata = [
     ("str(p.lines[1][p.statementindex])", "C"),
-    ("p.lines[1][p.ruleindex]", t.premisename),
+    ("p.lines[1][p.ruleindex]", t.premise_name),
     ("p.lines[1][p.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
     ("len(p.lines)", 2),
 ]

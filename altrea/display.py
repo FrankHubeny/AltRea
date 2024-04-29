@@ -9,6 +9,38 @@ import pandas
 
 import altrea
 
+def fitchnotation(p: altrea.truthfunction.Proof):
+    """This function changes the names for rules to better conform to Frederic Fitch's Symbolic Logic text."""
+
+    # Attributes from the altrea.truthfunction.Proof class
+    p.premise_name = 'Premise'
+    p.hypothesis_name = 'hyp'
+    p.disjunction_intro_name = 'disj int'
+    p.disjunction_elim_name = 'disj elim'
+    p.conjunction_intro_name = 'conj int'
+    p.conjunction_elim_name = 'conj elim'
+    p.reiterate_name = 'reit'
+    p.implication_intro_name = 'Implication Intro'
+    p.implication_elim_name = 'Implication Elim'
+    p.negation_intro_name = 'Negation Intro'
+    p.negation_elim_name = 'Negation Elim'
+    p.indirectproof_name = 'Indirect Proof'
+    p.coimplication_intro_name = 'cpimp int'
+    p.coimplication_elim_name = 'coimp elim'
+    #p.xor_intro_name = 'Xor Intro'
+    #p.xor_elim_name = 'Xor Elim'
+    #p.nand_intro_name = 'Nand Intro'
+    #p.nand_elim_name = 'Nand Elim'
+    #p.nor_intro_name = 'Nor Intro'
+    #p.nor_elim_name = 'Nor Elim'
+    #p.xnor_intro_name = 'Xnor Intro'
+    #p.xnor_elim_name = 'Xnor Elim'
+    p.lem_name = 'lem'
+    p.doublenegation_intro_name = 'Double Negation Intro'
+    p.doublenegation_elim_name = 'Double Negation Elim'
+    p.demorgan_name = 'DeMorgan'
+    p.explosion_name = 'Explosion'
+
 def metadata(p: altrea.truthfunction.Proof):
     """Display the metadata associated with a proof.
     
@@ -27,7 +59,7 @@ def metadata(p: altrea.truthfunction.Proof):
         print('Completed: No')
     print('Lines: {}'.format(len(p.lines)-1))
 
-def fitch(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
+def showproof(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1, columns: list = ['Item','Reason','Comment']):
     """Display a proof similar to how Frederic Fitch displayed it in Symbolic Logic.
     
     Parameters:
@@ -35,8 +67,9 @@ def fitch(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
         color: Use color with latex.
         latex: Use latex rather than text.
     """
+    
+    comment = ''
     def formatcomment(p):
-        comment = ''
         if i == 0:
             if p.lines[i][p.commentindex] == '':
                 if p.name == '':
@@ -67,108 +100,122 @@ def fitch(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
     indx = []
     for i in range(len(p.lines)):
         indx.append(i)
-    columns = ['Proposition', 'Rule', 'Comment']
+    #columns = ['Proposition', 'Rule', 'Comment']
     newp = []
     if latex == 1:
         for i in range(len(p.lines)):
 
             # Format the statement
+            base = ' \\hspace{0.35cm}|'
+            #hypothesisbase = ' \\underline{\\hspace{0.35cm}|}'
+            hypothesisbase = ''.join(['\\underline{', base, '}']) 
             statement = ''
+            for j in range(1, p.lines[i][p.levelindex]):
+                statement = base + statement
+            if p.lines[i][p.statementindex] != '':
+                if p.lines[i][p.levelindex] > 0:
+                    if i < len(p.lines) - 1:
+                        if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                            if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
+                                statement = hypothesisbase + statement
+                            else:
+                                statement = base + statement
+                        else:
+                            statement = base + statement   
+                    else:
+                        if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                            statement = hypothesisbase + statement
+                        else:
+                            statement = base + statement
+
             if i == 0:
                 if p.goals_latex != '':
-                    statement = ''.join(['$', p.goals_latex, '$'])
+                    statement = ''.join(['$', p.goals_latex, '$', statement, ])
                 else:
                     statement = ' '
             elif color == 1 and p.status != p.complete and p.status != p.stopped and p.lines[i][1] <= p.level and i > 0:
-                try:
-                    statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), '$'])
-                except AttributeError:
-                    statement = p.lines[i][0]
+                #if p.lines[i][p.ruleindex] == p.hypothesis_name and i < len(p.lines) - 1:
+                    # if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
+                    #     statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), lasthypothesis, statement, '$'])
+                    # else:
+                    # statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), blankspace, statement, '$' ])
+                #else:
+                statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), statement, '$' ])
             elif color == 1 and p.lines[i][6][0:8] == p.complete: 
-                statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), '$'])
+                statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), statement, '$' ])
             elif color == 1 and p.lines[i][6][0:18] == p.partialcompletion:
-                statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), '$'])
+                statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), statement, '$'])
             else:
-                try:
-                    statement = ''.join(['$', p.lines[i][0].latex(), '$'])
-                except AttributeError:
-                    statement = p.lines[i][0]
-            
+                # if p.lines[i][p.ruleindex] == p.hypothesis_name and i < len(p.lines) - 1:
+                #     if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
+                #         statement = ''.join(['$', p.lines[i][0].latex(), lasthypothesis, statement, '$' ])
+                #     else:
+                #         statement = ''.join(['$', p.lines[i][0].latex(), blankspace, statement, '$' ])
+                # else:
+                statement = ''.join(['$', p.lines[i][0].latex(), statement, '$' ])
+
             # Format the rule
             rule =''
             if p.lines[i][p.linesindex] != '':
                 rule = ''.join([p.lines[i][p.linesindex], ', ',p.lines[i][p.ruleindex]])
-            elif p.lines[i][p.blocksindex] != '':
-                rule = ''.join([p.lines[i][p.blocksindex], ', ',p.lines[i][p.ruleindex]])
+            elif p.lines[i][p.proofsindex] != '':
+                rule = ''.join([p.lines[i][p.proofsindex], ', ',p.lines[i][p.ruleindex]])
             else:
                 rule = p.lines[i][p.ruleindex]
 
             # Format the comment
-            comment = formatcomment(p)
-            # if i == 0:
-            #     if p.lines[i][p.commentindex] == '':
-            #         if p.name == '':
-            #             comment = ''.join({'Logic: ', p.logic})
-            #         else:
-            #             comment = ''.join(['Name: ', p.name, ' Logic: ', p.logic])
-            #     else:
-            #         if p.name == '':
-            #             comment = ''.join({'Logic: ', p.logic, ' Comment: ', p.lines[i][p.commentindex]})
-            #         else:
-            #             comment = ''.join({'Name: ', p.name, ' Logic: ', p.logic, ' Comment: ', p.lines[i][p.commentindex]})
-            # else:
-            #     comment = p.lines[i][p.commentindex]
+            #comment = formatcomment(p)
+            comment = p.lines[i][p.commentindex]
 
             newp.append([statement, rule, comment])
         
-    else:
+    else:  # string display
         for i in range(len(p.lines)):
 
             # Format the statement
-            statement = p.lines[i][p.statementindex]
+            base = '    |'
+            hypothesisbase = ' __|'
+            statement = ''
+            for j in range(1, p.lines[i][p.levelindex]):
+                statement = base + statement
+            if p.lines[i][p.statementindex] != '':
+                if p.lines[i][p.levelindex] > 0:
+                    if i < len(p.lines) - 1:
+                        if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                            if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
+                                statement = hypothesisbase + statement
+                            else:
+                                statement = base + statement
+                        else:
+                            statement = base + statement   
+                    else:
+                        if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                            statement = hypothesisbase + statement
+                        else:
+                            statement = base + statement
+            statement = ''.join([str(p.lines[i][p.statementindex]), statement])
         
             # Format the rule
             if p.lines[i][p.linesindex] != '':
                 rule = ''.join([p.lines[i][p.linesindex], ', ',p.lines[i][p.ruleindex]])
-            elif p.lines[i][p.blocksindex] != '':
-                rule = ''.join([p.lines[i][p.blocksindex], ', ',p.lines[i][p.ruleindex]])
+            elif p.lines[i][p.proofsindex] != '':
+                rule = ''.join([p.lines[i][p.proofsindex], ', ',p.lines[i][p.ruleindex]])
             else:
                 rule = p.lines[i][p.ruleindex]
 
             # Format the comment
-            comment = formatcomment(p)
-            # if i == 0:
-            #     if p.lines[i][p.commentindex] == '':
-            #         if p.name == '':
-            #             if p.logic == '':
-            #                 comment = ''
-            #             else:
-            #                 comment = ''.join({'Logic: ', p.logic})
-            #         else:
-            #             if p.logic == '':
-            #                 comment = ''.join(['Name: ', p.name])
-            #             else:
-            #                 comment = ''.join(['Name: ', p.name, ' Logic: ', p.logic])
-            #     else:
-            #         if p.name == '':
-            #             if p.logic == '':
-            #                 comment = p.lines[i][p.commentindex]
-            #             else:
-            #                 comment = ''.join({'Logic: ', p.logic, ' Comment: ', p.lines[i][p.commentindex]})
-            #         else:
-            #             if p.logic == '':
-            #                 comment = ''.join(['Name: ', p.name, ' Comment: ', p.lines[i][p.commentindex]])
-            #             else:
-            #                 comment = ''.join(['Name: ', p.name, ' Logic: ', p.logic, ' Comment: ', p.lines[i][p.commentindex]])
-            # else:
-            #     comment = p.lines[i][p.commentindex]
+            #comment = formatcomment(p)
+            comment = p.lines[i][p.commentindex]
 
             newp.append([statement, rule, comment])
     df = pandas.DataFrame(newp, index=indx, columns=columns)
     return df
             
 
-def show(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
+def show(p: altrea.truthfunction.Proof, 
+         color: int = 1, 
+         latex: int = 1, 
+         columns: list = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']):
     """Display a proof line by line.
     
     Parameters:
@@ -215,9 +262,9 @@ def show(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1):
                         p.lines[i][6]
                         ]
             )
-        df = pandas.DataFrame(newp, index=indx, columns=p.columns)
+        df = pandas.DataFrame(newp, index=indx, columns=columns)
     else:
-        df = pandas.DataFrame(p.lines, index=indx, columns=p.columns)
+        df = pandas.DataFrame(p.lines, index=indx, columns=columns)
     return df
 
 def truthtable(premises: list, goal, letters: list):

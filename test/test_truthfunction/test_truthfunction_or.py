@@ -59,8 +59,9 @@ def _or_stop_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(A)
+    p.premise(B)
     p.disjunction_intro(1, left='C')
     p.disjunction_intro(1, right=A)
     assert eval(input_n) == expected
@@ -79,8 +80,9 @@ def _or_stop_3(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(A)
+    p.premise(B)
     p.disjunction_intro(1, right='C')
     p.disjunction_intro(1, right=A)
     assert eval(input_n) == expected

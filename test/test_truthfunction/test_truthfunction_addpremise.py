@@ -1,6 +1,6 @@
 """------------------------------------------------------------------------------
                             Add Premise Testing
-                                addpremise
+                                premise
 ------------------------------------------------------------------------------"""
 
 import pytest
@@ -12,7 +12,7 @@ B = Wff('B')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                                ADDPREMISE
+                                premise
                                 Clean Run
 ------------------------------------------------------------------------------"""
 
@@ -27,12 +27,13 @@ def test_premise_clean_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A, "A comment")
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise(A, "A comment")
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
-                                    ADDPREMISE
+                                    premise
                                   Stopped Run
                                   
                         String Input (stopped_string)
@@ -51,7 +52,8 @@ def test_premise_string_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise('C')
-    p.addpremise(C)
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise('C')
+    p.premise(C)
     assert eval(input_n) == expected

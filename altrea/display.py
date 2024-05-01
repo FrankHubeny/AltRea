@@ -152,7 +152,10 @@ def showproof(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1, col
                 #     else:
                 #         statement = ''.join(['$', p.lines[i][0].latex(), blankspace, statement, '$' ])
                 # else:
-                statement = ''.join(['$', p.lines[i][0].latex(), statement, '$' ])
+                if type(p.lines[i][0]) == str:
+                    statement = ''.join([p.lines[i][0], statement])
+                else:
+                    statement = ''.join(['$', p.lines[i][0].latex(), statement, '$' ])
 
             # Format the rule
             rule =''

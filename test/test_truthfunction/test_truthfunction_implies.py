@@ -55,9 +55,10 @@ def test_implication_elim_clean_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(B)
-    p.addpremise(A)
-    p.addpremise(Implies(A, B))
+    p.setlogic('C')
+    p.goal(B)
+    p.premise(A)
+    p.premise(Implies(A, B))
     p.implication_elim(2,1)
     assert eval(input_n) == expected
 
@@ -83,9 +84,10 @@ def test_implication_elim_nosuchline_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(B)
-    p.addpremise(A)
-    p.addpremise(Implies(A, B))
+    p.setlogic('C')
+    p.goal(B)
+    p.premise(A)
+    p.premise(Implies(A, B))
     p.implication_elim(3,1)
     assert eval(input_n) == expected
 
@@ -104,9 +106,10 @@ def test_implication_elim_nosuchline_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(B)
-    p.addpremise(A)
-    p.addpremise(Implies(A, B))
+    p.setlogic('C')
+    p.goal(B)
+    p.premise(A)
+    p.premise(Implies(A, B))
     p.implication_elim(2, 1.5)
     assert eval(input_n) == expected
     
@@ -142,9 +145,10 @@ def test_implication_elim_notantecedent_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(B)
-    p.addpremise(And(A, B))
-    p.addpremise(Implies(A, B))
+    p.setlogic('C')
+    p.goal(B)
+    p.premise(And(A, B))
+    p.premise(Implies(A, B))
     p.implication_elim(1, 2)
     assert eval(input_n) == expected
 

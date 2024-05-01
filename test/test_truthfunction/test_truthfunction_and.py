@@ -50,13 +50,14 @@ testdata = [
     ("p.lines[3][p.commentindex]", "COMPLETE"),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_conjunction_elim_clean_1(input_n, expected):
+def conjunction_elim_clean_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(A, 'one')
-    p.addgoal(B, 'two')
-    p.addpremise(And(A, B))
+    p.setlogic('C')
+    p.goal(A, 'one')
+    p.goal(B, 'two')
+    p.premise(And(A, B))
     p.conjunction_elim(1)
     assert eval(input_n) == expected
 
@@ -82,9 +83,10 @@ def test_conjunction_elim_nosuchline_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(A, 'one')
-    p.addgoal(B, 'two')
-    p.addpremise(And(A, B))
+    p.setlogic('C')
+    p.goal(A, 'one')
+    p.goal(B, 'two')
+    p.premise(And(A, B))
     p.conjunction_elim(-1)
     assert eval(input_n) == expected
 
@@ -103,9 +105,10 @@ def test_conjunction_elim_nosuchline_2(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(A, 'one')
-    p.addgoal(B, 'two')
-    p.addpremise(And(A, B))
+    p.setlogic('C')
+    p.goal(A, 'one')
+    p.goal(B, 'two')
+    p.premise(And(A, B))
     p.conjunction_elim(A)
     assert eval(input_n) == expected
 
@@ -124,9 +127,10 @@ def test_conjunction_elim_nosuchline_3(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(A, 'one')
-    p.addgoal(B, 'two')
-    p.addpremise(And(A, B))
+    p.setlogic('C')
+    p.goal(A, 'one')
+    p.goal(B, 'two')
+    p.premise(And(A, B))
     p.conjunction_elim(10)
     assert eval(input_n) == expected
 
@@ -139,9 +143,10 @@ def test_conjunction_elim_nosuchline_4(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(A, 'one')
-    p.addgoal(B, 'two')
-    p.addpremise(And(A, B))
+    p.setlogic('C')
+    p.goal(A, 'one')
+    p.goal(B, 'two')
+    p.premise(And(A, B))
     p.conjunction_elim(10)
     p.conjunction_elim(1)
     assert eval(input_n) == expected
@@ -167,8 +172,9 @@ def test_conjunction_elim_stop_5(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
     p.conjunction_elim(1)
     assert eval(input_n) == expected
 
@@ -183,8 +189,9 @@ def test_conjunction_elim_stop_6(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
     p.conjunction_elim(1)
     p.disjunction_intro(1, left=C)
     assert eval(input_n) == expected
@@ -235,9 +242,10 @@ def test_conjunction_intro_clean_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise(A)
+    p.premise(B)
     p.conjunction_intro(1, 2)
     assert eval(input_n) == expected
 
@@ -263,9 +271,10 @@ def test_conjunction_intro_clean_comments_2(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B), comments='goal')
-    p.addpremise(A, comments='first premise')
-    p.addpremise(B, comments='second premise')
+    p.setlogic('C')
+    p.goal(And(A, B), comments='goal')
+    p.premise(A, comments='first premise')
+    p.premise(B, comments='second premise')
     p.conjunction_intro(1, 2, comments='joining first and second premises')
     assert eval(input_n) == expected
 
@@ -291,9 +300,10 @@ def test_conjunction_intro_nosuchline_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise(A)
+    p.premise(B)
     p.conjunction_intro(10, 2)
     assert eval(input_n) == expected
 
@@ -312,9 +322,10 @@ def test_conjunction_intro_nosuchline_2(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise(A)
+    p.premise(B)
     p.conjunction_intro(1, A)
     assert eval(input_n) == expected
 
@@ -333,9 +344,10 @@ def test_conjunction_intro_nosuchline_3(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise(A)
+    p.premise(B)
     p.conjunction_intro(-1.5, 2)
     assert eval(input_n) == expected
 
@@ -348,9 +360,10 @@ def test_conjunction_intro_nosuchline_4(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise(A)
+    p.premise(B)
     p.conjunction_intro(-1.5, 2)
     p.conjunction_intro(1, 2)
     p.conjunction_intro(1, 2)

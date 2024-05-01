@@ -26,9 +26,10 @@ def test_negation_elim_1(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     p = Proof()
-    p.addgoal(And(A, B))
-    p.addpremise(A)
-    p.addpremise(Not(A))
+    p.setlogic('C')
+    p.goal(And(A, B))
+    p.premise(A)
+    p.premise(Not(A))
     p.negation_elim(1, 2)
     assert eval(input_n) == expected
 
@@ -58,8 +59,9 @@ def test_negation_elim_stop_1a(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
     p.negation_elim(1, 2)
     assert eval(input_n) == expected
 
@@ -74,8 +76,9 @@ def test_negation_elim_stop_1b(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
     p.negation_elim(2, 1)
     assert eval(input_n) == expected
     
@@ -90,8 +93,9 @@ def test_negation_elim_stop_2a(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
     p.negation_elim(1, 2)
     p.disjunction_intro(1, left=C)
     assert eval(input_n) == expected
@@ -105,8 +109,9 @@ def test_negation_elim_stop_2b(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
     p.negation_elim(2, 1)
     p.disjunction_intro(1, left=C)
     assert eval(input_n) == expected
@@ -124,9 +129,10 @@ def test_negation_elim_stop_3(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
+    p.premise(B)
     p.negation_elim(1, 2)
     assert eval(input_n) == expected
 
@@ -141,9 +147,10 @@ def test_negation_elim_stop_4(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     p = Proof()
-    p.addgoal(C)
-    p.addpremise(A)
-    p.addpremise(B)
+    p.setlogic('C')
+    p.goal(C)
+    p.premise(A)
+    p.premise(B)
     p.negation_elim(1, 2)
     assert eval(input_n) == expected
 

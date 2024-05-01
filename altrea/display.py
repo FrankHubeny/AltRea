@@ -7,9 +7,9 @@
 
 import pandas
 
-import altrea
+from altrea.rules import Proof
 
-def fitchnotation(p: altrea.truthfunction.Proof):
+def fitchnotation(p: Proof):
     """This function changes the names for rules to better conform to Frederic Fitch's Symbolic Logic text."""
 
     # Attributes from the altrea.truthfunction.Proof class
@@ -41,7 +41,7 @@ def fitchnotation(p: altrea.truthfunction.Proof):
     p.demorgan_name = 'DeMorgan'
     p.explosion_name = 'Explosion'
 
-def metadata(p: altrea.truthfunction.Proof):
+def metadata(p: Proof):
     """Display the metadata associated with a proof.
     
     Parameters:
@@ -59,7 +59,7 @@ def metadata(p: altrea.truthfunction.Proof):
         print('Completed: No')
     print('Lines: {}'.format(len(p.lines)-1))
 
-def showproof(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1, columns: list = ['Item','Reason','Comment']):
+def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item','Reason','Comment']):
     """Display a proof similar to how Frederic Fitch displayed it in Symbolic Logic.
     
     Parameters:
@@ -216,7 +216,7 @@ def showproof(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1, col
     return df
             
 
-def show(p: altrea.truthfunction.Proof, 
+def show(p: Proof, 
          color: int = 1, 
          latex: int = 1, 
          columns: list = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']):
@@ -326,7 +326,7 @@ def truthtable(premises: list, goal, letters: list):
     df = pandas.DataFrame(table, index=index, columns=columns)
     return df
 
-def showblocklist(p: altrea.truthfunction.Proof):
+def showblocklist(p: Proof):
     """Display the blocklist of a proof.
     
     Parameters:

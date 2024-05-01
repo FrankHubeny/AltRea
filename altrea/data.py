@@ -2,7 +2,7 @@
 
 import sqlite3
 
-import altrea.truthfunction
+from altrea.rules import Proof
 
 logicdatabases = {
         'C': 'altrea/data/classical_propositional.db',
@@ -31,7 +31,7 @@ def checkdatabase(logic: str):
     connection.close()
     return rows
 
-def addproof(p: altrea.truthfunction.Proof):
+def addproof(p: Proof):
     database = logicdatabases.get(p.logic)
     # print(p.logic) 
     # print(p.name) 

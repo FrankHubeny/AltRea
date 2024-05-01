@@ -61,13 +61,9 @@ Then import from these files rather than the altrea files to experiment with usi
 Examples:
     >>> from myaltrea.boolean import And, Or, Not, Implies, Iff, Wff
     >>> import myaltrea.rules
-
-
 """
 
-
 from altrea.boolean import And, Or, Not, Implies, Iff, Wff, F, T
-
 
 class Proof:
     """
@@ -347,17 +343,7 @@ class Proof:
         proof = self.prooflist[proofid][1]
         return ''.join([str(proof[0]), '-', str(proof[1])])
     
-    def setlogic(self, logic: str):
-        """Sets the logic for the proof."""
 
-        self.logic = logic
-        if self.logic in self.logicdictionary:
-            self.lines = [['', 0, 0, '', '', '', '']]
-        else:
-            self.status = self.stopped
-            self.lines = [['', 0, 0, '', '', '', ''.join([self.stopped, self.stopped_connector, self.stopped_undefinedlogic])]]
-        if self.logging:
-            print(f'The logic {logic} or {self.logicdictionary.get(logic)} has been set for the proof.')
     
     def stopproof(self, message: str, statement, rule: str, lines: str, blocks: str, comments: str = ''):
         """Logs a status message in the line of a proof that shows no further lines can be added until the error is fixed."""
@@ -1675,6 +1661,40 @@ class Proof:
                 ]
             )  
             self.proofdata.append([self.reiterate_tag, statement.pattern()])    
+
+    def setlogic(self, logic: str):
+        """Sets the logic for the proof.
+        
+        Parameters:
+            logic: The code identifying the logic.
+            
+        Examples:
+            If you do not know which logics are avaiable, you may run `displaylogics()`.
+            A list of the available logics will be displayed.
+
+            If a logic has been incorrectly set an error message may appear
+            such as in the following example.
+            
+            >>> from altrea.boolean import Wff
+            >>> from altrea.rules import Proof
+            >>> from altrea.display import showproof
+            >>> p = Proof()
+            >>> A = Wff('A')
+            >>> p.setlogic('X')
+            >>> p.goal(A)
+            >>> showproof(p, latex=0)
+              Item Reason                                    Comment
+            0              STOPPED: This logic has not been defined.
+            """
+
+        self.logic = logic
+        if self.logic in self.logicdictionary:
+            self.lines = [['', 0, 0, '', '', '', '']]
+        else:
+            self.status = self.stopped
+            self.lines = [['', 0, 0, '', '', '', ''.join([self.stopped, self.stopped_connector, self.stopped_undefinedlogic])]]
+        if self.logging:
+            print(f'The logic {logic} or {self.logicdictionary.get(logic)} has been set for the proof.')
 
     """FUNCTIONS TO SUPPORT AXIOMS, TAUTOLOGOES AND SAVED PROOFS"""    
 

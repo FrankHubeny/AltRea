@@ -173,7 +173,8 @@ def showproof(p: altrea.truthfunction.Proof, color: int = 1, latex: int = 1, col
         for i in range(len(p.lines)):
 
             # Format the statement
-            base = '    |'
+            #base = '    |'
+            base = '   |'
             hypothesisbase = ' __|'
             statement = ''
             for j in range(1, p.lines[i][p.levelindex]):

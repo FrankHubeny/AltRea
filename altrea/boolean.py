@@ -63,7 +63,8 @@ class Wff:
             return f'{self.latexname}'
         
     def tree(self):
-        return f'{self.wff_treeconnector}{self.lb}{self.name}{self.rb}'
+        #return f'{self.wff_treeconnector}{self.lb}{self.name}{self.rb}'
+        return self.name
     
     def pattern(self):
         return '{}'

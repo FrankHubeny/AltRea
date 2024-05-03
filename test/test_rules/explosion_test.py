@@ -20,6 +20,7 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 5),
+    ('len(prf.log)', 8),
     #
     ("str(prf.lines[2][prf.statementindex])", str(Not(A))),
     ("prf.lines[2][prf.levelindex]", 0),
@@ -185,6 +186,7 @@ def test_explosion_nosuchline_1(input_n, expected):
 
 testdata = [
     ('len(prf.lines)', 3),
+    ('len(prf.log)', 4),
     #
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
     ("prf.lines[2][prf.levelindex]", 1),

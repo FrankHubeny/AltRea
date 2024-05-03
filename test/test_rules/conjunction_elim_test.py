@@ -20,6 +20,7 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 13),
+    ('len(prf.log)', 15),
     #
     ("str(prf.lines[7][prf.statementindex])", str(B)),
     ("prf.lines[7][prf.levelindex]", 1),

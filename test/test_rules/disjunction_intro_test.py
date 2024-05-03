@@ -14,64 +14,221 @@ E = Wff('E')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                                Clean Run
+                                Clean Run 1
 ------------------------------------------------------------------------------"""
 
 # Clean test
 testdata = [
-    ('len(p.lines)', 12),
+    ('len(prf.lines)', 3),
     #
-    ("str(p.lines[9][p.statementindex])", str(Implies(C, And(A, B)))),
-    ("p.lines[9][p.levelindex]", 2),
-    ("p.lines[9][p.proofidindex]", 2),
-    ("p.lines[9][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[9][p.linesindex]", ""),
-    ("p.lines[9][p.proofsindex]", "5-8"),
-    ("p.lines[9][p.commentindex]", ""),
+    ("str(prf.lines[1][prf.statementindex])", str(A)),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
     #
-    ("str(p.lines[10][p.statementindex])", str(Implies(D, Implies(C, And(A, B))))),
-    ("p.lines[10][p.levelindex]", 1),
-    ("p.lines[10][p.proofidindex]", 1),
-    ("p.lines[10][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[10][p.linesindex]", ""),
-    ("p.lines[10][p.proofsindex]", "4-9"),
-    ("p.lines[10][p.commentindex]", ""),
-    #
-    ("str(p.lines[11][p.statementindex])", str(Implies(E, Implies(D, Implies(C, And(A, B)))))),
-    ("p.lines[11][p.levelindex]", 0),
-    ("p.lines[11][p.proofidindex]", 0),
-    ("p.lines[11][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[11][p.linesindex]", ""),
-    ("p.lines[11][p.proofsindex]", "3-10"),
-    ("p.lines[11][p.commentindex]", "COMPLETE"),
+    ("str(prf.lines[2][prf.statementindex])", str(Or(A, B))),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def _disjunction_intro_clean_1(input_n, expected):
-    p = Proof()
+def test_disjunction_intro_clean_1(input_n, expected):
+    prf = Proof()
     A = Wff('A')
     B = Wff('B')
     C = Wff('C')
-    p.setlogic('C')
-    
+    prf.setlogic('C')
+    prf.goal(Or(A, B))
+    prf.premise(A)
+    prf.disjunction_intro(1, right=B)
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                Clean Run 2
+------------------------------------------------------------------------------"""
+
+# Clean test
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[1][prf.statementindex])", str(B)),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
+    #
+    ("str(prf.lines[2][prf.statementindex])", str(Or(A, B))),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.complete),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_disjunction_intro_clean_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Or(A, B))
+    prf.premise(B)
+    prf.disjunction_intro(1, left=A)
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                                stopped_string
 ------------------------------------------------------------------------------"""
+
+# Stop if the left input value is a string.
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_disjunction_intro_string_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Or(A, B))
+    prf.premise(B)
+    prf.disjunction_intro(1, left='A')
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                                stopped_string
 ------------------------------------------------------------------------------"""
+
+# Stop if the right input value is a string.
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_disjunction_intro_string_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Or(A, B))
+    prf.premise(B)
+    prf.disjunction_intro(1, right='A')
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                               stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                        
-------------------------------------------------------------------------------"""
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[2][prf.linesindex]", "-2"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_disjunction_intro_nosuchline_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Or(A, B))
+    prf.premise(A)
+    prf.disjunction_intro(-2, right=B)
+    assert eval(input_n) == expected
     
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                               stopped_linescope
+------------------------------------------------------------------------------"""
+
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_disjunction_intro_linescope_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Or(A, B))
+    prf.hypothesis(A)
+    prf.implication_intro()
+    prf.disjunction_intro(1, right=B)
+    assert eval(input_n) == expected
+
+
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                              stopped_novaluepassed
+------------------------------------------------------------------------------"""
+
+# No item was passed to the function.
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_novaluepassed),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_disjunction_intro_string_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Or(A, B))
+    prf.premise(B)
+    prf.disjunction_intro(1)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected

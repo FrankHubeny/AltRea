@@ -14,64 +14,216 @@ E = Wff('E')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                                   Clean Run
+                                   Clean Run 1
 ------------------------------------------------------------------------------"""
 
 # Clean test
 testdata = [
-    ('len(p.lines)', 12),
+    ('len(prf.lines)', 4),
     #
-    ("str(p.lines[9][p.statementindex])", str(Implies(C, And(A, B)))),
-    ("p.lines[9][p.levelindex]", 2),
-    ("p.lines[9][p.proofidindex]", 2),
-    ("p.lines[9][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[9][p.linesindex]", ""),
-    ("p.lines[9][p.proofsindex]", "5-8"),
-    ("p.lines[9][p.commentindex]", ""),
+    ("str(prf.lines[1][prf.statementindex])", str(A)),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
     #
-    ("str(p.lines[10][p.statementindex])", str(Implies(D, Implies(C, And(A, B))))),
-    ("p.lines[10][p.levelindex]", 1),
-    ("p.lines[10][p.proofidindex]", 1),
-    ("p.lines[10][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[10][p.linesindex]", ""),
-    ("p.lines[10][p.proofsindex]", "4-9"),
-    ("p.lines[10][p.commentindex]", ""),
+    ("str(prf.lines[2][prf.statementindex])", str(B)),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.premise_name),
+    ("prf.lines[2][prf.linesindex]", ""),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(p.lines[11][p.statementindex])", str(Implies(E, Implies(D, Implies(C, And(A, B)))))),
-    ("p.lines[11][p.levelindex]", 0),
-    ("p.lines[11][p.proofidindex]", 0),
-    ("p.lines[11][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[11][p.linesindex]", ""),
-    ("p.lines[11][p.proofsindex]", "3-10"),
-    ("p.lines[11][p.commentindex]", "COMPLETE"),
+    ("str(prf.lines[3][prf.statementindex])", str(And(A, B))),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def _conjunction_intro_clean_1(input_n, expected):
-    p = Proof()
+def test_conjunction_intro_clean_1(input_n, expected):
+    prf = Proof()
     A = Wff('A')
     B = Wff('B')
     C = Wff('C')
-    p.setlogic('C')
-    
+    prf.setlogic('C')
+    prf.goal(And(A, B))
+    prf.premise(A)
+    prf.premise(B)
+    prf.conjunction_intro(1, 2)
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                   Clean Run 2
+------------------------------------------------------------------------------"""
+
+# Clean test: reverse order of lines
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[1][prf.statementindex])", str(A)),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
+    #
+    ("str(prf.lines[2][prf.statementindex])", str(B)),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.premise_name),
+    ("prf.lines[2][prf.linesindex]", ""),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", ""),
+    #
+    ("str(prf.lines[3][prf.statementindex])", str(And(B, A))),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    ("prf.lines[3][prf.linesindex]", "2, 1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.complete),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_conjunction_intro_clean_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(And(B, A))
+    prf.premise(A)
+    prf.premise(B)
+    prf.conjunction_intro(2, 1)
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                              stopped_nosuchline
 ------------------------------------------------------------------------------"""
+
+# The first line does not exist in the proof.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    ("prf.lines[3][prf.linesindex]", "3"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_conjunction_intro_nosuchline_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(And(A, B))
+    prf.premise(A)
+    prf.premise(B)
+    prf.conjunction_intro(3, 2)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                              stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
+# The second line does not exist in the proof.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    ("prf.lines[3][prf.linesindex]", "3"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_conjunction_intro_nosuchline_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(And(A, B))
+    prf.premise(A)
+    prf.premise(B)
+    prf.conjunction_intro(1, 3)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                              stopped_linescope
 ------------------------------------------------------------------------------"""
 
+# The first line is not accessible.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 2),
+    ("prf.lines[3][prf.proofidindex]", 2),
+    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_conjunction_elim_linescope_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(And(A, B))
+    prf.hypothesis(A)
+    prf.hypothesis(B)
+    prf.conjunction_intro(1, 2)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                              stopped_linescope
 ------------------------------------------------------------------------------"""
+
+# The second line is not accessible.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 2),
+    ("prf.lines[3][prf.proofidindex]", 2),
+    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_conjunction_elim_linescope_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(And(A, B))
+    prf.hypothesis(A)
+    prf.hypothesis(B)
+    prf.conjunction_intro(2, 1)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
     

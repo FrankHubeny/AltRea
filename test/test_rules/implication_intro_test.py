@@ -21,53 +21,53 @@ t = Proof()
 
 # Clean test
 testdata = [
-    ('len(p.lines)', 12),
+    ('len(prf.lines)', 12),
     #
-    ("str(p.lines[9][p.statementindex])", str(Implies(C, And(A, B)))),
-    ("p.lines[9][p.levelindex]", 2),
-    ("p.lines[9][p.proofidindex]", 2),
-    ("p.lines[9][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[9][p.linesindex]", ""),
-    ("p.lines[9][p.proofsindex]", "5-8"),
-    ("p.lines[9][p.commentindex]", ""),
+    ("str(prf.lines[9][prf.statementindex])", str(Implies(C, And(A, B)))),
+    ("prf.lines[9][prf.levelindex]", 2),
+    ("prf.lines[9][prf.proofidindex]", 2),
+    ("prf.lines[9][prf.ruleindex]", t.implication_intro_name),
+    ("prf.lines[9][prf.linesindex]", ""),
+    ("prf.lines[9][prf.proofsindex]", "5-8"),
+    ("prf.lines[9][prf.commentindex]", ""),
     #
-    ("str(p.lines[10][p.statementindex])", str(Implies(D, Implies(C, And(A, B))))),
-    ("p.lines[10][p.levelindex]", 1),
-    ("p.lines[10][p.proofidindex]", 1),
-    ("p.lines[10][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[10][p.linesindex]", ""),
-    ("p.lines[10][p.proofsindex]", "4-9"),
-    ("p.lines[10][p.commentindex]", ""),
+    ("str(prf.lines[10][prf.statementindex])", str(Implies(D, Implies(C, And(A, B))))),
+    ("prf.lines[10][prf.levelindex]", 1),
+    ("prf.lines[10][prf.proofidindex]", 1),
+    ("prf.lines[10][prf.ruleindex]", t.implication_intro_name),
+    ("prf.lines[10][prf.linesindex]", ""),
+    ("prf.lines[10][prf.proofsindex]", "4-9"),
+    ("prf.lines[10][prf.commentindex]", ""),
     #
-    ("str(p.lines[11][p.statementindex])", str(Implies(E, Implies(D, Implies(C, And(A, B)))))),
-    ("p.lines[11][p.levelindex]", 0),
-    ("p.lines[11][p.proofidindex]", 0),
-    ("p.lines[11][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[11][p.linesindex]", ""),
-    ("p.lines[11][p.proofsindex]", "3-10"),
-    ("p.lines[11][p.commentindex]", "COMPLETE"),
+    ("str(prf.lines[11][prf.statementindex])", str(Implies(E, Implies(D, Implies(C, And(A, B)))))),
+    ("prf.lines[11][prf.levelindex]", 0),
+    ("prf.lines[11][prf.proofidindex]", 0),
+    ("prf.lines[11][prf.ruleindex]", t.implication_intro_name),
+    ("prf.lines[11][prf.linesindex]", ""),
+    ("prf.lines[11][prf.proofsindex]", "3-10"),
+    ("prf.lines[11][prf.commentindex]", "COMPLETE"),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_clean_1(input_n, expected):
-    p = Proof()
+    prf = Proof()
     A = Wff('A')
     B = Wff('B')
     C = Wff('C')
     D = Wff('D')
     E = Wff('E')
-    p.setlogic('C')
-    p.goal(Implies(E, Implies(D, Implies(C, And(A, B)))))
-    p.premise(A)
-    p.premise(B)
-    p.hypothesis(E)
-    p.hypothesis(D)
-    p.hypothesis(C)
-    p.reiterate(1)
-    p.reiterate(2)
-    p.conjunction_intro(6, 7)
-    p.implication_intro()
-    p.implication_intro()
-    p.implication_intro()
+    prf.setlogic('C')
+    prf.goal(Implies(E, Implies(D, Implies(C, And(A, B)))))
+    prf.premise(A)
+    prf.premise(B)
+    prf.hypothesis(E)
+    prf.hypothesis(D)
+    prf.hypothesis(C)
+    prf.reiterate(1)
+    prf.reiterate(2)
+    prf.conjunction_intro(6, 7)
+    prf.implication_intro()
+    prf.implication_intro()
+    prf.implication_intro()
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------

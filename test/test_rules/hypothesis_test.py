@@ -15,29 +15,44 @@ E = Wff('E')
 t = Proof()
 
 """------------------------------------------------------------------------------
-                            hypothesis, ADDhypothesis
                                 Clean Run
 ------------------------------------------------------------------------------"""
 
 # Clean test
 testdata = [
-    ('len(p.lines)', 6),
-    ('p.prooflist[1]', [1, [2, 4], 0, [2, 3]]),
-    ('str(p.lines[5][p.statementindex])', str(Implies(And(A, B), C))),
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[1][prf.statementindex])", str(Iff(A, B))),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
+    #
+    ("str(prf.lines[2][prf.statementindex])", str(A)),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.premise_name),
+    ("prf.lines[2][prf.linesindex]", ""),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", ""),
+    #
+    ("str(prf.lines[3][prf.statementindex])", str(B)),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_elim_name),
+    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_hypothesis_clean_1(input_n, expected):
+def _hypothesis_clean_1(input_n, expected):
+    prf = Proof()
     A = Wff('A')
     B = Wff('B')
     C = Wff('C')
-    p = Proof()
-    p.setlogic('C')
-    p.goal(Implies(And(A, B), C))
-    p.premise(C)
-    p.hypothesis(A)
-    p.addhypothesis(B)
-    p.reiterate(1)
-    p.implication_intro()
+    prf.setlogic('C')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------

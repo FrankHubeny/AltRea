@@ -216,7 +216,7 @@ def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item',
     return df
             
 
-def show(p: Proof, 
+def showlines(p: Proof, 
          color: int = 1, 
          latex: int = 1, 
          columns: list = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']):

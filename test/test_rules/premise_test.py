@@ -19,39 +19,39 @@ t = Proof()
 
 # Clean test
 testdata = [
-    ('len(p.lines)', 12),
+    ('len(prf.lines)', 4),
     #
-    ("str(p.lines[9][p.statementindex])", str(Implies(C, And(A, B)))),
-    ("p.lines[9][p.levelindex]", 2),
-    ("p.lines[9][p.proofidindex]", 2),
-    ("p.lines[9][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[9][p.linesindex]", ""),
-    ("p.lines[9][p.proofsindex]", "5-8"),
-    ("p.lines[9][p.commentindex]", ""),
+    ("str(prf.lines[1][prf.statementindex])", str(Iff(A, B))),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
     #
-    ("str(p.lines[10][p.statementindex])", str(Implies(D, Implies(C, And(A, B))))),
-    ("p.lines[10][p.levelindex]", 1),
-    ("p.lines[10][p.proofidindex]", 1),
-    ("p.lines[10][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[10][p.linesindex]", ""),
-    ("p.lines[10][p.proofsindex]", "4-9"),
-    ("p.lines[10][p.commentindex]", ""),
+    ("str(prf.lines[2][prf.statementindex])", str(A)),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.premise_name),
+    ("prf.lines[2][prf.linesindex]", ""),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(p.lines[11][p.statementindex])", str(Implies(E, Implies(D, Implies(C, And(A, B)))))),
-    ("p.lines[11][p.levelindex]", 0),
-    ("p.lines[11][p.proofidindex]", 0),
-    ("p.lines[11][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[11][p.linesindex]", ""),
-    ("p.lines[11][p.proofsindex]", "3-10"),
-    ("p.lines[11][p.commentindex]", "COMPLETE"),
+    ("str(prf.lines[3][prf.statementindex])", str(B)),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_elim_name),
+    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def _premise_clean_1(input_n, expected):
-    p = Proof()
+    prf = Proof()
     A = Wff('A')
     B = Wff('B')
     C = Wff('C')
-    p.setlogic('C')
+    prf.setlogic('C')
     
     assert eval(input_n) == expected
 

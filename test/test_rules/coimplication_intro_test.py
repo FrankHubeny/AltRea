@@ -19,59 +19,285 @@ t = Proof()
 
 # Clean test
 testdata = [
-    ('len(p.lines)', 12),
+    ('len(prf.lines)', 4),
     #
-    ("str(p.lines[9][p.statementindex])", str(Implies(C, And(A, B)))),
-    ("p.lines[9][p.levelindex]", 2),
-    ("p.lines[9][p.proofidindex]", 2),
-    ("p.lines[9][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[9][p.linesindex]", ""),
-    ("p.lines[9][p.proofsindex]", "5-8"),
-    ("p.lines[9][p.commentindex]", ""),
+    ("str(prf.lines[1][prf.statementindex])", str(Implies(A, B))),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
     #
-    ("str(p.lines[10][p.statementindex])", str(Implies(D, Implies(C, And(A, B))))),
-    ("p.lines[10][p.levelindex]", 1),
-    ("p.lines[10][p.proofidindex]", 1),
-    ("p.lines[10][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[10][p.linesindex]", ""),
-    ("p.lines[10][p.proofsindex]", "4-9"),
-    ("p.lines[10][p.commentindex]", ""),
+    ("str(prf.lines[2][prf.statementindex])", str(Implies(B, A))),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.premise_name),
+    ("prf.lines[2][prf.linesindex]", ""),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(p.lines[11][p.statementindex])", str(Implies(E, Implies(D, Implies(C, And(A, B)))))),
-    ("p.lines[11][p.levelindex]", 0),
-    ("p.lines[11][p.proofidindex]", 0),
-    ("p.lines[11][p.ruleindex]", t.implication_intro_name),
-    ("p.lines[11][p.linesindex]", ""),
-    ("p.lines[11][p.proofsindex]", "3-10"),
-    ("p.lines[11][p.commentindex]", "COMPLETE"),
+    ("str(prf.lines[3][prf.statementindex])", str(Iff(A, B))),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.complete),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def _coimplication_intro_clean_1(input_n, expected):
-    p = Proof()
+def test_coimplication_intro_clean_1(input_n, expected):
+    prf = Proof()
     A = Wff('A')
     B = Wff('B')
     C = Wff('C')
-    p.setlogic('C')
-    
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.premise(Implies(A, B))
+    prf.premise(Implies(B, A))
+    prf.coimplication_intro(1, 2)    
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                              stopped_nosuchline
 ------------------------------------------------------------------------------"""
+
+# The first line does not exist in the proof.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "5"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_elim_nosuchline_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.premise(Implies(A, B))
+    prf.premise(Implies(B, A))
+    prf.coimplication_intro(5, 2)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                              stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
+# The second line does not exist in the proof.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "4"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_elim_nosuchline_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.premise(Implies(A, B))
+    prf.premise(Implies(B, A))
+    prf.coimplication_intro(1, 4)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                                stopped_linescope
 ------------------------------------------------------------------------------"""
 
+# The first line is not accessible.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 2),
+    ("prf.lines[3][prf.proofidindex]", 2),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_intro_linescope_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.hypothesis(Implies(A, B))
+    prf.hypothesis(Implies(B, A))
+    prf.coimplication_intro(1, 2)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                               stopped_linescope
 ------------------------------------------------------------------------------"""
+
+# The second line is not accessible.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 2),
+    ("prf.lines[3][prf.proofidindex]", 2),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_intro_linescope_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.hypothesis(Implies(A, B))
+    prf.hypothesis(Implies(B, A))
+    prf.coimplication_intro(2, 1)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                             stopped_notimplication
+------------------------------------------------------------------------------"""
+
+# The first line is not an implication.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notimplication),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_intro_notimplication_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.premise(A)
+    prf.premise(Implies(B, A))
+    prf.coimplication_intro(1, 2)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                            stopped_notimplication
+------------------------------------------------------------------------------"""
+
+# The second line is not an implication.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notimplication),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_intro_notimplication_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.premise(A)
+    prf.premise(Implies(B, A))
+    prf.coimplication_intro(2, 1)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                            stopped_notsamestatement
+------------------------------------------------------------------------------"""
+
+# The left side of the first statement is not the same as the right side of the second.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notsamestatement),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_elim_nosuchline_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.premise(Implies(A, B))
+    prf.premise(Implies(B, C))
+    prf.coimplication_intro(1, 2)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+    
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                            stopped_notsamestatement
+------------------------------------------------------------------------------"""
+
+# The right side of the first statement is not the same as the left side of the second.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
+    ("prf.lines[3][prf.linesindex]", "2, 1"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notsamestatement),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_elim_nosuchline_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Iff(A, B))
+    prf.premise(Implies(A, B))
+    prf.premise(Implies(C, A))
+    prf.coimplication_intro(1, 2)
+    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+
     

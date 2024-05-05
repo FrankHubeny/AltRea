@@ -68,7 +68,7 @@ testdata = [
     ("prf.lines[12][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[12][prf.linesindex]", "5, 10"),
     ("prf.lines[12][prf.proofsindex]", ""),
-    ("prf.lines[12][prf.commentindex]", t.complete + t.comments_connector + "Now it works using line 5 first."),
+    ("prf.lines[12][prf.commentindex]", t.complete + t.comment_connector + "Now it works using line 5 first."),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_clean_1(input_n, expected):
@@ -78,18 +78,18 @@ def test_conjunction_elim_clean_1(input_n, expected):
     C = Wff('C')
     prf.setlogic('C')
     prf.goal(Iff(And(A, B), And(B, A)))
-    prf.hypothesis(And(A, B), comments="Don't use `addhypothesis` to start the subproof.")
-    prf.conjunction_elim(1, comments='The left side is the default.')
-    prf.conjunction_elim(1, side='right', comments='Now do the right side.')
-    prf.conjunction_intro(3, 2, comments='Put the conjuncts on the opposite side.')
+    prf.hypothesis(And(A, B), comment="Don't use `addhypothesis` to start the subproof.")
+    prf.conjunction_elim(1, comment='The left side is the default.')
+    prf.conjunction_elim(1, side='right', comment='Now do the right side.')
+    prf.conjunction_intro(3, 2, comment='Put the conjuncts on the opposite side.')
     prf.implication_intro()
     prf.hypothesis(And(B, A))
     prf.conjunction_elim(6)
     prf.conjunction_elim(6, side='right')
-    prf.conjunction_intro(8, 7, comments='The order is reversed.')
+    prf.conjunction_intro(8, 7, comment='The order is reversed.')
     prf.implication_intro()
-    prf.coimplication_intro(10, 5, comments='The order will be like the first statement on line 10.')
-    prf.coimplication_intro(5, 10, comments='Now it works using line 5 first.')    
+    prf.coimplication_intro(10, 5, comment='The order will be like the first statement on line 10.')
+    prf.coimplication_intro(5, 10, comment='Now it works using line 5 first.')    
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -119,7 +119,7 @@ def test_conjunction_elim_nosuchline_1(input_n, expected):
     prf.goal(C)
     prf.premise(And(A, B))
     prf.conjunction_elim(0)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -150,7 +150,7 @@ def test_conjunction_elim_linescope_1(input_n, expected):
     prf.hypothesis(And(A, B))
     prf.hypothesis(C)
     prf.conjunction_elim(1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -180,7 +180,7 @@ def test_conjunction_elim_notconjunction_1(input_n, expected):
     prf.goal(C)
     prf.premise(A)
     prf.conjunction_elim(1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -210,6 +210,6 @@ def test_conjunction_elim_sidenotselected_1(input_n, expected):
     prf.goal(C)
     prf.premise(And(A, B))
     prf.conjunction_elim(1, side='righ')
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 

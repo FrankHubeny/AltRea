@@ -148,7 +148,7 @@ def test_explosion_string_2(input_n, expected):
     prf.premise(Not(A))
     prf.negation_elim(1, 2)
     prf.explosion('C')
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------

@@ -53,7 +53,7 @@ def test_implication_elim_clean_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(A)
     prf.premise(Implies(A, B))
     prf.implication_elim(1, 2)  
@@ -84,11 +84,11 @@ def test_implication_elim_nosuchline_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(A)
     prf.premise(Implies(A, B))
     prf.implication_elim(3, 2)  
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -116,11 +116,11 @@ def test_implication_elim_nosuchline_2(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(A)
     prf.premise(Implies(A, B))
     prf.implication_elim(1, -2.56789)  
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 
@@ -149,12 +149,12 @@ def test_implication_elim_linescope_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(Implies(A, B))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.implication_elim(2, 1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 
@@ -183,12 +183,12 @@ def test_implication_elim_linescope_2(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(Implies(A, B))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.implication_elim(1, 2)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -216,11 +216,11 @@ def test_implication_elim_notantecedent_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(Implies(A, B))
     prf.premise(And(A, A))
     prf.implication_elim(1, 2)  
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -248,11 +248,11 @@ def test_implication_elim_notantecedent_2(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(Implies(A, B))
     prf.premise(And(A, A))
     prf.implication_elim(2, 1)  
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -280,11 +280,11 @@ def test_implication_elim_notmodusponens_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='Modus Ponens')
+    prf.goal(B, comment='Modus Ponens')
     prf.premise(A)
     prf.premise(And(A, A))
     prf.implication_elim(1, 2)  
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
     

@@ -87,7 +87,7 @@ def test_coimplication_elim_nosuchline_1(input_n, expected):
     prf.premise(Iff(A, B))
     prf.premise(A)
     prf.coimplication_elim(5, 2)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ def test_coimplication_elim_nosuchline_2(input_n, expected):
     prf.premise(Iff(A, B))
     prf.premise(A)
     prf.coimplication_elim(1, 4)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ def test_coimplication_elim_linescope_1(input_n, expected):
     prf.hypothesis(Iff(A, B))
     prf.hypothesis(A)
     prf.coimplication_elim(1, 2)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -177,7 +177,7 @@ def test_coimplication_elim_linescope_2(input_n, expected):
     prf.hypothesis(Iff(A, B))
     prf.hypothesis(A)
     prf.coimplication_elim(2, 1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ def test_coimplication_elim_notcoimplicationelim_1(input_n, expected):
     prf.premise(C)
     prf.premise(A)
     prf.coimplication_elim(2, 1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -237,7 +237,7 @@ def test_coimplication_elim_notcoimplicationelim_2(input_n, expected):
     prf.premise(Iff(C, A))
     prf.premise(B)
     prf.coimplication_elim(1, 2)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -267,6 +267,36 @@ def test_coimplication_elim_notcoimplicationelim_2(input_n, expected):
     prf.premise(Iff(C, A))
     prf.premise(B)
     prf.coimplication_elim(2, 1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                          stopped_undefinedoperator
+------------------------------------------------------------------------------"""
+
+# The second statement is a coimplication but the first is not on either its left or right side.
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", t.coimplication_elim_name),
+    ("prf.lines[3][prf.linesindex]", ""),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_undefinedoperator),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_coimplication_elim_undefinedoperator_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    prf.setlogic('GND')
+    prf.goal(B)
+    prf.premise(Iff(A, B))
+    prf.premise(A)
+    prf.coimplication_elim(1, 2)
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 

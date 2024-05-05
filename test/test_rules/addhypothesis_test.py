@@ -54,9 +54,9 @@ def test_addhypothesis_clean_1(input_n, expected):
     C = Wff('C')
     prf.setlogic('C')
     prf.goal(B)
-    prf.hypothesis(A, comments='Each call to `hypothesis` creates a sub proof.')
-    prf.hypothesis(C, comments='Now I have a sub sub proof.')
-    prf.addhypothesis(B, comments='This adds a second hypothesis.')    
+    prf.hypothesis(A, comment='Each call to `hypothesis` creates a sub proof.')
+    prf.hypothesis(C, comment='Now I have a sub sub proof.')
+    prf.addhypothesis(B, comment='This adds a second hypothesis.')    
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ def test_addhypothesis_string_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='There is a difference between the Wff A and the string "A"')
+    prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis(A)  
     prf.addhypothesis('~A')
 
@@ -112,7 +112,7 @@ def test_addhypothesis_nosubproof_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='There is a difference between the Wff A and the string "A"')
+    prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     # prf.hypothesis(A)  
     prf.addhypothesis(Not(A))
     
@@ -139,7 +139,7 @@ def test_addhypothesis_string_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='There is a difference between the Wff A and the string "A"')
+    prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis(A)  
     prf.addhypothesis('~A')
     

@@ -59,6 +59,75 @@ def metadata(p: Proof):
         print('Completed: No')
     print('Lines: {}'.format(len(p.lines)-1))
 
+def formatlatexstatement(p: Proof, i: int, color=1):
+    if p.lines[i][0] != p.blankstatement:
+        base = ' \\hspace{0.35cm}|'
+        hypothesisbase = ''.join(['\\underline{', base, '}']) 
+        statement = ''
+        for j in range(1, p.lines[i][p.levelindex]):
+            statement = base + statement
+        if p.lines[i][p.statementindex] != '':
+            if p.lines[i][p.levelindex] > 0:
+                if i < len(p.lines) - 1:
+                    if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                        if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
+                            statement = hypothesisbase + statement
+                        else:
+                            statement = base + statement
+                    else:
+                        statement = base + statement   
+                else:
+                    if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                        statement = hypothesisbase + statement
+                    else:
+                        statement = base + statement
+
+        if i == 0:
+            if p.goals_latex != '':
+                statement = ''.join(['$\\color{blue}', p.goals_latex, '$', statement, ])
+            else:
+                statement = ''
+        elif color == 1 and p.status != p.complete and p.status != p.stopped and p.lines[i][1] == p.level and p.currentproofid == p.lines[i][2] and i > 0:
+            statement = ''.join(['$\\color{green}', p.lines[i][0].latex(), statement, '$' ])
+        elif color == 1 and p.status != p.complete and p.status != p.stopped and (p.lines[i][2] in p.previousproofchain) and i > 0:
+            statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), statement, '$' ])
+        elif color == 1 and p.lines[i][6][0:8] == p.complete: 
+            statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), statement, '$' ])
+        elif color == 1 and p.lines[i][6][0:18] == p.partialcompletion:
+            statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), statement, '$'])
+        else:
+            if type(p.lines[i][0]) == str:
+                statement = ''.join([p.lines[i][0], statement])
+            else:
+                statement = ''.join(['$', p.lines[i][0].latex(), statement, '$' ])
+    else:
+        statement = p.blankstatement
+    return statement
+
+def formatstringstatement(p: Proof, i: int):
+    base = '   |'
+    hypothesisbase = ' __|'
+    statement = ''
+    for j in range(1, p.lines[i][p.levelindex]):
+        statement = base + statement
+    if p.lines[i][p.statementindex] != '':
+        if p.lines[i][p.levelindex] > 0:
+            if i < len(p.lines) - 1:
+                if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                    if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
+                        statement = hypothesisbase + statement
+                    else:
+                        statement = base + statement
+                else:
+                    statement = base + statement   
+            else:
+                if p.lines[i][p.ruleindex] == p.hypothesis_name:
+                    statement = hypothesisbase + statement
+                else:
+                    statement = base + statement
+    statement = ''.join([str(p.lines[i][p.statementindex]), statement])
+    return statement
+
 def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item','Reason','Comment']):
     """Display a proof similar to how Frederic Fitch displayed it in Symbolic Logic.
     
@@ -107,7 +176,6 @@ def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item',
 
             # Format the statement
             base = ' \\hspace{0.35cm}|'
-            #hypothesisbase = ' \\underline{\\hspace{0.35cm}|}'
             hypothesisbase = ''.join(['\\underline{', base, '}']) 
             statement = ''
             for j in range(1, p.lines[i][p.levelindex]):
@@ -134,24 +202,12 @@ def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item',
                 else:
                     statement = ' '
             elif color == 1 and p.status != p.complete and p.status != p.stopped and p.lines[i][1] <= p.level and i > 0:
-                #if p.lines[i][p.ruleindex] == p.hypothesis_name and i < len(p.lines) - 1:
-                    # if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
-                    #     statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), lasthypothesis, statement, '$'])
-                    # else:
-                    # statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), blankspace, statement, '$' ])
-                #else:
                 statement = ''.join(['$\\color{red}', p.lines[i][0].latex(), statement, '$' ])
             elif color == 1 and p.lines[i][6][0:8] == p.complete: 
                 statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), statement, '$' ])
             elif color == 1 and p.lines[i][6][0:18] == p.partialcompletion:
                 statement = ''.join(['$\\color{blue}', p.lines[i][0].latex(), statement, '$'])
             else:
-                # if p.lines[i][p.ruleindex] == p.hypothesis_name and i < len(p.lines) - 1:
-                #     if p.lines[i+1][p.ruleindex] != p.hypothesis_name or p.lines[i][p.levelindex] < p.lines[i+1][p.levelindex]:
-                #         statement = ''.join(['$', p.lines[i][0].latex(), lasthypothesis, statement, '$' ])
-                #     else:
-                #         statement = ''.join(['$', p.lines[i][0].latex(), blankspace, statement, '$' ])
-                # else:
                 if type(p.lines[i][0]) == str:
                     statement = ''.join([p.lines[i][0], statement])
                 else:
@@ -167,7 +223,6 @@ def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item',
                 rule = p.lines[i][p.ruleindex]
 
             # Format the comment
-            #comment = formatcomment(p)
             comment = p.lines[i][p.commentindex]
 
             newp.append([statement, rule, comment])
@@ -176,7 +231,6 @@ def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item',
         for i in range(len(p.lines)):
 
             # Format the statement
-            #base = '    |'
             base = '   |'
             hypothesisbase = ' __|'
             statement = ''
@@ -208,7 +262,6 @@ def showproof(p: Proof, color: int = 1, latex: int = 1, columns: list = ['Item',
                 rule = p.lines[i][p.ruleindex]
 
             # Format the comment
-            #comment = formatcomment(p)
             comment = p.lines[i][p.commentindex]
 
             newp.append([statement, rule, comment])
@@ -270,6 +323,55 @@ def showlines(p: Proof,
     else:
         df = pandas.DataFrame(p.lines, index=indx, columns=columns)
     return df
+
+def displayproof(p: Proof, 
+                 color: int = 1, 
+                 latex: int = 1, 
+                 columns: list = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']):
+    indx = [p.logic]
+    for i in range(len(p.lines)-1):
+        indx.append(i + 1)
+    newp = []
+    if latex == 1:
+        for i in range(len(p.lines)):
+
+            # Format statement
+            statement = formatlatexstatement(p, i, color)
+
+            # Format subproof
+            # if color == 1 and p.status != p.complete and p.status != p.stopped and p.lines[i][1] == p.level + 1:
+            #     subproof = ''.join(['$\\color{red}', str(p.lines[i][2]), '$'])
+            # else:
+            #     subproof = p.lines[i][2]
+
+            newp.append([statement,
+                        p.lines[i][1],
+                        p.lines[i][2],
+                        p.lines[i][3],
+                        p.lines[i][4],
+                        p.lines[i][5],
+                        p.lines[i][6]
+                        ]
+            )
+    else:
+        newp = []
+        for i in range(len(p.lines)):
+
+            # Format statement
+            statement = formatstringstatement(p, i)
+
+            newp.append([statement,
+                        p.lines[i][1],
+                        p.lines[i][2],
+                        p.lines[i][3],
+                        p.lines[i][4],
+                        p.lines[i][5],
+                        p.lines[i][6]
+                        ]
+            )
+    df = pandas.DataFrame(newp, index=indx, columns=columns)
+    return df
+    
 
 def truthtable(premises: list, goal, letters: list):
     """Display a truth table built from a conjunction of the premises implying the goal.
@@ -339,16 +441,16 @@ def showblocklist(p: Proof):
     df = pandas.DataFrame(p.blocklist, index=indx, columns=['Level', 'Block'])
     return df
 
-def availablelogics():
-    """Displays the available logics for proofs."""
+# def availablelogics():
+#     """Displays the available logics for proofs."""
 
-    from pandas import DataFrame
-    from altrea.boolean import Wff
-    from altrea.truthfunction import Proof
-    A = Wff('A')
-    p = Proof(A)
-    df = DataFrame(p.logicdictionary.items(), columns=['Rule', 'Logics Supporting It'])
-    return df
+#     from pandas import DataFrame
+#     from altrea.boolean import Wff
+#     from altrea.truthfunction import Proof
+#     A = Wff('A')
+#     p = Proof(A)
+#     df = DataFrame(p.logicdictionary.items(), columns=['Rule', 'Logics Supporting It'])
+#     return df
 
 def connectors():
     """Displays the available logical connectors for a specific logic."""

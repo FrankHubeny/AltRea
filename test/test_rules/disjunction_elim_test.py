@@ -143,7 +143,7 @@ def test_conjunction_intro_nosuchline_1(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(10, 3, 3)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 
@@ -176,7 +176,7 @@ def test_conjunction_intro_nosuchline_2(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, -10, 3)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -207,7 +207,7 @@ def test_conjunction_intro_nosuchline_3(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 3.1416)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -240,7 +240,7 @@ def test_conjunction_elim_linescope_1(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 4, 4)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -272,7 +272,7 @@ def test_conjunction_elim_linescope_2(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 2, 3)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -304,7 +304,7 @@ def test_conjunction_elim_linescope_3(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 2)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -336,7 +336,7 @@ def test_conjunction_intro_nodisjunction_1(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 3)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -368,7 +368,7 @@ def test_conjunction_intro_notimplication_1(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 1, 3)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -400,7 +400,7 @@ def test_conjunction_intro_notimplication_2(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
@@ -440,6 +440,6 @@ def test_conjunction_intro_notsameconclusion_1(input_n, expected):
     prf.implication_elim(8, 9)
     prf.implication_intro()
     prf.disjunction_elim(3, 7, 11)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     

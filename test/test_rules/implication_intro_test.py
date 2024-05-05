@@ -55,7 +55,7 @@ def test_implication_intro_clean_1(input_n, expected):
     D = Wff('D')
     E = Wff('E')
     prf.setlogic('C')
-    prf.goal(Implies(A, A), comments='Reflexivity of Implication')
+    prf.goal(Implies(A, A), comment='Reflexivity of Implication')
     prf.hypothesis(A)
     prf.implication_intro()
     assert eval(input_n) == expected
@@ -194,7 +194,7 @@ def test_implication_intro_notantecedent_2(input_n, expected):
     prf.goal(Implies(A, A))
     prf.premise(A)
     prf.implication_intro()
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
     

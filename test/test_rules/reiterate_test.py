@@ -86,7 +86,7 @@ def test_reiterate_nosuchline_1(input_n, expected):
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                               stopped_linescope
+                            stopped_notreiteratescope
 ------------------------------------------------------------------------------"""
 
 # The line is not accessible.
@@ -97,10 +97,10 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_reiterate_linescope_1(input_n, expected):
+def test_reiterate_notreiteratescope_1(input_n, expected):
     prf = Proof()
     A = Wff('A')
     prf.setlogic('C')
@@ -112,11 +112,81 @@ def test_reiterate_linescope_1(input_n, expected):
     
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                           stopped_notreiteratescope
 ------------------------------------------------------------------------------"""
 
+# The line is not accessible because it is already in the current proof.
+testdata = [
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 1),
+    ("prf.lines[2][prf.proofidindex]", 1),
+    ("prf.lines[2][prf.ruleindex]", t.reiterate_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_reiterate_notreiteratescope_2(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    prf.setlogic('C')
+    prf.goal(Not(Not(A)))
+    prf.hypothesis(A)
+    prf.reiterate(1)
+    assert eval(input_n) == expected
+    
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                           stopped_notreiteratescope
 ------------------------------------------------------------------------------"""
+
+# The line is not accessible because it is at the main proof level.  There is no previous proof to reiterate from.
+testdata = [
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.reiterate_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_reiterate_notreiteratescope_3(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    prf.setlogic('C')
+    prf.goal(Not(Not(A)))
+    prf.premise(A)
+    prf.reiterate(1)
+    assert eval(input_n) == expected
     
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                           stopped_notreiteratescope
+------------------------------------------------------------------------------"""
+
+# The line is not accessible because it is not in a proof from the previous proof chain.
+testdata = [
+    ("str(prf.lines[5][prf.statementindex])", t.blankstatement),
+    ("prf.lines[5][prf.levelindex]", 2),
+    ("prf.lines[5][prf.proofidindex]", 3),
+    ("prf.lines[5][prf.ruleindex]", t.reiterate_name),
+    ("prf.lines[5][prf.linesindex]", "2"),
+    ("prf.lines[5][prf.proofsindex]", ""),
+    ("prf.lines[5][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_reiterate_notreiteratescope_4(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    B = Wff('B')
+    C = Wff('C')
+    prf.setlogic('C')
+    prf.goal(Not(Not(A)))
+    prf.hypothesis(A)
+    prf.hypothesis(B)
+    prf.implication_intro()
+    prf.hypothesis(C)
+    prf.reiterate(2)
+    assert eval(input_n) == expected
+

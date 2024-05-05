@@ -84,7 +84,7 @@ def test_hypothesis_string_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    prf.goal(B, comments='There is a difference between the Wff A and the string "A"')
+    prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis('A')  
 
 """------------------------------------------------------------------------------
@@ -110,6 +110,6 @@ def test_hypothesis_nogoal_1(input_n, expected):
     B = Wff('B')
     C = Wff('C')
     prf.setlogic('C')
-    #prf.goal(B, comments='There is a difference between the Wff A and the string "A"')
+    #prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis(A)  
     

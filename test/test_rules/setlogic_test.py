@@ -60,7 +60,7 @@ def test_setlogic_undefinedlogic_1(input_n, expected):
     prf = Proof()
     A = Wff('A')
     prf.setlogic('X')
-    prf.goal(A, comments="This should not be displayed.")
+    prf.goal(A, comment="This should not be displayed.")
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------

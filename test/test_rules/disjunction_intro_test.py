@@ -113,7 +113,7 @@ def test_disjunction_intro_string_1(input_n, expected):
     prf.goal(Or(A, B))
     prf.premise(B)
     prf.disjunction_intro(1, left='A')
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -143,7 +143,7 @@ def test_disjunction_intro_string_2(input_n, expected):
     prf.goal(Or(A, B))
     prf.premise(B)
     prf.disjunction_intro(1, right='A')
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -231,5 +231,5 @@ def test_disjunction_intro_string_2(input_n, expected):
     prf.goal(Or(A, B))
     prf.premise(B)
     prf.disjunction_intro(1)
-    prf.hypothesis(A, comments='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected

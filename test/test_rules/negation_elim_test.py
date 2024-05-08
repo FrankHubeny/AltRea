@@ -38,7 +38,7 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(prf.lines[3][prf.statementindex])", str(t.falsename)),
+    ("str(prf.lines[3][prf.statementindex])", str(t.false_name)),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
     ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),

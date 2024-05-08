@@ -37,10 +37,11 @@ class Wff:
     or_connector = '|'
     or_latexconnector = '\\vee'
     or_treeconnector = 'Or'
-    possible_connector = 'Pos'
-    possible_latexconnector = '\\Diamond'
+    possibly_connector = 'Pos'
+    possibly_latexconnector = '\\Diamond'
     possible_treeconnector = 'P'
     wff_treeconnector = 'Wff'
+    reserved_names = ['And', 'Or', 'Not', 'Implies', 'Iff', 'Wff']
 
     f_name = 'X'
     f_latexname = '\\bot'
@@ -49,9 +50,12 @@ class Wff:
 
     
     def __init__(self, name: str, latexname: str = ''):
-        self.name = name
-        self.latexname = latexname
-        self.booleanvalue = None
+        if name in self.reserved_names:
+            raise ValueError(f'The name "{name}" is in the list of reserved words: {self.reserved_names}.')
+        else:
+            self.name = name
+            self.latexname = latexname
+            self.booleanvalue = None
 
     def __str__(self):
         return f'{self.name}'
@@ -66,8 +70,13 @@ class Wff:
         #return f'{self.wff_treeconnector}{self.lb}{self.name}{self.rb}'
         return self.name
     
-    def pattern(self):
-        return '{}'
+    def pattern(self, wfflist: list):
+        try:
+            idx = wfflist.index(self.name)
+        except ValueError:
+            idx = len(wfflist)
+            wfflist.append(self.name)
+        return ''.join(['*', str(idx), '*'])
     
     def treetuple(self):
         return self.name
@@ -80,6 +89,11 @@ class Wff:
     
     def getvalue(self):
         return self.booleanvalue   
+    
+    def dictionary(self, d: dict):
+        if d.get(self.name) == None:
+            d.update({self.name: self})
+        return d
 
 class And(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -116,14 +130,19 @@ class And(Wff):
     def tree(self):
         return f'{self.and_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
     
-    def pattern(self):
-        return f'{self.and_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    def pattern(self, wfflist: list):
+        return f'{self.and_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.and_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
     def getvalue(self):
         return self.left.getvalue() and self.right.getvalue()
+    
+    def dictionary(self, d: dict):
+        d = self.left.dictionary(d)
+        d = self.right.dictionary(d)
+        return d
 
 class F(Wff):
     """This well formed formula is the result of a contradiction in a proof which may be useful for explosions.
@@ -143,7 +162,7 @@ class F(Wff):
     def tree(self):
         return f'{self.f_name}'
     
-    def pattern(self):
+    def pattern(self, wfflist: list):
         return f'{self.f_name}'
     
     def treetuple(self):
@@ -187,11 +206,16 @@ class Iff(Wff):
     def tree(self):
         return f'{self.iff_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
     
-    def pattern(self):
-        return f'{self.iff_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    def pattern(self, wfflist: list):
+        return f'{self.iff_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.iff_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
+    
+    def dictionary(self, d: dict):
+        d = self.left.dictionary(d)
+        d = self.right.dictionary(d)
+        return d
 
 class Implies(Wff):
     """A well formed formula with two arguments which are also well formed formulas joined
@@ -229,16 +253,21 @@ class Implies(Wff):
     def tree(self):
         return f'{self.implies_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
     
-    def pattern(self):
-        return f'{self.implies_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    def pattern(self, wfflist: list):
+        return f'{self.implies_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.implies_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
     def getvalue(self):
         return (not self.left.getvalue()) or self.right.getvalue()
+    
+    def dictionary(self, d: dict):
+        d = self.left.dictionary(d)
+        d = self.right.dictionary(d)
+        return d
 
-class N(Wff):
+class Necessary(Wff):
     """A well-formed formula which is necessarily true."""
 
     is_variable = True
@@ -261,8 +290,8 @@ class N(Wff):
     def tree(self):
         return f'{self.necessary_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
     
-    def pattern(self):
-        return f'{self.necessary_treeconnector}{self.lb}{self.wff.pattern()}{self.rb}'
+    def pattern(self, wfflist: list):
+        return f'{self.necessary_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.necessary_treeconnector, self.lb, self.wff.treetuple(), self.rb
@@ -296,14 +325,18 @@ class Not(Wff):
     def tree(self):
         return f'{self.not_treeconnector}{self.lb}{self.negated.tree()}{self.rb}'
     
-    def pattern(self):
-        return f'{self.not_treeconnector}{self.lb}{self.negated.pattern()}{self.rb}'
+    def pattern(self, wfflist: list):
+        return f'{self.not_treeconnector}{self.lb}{self.negated.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.not_treeconnector, self.lb, self.negated.treetuple(), self.rb
     
     def getvalue(self):
         return not self.negated.getvalue()
+
+    def dictionary(self, d: dict):
+        d = self.negated.dictionary(d)
+        return d
 
 class Or(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -340,16 +373,21 @@ class Or(Wff):
     def tree(self):
         return f'{self.or_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
     
-    def pattern(self):
-        return f'{self.or_treeconnector}{self.lb}{self.left.pattern()}, {self.right.pattern()}{self.rb}'
+    def pattern(self, wfflist: list):
+        return f'{self.or_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.or_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
     def getvalue(self):
         return self.left.getvalue() or self.right.getvalue()
+    
+    def dictionary(self, d: dict):
+        d = self.left.dictionary(d)
+        d = self.right.dictionary(d)
+        return d
 
-class P(Wff):
+class Possibly(Wff):
     """A well-formed formula which is possibly true."""
 
     is_variable = True
@@ -359,21 +397,21 @@ class P(Wff):
 
     def __str__(self):
         if self.is_variable:
-            return f'{self.possible_connector} {self.wff}'
+            return f'{self.possibly_connector} {self.wff}'
         else:
-            return f'{self.possible_connector}{self.lb}{self.wff}{self.rb}'
+            return f'{self.possibly_connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
         if self.is_variable:
-            return f'{self.possible_latexconnector} {self.wff}'
+            return f'{self.possibly_latexconnector} {self.wff}'
         else:
-            return f'{self.possible_latexconnector} {self.lb}{self.wff}{self.rb}'
+            return f'{self.possibly_latexconnector} {self.lb}{self.wff}{self.rb}'
         
     def tree(self):
         return f'{self.possible_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
     
-    def pattern(self):
-        return f'{self.possible_treeconnector}{self.lb}{self.wff.pattern()}{self.rb}'
+    def pattern(self, wfflist):
+        return f'{self.possible_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.possible_treeconnector, self.lb, self.wff.treetuple(), self.rb

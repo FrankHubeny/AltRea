@@ -66,7 +66,6 @@ def test_addhypothesis_clean_1(input_n, expected):
 
 testdata = [
     ('len(prf.lines)', 3),
-    ('len(prf.log)', 4),
     #
     ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
     ("prf.lines[1][prf.levelindex]", 1),

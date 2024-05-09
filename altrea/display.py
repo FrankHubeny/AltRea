@@ -8,12 +8,13 @@
 import pandas
 
 from altrea.rules import Proof
+import altrea.data
 
 def fitchnotation(p: Proof):
     """This function changes the names for rules to better conform to Frederic Fitch's Symbolic Logic text."""
 
     # Attributes from the altrea.truthfunction.Proof class
-    p.premise_name = 'Premise'
+    p.premise_name = 'hyp'
     p.hypothesis_name = 'hyp'
     p.disjunction_intro_name = 'disj int'
     p.disjunction_elim_name = 'disj elim'
@@ -27,6 +28,125 @@ def fitchnotation(p: Proof):
     p.coimplication_intro_name = 'coimp int'
     p.coimplication_elim_name = 'coimp elim'
     p.explosion_name = 'Explosion'
+
+def definedlogics():
+    rows = list(altrea.data.getdefinedlogics())
+    columns = ['Logic', 'Database', 'Description']
+    index = []
+    for i in range(len(rows)):
+            index.append(i)
+    df = pandas.DataFrame(rows, index=index, columns=columns)
+    return df
+
+# def proofdetails(logic: str, proofname: str):
+#     rows = altrea.data.getproofdetails(logic, proofname)
+#     columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs']
+#     index = []
+#     for i in range(len(rows)):
+#             index.append(i)
+#     df = pandas.DataFrame(rows, index=index, columns=columns)
+#     return df
+
+def stringitem(p: Proof, prooflines: list, i: int):
+    base = '   |'
+    hypothesisbase = ' __|'
+    statement = ''
+    for j in range(1, prooflines[i][p.levelindex]):
+        statement = base + statement
+    if prooflines[i][p.statementindex] != '':
+        if prooflines[i][p.levelindex] > 0:
+            if i < len(prooflines) - 1:
+                if prooflines[i][p.ruleindex] == p.hypothesis_name:
+                    if prooflines[i+1][p.ruleindex] != p.hypothesis_name or prooflines[i][p.levelindex] < prooflines[i+1][p.levelindex]:
+                        statement = hypothesisbase + statement
+                    else:
+                        statement = base + statement
+                else:
+                    statement = base + statement   
+            else:
+                if prooflines[i][p.ruleindex] == p.hypothesis_name:
+                    statement = hypothesisbase + statement
+                else:
+                    statement = base + statement
+    statement = ''.join([str(prooflines[i][p.statementindex]), statement])
+    return statement
+
+def latexitem(p: Proof, prooflines: list, i: int, color=1):
+    if prooflines[i][0] != p.blankstatement:
+        base = ' \\hspace{0.35cm}|'
+        hypothesisbase = ''.join(['\\underline{', base, '}']) 
+        statement = ''
+        for j in range(1, prooflines[i][p.levelindex]):
+            statement = base + statement
+        if prooflines[i][p.statementindex] != '':
+            if prooflines[i][p.levelindex] > 0:
+                if i < len(prooflines) - 1:
+                    if prooflines[i][p.ruleindex] == p.hypothesis_name:
+                        if prooflines[i+1][p.ruleindex] != p.hypothesis_name or prooflines[i][p.levelindex] < prooflines[i+1][p.levelindex]:
+                            statement = hypothesisbase + statement
+                        else:
+                            statement = base + statement
+                    else:
+                        statement = base + statement   
+                else:
+                    if prooflines[i][p.ruleindex] == p.hypothesis_name:
+                        statement = hypothesisbase + statement
+                    else:
+                        statement = base + statement
+        if type(prooflines[i][0]) == str:
+            statement = ''.join([prooflines[i][0], statement])
+        else:
+            statement = ''.join(['$', prooflines[i][0].latex(), statement, '$' ])
+    else:
+        statement = p.blankstatement
+    return statement
+
+def proofdetails(p: Proof, proofname: str, *args, latex: int = 1):
+    # Retrieve proof data.
+    rows = altrea.data.getproofdetails(p.logic, proofname)
+    # Format retrieved proof data so it is in line with current proof p.
+    newrows =[]
+    for i in rows:
+        newrows.append(list(i))
+    s = []
+    for i in args:
+        if type(i) == int:        
+            s.append(p.getstatement(i))
+        else:
+            s.append(i)
+    dict = p.objectdictionary
+    for i in s:
+        dict = i.dictionary(dict)
+    for i in newrows:
+        for k in range(len(s)):
+            i[0] = i[0].replace(''.join(['*', str(k+1), '*']), s[k].tree())
+        i[0] = eval(i[0], dict)
+    # Format the item column.
+    newp = []
+    if latex == 1:
+        for i in range(len(newrows)):
+            item = latexitem(p, newrows, i)
+            newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])
+    else:
+        for i in range(len(newrows)):
+            item = stringitem(p, newrows, i)
+            newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])    
+    # Prepare to run DataFrame.
+    columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
+    index = []
+    for i in range(len(newrows)):
+        index.append(i)
+    df = pandas.DataFrame(newp, index=index, columns=columns)
+    return df
+
+def availableproofs(logic: str):
+    rows = altrea.data.getavailableproofs(logic)
+    columns = ['Name', 'Pattern', 'Display', 'Description']
+    index = []
+    for i in range(len(rows)):
+            index.append(i)
+    df = pandas.DataFrame(rows, index=index, columns=columns)
+    return df
 
 def metadata(p: Proof):
     """Display the metadata associated with a proof.

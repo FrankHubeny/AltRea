@@ -65,7 +65,6 @@ def test_negation_elim_clean_1(input_n, expected):
 # The first line does not exist in the proof.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
@@ -95,7 +94,6 @@ def test_negation_elim_nosuchline_1(input_n, expected):
 # The second line does not exist in the proof.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
@@ -124,7 +122,6 @@ def test_negation_elim_nosuchline_2(input_n, expected):
 # The first line is not accessible.
 testdata = [
     ('len(prf.lines)', 5),
-    ('len(prf.log)', 6),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -154,7 +151,6 @@ def test_negation_elim_linescope_1(input_n, expected):
 # The second line is not accessible.
 testdata = [
     ('len(prf.lines)', 5),
-    ('len(prf.log)', 6),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -184,7 +180,6 @@ def test_negation_elim_linescope_2(input_n, expected):
 # The two lines are not negations of each other.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),

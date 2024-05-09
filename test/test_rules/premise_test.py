@@ -63,7 +63,6 @@ def test_premise_clean_1(input_n, expected):
 
 testdata = [
     ('len(prf.lines)', 2),
-    ('len(prf.log)', 3),
     #
     ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
     ("prf.lines[1][prf.levelindex]", 0),

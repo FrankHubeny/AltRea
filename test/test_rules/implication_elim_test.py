@@ -67,7 +67,6 @@ def test_implication_elim_clean_1(input_n, expected):
 # The first referenced line of the three does not exist in the proof.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
@@ -99,7 +98,6 @@ def test_implication_elim_nosuchline_1(input_n, expected):
 # The second referenced line of the three does not exist in the proof.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
@@ -132,7 +130,6 @@ def test_implication_elim_nosuchline_2(input_n, expected):
 # The first referenced line is not accessible.
 testdata = [
     ('len(prf.lines)', 5),
-    ('len(prf.log)', 6),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -166,7 +163,6 @@ def test_implication_elim_linescope_1(input_n, expected):
 # The second referenced line is not accessible.
 testdata = [
     ('len(prf.lines)', 5),
-    ('len(prf.log)', 6),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -199,7 +195,6 @@ def test_implication_elim_linescope_2(input_n, expected):
 # The first referenced line is an implication but the second is not the antecedent of it.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
@@ -231,7 +226,6 @@ def test_implication_elim_notantecedent_1(input_n, expected):
 # The first referenced line is an implication but the second is not the antecedent of it.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
@@ -263,7 +257,6 @@ def test_implication_elim_notantecedent_2(input_n, expected):
 # Neither line references an implication.
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),

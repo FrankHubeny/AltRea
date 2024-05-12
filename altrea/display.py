@@ -101,27 +101,58 @@ def latexitem(p: Proof, prooflines: list, i: int, color=1):
         statement = p.blankstatement
     return statement
 
-def proofdetails(p: Proof, proofname: str, *args, latex: int = 1):
+def proofdetailsraw(p: Proof, proofname: str):
+    """Display the proof details as saved to the database."""
+
     # Retrieve proof data.
     rows = altrea.data.getproofdetails(p.logic, proofname)
-    # Format retrieved proof data so it is in line with current proof p.
-    newrows =[]
-    for i in rows:
-        newrows.append(list(i))
-    s = []
-    for i in args:
-        if type(i) == int:        
-            s.append(p.getstatement(i))
-        else:
-            s.append(i)
-    dict = p.objectdictionary
-    for i in s:
-        dict = i.dictionary(dict)
-    for i in newrows:
-        for k in range(len(s)):
-            i[0] = i[0].replace(''.join(['*', str(k+1), '*']), s[k].tree())
-        i[0] = eval(i[0], dict)
-    # Format the item column.
+
+    # Prepare to run DataFrame.
+    columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
+    index = []
+    for i in range(len(rows)):
+        index.append(i)
+    df = pandas.DataFrame(rows, index=index, columns=columns)
+    return df
+
+# def proofdetails(p: Proof, proofname: str, *args, latex: int = 1):
+def displayproofdetails(p: Proof, newrows: list, latex: int = 1):
+    """Display the details of a saved proof."""
+
+    # # Retrieve proof data.
+    # rows = altrea.data.getproofdetails(p.logic, proofname)
+
+    # # Create an augmented dictionary from the args.
+    # newrows =[]
+    # for i in rows:
+    #     newrows.append(list(i))
+    # s = []
+    # for i in args:
+    #     if type(i) == int:        
+    #         s.append(p.getstatement(i))
+    #     else:
+    #         s.append(i)
+    # dict = p.objectdictionary
+    # for i in s:
+    #     dict = i.dictionary(dict)
+
+    # # Format the item column using the dictionary.
+    # for i in newrows:
+    #     for k in range(len(s)):
+    #         i[0] = i[0].replace(''.join(['*', str(k+1), '*']), s[k].tree())
+    #     i[0] = eval(i[0], dict)
+
+    # # Format the rules column using the names from the proofs logic operators.
+    # for i in newrows:
+    #     for k in p.logicoperators:
+    #         i[3] = i[3].replace(''.join(['*', k[0], '*']), k[1])
+    # for i in newrows:
+    #     for k in p.basicoperatorseval:
+    #         i[3] = i[3].replace(''.join(['*', k[0], '*']), k[1])
+    # for i in newrows:
+    #     i[3] = eval(i[3])
+
+    # Format the item column to use latex or strings.
     newp = []
     if latex == 1:
         for i in range(len(newrows)):
@@ -130,7 +161,8 @@ def proofdetails(p: Proof, proofname: str, *args, latex: int = 1):
     else:
         for i in range(len(newrows)):
             item = stringitem(p, newrows, i)
-            newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])    
+            newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])  
+
     # Prepare to run DataFrame.
     columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
     index = []
@@ -148,23 +180,23 @@ def availableproofs(logic: str):
     df = pandas.DataFrame(rows, index=index, columns=columns)
     return df
 
-def metadata(p: Proof):
-    """Display the metadata associated with a proof.
+# def metadata(p: Proof):
+#     """Display the metadata associated with a proof.
     
-    Parameters:
-        p: The proof containing the metadata.
-    """
+#     Parameters:
+#         p: The proof containing the metadata.
+#     """
 
-    print('Name: {}'.format(p.name))
-    print('Goal: {}'.format(p.goal))
-    print('Premises')
-    for i in p.premises:
-        print('   {}'.format(i))
-    if p.status == p.complete:
-        print('Completed: Yes')
-    else:
-        print('Completed: No')
-    print('Lines: {}'.format(len(p.lines)-1))
+#     print('Name: {}'.format(p.name))
+#     print('Goal: {}'.format(p.goal))
+#     print('Premises')
+#     for i in p.premises:
+#         print('   {}'.format(i))
+#     if p.status == p.complete:
+#         print('Completed: Yes')
+#     else:
+#         print('Completed: No')
+#     print('Lines: {}'.format(len(p.lines)-1))
 
 def formatlatexstatement(p: Proof, i: int, color=1):
     if p.lines[i][0] != p.blankstatement:
@@ -431,53 +463,53 @@ def showlines(p: Proof,
         df = pandas.DataFrame(p.lines, index=indx, columns=columns)
     return df
 
-def displayproof(p: Proof, 
-                 color: int = 1, 
-                 latex: int = 1, 
-                 columns: list = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']):
-    indx = [p.logic]
-    for i in range(len(p.lines)-1):
-        indx.append(i + 1)
-    newp = []
-    if latex == 1:
-        for i in range(len(p.lines)):
+# def displayproof(p: Proof, 
+#                  color: int = 1, 
+#                  latex: int = 1, 
+#                  columns: list = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']):
+#     indx = [p.logic]
+#     for i in range(len(p.lines)-1):
+#         indx.append(i + 1)
+#     newp = []
+#     if latex == 1:
+#         for i in range(len(p.lines)):
 
-            # Format statement
-            statement = formatlatexstatement(p, i, color)
+#             # Format statement
+#             statement = formatlatexstatement(p, i, color)
 
-            # Format subproof
-            # if color == 1 and p.status != p.complete and p.status != p.stopped and p.lines[i][1] == p.level + 1:
-            #     subproof = ''.join(['$\\color{red}', str(p.lines[i][2]), '$'])
-            # else:
-            #     subproof = p.lines[i][2]
+#             # Format subproof
+#             # if color == 1 and p.status != p.complete and p.status != p.stopped and p.lines[i][1] == p.level + 1:
+#             #     subproof = ''.join(['$\\color{red}', str(p.lines[i][2]), '$'])
+#             # else:
+#             #     subproof = p.lines[i][2]
 
-            newp.append([statement,
-                        p.lines[i][1],
-                        p.lines[i][2],
-                        p.lines[i][3],
-                        p.lines[i][4],
-                        p.lines[i][5],
-                        p.lines[i][6]
-                        ]
-            )
-    else:
-        newp = []
-        for i in range(len(p.lines)):
+#             newp.append([statement,
+#                         p.lines[i][1],
+#                         p.lines[i][2],
+#                         p.lines[i][3],
+#                         p.lines[i][4],
+#                         p.lines[i][5],
+#                         p.lines[i][6]
+#                         ]
+#             )
+#     else:
+#         newp = []
+#         for i in range(len(p.lines)):
 
-            # Format statement
-            statement = formatstringstatement(p, i)
+#             # Format statement
+#             statement = formatstringstatement(p, i)
 
-            newp.append([statement,
-                        p.lines[i][1],
-                        p.lines[i][2],
-                        p.lines[i][3],
-                        p.lines[i][4],
-                        p.lines[i][5],
-                        p.lines[i][6]
-                        ]
-            )
-    df = pandas.DataFrame(newp, index=indx, columns=columns)
-    return df
+#             newp.append([statement,
+#                         p.lines[i][1],
+#                         p.lines[i][2],
+#                         p.lines[i][3],
+#                         p.lines[i][4],
+#                         p.lines[i][5],
+#                         p.lines[i][6]
+#                         ]
+#             )
+#     df = pandas.DataFrame(newp, index=indx, columns=columns)
+#     return df
     
 
 def truthtable(premises: list, goal, letters: list):
@@ -535,18 +567,18 @@ def truthtable(premises: list, goal, letters: list):
     df = pandas.DataFrame(table, index=index, columns=columns)
     return df
 
-def showblocklist(p: Proof):
-    """Display the blocklist of a proof.
+# def showblocklist(p: Proof):
+#     """Display the blocklist of a proof.
     
-    Parameters:
-        p: The proof that contains the blocklist.
-    """
+#     Parameters:
+#         p: The proof that contains the blocklist.
+#     """
 
-    indx = []
-    for i in range(len(p.blocklist)):
-        indx.append(i)
-    df = pandas.DataFrame(p.blocklist, index=indx, columns=['Level', 'Block'])
-    return df
+#     indx = []
+#     for i in range(len(p.blocklist)):
+#         indx.append(i)
+#     df = pandas.DataFrame(p.blocklist, index=indx, columns=['Level', 'Block'])
+#     return df
 
 # def availablelogics():
 #     """Displays the available logics for proofs."""
@@ -559,13 +591,13 @@ def showblocklist(p: Proof):
 #     df = DataFrame(p.logicdictionary.items(), columns=['Rule', 'Logics Supporting It'])
 #     return df
 
-def connectors():
-    """Displays the available logical connectors for a specific logic."""
+# def connectors():
+#     """Displays the available logical connectors for a specific logic."""
 
-    from pandas import DataFrame
-    from altrea.boolean import Wff
-    from altrea.truthfunction import Proof
-    A = Wff('A')
-    p = Proof(A)
-    df = DataFrame(p.connectors.items(), columns=['Logic', 'Available Connectors'])
-    return df
+#     from pandas import DataFrame
+#     from altrea.boolean import Wff
+#     from altrea.truthfunction import Proof
+#     A = Wff('A')
+#     p = Proof(A)
+#     df = DataFrame(p.connectors.items(), columns=['Logic', 'Available Connectors'])
+#     return df

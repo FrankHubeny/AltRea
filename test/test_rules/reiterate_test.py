@@ -6,12 +6,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[1][prf.statementindex])", str(A)),
     ("prf.lines[1][prf.levelindex]", 0),

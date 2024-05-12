@@ -6,12 +6,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                    Clean Run
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 3),
-    ('len(prf.log)', 4),
     #
     ("str(prf.lines[0][prf.statementindex])", str(Not(Not(A)))),
     ("prf.lines[0][prf.levelindex]", 0),
@@ -49,7 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -75,7 +78,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_string_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Not(Not(A)))
     prf.premise('A') 
@@ -100,7 +107,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_nogoal_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     # prf.goal(Not(Not(A)))
     prf.premise(A) 

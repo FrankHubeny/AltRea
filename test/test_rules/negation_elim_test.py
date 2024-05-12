@@ -6,12 +6,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[1][prf.statementindex])", str(A)),
     ("prf.lines[1][prf.levelindex]", 0),
@@ -49,7 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, A))
     prf.premise(A)
@@ -77,7 +80,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, A))
     prf.premise(A)
@@ -106,7 +113,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_nosuchline_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, A))
     prf.premise(A)
@@ -134,7 +145,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, A))
     prf.premise(A)
@@ -163,7 +178,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_linescope_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, A))
     prf.premise(A)
@@ -192,7 +211,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_notcontradiction_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, A))
     prf.premise(A)

@@ -6,12 +6,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run 1
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 5),
-    ('len(prf.log)', 8),
     #
     ("str(prf.lines[2][prf.statementindex])", str(Not(A))),
     ("prf.lines[2][prf.levelindex]", 0),
@@ -49,9 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     mygoal = C
     prf.setlogic('C')
@@ -97,9 +98,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_clean_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Implies(Or(Not(A), B), Implies(A, B)))
     prf.hypothesis(Or(Not(A), B))
@@ -139,9 +142,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_string_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(C)
     prf.premise(A)
@@ -170,9 +175,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Or(A, B))
     prf.explosion(C)
@@ -186,7 +193,6 @@ def test_explosion_nosuchline_1(input_n, expected):
 
 testdata = [
     ('len(prf.lines)', 3),
-    ('len(prf.log)', 4),
     #
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
     ("prf.lines[2][prf.levelindex]", 1),
@@ -199,9 +205,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_linescope_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(C)
     prf.hypothesis(A)

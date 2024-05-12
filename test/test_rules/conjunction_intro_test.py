@@ -6,12 +6,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                    Clean Run 1
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 6),
     #
     ("str(prf.lines[1][prf.statementindex])", str(A)),
     ("prf.lines[1][prf.levelindex]", 0),
@@ -49,9 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, B))
     prf.premise(A)
@@ -94,9 +95,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_clean_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(B, A))
     prf.premise(A)
@@ -124,9 +127,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, B))
     prf.premise(A)
@@ -155,9 +160,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, B))
     prf.premise(A)
@@ -186,9 +193,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, B))
     prf.hypothesis(A)
@@ -217,9 +226,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(And(A, B))
     prf.hypothesis(A)

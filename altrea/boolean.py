@@ -19,23 +19,23 @@ class Wff:
     lb = '('
     rb = ')'
 
-    and_connector = '&'
-    and_latexconnector = '\\wedge'
+    default_and_connector = '&'
+    default_and_latexconnector = '\\wedge'
     and_treeconnector = 'And'
-    iff_connector = '<>'
-    iff_latexconnector = '\\leftrightarrow'
+    default_iff_connector = '<>'
+    default_iff_latexconnector = '\\leftrightarrow'
     iff_treeconnector = 'Iff'
-    implies_connector = '>'
-    implies_latexconnector = '\\to'
+    default_implies_connector = '>'
+    default_implies_latexconnector = '\\to'
     implies_treeconnector = 'Implies'
-    necessary_connector = 'Nec'
-    necessary_latexconnector = '\\Box'
+    default_necessary_connector = 'Nec'
+    default_necessary_latexconnector = '\\Box'
     necessary_treeconnector = 'N'
-    not_connector = '~'
-    not_latexconnector = '\\lnot '
+    default_not_connector = '~'
+    default_not_latexconnector = '\\lnot '
     not_treeconnector = 'Not'
-    or_connector = '|'
-    or_latexconnector = '\\vee'
+    default_or_connector = '|'
+    default_or_latexconnector = '\\vee'
     or_treeconnector = 'Or'
     possibly_connector = 'Pos'
     possibly_latexconnector = '\\Diamond'
@@ -89,11 +89,6 @@ class Wff:
     
     def getvalue(self):
         return self.booleanvalue   
-    
-    def dictionary(self, d: dict):
-        if d.get(self.name) == None:
-            d.update({self.name: self})
-        return d
 
 class And(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -102,9 +97,11 @@ class And(Wff):
 
     is_variable = False
 
-    def __init__(self, left: Wff, right: Wff):
+    def __init__(self, left: Wff, right: Wff, and_connector: str = '&', and_latexconnector: str = '\\wedge'):
         self.left = left
         self.right = right
+        self.and_connector = and_connector
+        self.and_latexconnector = and_latexconnector
         self.booleanvalue = left.booleanvalue and right.booleanvalue
 
     def __str__(self):
@@ -139,10 +136,10 @@ class And(Wff):
     def getvalue(self):
         return self.left.getvalue() and self.right.getvalue()
     
-    def dictionary(self, d: dict):
-        d = self.left.dictionary(d)
-        d = self.right.dictionary(d)
-        return d
+    # def dictionary(self, d: dict):
+    #     d = self.left.dictionary(d)
+    #     d = self.right.dictionary(d)
+    #     return d
 
 class F(Wff):
     """This well formed formula is the result of a contradiction in a proof which may be useful for explosions.
@@ -178,9 +175,11 @@ class Iff(Wff):
 
     is_variable = False
 
-    def __init__(self, left: Wff, right: Wff):
+    def __init__(self, left: Wff, right: Wff, iff_connector: str = '<>', iff_latexconnector: str = '\\leftrightarrow)'):
         self.left = left
         self.right = right
+        self.iff_connector = iff_connector
+        self.iff_latexconnector = iff_latexconnector
         self.booleanvalue = ((not left.booleanvalue) or right.booleanvalue) and ((not right.booleanvalue) or left.booleanvalue)
 
     def __str__(self):
@@ -212,10 +211,10 @@ class Iff(Wff):
     def treetuple(self):
         return self.iff_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
     
-    def dictionary(self, d: dict):
-        d = self.left.dictionary(d)
-        d = self.right.dictionary(d)
-        return d
+    # def dictionary(self, d: dict):
+    #     d = self.left.dictionary(d)
+    #     d = self.right.dictionary(d)
+    #     return d
 
 class Implies(Wff):
     """A well formed formula with two arguments which are also well formed formulas joined
@@ -225,9 +224,11 @@ class Implies(Wff):
 
     is_variable = False
 
-    def __init__(self, left: Wff, right: Wff):
+    def __init__(self, left: Wff, right: Wff, implies_connector: str = '>', implies_latexconnector: str = '\\to'):
         self.left = left
         self.right = right
+        self.implies_connector = implies_connector
+        self.implies_latexconnector = implies_latexconnector
         self.booleanvalue = None
     
     def __str__(self):
@@ -262,18 +263,20 @@ class Implies(Wff):
     def getvalue(self):
         return (not self.left.getvalue()) or self.right.getvalue()
     
-    def dictionary(self, d: dict):
-        d = self.left.dictionary(d)
-        d = self.right.dictionary(d)
-        return d
+    # def dictionary(self, d: dict):
+    #     d = self.left.dictionary(d)
+    #     d = self.right.dictionary(d)
+    #     return d
 
 class Necessary(Wff):
     """A well-formed formula which is necessarily true."""
 
     is_variable = True
 
-    def __init__(self, wff):
+    def __init__(self, wff, necessary_connector: str = 'Nec', necessary_latexconnector: str = '\\Box'):
         self.wff = wff
+        self.necessary_connector = necessary_connector
+        self.necessary_latexconnector = necessary_latexconnector
 
     def __str__(self):
         if self.is_variable:
@@ -306,9 +309,11 @@ class Not(Wff):
 
     is_variable = True
 
-    def __init__(self, negated: Wff):
+    def __init__(self, negated: Wff, not_connector: str = '~', not_latexconnector: str = '\\lnot'):
         self.negated = negated
         self.booleanvalue = None
+        self.not_connector = not_connector
+        self.not_latexconnector = not_latexconnector      
 
     def __str__(self):
         if self.negated.is_variable:
@@ -334,9 +339,9 @@ class Not(Wff):
     def getvalue(self):
         return not self.negated.getvalue()
 
-    def dictionary(self, d: dict):
-        d = self.negated.dictionary(d)
-        return d
+    # def dictionary(self, d: dict):
+    #     d = self.negated.dictionary(d)
+    #     return d
 
 class Or(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -345,9 +350,11 @@ class Or(Wff):
 
     is_variable = False
 
-    def __init__(self, left: Wff, right: Wff):
+    def __init__(self, left: Wff, right: Wff, or_connector: str = '|', or_latexconnector: str = '\\vee'):
         self.left = left
         self.right = right
+        self.or_connector = or_connector
+        self.or_latexconnector = or_latexconnector
         self.booleanvalue = left.booleanvalue or right.booleanvalue
 
     def __str__(self):
@@ -382,18 +389,20 @@ class Or(Wff):
     def getvalue(self):
         return self.left.getvalue() or self.right.getvalue()
     
-    def dictionary(self, d: dict):
-        d = self.left.dictionary(d)
-        d = self.right.dictionary(d)
-        return d
+    # def dictionary(self, d: dict):
+    #     d = self.left.dictionary(d)
+    #     d = self.right.dictionary(d)
+    #     return d
 
 class Possibly(Wff):
     """A well-formed formula which is possibly true."""
 
     is_variable = True
 
-    def __init__(self, wff):
+    def __init__(self, wff, possibly_connector: str = 'Pos', possibly_latexconnector: str = '\\Diamond'):
         self.wff = wff
+        self.possibly_connector = possibly_connector
+        self.possibly_latexconnector = possibly_latexconnector
 
     def __str__(self):
         if self.is_variable:

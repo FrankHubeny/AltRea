@@ -6,12 +6,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run 1
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 6),
-    ('len(prf.log)', 8),
     #
     ("str(prf.lines[3][prf.statementindex])", str(A)),
     ("prf.lines[3][prf.levelindex]", 1),
@@ -49,7 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_intro_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -67,7 +70,6 @@ def test_negation_intro_clean_1(input_n, expected):
 # Clean test
 testdata = [
     ('len(prf.lines)', 5),
-    ('len(prf.log)', 7),
     #
     ("str(prf.lines[2][prf.statementindex])", str(Not(A))),
     ("prf.lines[2][prf.levelindex]", 1),
@@ -96,8 +98,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_intro_clean_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Not(And(A, Not(A))))
     prf.hypothesis(A)
@@ -124,7 +129,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_closemainproof_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -149,7 +158,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_notfalse_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)

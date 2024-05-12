@@ -6,12 +6,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 4),
-    ('len(prf.log)', 6),
     #
     ("str(prf.lines[1][prf.statementindex])", str(Implies(A, B))),
     ("prf.lines[1][prf.levelindex]", 0),
@@ -49,9 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.premise(Implies(A, B))
@@ -79,8 +80,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.premise(Implies(A, B))
@@ -109,8 +113,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.premise(Implies(A, B))
@@ -139,8 +146,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_linescope_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.hypothesis(Implies(A, B))
@@ -169,8 +179,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_linescope_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.hypothesis(Implies(A, B))
@@ -199,8 +212,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_notimplication_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.premise(A)
@@ -229,8 +245,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_notimplication_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.premise(A)
@@ -259,9 +278,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Iff(A, B))
     prf.premise(Implies(A, B))
@@ -270,35 +291,5 @@ def test_coimplication_elim_nosuchline_1(input_n, expected):
     prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                            stopped_undefinedoperator
-------------------------------------------------------------------------------"""
-
-# The operator is not defined for this logic.
-testdata = [
-    ('len(prf.lines)', 4),
-    #
-    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
-    ("prf.lines[3][prf.levelindex]", 0),
-    ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
-    ("prf.lines[3][prf.linesindex]", ""),
-    ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_undefinedoperator),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_coimplication_elim_undefinedoperator_1(input_n, expected):
-    prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
-    prf.setlogic('GND')
-    prf.goal(Iff(A, B))
-    prf.premise(Implies(A, B))
-    prf.premise(Implies(B, A))
-    prf.coimplication_intro(1, 2)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
-    assert eval(input_n) == expected
 
     

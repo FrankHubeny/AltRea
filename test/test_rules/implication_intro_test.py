@@ -7,12 +7,12 @@ import pytest
 
 from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
 from altrea.rules import Proof
-A = Wff('A')
-B = Wff('B')
-C = Wff('C')
-D = Wff('D')
-E = Wff('E')
 t = Proof()
+A = t.wff('A')
+B = t.wff('B')
+C = t.wff('C')
+D = t.wff('D')
+E = t.wff('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run 1
@@ -20,7 +20,6 @@ t = Proof()
 # Clean test
 testdata = [
     ('len(prf.lines)', 3),
-    ('len(prf.log)', 5),
     #
     ("str(prf.lines[0][prf.statementindex])", str(Implies(A, A))),
     ("prf.lines[0][prf.levelindex]", 0),
@@ -49,11 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
-    D = Wff('D')
-    E = Wff('E')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Implies(A, A), comment='Reflexivity of Implication')
     prf.hypothesis(A)
@@ -68,7 +67,6 @@ def test_implication_intro_clean_1(input_n, expected):
 # Clean test
 testdata = [
     ('len(prf.lines)', 12),
-    ('len(prf.log)', 14),
     #
     ("str(prf.lines[9][prf.statementindex])", str(Implies(C, And(A, B)))),
     ("prf.lines[9][prf.levelindex]", 2),
@@ -97,11 +95,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_clean_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
-    D = Wff('D')
-    E = Wff('E')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Implies(E, Implies(D, Implies(C, And(A, B)))))
     prf.premise(A)
@@ -124,7 +122,6 @@ def test_implication_intro_clean_2(input_n, expected):
 # Clean test: check that multiple hypotheses are included in the antecedent of the implication
 testdata = [
     ('len(prf.lines)', 6),
-    ('len(prf.log)', 7),
     #
     ("str(prf.lines[3][prf.statementindex])", str(C)),
     ("prf.lines[3][prf.levelindex]", 1),
@@ -153,9 +150,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_clean_3(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Implies(A, A))
     prf.hypothesis(B)
@@ -174,7 +173,6 @@ def test_implication_intro_clean_3(input_n, expected):
 # An attempt was made to close the main proof.  This can only be closed by completing the proof.
 testdata = [
     ('len(prf.lines)', 3),
-    ('len(prf.log)', 4),
     #
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
     ("prf.lines[2][prf.levelindex]", 0),
@@ -187,9 +185,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_notantecedent_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = prf.wff('A')
+    B = prf.wff('B')
+    C = prf.wff('C')
+    D = prf.wff('D')
+    E = prf.wff('E')
     prf.setlogic('C')
     prf.goal(Implies(A, A))
     prf.premise(A)

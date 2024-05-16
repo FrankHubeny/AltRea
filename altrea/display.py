@@ -101,21 +101,21 @@ def latexitem(p: Proof, prooflines: list, i: int, color=1):
         statement = p.blankstatement
     return statement
 
-def proofdetailsraw(p: Proof, proofname: str):
-    """Display the proof details as saved to the database."""
+# def proofdetailsraw(p: Proof, proofname: str):
+#     """Display the proof details as saved to the database."""
 
-    # Retrieve proof data.
-    rows = altrea.data.getproofdetails(p.logic, proofname)
+#     # Retrieve proof data.
+#     rows = altrea.data.getproofdetails(p.logic, proofname)
 
-    # Prepare to run DataFrame.
-    columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
-    index = []
-    for i in range(len(rows)):
-        index.append(i)
-    df = pandas.DataFrame(rows, index=index, columns=columns)
-    return df
+#     # Prepare to run DataFrame.
+#     columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
+#     index = []
+#     for i in range(len(rows)):
+#         index.append(i)
+#     df = pandas.DataFrame(rows, index=index, columns=columns)
+#     return df
 
-# def proofdetails(p: Proof, proofname: str, *args, latex: int = 1):
+# def proofdetails(p: proof, proofname: str, *args, latex: int = 1):
 def displayproofdetails(p: Proof, newrows: list, latex: int = 1):
     """Display the details of a saved proof."""
 
@@ -463,7 +463,7 @@ def showlines(p: Proof,
         df = pandas.DataFrame(p.lines, index=indx, columns=columns)
     return df
 
-# def displayproof(p: Proof, 
+# def displayproof(p: proof, 
 #                  color: int = 1, 
 #                  latex: int = 1, 
 #                  columns: list = ['Statement', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']):
@@ -512,60 +512,60 @@ def showlines(p: Proof,
 #     return df
     
 
-def truthtable(premises: list, goal, letters: list):
-    """Display a truth table built from a conjunction of the premises implying the goal.
+# def truthtable(premises: list, goal, letters: list):
+#     """Display a truth table built from a conjunction of the premises implying the goal.
     
-    Paramters:
-        p: The proof containing the premises and goal.
-    """
+#     Paramters:
+#         p: The proof containing the premises and goal.
+#     """
 
-    from altrea.boolean import And, Or, Not, Implies, Iff, Wff
+#     from altrea.boolean import And, Or, Not, Implies, Iff, Wff
 
-    def makerow(value: bool, letters: list, goal):
-        row = []
-        letters[0].setvalue(value)
-        row.append(letters[0].booleanvalue)
-        for i in premises:
-            row.append(i.booleanvalue)
-        row.append(goal.booleanvalue)
-        return row
+#     def makerow(value: bool, letters: list, goal):
+#         row = []
+#         letters[0].setvalue(value)
+#         row.append(letters[0].booleanvalue)
+#         for i in premises:
+#             row.append(i.booleanvalue)
+#         row.append(goal.booleanvalue)
+#         return row
     
-    columns = []
-    for i in letters:
-        columns.append(str(i))
-    for i in premises:
-        statement = ''.join(['$',i.latex(),'$'])
-        columns.append(statement)
-    statement = ''.join(['$',goal.latex(),'$'])
-    columns.append(statement)
+#     columns = []
+#     for i in letters:
+#         columns.append(str(i))
+#     for i in premises:
+#         statement = ''.join(['$',i.latex(),'$'])
+#         columns.append(statement)
+#     statement = ''.join(['$',goal.latex(),'$'])
+#     columns.append(statement)
 
-    rows = 2**len(letters)
-    index = []
-    for i in range(rows):
-        index.append(i)
+#     rows = 2**len(letters)
+#     index = []
+#     for i in range(rows):
+#         index.append(i)
 
-    table = []
-    if len(letters) == 1:
-        table.append(makerow(True, letters, goal))
-        table.append(makerow(False, letters, goal))
-        # row = []
-        # letters[0].setvalue(True)
-        # row.append(letters[0].booleanvalue)
-        # for i in premises:
-        #     row.append(i.booleanvalue)
-        # row.append(goal.booleanvalue)
-        # table.append(row)
+#     table = []
+#     if len(letters) == 1:
+#         table.append(makerow(True, letters, goal))
+#         table.append(makerow(False, letters, goal))
+#         # row = []
+#         # letters[0].setvalue(True)
+#         # row.append(letters[0].booleanvalue)
+#         # for i in premises:
+#         #     row.append(i.booleanvalue)
+#         # row.append(goal.booleanvalue)
+#         # table.append(row)
 
-        # row = []
-        # letters[0].setvalue(False)
-        # row.append(letters[0].booleanvalue)
-        # for i in premises:
-        #     row.append(i.booleanvalue)
-        # row.append(goal.booleanvalue)
-        # table.append(row)
+#         # row = []
+#         # letters[0].setvalue(False)
+#         # row.append(letters[0].booleanvalue)
+#         # for i in premises:
+#         #     row.append(i.booleanvalue)
+#         # row.append(goal.booleanvalue)
+#         # table.append(row)
         
-    df = pandas.DataFrame(table, index=index, columns=columns)
-    return df
+#     df = pandas.DataFrame(table, index=index, columns=columns)
+#     return df
 
 # def showblocklist(p: Proof):
 #     """Display the blocklist of a proof.

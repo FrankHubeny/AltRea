@@ -4,14 +4,14 @@
 
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, TrueFalse, Falsehood, Truth
 from altrea.rules import Proof
 t = Proof()
-A = t.wff('A')
-B = t.wff('B')
-C = t.wff('C')
-D = t.wff('D')
-E = t.wff('E')
+A = t.truefalse('A')
+B = t.truefalse('B')
+C = t.truefalse('C')
+D = t.truefalse('D')
+E = t.truefalse('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run

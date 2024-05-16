@@ -4,14 +4,14 @@
 
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, TrueFalse, Falsehood, Truth
 from altrea.rules import Proof
 t = Proof()
-A = t.wff('A')
-B = t.wff('B')
-C = t.wff('C')
-D = t.wff('D')
-E = t.wff('E')
+A = t.truefalse('A')
+B = t.truefalse('B')
+C = t.truefalse('C')
+D = t.truefalse('D')
+E = t.truefalse('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run
@@ -48,11 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_hypothesis_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.wff('A')
-    B = prf.wff('B')
-    C = prf.wff('C')
-    D = prf.wff('D')
-    E = prf.wff('E')
+    A = prf.truefalse('A')
+    B = prf.truefalse('B')
+    C = prf.truefalse('C')
+    D = prf.truefalse('D')
+    E = prf.truefalse('E')
     prf.setlogic('C')
     prf.goal(Implies(A, B))
     prf.premise(B)
@@ -80,11 +80,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_hypothesis_string_1(input_n, expected):
     prf = Proof()
-    A = prf.wff('A')
-    B = prf.wff('B')
-    C = prf.wff('C')
-    D = prf.wff('D')
-    E = prf.wff('E')
+    A = prf.truefalse('A')
+    B = prf.truefalse('B')
+    C = prf.truefalse('C')
+    D = prf.truefalse('D')
+    E = prf.truefalse('E')
     prf.setlogic('C')
     prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis('A')  
@@ -108,11 +108,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_hypothesis_nogoal_1(input_n, expected):
     prf = Proof()
-    A = prf.wff('A')
-    B = prf.wff('B')
-    C = prf.wff('C')
-    D = prf.wff('D')
-    E = prf.wff('E')
+    A = prf.truefalse('A')
+    B = prf.truefalse('B')
+    C = prf.truefalse('C')
+    D = prf.truefalse('D')
+    E = prf.truefalse('E')
     prf.setlogic('C')
     #prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis(A)  

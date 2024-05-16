@@ -4,7 +4,7 @@
 
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff, F, T
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, TrueFalse, Falsehood, Truth
 from altrea.rules import Proof
 A = Wff('A')
 B = Wff('B')

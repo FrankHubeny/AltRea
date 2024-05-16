@@ -56,9 +56,10 @@ Examples:
     >>> import myaltrea.rules
 """
 
+
 import pandas
 
-from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, F, T
+from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, TrueFalse, Falsehood, Truth, PremisesConclusion
 import altrea.data
 
 class Proof:
@@ -80,8 +81,8 @@ class Proof:
     proofsindex = 5
     commentindex = 6
     lowestlevel = 0
-    acceptedtypes = [And, Or, Not, Implies, Iff, Wff, F, T],
-    false_name = F()
+    acceptedtypes = [And, Or, Not, Implies, Iff, Wff, Falsehood, Truth],
+    false_name = Falsehood()
     coimplication_intro_tag = 'COI'
     coimplication_elim_tag = 'COE'
     conjunction_intro_tag = 'CI'
@@ -145,6 +146,7 @@ class Proof:
     stopped_logiccannotuserule = 'The selected logic cannot use this rule.'
     stopped_nogoal = 'The proof does not yet have a goal.'
     stopped_nologic = 'No logic has been declared for the proof.'
+    stopped_nosavedproof = "The named saved proof does not exist in the logic's database."
     stopped_nosuchline = 'The referenced line does not exist.'
     stopped_nosubs = 'There were no substitutions entered.'
     stopped_nosubproof = 'No subproof has yet been started to add an hypothesis to.'
@@ -166,6 +168,7 @@ class Proof:
     stopped_notsameconclusion = 'The two conclusions are not the same.'
     stopped_notsamestatement = 'The referenced items are not the same.'
     stopped_notsamelevel = 'The two blocks are not at the same level.'
+    stopped_nosuchaxiom = 'The named axiom is not in the axiom list.'
     stopped_novaluepassed = 'No value was passed to the function.'
     stopped_notstrictsubproof = 'The subproof is not strict.'
     stopped_sidenotselected = 'A side, left or right, must be selected.'
@@ -199,9 +202,12 @@ class Proof:
     label_axioms = 'Axioms'
     label_axiom = 'Axiom'
     label_noaxioms = 'No Axioms'
-    label_operators = 'Operators'
-    label_operator = 'Operator'
-    label_nooperators = 'No Opertors'
+    label_connectors = 'Connectors'
+    label_connector = 'Connector'
+    label_noconnectors = 'No Connectors'
+    label_intelimrules = 'IntElim Rules'
+    label_intelimrule = 'IntElim Rule'
+    label_nointelimrules = 'No IntElim Rules'
     label_premises = 'Premises'
     label_premise = 'Premise'
     label_nopremises = 'No Premises'
@@ -222,8 +228,15 @@ class Proof:
             name: The name assigned to the proof under which it may be saved in the proofs and proofdetail tables of the database.
             displayname: The name to be used in displaying the proof.
             description: A descriptive name giving more information about the proof to be used in queries later.
+
+        Exceptions:
+            TypeError: If the input to either the name, displayname or description parameters are not strings,
+            then a type error is raised.
         """
-            
+
+        if type(name) != str or type(displayname) != str or type(description) != str:
+            raise TypeError('A value used to define a Proof object was not a string.')
+        
         self.name = name
         self.displayname = displayname
         self.description = description
@@ -237,8 +250,9 @@ class Proof:
         self.logic = ''
         self.logicdescription = ''
         self.logicdatabase = ''
-        self.logicoperators = []
+        self.logicconnectors = []
         self.logicaxioms = []
+        self.logicintelimrules = []
         self.logicoperators = [
             (self.coimplication_elim_tag, self.coimplication_elim_name),
             (self.coimplication_intro_tag, self.coimplication_intro_name),
@@ -261,11 +275,6 @@ class Proof:
             (self.premise_tag, self.premise_name),
             (self.reiterate_tag, self.reiterate_name),
         ]
-        self.basicoperatorseval = [
-            (self.hypothesis_tag, 'self.hypothesis_name'),
-            (self.premise_tag, 'self.premise_name'),
-            (self.reiterate_tag, 'self.reiterate_name'),
-        ]
         self.lines = [['', 0, 0, '', '', '', '']]
         self.previousproofchain = []
         self.previousproofid = -1
@@ -273,7 +282,8 @@ class Proof:
         self.currentproofid = 0
         self.subproof_status = self.subproof_normal
         self.proofdata = [[self.name, self.displayname, self.description]]
-        self.wfflist = ['Wff']
+        self.proofdatafinal = []
+        self.truefalselist = ['Wff']
         self.prooflist = [[self.lowestlevel, self.currentproof, self.previousproofid, [], self.subproof_status]]  
         self.level = self.lowestlevel
         self.status = ''
@@ -281,20 +291,23 @@ class Proof:
         self.premises = []
         self.consequences = []
         self.letters = []
-        self.objectdictionary = {'Implies': Implies, 'Iff': Iff, 'And': And, 'Or': Or, 'Not': Not, 'Necessary': Necessary, 'Possible': Possibly}
+        self.truths = []
+        self.falsehoods = []
+        self.objectdictionary = {'Implies': Implies, 'Iff': Iff, 'And': And, 'Or': Or, 'Not': Not, 'Necessary': Necessary, 'Possibly': Possibly}
         self.log = []
         self.showlogging = False
 
     """SUPPORT FUNCTIONS NOT INTENTED TO BE DIRECTLY CALLED BY THE USER"""
 
     def appendproofdata(self, 
-                        statement:  And | Or | Not | Implies | Iff | Wff | F | T,
+                        statement:  And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
                         rule: str):
         length = len(self.lines) - 1
         self.proofdata.append(
                 [
                     self.name,
-                    statement.pattern(self.wfflist), 
+                    statement,
+                    #statement.pattern(self.truefalselist),  
                     self.lines[length][1], 
                     self.lines[length][2], 
                     ''.join(['*', rule, '*']),
@@ -302,7 +315,28 @@ class Proof:
                     self.lines[length][5],
                     self.lines[length][6]
                 ]
-            )    
+            )
+        if self.status == self.complete:
+            finalresult = self.getantecedentconsequent()
+            self.proofdatafinal.append([
+                self.proofdata[0][0], 
+                self.proofdata[0][1], 
+                self.proofdata[0][2], 
+                self.proofdata[0][3],
+                finalresult.pattern(self.truefalselist)
+                ])
+            for i in range(len(self.proofdata)):
+                if i > 0:
+                    self.proofdatafinal.append([
+                        self.proofdata[i][0],
+                        self.proofdata[i][1].pattern(self.truefalselist),
+                        self.proofdata[i][2],
+                        self.proofdata[i][3],
+                        self.proofdata[i][4],
+                        self.proofdata[i][5],
+                        self.proofdata[i][6],
+                        self.proofdata[i][7]
+                    ])    
         
     def canproceed(self):
         """Check if there are no errors that block proceeding with the next line of the proof or the proof is already complete."""
@@ -332,12 +366,12 @@ class Proof:
         else:
             return False
 
-    def checkoperator(self, operator: str):
+    def checkintelimrule(self, intelimrule: str):
         """Check if the operator is defined in the selected logic."""
 
         found = False
-        for i in self.logicoperators:
-            if i[0] == operator:
+        for i in self.logicintelimrules:
+            if i[0] == intelimrule:
                 found = True
                 break
         return found
@@ -347,9 +381,25 @@ class Proof:
 
         return self.lines[line][2] == self.currentproofid
     
-    def checkstring(self, wff: And | Or | Not | Implies | Iff | Wff | F | T):
+    def checkstring(self, wff: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth):
         return type(wff) == str
 
+    def buildpremisesconclusion(self):
+        conclusion = self.consequences[0]
+        if len(self.consequences) > 1:
+            for i in range(len(self.consequences)):
+                if i > 0:
+                    conclusion = And(conclusion, self.consequences[i])
+        if len(self.premises) > 0:
+        #     antecedent = self.premises[0]
+        #     if len(self.premises) > 1:
+        #         for i in range(len(self.premises)):
+        #             if i > 0:
+        #                 antecedent = And(antecedent, self.premises[i])
+            return PremisesConclusion(conclusion, self.premises)
+        else:
+            return PremisesConclusion(conclusion)
+        
     def getantecedentconsequent(self):
         consequent = self.consequences[0]
         if len(self.consequences) > 1:
@@ -412,7 +462,7 @@ class Proof:
         return self.lines[line][self.statementindex]
 
     def iscomplete(self, 
-                   statement:  And | Or | Not | Implies | Iff | Wff | F | T = None, 
+                   statement:  And | Or | Not | Implies | Iff | Wff | Falsehood | Truth = None, 
                    comment: str = ''):
         """Check if the proof is complete or partially complete and if so leave a message."""
 
@@ -431,8 +481,27 @@ class Proof:
                         self.prooflist[0][1].append(len(self.lines))
                         newcomment = self.complete
                         self.consequences.append(statement)
-                        finalresult = self.getantecedentconsequent()
-                        self.proofdata[0].append(finalresult.pattern(self.wfflist))
+                        # finalresult = self.getantecedentconsequent()
+                        # self.proofdatafinal.append([
+                        #     self.proofdata[0][0], 
+                        #     self.proofdata[0][1], 
+                        #     self.proofdata[0][2], 
+                        #     self.proofdata[0][3],
+                        #     finalresult.pattern(self.truefalselist)
+                        #     ])
+                        # for i in range(len(self.proofdata)):
+                        #     if i > 0:
+                        #         self.proofdatafinal.append([
+                        #             self.proofdata[i][0],
+                        #             self.proofdata[i][1].pattern(self.truefalselist),
+                        #             self.proofdata[i][2],
+                        #             self.proofdata[i][3],
+                        #             self.proofdata[i][4],
+                        #             self.proofdata[i][5],
+                        #             self.proofdata[i][6],
+                        #             self.proofdata[i][7]
+                        #         ])
+                        #self.proofdata[0].append(finalresult.pattern(self.truefalselist))
                         self.logstep(f'The proof is complete.')
                 
         if comment == '':
@@ -524,12 +593,16 @@ class Proof:
         axiomslist = [list(i) for i in self.logicaxioms]
         columns = [self.label_name, self.label_value]
         data = []
+
+        # Display general information on proof and logic used.
         data.append([self.label_proofname, self.name])
         data.append([self.label_displayname, self.displayname])
         data.append([self.label_description,self.description])
         data.append([self.label_logic, self.logic])
         data.append([self.label_logicdescription, self.logicdescription])
         data.append([self.label_logicdatabase, self.logicdatabase])
+
+        # Display axioms.
         if len(self.logicaxioms) == 0:
             data.append([self.label_axioms, self.label_noaxioms])
         else:
@@ -544,11 +617,22 @@ class Proof:
                     axiom = str(axiomwff)
                 axiomslist[i][1] = axiom
                 data.append([self.label_axiom, axiomslist[i]])
-        if len(self.logicoperators) == 0:
-            data.append([self.label_operators, self.label_nooperators])
+
+        # Display connectors.
+        if len(self.logicconnectors) == 0:
+            data.append([self.label_connectors, self.label_noconnectors])
         else:
-            for i in self.logicoperators:
-                data.append([self.label_operator, i[1]])
+            for i in self.logicconnectors:
+                data.append([self.label_connector, i[1]])
+
+        # Display intelim rules.
+        if len(self.logicintelimrules) == 0:
+            data.append([self.label_intelimrules, self.label_nointelimrules])
+        else:
+            for i in self.logicintelimrules:
+                data.append([self.label_intelimrule, i[1]])
+
+        # Display goals.
         if len(self.goalswff) == 0:
             data.append([self.label_goals, self.label_nogoals])
         else:
@@ -557,6 +641,8 @@ class Proof:
                     data.append([self.label_goal, ''.join(['$', i.latex(), '$'])])
                 else:
                     data.append([self.label_goal, str(i)])
+
+        # Display premises.
         if len(self.premises) == 0:
             data.append([self.label_premises, self.label_nopremises])
         else:
@@ -565,6 +651,8 @@ class Proof:
                     data.append([self.label_premise, ''.join(['$', i.latex(), '$'])])
                 else:
                     data.append([self.label_premise, str(i)])
+
+        # Display derived goals.
         if len(self.derivedgoalswff) == 0:
             data.append([self.label_derivedgoals, self.label_noderivedgoals])
         else:
@@ -573,6 +661,8 @@ class Proof:
                     data.append([self.label_derivedgoal, ''.join(['$', i.latex(), '$'])])
                 else:
                     data.append([self.label_derivedgoal, str(i)])
+
+        # Display status, stopped and proof info.
         if self.status == '':
             data.append([self.label_proofstatus, self.label_inprogress])
         else:
@@ -595,48 +685,79 @@ class Proof:
         return df
 
     def reportstatus(self):
-        print(f'{self.label_proofname}                  {self.name}')
-        print(f'{self.label_displayname}          {self.displayname}')
-        print(f'{self.label_description}           {self.description}')
-        print(f'{self.label_logic}                 {self.logic}')
-        print(f'{self.label_logicdescription}     {self.logicdescription}')
-        print(f'{self.label_logicdatabase}        {self.logicdatabase}')
+        # Display general information.
+        print('{: <25} {: <25}'.format(self.label_proofname, self.name))
+        print('{: <25} {: <25}'.format(self.label_displayname, self.displayname))
+        print('{: <25} {: <25}'.format(self.label_displayname, self.displayname))
+        print('{: <25} {: <25}'.format(self.label_description, self.description))
+        print('{: <25} {: <25}'.format(self.label_logic, self.logic))
+        print('{: <25} {: <25}'.format(self.label_logicdescription, self.logicdescription))
+        print('{: <25} {: <25}'.format(self.label_logicdatabase, self.logicdatabase))
+
+        # Display axioms
         if len(self.logicaxioms) == 0:
-            print(f'{self.label_axioms}                {self.label_noaxioms}')
+            print('{: <25} {: <25}'.format(self.label_axioms, self.label_noaxioms))
         else:
+            print('{}'.format(self.label_axioms))
             for i in self.logicaxioms:
-                print(f'{self.label_axiom}                 {i}')
-        if len(self.logicoperators) == 0:
-            print(f'{self.label_operators}              {self.label_nooperators}')
+                print('{: >25} {: <25}'.format(i[0], i[1]))
+
+        # Display connectors.
+        if len(self.logicconnectors) == 0:
+            print('{: <25} {: <25}'.format(self.label_connectors, self.label_noconnectors))
         else:
-            for i in self.logicoperators:
-                print(f'{self.label_operator}              {i[1]}')
+            print('{}'.format(self.label_connectors))
+            for i in self.logicconnectors:
+                print('{: >25} {: <25}'.format(i[1], i[2]))
+
+        # Display intelim rules.
+        if len(self.logicintelimrules) == 0:
+            print('{: <25} {: <25}'.format(self.label_intelimrules, self.label_nointelimrules))
+        else:
+            print('{}'.format(self.label_intelimrules))
+            for i in self.logicintelimrules:
+                print('{: <25} {: <25}'.format(' ', i[1]))
+
+        # Display goals.
         if len(self.goals) == 0:
-            print(f'{self.label_goals}                  {self.label_nogoals}')
+            print('{: <25} {: <25}'.format(self.label_goals, self.label_nogoals))
         else:
+            print('{}'.format(self.label_goals))
             for i in self.goals:
-                print(f'{self.label_goal}                  {i}')
+                print('{: <25} {: <25}'.format(' ', str(i)))
+
+        # Display premises.
         if len(self.premises) == 0:
-            print(f'{self.label_premises}               {self.label_nopremises}')
+            print('{: <25} {: <25}'.format(self.label_premises, self.label_nopremises))
         else:
+            print('{}'.format(self.label_premises))
             for i in self.premises:
-                print(f'{self.label_premise}               {str(i)}')
-        print(f'{self.label_derivedgoals}         {self.derivedgoals}')
+                print('{: <25} {: <25}'.format(' ', str(i)))
+
+        # Display derived goals.
+        if len(self.derivedgoals) == 0:
+            print('{: <25} {: <25}'.format(self.label_derivedgoals, self.label_noderivedgoals))
+        else:
+            print('{}'.format(self.derivedgoals))
+            for i in self.derivedgoals:
+                print('{: <25} {: <25}'.format(' ', str(i)))
+
+        # Display proof statuses.
         if self.status == '':
-            print(f'{self.label_proofstatus}          {self.label_inprogress}')
+            print('{: <25} {: <25}'.format(self.label_proofstatus, self.label_inprogress))
         else:
-            print(f'{self.label_proofstatus}          {self.status}')
+            print('{: <25} {: <25}'.format(self.label_proofstatus, self.status))
         if self.stoppedmessage == '':
-            print(f'{self.label_stoppedstatus}        {self.label_notstopped}')
+            print('{: <25} {: <25}'.format(self.label_stoppedstatus, self.label_notstopped))
         else:
-            print(f'{self.label_stoppedstatus}        {self.stoppedmessage}')
-        print(f'{self.label_prooflevel}           {self.level}')
-        print(f'{self.label_currentproofid}      {self.currentproofid}')
-        print(f'{self.label_previousproofid}     {self.previousproofid}')
+            print('{: <25} {: <25}'.format(self.label_stoppedstatus, self.stoppedmessage))
+        print('{: <25} {: <25}'.format(self.label_prooflevel, self.level))
+        print('{: <25} {: <25}'.format(self.label_currentproofid, self.currentproofid))
+        print('{: <25} {: <25}'.format(self.label_previousproofid, self.previousproofid))
         if self.previousproofchain == []:
-            print(f'{self.label_previousproofchain}  {self.label_empty}')
+            print('{: <25} {: <25}'.format(self.label_previousproofchain, self.label_empty))
         else:
-            print(f'{self.label_previousproofchain}  {self.previousproofchain}')
+            print('{: <25} {: <25}'.format(self.label_previousproofchain, self.previousproofchain))
 
     def reflines(self, *lines):
         """Convert integers to strings and join separated by commas."""
@@ -652,6 +773,20 @@ class Proof:
 
         proof = self.prooflist[proofid][1]
         return ''.join([str(proof[0]), '-', str(proof[1])])
+
+    def proofdetailsraw(self, proofname: str):
+        """Display the proof details as saved to the database."""
+
+        # Retrieve proof data.
+        rows = altrea.data.getproofdetails(self.logic, proofname)
+
+        # Prepare to run DataFrame.
+        columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
+        index = []
+        for i in range(len(rows)):
+            index.append(i)
+        df = pandas.DataFrame(rows, index=index, columns=columns)
+        return df
     
     def proofdetails(self, proofname: str, *args, latex: int = 1):
         # Retrieve proof data.
@@ -688,6 +823,9 @@ class Proof:
         for i in newrows:
             for k in self.basicoperators:
                 i[3] = i[3].replace(''.join(['*', k[0], '*']), k[1])
+        for i in newrows:
+            for k in self.basicoperators:
+                i[3] = i[3].replace('*', '')
 
         # Display the proof.
         newp = []
@@ -760,42 +898,66 @@ class Proof:
                 return True
             
         columns = []
+
+        # Letters
         for i in self.letters:
             columns.append(''.join(['$', i[0].latex(), '$']))
         columns.append('|')
-        for i in self.premises:
-            columns.append(''.join(['$', i.latex(), '$']))
-        columns.append('|')
 
-        goals = self.goalswff[0]
-        if len(self.goalswff) > 1:
-            for i in range(len(self.goalswff)):
-                if i > 0:
-                    goals = And(goals, self.goalswff[i])
-        columns.append(''.join(['$', goals.latex(), '$']))
-        columns.append('Check')
+        # Optional premises
+        if len(self.premises) > 0:
+            for i in self.premises:
+                columns.append(''.join(['$', i.latex(), '$']))
+            columns.append('|')
+
+        # Required models sign
+        columns.append('$\\models $')
+
+        # Required conclusion
+        if len(self.goalswff) > 0:
+            goals = self.goalswff[0]
+            if len(self.goalswff) > 1:
+                for i in range(len(self.goalswff)):
+                    if i > 0:
+                        goals = And(goals, self.goalswff[i])
+            columns.append(''.join(['$', goals.latex(), '$']))
+            columns.append(' ')
+        else:
+            raise ValueError('A goal needs to be set before a truth table can be constructed.')
             
         tt = []
         letters = len(self.letters)
         ttrows = 2**letters
+        status = 'Valid'
 
         for letter in self.letters:
             letter[0].booleanvalue = True
         for total in range(ttrows):
             row = []
+
+            # Display the letters
             for i in self.letters:
                 row.append(i[0].booleanvalue)
             row.append('|')
+
+            # Display the optional premises
             premisesvalue = True
-            for i in self.premises:
-                row.append(i.getvalue())
-                premisesvalue = premisesvalue and i.getvalue()
-            row.append('|')
+            if len(self.premises) > 0:
+                for i in self.premises:
+                    row.append(i.getvalue())
+                    premisesvalue = premisesvalue and i.getvalue()
+                row.append('|')
+
+            # Display the goal and assessment of the interpretation on the line.
+            row.append(' ')
             row.append(goals.getvalue())
             if premisesvalue == True and goals.getvalue() == False:
-                row.append('Invalid')
+                row.append('$\\color{red}X $')
+                status = 'Invalid'
+            elif premisesvalue == True and goals.getvalue() == True:
+                row.append('$\\color{green}\\checkmark $')
             else:
-                row.append('OK')
+                row.append(' ')
             tt.append(row)
             for n in range(letters):
                 if (total + 1) % (2**(letters - 1 - n)) == 0:
@@ -803,11 +965,27 @@ class Proof:
 
         index = []
         for i in range(len(tt)):
-            index.append(i)
+            index.append(i+1)
+        index.append(' ')
+        summaryrow = []
+        for i in range(len(columns)-3):
+            summaryrow.append(' ')
+        summaryrow.append(status)
+        summaryrow.append(' ')
+        summaryrow.append(' ')
+        tt.append(summaryrow)
 
         df = pandas.DataFrame(tt, index=index, columns=columns)
         return df
 
+    def savedproofs(self):
+        rows = altrea.data.getavailableproofs(self.logic)
+        columns = ['Name', 'Pattern', 'Display', 'Description']
+        index = []
+        for i in range(len(rows)):
+            index.append(i)
+        df = pandas.DataFrame(rows, index=index, columns=columns)
+        return df
 
     def getgenericaxioms(self, *args, latex: int = 1):
         """Provide a list of generic axioms which the user may add to the proof."""
@@ -957,7 +1135,7 @@ class Proof:
         """
 
         if self.completedproof():  
-            altrea.data.addproof(self.proofdata)
+            altrea.data.addproof(self.proofdatafinal)
         else:
             print(self.stopped_notcomplete)
             
@@ -971,14 +1149,14 @@ class Proof:
 
         if self.completedproof(): 
             altrea.data.deleteproof(self.logic, self.name)
-            altrea.data.addproof(self.proofdata)
+            altrea.data.addproof(self.proofdatafinal)
         else:
             print(self.stopped_notcomplete)
 
     """FUNCTIONS TO BUILD PROOFS"""
 
     def addhypothesis(self,
-                      hypothesis: And | Or | Not | Implies | Iff | Wff | F | T,
+                      hypothesis: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
                       comment: str = ''):
         """Adds to the currently opened subproof an hypothesis and inserts the new hypothesis into
         a list of hypotheses which now have more than one.
@@ -1005,7 +1183,7 @@ class Proof:
             >>> prf.hypothesis(A, comment='Each call to `hypothesis` creates a sub proof.')
             >>> prf.hypothesis(C, comment='Now I have a sub sub proof.')
             >>> prf.addhypothesis(B, comment='This adds a second hypothesis.')
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                     Item      Reason                                         Comment
             0          B        GOAL
             1      A __|  Hypothesis  Each call to `hypothesis` creates a sub proof.
@@ -1028,7 +1206,7 @@ class Proof:
             >>> prf.setlogic('C')
             >>> prf.goal(B, comment='There is a difference between A and "A"')
             >>> prf.hypothesis('A')
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
               Item      Reason                                      Comment
             0    B        GOAL      There is a difference between A and "A"
             1       Hypothesis  STOPPED: Input is not a Wff derived object.
@@ -1046,7 +1224,7 @@ class Proof:
             >>> prf.setlogic('C')
             >>> #prf.goal(B, comment='There is a difference between A and "A"')
             >>> prf.hypothesis(A)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
               Item      Reason                                       Comment
             0
             1       Hypothesis  STOPPED: The proof does not yet have a goal.
@@ -1082,7 +1260,7 @@ class Proof:
 
     def useproof(self, 
                    name: str, 
-                   *subs: int | And | Or | Not | Implies | Iff | Wff | F | T,
+                   *subs: int | And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
                    comment: str = ''):
         """Various proofs may be invoked here such as the law of excluded middle.
         
@@ -1105,24 +1283,27 @@ class Proof:
                 elif type(i) == int:
                     lines += ''.join([str(i), ','])
                     if not self.checkline(i):
+                        self.logstep(f'USEPROOF: The line {str(i)} is not in the proof.')
                         self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(i), '', comment)
                     elif not self.checklinescope(i):
+                        self.logstep(f'USEPROOF: The line {str(i)} is not available.')
                         self.stopproof(self.stopped_linescope, self.blankstatement, name, str(i), '', comment)
                     else:
                         s.append(self.getstatement(i))
                 elif type(i) == str:
+                    self.logstep(f'USEPROOF: The input "{i}" is a string.')
                     self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
                 else:
                     s.append(i)
-
-        # If no errors, perform task.
-        if self.canproceed():
-            subslen = len(s)
             try:
                 displayname, description, received = altrea.data.getsavedproof(self.logic, name)
             except TypeError:
-                print(f'The proof {name} is not in the {self.logic} databaase.')
-            for i in range(len(subs)):
+                self.logstep(f'USEPROOF: The name "{name}" is not a saved proof in the database.')
+                self.stopproof(self.stopped_nosavedproof, self.blankstatement, name, '', '', comment)
+
+        # If no errors, perform task.
+        if self.canproceed():
+            for i in range(len(s)):
                 received = received.replace(''.join(['*', str(i+1), '*']), s[i].tree())
             statement = eval(received, self.objectdictionary)
             self.logstep(f'SAVED PROOF: Item "{str(statement)}" has been added through the "{description}" saved proof.')
@@ -1144,7 +1325,7 @@ class Proof:
 
     def axiom(self, 
               name: str, 
-              *subs: int | And | Or | Not | Implies | Iff | Wff | F | T,
+              *subs: int | And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
               comment: str = ''):
         """Various axioms may be invoked here such as the law of excluded middle.
         
@@ -1165,23 +1346,35 @@ class Proof:
                 if type(i) == int:
                     lines += ''.join([str(i), ','])
                     if not self.checkline(i):
+                        self.logstep(f'AXIOM: The line {str(i)} cannot be found in the axiom list.')
                         self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(i), '', comment)
                     elif not self.checklinescope(i):
+                        self.logstep(f'AXIOM: The line {str(i)} is not available.')
                         self.stopproof(self.stopped_linescope, self.blankstatement, name, str(i), '', comment)
                     else:
                         s.append(self.getstatement(i))
                 elif type(i) == str:
+                    self.logstep(f'AXIOM: The input value "{i}" is a string.')
                     self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
                 else:
                     s.append(i)
+            foundindex = -1
+            for i in range(len(self.logicaxioms)):
+                if self.logicaxioms[i][0] == name:
+                    foundindex = i
+                    break
+            if foundindex < 0:
+                self.logstep(f'AXIOM: Axiom name "{name}" cannot be found in the axiom list.')
+                self.stopproof(self.stopped_nosuchaxiom, self.blankstatement, name, '', '', comment)
 
         # If no errors, perform task.
         if self.canproceed():
-            subslen = len(s)
-            displayname, description, received = altrea.data.getaxiom(self.logic, name)
-            for i in range(len(subs)):
-                received = received.replace(''.join(['*', str(i+1), '*']), s[i].tree())
-            statement = eval(received, self.objectdictionary)
+            pattern = self.logicaxioms[foundindex][1]
+            displayname = self.logicaxioms[foundindex][2]
+            description = self.logicaxioms[foundindex][3]
+            for i in range(len(s)):
+                pattern = pattern.replace(''.join(['*', str(i+1), '*']), s[i].tree())
+            statement = eval(pattern, self.objectdictionary)
             self.logstep(f'AXIOM: Item "{str(statement)}" has been added through the "{description}" axiom.')
             newcomment = self.iscomplete(statement, comment)
             if len(lines) > 0:
@@ -1231,7 +1424,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.coimplication_elim_tag):
+            if not self.checkintelimrule(self.coimplication_elim_tag):
                 self.logstep(f'STATE: The operator "{self.coimplication_elim_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.coimplication_elim_name, '', '', comment)
             elif not self.checkline(first):
@@ -1324,7 +1517,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.coimplication_intro_tag):
+            if not self.checkintelimrule(self.coimplication_intro_tag):
                 self.logstep(f'STATE: The operator "{self.coimplication_intro_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.coimplication_intro_name, '', '', comment)
             elif not self.checkline(first):
@@ -1420,7 +1613,7 @@ class Proof:
             >>> prf.implication_intro()
             >>> prf.coimplication_intro(10, 5, comment='The order will be like the first statement on line 10.')
             >>> prf.coimplication_intro(5, 10, comment='Now it works using line 5 first.')
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                              Item  ...                                            Comment
             0   (A & B) <> (B & A)  ...
             1            A & B __|  ...   Don't use `addhypothesis` to start the subproof.
@@ -1439,7 +1632,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.conjunction_elim_tag):
+            if not self.checkintelimrule(self.conjunction_elim_tag):
                 self.logstep(f'STATE: The operator "{self.conjunction_elim_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.conjunction_elim_name, '', '', comment)
             elif not self.checkline(line):
@@ -1507,7 +1700,7 @@ class Proof:
             >>> prf.premise(A)
             >>> prf.premise(B)
             >>> prf.conjunction_intro(1, 2)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item                   Reason   Comment
             0  A & B                     GOAL
             1      A                  Premise
@@ -1527,7 +1720,7 @@ class Proof:
             >>> prf.goal(And(A, A))
             >>> prf.premise(A)
             >>> prf.conjunction_intro(1, 1)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item                   Reason   Comment
             0  A & A                     GOAL
             1      A                  Premise
@@ -1541,7 +1734,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.conjunction_intro_tag):
+            if not self.checkintelimrule(self.conjunction_intro_tag):
                 self.logstep(f'STATE: The operator "{self.conjunction_intro_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.conjunction_intro_name, '', '', comment)
             elif not self.checkline(first):
@@ -1606,7 +1799,7 @@ class Proof:
             >>> prf.hypothesis(A)
             >>> prf.implication_intro()
             >>> prf.disjunction_elim(1, 3, 3)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item                     Reason   Comment
             0      A                       GOAL
             1  A | A                    Premise
@@ -1640,7 +1833,7 @@ class Proof:
             >>> prf.implication_elim(8, 9)
             >>> prf.implication_intro()
             >>> prf.disjunction_elim(3, 7, 11)
-            >>> showlines(prf, latex=0)
+            >>> showlines(prFalsehood, latex=0)
                Statement  Level  Proof               Rule     Lines Proofs   Comment
             C          A      0      0               GOAL
             1      B > A      0      0            Premise
@@ -1659,7 +1852,7 @@ class Proof:
 
         # Look for errors.
         if self.canproceed():
-            if not self.checkoperator(self.disjunction_elim_tag):
+            if not self.checkintelimrule(self.disjunction_elim_tag):
                 self.logstep(f'STATE: The operator "{self.disjunction_elim_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.disjunction_elim_name, '', '', comment)
             elif not self.checkline(disjunction_line):
@@ -1716,8 +1909,8 @@ class Proof:
 
     def disjunction_intro(self, 
                  line: int,
-                 left: And | Or | Not | Implies | Iff | Wff | F | T = None,
-                 right: And | Or | Not | Implies | Iff | Wff | F | T = None,  
+                 left: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth = None,
+                 right: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth = None,  
                  or_connector: str = '|', 
                  or_latexconnector: str = '\\vee',
                  comment: str = ''):
@@ -1746,7 +1939,7 @@ class Proof:
             >>> prf.goal(Or(A, B))
             >>> prf.premise(A)
             >>> prf.disjunction_intro(1, right=B)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item                Reason   Comment
             0  A | B                  GOAL
             1      A               Premise
@@ -1765,7 +1958,7 @@ class Proof:
             >>> prf.goal(Or(A, B))
             >>> prf.premise(B)
             >>> prf.disjunction_intro(1, left=A)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item                Reason   Comment
             0  A | B                  GOAL
             1      B               Premise
@@ -1774,7 +1967,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.disjunction_intro_tag):
+            if not self.checkintelimrule(self.disjunction_intro_tag):
                 self.logstep(f'STATE: The operator "{self.disjunction_intro_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.disjunction_intro_name, '', '', comment)
             elif left is not None and self.checkstring(left):
@@ -1818,7 +2011,7 @@ class Proof:
             self.appendproofdata(disjunction, self.disjunction_intro_tag)
 
     def explosion(self, 
-                  statement: And | Or | Not | Implies | Iff | Wff | F | T, 
+                  statement: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth, 
                   comment: str = ''):
         """An arbitrary statement is entered in the proof given a false statement immediately preceding it.
         
@@ -1850,7 +2043,7 @@ class Proof:
             >>> prf.premise(Not(A))
             >>> prf.negation_elim(1, 2)
             >>> prf.explosion(mygoal)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
               Item               Reason   Comment
             0    C                 GOAL
             1    A              Premise
@@ -1893,7 +2086,7 @@ class Proof:
             >>> prf.implication_intro()
             >>> prf.disjunction_elim(1, 8, 13)
             >>> prf.implication_intro()
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                               Item                      Reason   Comment
             0   (~A | B) > (A > B)                        GOAL
             1           ~A | B __|                  Hypothesis
@@ -1922,7 +2115,7 @@ class Proof:
         # Look for errors
         if self.canproceed():
             line = len(self.lines) - 1
-            if not self.checkoperator(self.explosion_tag):
+            if not self.checkintelimrule(self.explosion_tag):
                 self.logstep(f'STATE: The operator "{self.explosion_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.explosion_name, '', '', comment)
             elif self.checkstring(statement):
@@ -1958,7 +2151,7 @@ class Proof:
             (statement)
                                
     def goal(self,
-                goal: And | Or | Not | Implies | Iff | Wff | F | T, 
+                goal: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth, 
                 comment: str = ''):
         """Add a goal to the proof.  More than one goal can be assigned although generally
         only one goal is used and only one is needed.  Think of multiple goals as the
@@ -1991,7 +2184,7 @@ class Proof:
             >>> prf.setlogic('C')
             >>> prf.goal(A)
             >>> prf.premise(A)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
               Item   Reason   Comment
             0    A     GOAL
             1    A  Premise  COMPLETE
@@ -2027,7 +2220,7 @@ class Proof:
             self.logstep(f'GOAL: The goal "{str(goal)}" has been added to the goals.')
 
     def hypothesis(self, 
-                   hypothesis: And | Or | Not | Implies | Iff | Wff | F | T,
+                   hypothesis: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
                    comment: str = ''):
         """Opens a uniquely identified subproof of items with an hypothesis.
         
@@ -2095,7 +2288,7 @@ class Proof:
             >>> prf.premise(A)
             >>> prf.premise(Implies(A, B))
             >>> prf.implication_elim(1, 2)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item                  Reason       Comment
             0      B                    GOAL  Modus Ponens
             1      A                 Premise
@@ -2105,7 +2298,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.implication_elim_tag):
+            if not self.checkintelimrule(self.implication_elim_tag):
                 self.logstep(f'STATE: The operator "{self.implication_elim_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.implication_elim_name, '', '', comment)
             elif not self.checkline(first):
@@ -2166,7 +2359,7 @@ class Proof:
             )
             self.appendproofdata(statement, self.implication_elim_tag)
 
-    def implication_intro(self, comment: str = '', implies_connector: str = '>', implies_latexconnector: str = '\\to'):
+    def implication_intro(self, comment: str = '', implies_connector: str = '>', implies_latexconnector: str = '\\Rightarrow'):
         """From a subproof derive the implication where the antecendent is the hypotheses of subproof joined as conjuncts and the
         consequent is the last line of the proof so far entered.  In the process of deriving the implication as an item of the
         proof, the subproof is closed.
@@ -2189,7 +2382,7 @@ class Proof:
             >>> prf.goal(Implies(A, A), comment='Reflexivity of Implication')
             >>> prf.hypothesis(A)
             >>> prf.implication_intro()
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item                  Reason                     Comment
             0  A > A                    GOAL  Reflexivity of Implication
             1  A __|              Hypothesis
@@ -2217,7 +2410,7 @@ class Proof:
             >>> prf.reiterate(1)
             >>> prf.implication_intro()
             >>> prf.implication_intro()
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                       Item                  Reason                          Comment
             0  A > (B > A)                    GOAL  Axiom of Conditioned Repetition
             1        A __|              Hypothesis
@@ -2253,7 +2446,7 @@ class Proof:
             >>> prf.implication_intro()
             >>> prf.implication_intro()
             >>> prf.implication_intro()
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                                                Item  ...               Comment
             0   (A > (B > C)) > ((A > B) > (A > C))  ...  rule of distribution
             1                       A > (B > C) __|  ...
@@ -2271,7 +2464,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.implication_intro_tag):
+            if not self.checkintelimrule(self.implication_intro_tag):
                 self.logstep(f'STATE: The operator "{self.implication_intro_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.implication_intro_name, '', '', comment)
             elif self.currentproofid == 0:
@@ -2321,7 +2514,7 @@ class Proof:
 
         # Look for errors.
         if self.canproceed():
-            if not self.checkoperator(self.necessary_elim_tag):
+            if not self.checkintelimrule(self.necessary_elim_tag):
                 self.logstep(f'STATE: The operator "{self.necessary_elim_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.necessary_elim_name, '', '', comment)
             elif not self.checkline(line):
@@ -2338,11 +2531,11 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
-            self.logstep(f'NECESSARY_ELIM: Item "{str(statement.wff)}" has been derived from the necessary item "{str(statement)}" on line {str(line)}.')   
-            newcomment = self.iscomplete(statement.wff, comment)
+            self.logstep(f'NECESSARY_ELIM: Item "{str(statement.truefalse)}" has been derived from the necessary item "{str(statement)}" on line {str(line)}.')   
+            newcomment = self.iscomplete(statement.truefalse, comment)
             self.lines.append(
                 [
-                    statement.wff, 
+                    statement.truefalse, 
                     self.level, 
                     self.currentproofid, 
                     self.necessary_elim_name, 
@@ -2351,7 +2544,7 @@ class Proof:
                     newcomment
                 ]
             )      
-            self.appendproofdata(statement.wff, self.necessary_elim_tag)  
+            self.appendproofdata(statement.truefalse, self.necessary_elim_tag)  
 
     def necessary_intro(self, comment: str = ''):
         """Closes a strict subproof with a necessary consequence.
@@ -2363,7 +2556,7 @@ class Proof:
 
         # Look for errors.
         if self.canproceed():
-            if not self.checkoperator(self.necessary_intro_tag):
+            if not self.checkintelimrule(self.necessary_intro_tag):
                 self.logstep(f'STATE: The operator "{self.necessary_intro_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.necessary_elim_name, '', '', comment)
             elif self.subproof_status != self.subproof_strict:
@@ -2389,7 +2582,7 @@ class Proof:
             >>> prf.premise(A)
             >>> prf.premise(Not(A))
             >>> prf.negation_elim(1, 2)
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                 Item               Reason Comment
             0  A & A                 GOAL
             1      A              Premise
@@ -2399,7 +2592,7 @@ class Proof:
         
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.negation_elim_tag):
+            if not self.checkintelimrule(self.negation_elim_tag):
                 self.logstep(f'STATE: The operator "{self.negation_elim_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.negation_elim_name, '', '', comment)
             elif not self.checkline(first):
@@ -2464,7 +2657,7 @@ class Proof:
             >>> prf.reiterate(2)
             >>> prf.negation_elim(5, 6)
             >>> prf.negation_intro()
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                     Item                  Reason        Comment
             0         ~A                    GOAL  Modus Tollens
             1      A > B                 Premise
@@ -2479,7 +2672,7 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if not self.checkoperator(self.negation_intro_tag):
+            if not self.checkintelimrule(self.negation_intro_tag):
                 self.logstep(f'STATE: The operator "{self.negation_intro_name}" is not part of the logic.')
                 self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.negation_intro_name, '', '', comment)
             elif self.currentproofid == 0:
@@ -2520,7 +2713,7 @@ class Proof:
             self.appendproofdata(negation, self.negation_intro_tag)
 
     def premise(self, 
-                   premise: And | Or | Not | Implies | Iff | Wff | F | T, 
+                   premise: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth, 
                    comment: str = ''):
         """Add a premise to the proof.  Although a proof does not require a premise one or more of
         them may be provided.  
@@ -2580,7 +2773,7 @@ class Proof:
             >>> prf.hypothesis(Not(A))
             >>> prf.reiterate(1)
             >>> prf.negation_intro()
-            >>> showproof(prf, latex=0)
+            >>> showproof(prFalsehood, latex=0)
                  Item               Reason   Comment
             0     ~~A                 GOAL
             1       A              Premise
@@ -2661,32 +2854,71 @@ class Proof:
             self.logicaxioms = []
         if database != 'No Database':
             try:
-                operators = altrea.data.getoperators(logic)
-                for i in operators:
-                    self.logicoperators.append([operators[0], eval(operators[1])])
-            except TypeError:
-                self.logicoperators = [
-                    (self.coimplication_elim_tag, self.coimplication_elim_name),
-                    (self.coimplication_intro_tag, self.coimplication_intro_name),
-                    (self.conjunction_elim_tag, self.conjunction_elim_name),
-                    (self.conjunction_intro_tag, self.conjunction_intro_name),
-                    (self.disjunction_elim_tag, self.disjunction_elim_name),
-                    (self.disjunction_intro_tag, self.disjunction_intro_name),
-                    (self.explosion_tag, self.explosion_name),
-                    (self.implication_elim_tag, self.implication_elim_name),
-                    (self.implication_intro_tag, self.implication_intro_name),
-                    (self.necessary_elim_tag, self.necessary_elim_name),
-                    (self.necessary_intro_tag, self.necessary_intro_name),
-                    (self.negation_elim_tag, self.negation_elim_name),
-                    (self.negation_intro_tag, self.negation_intro_name),
-                    (self.possibly_elim_tag, self.possibly_elim_name),
-                    (self.possibly_intro_tag, self.possibly_intro_name),
-                ]
+                intelimrules = altrea.data.getintelimrules(logic)
+            except:
+                self.logstep(f'SETLOGIC: "{logic}" could not retrieve its intelim rule permissions.')
+            else:
+                if len(intelimrules) > 0:
+                    self.logicintelimrules = []
+                    for i in intelimrules:
+                        if i[0] != '':
+                            self.logicintelimrules.append((i[0], eval(i[1])))
+                        else:
+                            self.logicintelimrules.append(i)
+            try: 
+                connectors = altrea.data.getconnectors(logic)
+            except:
+                self.logstep(f'SETLOGIC: "{logic}" could not retrieve its connector permissions.')
+            else:
+                if len(connectors) > 0:
+                    self.connectors = []
+                    for i in connectors:
+                        if i[0] != '':
+                            self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
+                        else:
+                            self.logicconnectors.append(i)
+        else:
+            self.logicintelimrules = [
+                (self.coimplication_elim_tag, self.coimplication_elim_name),
+                (self.coimplication_intro_tag, self.coimplication_intro_name),
+                (self.conjunction_elim_tag, self.conjunction_elim_name),
+                (self.conjunction_intro_tag, self.conjunction_intro_name),
+                (self.disjunction_elim_tag, self.disjunction_elim_name),
+                (self.disjunction_intro_tag, self.disjunction_intro_name),
+                #(self.explosion_tag, self.explosion_name),
+                (self.implication_elim_tag, self.implication_elim_name),
+                (self.implication_intro_tag, self.implication_intro_name),
+                (self.necessary_elim_tag, self.necessary_elim_name),
+                (self.necessary_intro_tag, self.necessary_intro_name),
+                (self.negation_elim_tag, self.negation_elim_name),
+                (self.negation_intro_tag, self.negation_intro_name),
+                (self.possibly_elim_tag, self.possibly_elim_name),
+                (self.possibly_intro_tag, self.possibly_intro_name),
+            ]
+            self.logicconnectors = [
 
-    def wff(self, name: str, latex: str = ''):
-        newwff = Wff(name, latex)
-        self.objectdictionary.update({name: newwff})
-        self.letters.append([newwff, name])
+            ]
+
+    def truefalse(self, name: str, latex: str = ''):
+        newtruefalse = TrueFalse(name, latex)
+        self.objectdictionary.update({name: newtruefalse})
+        self.letters.append([newtruefalse, name])
         howmany = len(self.letters)
         self.logstep(f'WFF: The letter "{name}" for a generic well-formed formula has been defined making {howmany} so far.')
-        return newwff
+        return newtruefalse
+
+    def truth(self, name: str, latex: str = ''):
+        newtruth = Truth(name, latex)
+        self.objectdictionary.update({name: newtruth})
+        self.truths.append([newtruth, name])
+        howmany = len(self.truths)
+        self.logstep(f'TRUTH: The letter "{newtruth.name}" (latex: "{newtruth.latexname}") for a generic truth formula has been defined making {howmany} so far.')
+        return newtruth
+
+    def falsehood(self, name: str, latex: str = ''):
+        newfalsehood = Falsehood(name, latex)
+        self.objectdictionary.update({name: newfalsehood})
+        self.falsehoods.append([newfalsehood, name])
+        howmany = len(self.falsehoods)
+        self.logstep(f'TRUTH: The letter "{newfalsehood.name}" (latex: "{newfalsehood.latexname}") for a generic falsehood formula has been defined making {howmany} so far.')
+        return newfalsehood

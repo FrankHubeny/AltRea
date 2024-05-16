@@ -50,8 +50,12 @@ class Wff:
 
     
     def __init__(self, name: str, latexname: str = ''):
-        if name in self.reserved_names:
-            raise ValueError(f'The name "{name}" is in the list of reserved words: {self.reserved_names}.')
+        if name in self.reserved_names or latexname in self.reserved_names:
+            raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
+        elif name == '':
+            raise ValueError(f'The name "{name}" is the empty string which cannot be used as a name.')
+        elif type(name) != str or type(latexname) != str:
+            raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
         else:
             self.name = name
             self.latexname = latexname
@@ -67,7 +71,6 @@ class Wff:
             return f'{self.latexname}'
         
     def tree(self):
-        #return f'{self.wff_treeconnector}{self.lb}{self.name}{self.rb}'
         return self.name
     
     def pattern(self, wfflist: list):
@@ -135,20 +138,32 @@ class And(Wff):
         
     def getvalue(self):
         return self.left.getvalue() and self.right.getvalue()
-    
-    # def dictionary(self, d: dict):
-    #     d = self.left.dictionary(d)
-    #     d = self.right.dictionary(d)
-    #     return d
 
-class F(Wff):
+class Falsehood(Wff):
     """This well formed formula is the result of a contradiction in a proof which may be useful for explosions.
     """
 
     is_variable = True
 
-    def __init__(self):
-        self.value = False
+    def __init__(self, name: str = '', latexname: str = ''):
+        if name in self.reserved_names or latexname in self.reserved_names:
+            raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
+        elif type(name) != str or type(latexname) != str:
+            raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
+        else:
+            self.booleanvalue = False
+            if name == '':
+                self.name = self.f_name
+            else:
+                self.name = name
+            if latexname == '':
+                if name == '':
+                    self.latex = self.f_latexname
+                else:
+                    self.latex = self.name
+            else:
+                self.latex = latexname
+
 
     def __str__(self):
         return f'{self.f_name}'
@@ -159,14 +174,17 @@ class F(Wff):
     def tree(self):
         return f'{self.f_name}'
     
-    def pattern(self, wfflist: list):
-        return f'{self.f_name}'
+    # def pattern(self, wfflist: list):
+    #     return f'{self.f_name}'
     
     def treetuple(self):
         return self.f_name
     
     def getvalue(self):
-        return self.value
+        return self.booleanvalue
+    
+    def setvalue(self, value: bool):
+        self.booleanvalue = False
 
 class Iff(Wff):
     """A well formed formula with two arguments which are also well formed formulas
@@ -175,7 +193,7 @@ class Iff(Wff):
 
     is_variable = False
 
-    def __init__(self, left: Wff, right: Wff, iff_connector: str = '<>', iff_latexconnector: str = '\\leftrightarrow)'):
+    def __init__(self, left: Wff, right: Wff, iff_connector: str = '<>', iff_latexconnector: str = '\\equiv '):
         self.left = left
         self.right = right
         self.iff_connector = iff_connector
@@ -210,11 +228,6 @@ class Iff(Wff):
     
     def treetuple(self):
         return self.iff_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
-    
-    # def dictionary(self, d: dict):
-    #     d = self.left.dictionary(d)
-    #     d = self.right.dictionary(d)
-    #     return d
 
 class Implies(Wff):
     """A well formed formula with two arguments which are also well formed formulas joined
@@ -224,7 +237,7 @@ class Implies(Wff):
 
     is_variable = False
 
-    def __init__(self, left: Wff, right: Wff, implies_connector: str = '>', implies_latexconnector: str = '\\to'):
+    def __init__(self, left: Wff, right: Wff, implies_connector: str = '>', implies_latexconnector: str = '\\Rightarrow '):
         self.left = left
         self.right = right
         self.implies_connector = implies_connector
@@ -262,11 +275,6 @@ class Implies(Wff):
         
     def getvalue(self):
         return (not self.left.getvalue()) or self.right.getvalue()
-    
-    # def dictionary(self, d: dict):
-    #     d = self.left.dictionary(d)
-    #     d = self.right.dictionary(d)
-    #     return d
 
 class Necessary(Wff):
     """A well-formed formula which is necessarily true."""
@@ -274,30 +282,30 @@ class Necessary(Wff):
     is_variable = True
 
     def __init__(self, wff, necessary_connector: str = 'Nec', necessary_latexconnector: str = '\\Box'):
-        self.wff = wff
+        self.truefalse = wff
         self.necessary_connector = necessary_connector
         self.necessary_latexconnector = necessary_latexconnector
 
     def __str__(self):
         if self.is_variable:
-            return f'{self.necessary_connector} {self.wff}'
+            return f'{self.necessary_connector} {self.truefalse}'
         else:
-            return f'{self.necessary_connector}{self.lb}{self.wff}{self.rb}'
+            return f'{self.necessary_connector}{self.lb}{self.truefalse}{self.rb}'
     
     def latex(self):
         if self.is_variable:
-            return f'{self.necessary_latexconnector} {self.wff}'
+            return f'{self.necessary_latexconnector} {self.truefalse}'
         else:
-            return f'{self.necessary_latexconnector} {self.lb}{self.wff}{self.rb}'
+            return f'{self.necessary_latexconnector} {self.lb}{self.truefalse}{self.rb}'
         
     def tree(self):
-        return f'{self.necessary_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
+        return f'{self.necessary_treeconnector}{self.lb}{self.truefalse.tree()}{self.rb}'
     
     def pattern(self, wfflist: list):
-        return f'{self.necessary_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
+        return f'{self.necessary_treeconnector}{self.lb}{self.truefalse.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
-        return self.necessary_treeconnector, self.lb, self.wff.treetuple(), self.rb
+        return self.necessary_treeconnector, self.lb, self.truefalse.treetuple(), self.rb
     
     def getvalue(self):
         return True
@@ -309,7 +317,7 @@ class Not(Wff):
 
     is_variable = True
 
-    def __init__(self, negated: Wff, not_connector: str = '~', not_latexconnector: str = '\\lnot'):
+    def __init__(self, negated: Wff, not_connector: str = '~', not_latexconnector: str = '\\lnot '):
         self.negated = negated
         self.booleanvalue = None
         self.not_connector = not_connector
@@ -338,10 +346,6 @@ class Not(Wff):
     
     def getvalue(self):
         return not self.negated.getvalue()
-
-    # def dictionary(self, d: dict):
-    #     d = self.negated.dictionary(d)
-    #     return d
 
 class Or(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -388,11 +392,6 @@ class Or(Wff):
         
     def getvalue(self):
         return self.left.getvalue() or self.right.getvalue()
-    
-    # def dictionary(self, d: dict):
-    #     d = self.left.dictionary(d)
-    #     d = self.right.dictionary(d)
-    #     return d
 
 class Possibly(Wff):
     """A well-formed formula which is possibly true."""
@@ -400,58 +399,189 @@ class Possibly(Wff):
     is_variable = True
 
     def __init__(self, wff, possibly_connector: str = 'Pos', possibly_latexconnector: str = '\\Diamond'):
-        self.wff = wff
+        self.truefalse = wff
         self.possibly_connector = possibly_connector
         self.possibly_latexconnector = possibly_latexconnector
 
     def __str__(self):
         if self.is_variable:
-            return f'{self.possibly_connector} {self.wff}'
+            return f'{self.possibly_connector} {self.truefalse}'
         else:
-            return f'{self.possibly_connector}{self.lb}{self.wff}{self.rb}'
+            return f'{self.possibly_connector}{self.lb}{self.truefalse}{self.rb}'
     
     def latex(self):
         if self.is_variable:
-            return f'{self.possibly_latexconnector} {self.wff}'
+            return f'{self.possibly_latexconnector} {self.truefalse}'
         else:
-            return f'{self.possibly_latexconnector} {self.lb}{self.wff}{self.rb}'
+            return f'{self.possibly_latexconnector} {self.lb}{self.truefalse}{self.rb}'
         
     def tree(self):
-        return f'{self.possible_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
+        return f'{self.possible_treeconnector}{self.lb}{self.truefalse.tree()}{self.rb}'
     
     def pattern(self, wfflist):
-        return f'{self.possible_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
+        return f'{self.possible_treeconnector}{self.lb}{self.truefalse.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
-        return self.possible_treeconnector, self.lb, self.wff.treetuple(), self.rb
+        return self.possible_treeconnector, self.lb, self.truefalse.treetuple(), self.rb
     
     def getvalue(self):
         return True
     
-class T(Wff):
+class Truth(Wff):
     """A well formed formula which is always true."""
 
-    is_variable = False
+    is_variable = True
+    booleanvalue = True
 
-    def __init__(self):
-        self.value = True
+    def __init__(self, name: str = '', latexname: str = ''):
+        if name in self.reserved_names or latexname in self.reserved_names:
+            raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
+        elif name == '':
+            raise ValueError(f'The name "{name}" is the empty string which cannot be used as a name.')
+        elif type(name) != str or type(latexname) != str:
+            raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
+        else:
+            if name == '':
+                self.name = self.t_name
+            else:
+                self.name = name
+            if latexname == '':
+                self.latexname = self.name
+            else:
+                self.latexname = latexname
 
     def __str__(self):
-        return f'{self.t_name}'
+        return f'{self.name}'
     
     def latex(self):
-        return f'{self.t_latexname}'
+        return f'{self.latexname}'
     
     def tree(self):
-        return f'{self.t_name}'
+        return f'{self.name}'
     
-    def pattern(self):
-        return f'{self.t_name}'
+    # def pattern(self):
+    #     return f'{self.name}'
     
     def treetuple(self):
-        return self.t_name
+        return self.name
     
     def getvalue(self):
-        return self.value
+        return self.booleanvalue
+    
+    def setvalue(self, value: bool):
+        self.booleanvalue = True
 
+class TrueFalse(Wff):
+    """A well formed formula which is can be either true or false, but not both and not neither."""
 
+    is_variable = True
+    booleanvalue = True
+
+    def __init__(self, name: str, latexname: str = ''):
+        if name in self.reserved_names or latexname in self.reserved_names:
+            raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
+        elif name == '':
+            raise ValueError(f'The name "{name}" is the empty string which cannot be used as a name.')
+        elif type(name) != str or type(latexname) != str:
+            raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
+        else:
+            if name == '':
+                self.name = self.t_name
+            else:
+                self.name = name
+            if latexname == '':
+                self.latexname = self.name
+            else:
+                self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.name}'
+    
+    def latex(self):
+        return f'{self.latexname}'
+    
+    def tree(self):
+        return f'{self.name}'
+    
+    # def pattern(self):
+    #     return f'{self.name}'
+    
+    def treetuple(self):
+        return self.name
+    
+    def getvalue(self):
+        return self.booleanvalue
+    
+    def setvalue(self, value: bool):
+        self.booleanvalue = value
+
+class PremisesConclusion(Wff):
+    """A premises and conclusion pairing of Wff objects."""
+
+    is_variable = True
+    booleanvalue = None
+    lb = '{'
+    rb = '}'
+    tree_connector = '|='
+
+    def __init__(self, conclusion: Wff, premises: list = [], connector: str = '|-', latexconnector: str = '\\models '):
+        self.conclusion = conclusion
+        self.premises = premises
+        self.connector = connector
+        self.latexconnector = latexconnector
+
+    def __str__(self):
+        if len(self.premises) > 0:
+            prem = str(self.premises[0])
+            for i in range(len(self.premises)):
+                if i > 0:
+                    prem += ''.join([', ', str(self.premises[i])])
+            return f'{self.lb}{prem}{self.rb} {self.connector} {self.conclusion}'
+        else:
+            return f'{self.connector} {str(self.conclusion)}'
+    
+    def latex(self):
+        if len(self.premises) > 0:
+            prem = self.premises[0].latex()
+            for i in range(len(self.premises)):
+                if i > 0:
+                    prem += ''.join([', ', self.premises[i].latex()])
+            return f'{self.lb}{prem}{self.rb} {self.latexconnector} {self.conclusion.latex()}'
+        else:
+            return f'{self.latexconnector} {self.conclusion.latex()}'
+    
+    def tree(self):
+        if len(self.premises) > 0:
+            prem = self.premises[0].tree()
+            for i in range(len(self.premises)):
+                if i > 0:
+                    prem += ''.join([', ', self.premises[i].tree()])
+            return f'{self.lb}{prem}{self.rb} {self.tree_connector} {self.conclusion.tree()}'
+        else:
+            return f'{self.tree_connector} {self.conclusion.tree()}'
+    
+    def pattern(self, wfflist: list):
+        if len(self.premises) > 0:
+            prem = self.premises[0].pattern(wfflist)
+            for i in range(len(self.premises)):
+                if i > 0:
+                    prem += ''.join([', ', self.premises[i].pattern(wfflist)])
+            return f'{self.lb}{prem}{self.rb} {self.latexconnector} {self.conclusion.pattern(wfflist)}'
+        else:
+            return f'{self.latexconnector} {self.conclusion.pattern(wfflist)}'
+    
+    def treetuple(self):
+        if len(self.premises) > 0:
+            prem = self.premises[0].treetuple()
+            for i in range(len(self.premises)):
+                if i > 0:
+                    prem += ''.join([', ', self.premises[i].treetuple()])
+            return f'{self.lb}{prem}{self.rb} {self.latexconnector} {self.conclusion.treetuple()}'
+        else:
+            return f'{self.latexconnector} {self.conclusion.treetuple()}'
+        
+    def getvalue(self):
+        return None 
+    
+    def setvalue(self):
+        self.booleanvalue = None

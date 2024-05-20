@@ -237,7 +237,7 @@ class Implies(Wff):
 
     is_variable = False
 
-    def __init__(self, left: Wff, right: Wff, implies_connector: str = '>', implies_latexconnector: str = '\\Rightarrow '):
+    def __init__(self, left: Wff, right: Wff, implies_connector: str = '>', implies_latexconnector: str = '\\supset '):
         self.left = left
         self.right = right
         self.implies_connector = implies_connector
@@ -515,6 +515,72 @@ class TrueFalse(Wff):
     def setvalue(self, value: bool):
         self.booleanvalue = value
 
+class Axiom(Wff):
+    """This class holds axioms of the logical system."""
+
+    is_variable = True
+    booleanvalue = True
+
+    def __init__(self, schema: Wff):
+        self.schema = schema
+
+    def __str__(self):
+        return f'{str(self.schema)}'
+    
+    def latex(self):
+        return f'{self.schema.latex()}'
+
+    def tree(self):
+        return f'{self.schema.tree()}'
+    
+    def pattern(self, wfflist: list):
+        return f'Axiom({self.schema.pattern(wfflist)})'
+    
+    def treetuple(self):
+        return f'{self.schema.treetuple()}'
+        
+    def getvalue(self):
+        return self.schema.booleanvalue() 
+    
+    def setvalue(self, val: bool):
+        self.booleanvalue = True
+
+class Definition(Wff):
+    """This class defines one wff expression to be the same as the other."""
+
+    is_variable = True
+    booleanvalue = None
+    lb = '('
+    rb = ')'
+    tree_connector = '|='
+
+    def __init__(self, left: Wff, right: Wff, connector: str = '=', latexconnector: str = '\\equiv '):
+        self.left = left
+        self.right = right
+        self.connector = connector
+        self.latexconnector = latexconnector
+
+    def __str__(self):
+        return f'{str(self.left)} {self.connector} {str(self.right)}'
+    
+    def latex(self):
+        return f'{self.left.latex()} {self.latexconnector} {self.right.latex()}'
+
+    def tree(self):
+        return f'{self.left.tree()} {self.connector} {self.right.tree()}'
+    
+    def pattern(self, wfflist: list):
+        return f'Definition({self.left.pattern(wfflist)}, {self.right.pattern(wfflist)})'
+    
+    def treetuple(self):
+        return f'{self.left.treetuple()} {self.connector} {self.right.treetuple()}'
+        
+    def getvalue(self):
+        return None 
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
 class PremisesConclusion(Wff):
     """A premises and conclusion pairing of Wff objects."""
 
@@ -524,11 +590,19 @@ class PremisesConclusion(Wff):
     rb = '}'
     tree_connector = '|='
 
-    def __init__(self, conclusion: Wff, premises: list = [], connector: str = '|-', latexconnector: str = '\\models '):
+    def __init__(self, 
+                 conclusion: Wff, 
+                 premises: list = [], 
+                 connector: str = '|=', 
+                 derivedconnector: str = '|-', 
+                 latexconnector: str = '\\models ',
+                 derivedlatexconnector: str = '\\vdash '):
         self.conclusion = conclusion
         self.premises = premises
         self.connector = connector
         self.latexconnector = latexconnector
+        self.derivedconnector = derivedconnector
+        self.derivedlatexconnector = derivedlatexconnector
 
     def __str__(self):
         if len(self.premises) > 0:
@@ -549,6 +623,16 @@ class PremisesConclusion(Wff):
             return f'{self.lb}{prem}{self.rb} {self.latexconnector} {self.conclusion.latex()}'
         else:
             return f'{self.latexconnector} {self.conclusion.latex()}'
+        
+    def latexderived(self):
+        if len(self.premises) > 0:
+            prem = self.premises[0].latex()
+            for i in range(len(self.premises)):
+                if i > 0:
+                    prem += ''.join([', ', self.premises[i].latex()])
+            return f'{self.lb}{prem}{self.rb} {self.derivedlatexconnector} {self.conclusion.latex()}'
+        else:
+            return f'{self.latexconnector} {self.conclusion.latex()}'
     
     def tree(self):
         if len(self.premises) > 0:
@@ -566,9 +650,9 @@ class PremisesConclusion(Wff):
             for i in range(len(self.premises)):
                 if i > 0:
                     prem += ''.join([', ', self.premises[i].pattern(wfflist)])
-            return f'{self.lb}{prem}{self.rb} {self.latexconnector} {self.conclusion.pattern(wfflist)}'
+            return f'PremisesConclusion({self.conclusion.pattern(wfflist)}, {prem})'
         else:
-            return f'{self.latexconnector} {self.conclusion.pattern(wfflist)}'
+            return f'PremisesConclusion({self.conclusion.pattern(wfflist)})'
     
     def treetuple(self):
         if len(self.premises) > 0:

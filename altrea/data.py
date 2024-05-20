@@ -18,7 +18,7 @@ def getdatabase(logic: str):
     try:
         database = dbname[0]
     except TypeError:
-        print(f'The logic {logic} does not exist in the logics table.')
+        print(f'The logic "{logic}" could not be found in the logics table.')
     connection.commit()
     connection.close()
     return database
@@ -61,6 +61,19 @@ def createmetadatatables():
                   FOREIGN KEY (logic) REFERENCES logics(logic))""")
         print('The connectors table has been created.')
 
+        # Create the definitons table in the metadata database.
+        c.execute("""CREATE TABLE definitions (
+                logic       TEXT NOT NULL,
+                name        TEXT NOT NULL,
+                pattern     TEXT NOT NULL,
+                displayname TEXT NOT NULL,
+                description TEXT NOT NULL,
+                UNIQUE(logic, name) ON CONFLICT REPLACE,
+                FOREIGN KEY (logic) REFERENCES logics(logic)
+                )"""
+                )
+        print(f'The definitions table has been created.')
+
         # Create the axioms table in the metadata database.
         c.execute("""CREATE TABLE axioms (
                 logic       TEXT NOT NULL,
@@ -74,34 +87,40 @@ def createmetadatatables():
                 )
         print(f'The axioms table has been created.')
 
-        # Create the generic axioms table in the metadata database.
-        c.execute("""CREATE TABLE genericaxioms (
-                name        TEXT PRIMARY KEY,
-                pattern     TEXT NOT NULL,
-                displayname TEXT NOT NULL,
-                description TEXT NOT NULL
-                )"""
-                )
-        print(f'The generic axioms table has been created.')
+        # # Create the generic axioms table in the metadata database.
+        # c.execute("""CREATE TABLE genericaxioms (
+        #         name        TEXT PRIMARY KEY,
+        #         pattern     TEXT NOT NULL,
+        #         displayname TEXT NOT NULL,
+        #         description TEXT NOT NULL
+        #         )"""
+        #         )
+        # print(f'The generic axioms table has been created.')
 
-        # Load the generic axioms table.
-        genericaxioms = [
-            ('dneg intro', 'Implies(*1*, Not(Not(*1*)))', 'dneg intro', 'Double Negation Intro'),
-            ('dneg elim', 'Implies(Not(Not(*1*)), *1*)', 'dneg elim', 'Double Negation Elim'),
-            ('lem', 'Or(*1*, Not(*1*))', 'lem', 'Law of Excluded Middle'),
-            ('wlem', 'Or(Not(*1*), Not(Not(*1*)))', 'wlem', 'Weak Law of Excluded Middle'),
-            ('contradiction', 'And(*1*, Not(*1*))', 'Contradiction', 'All contradictions are true'),
-            ('explosion', 'Implies(And(*1*, Not(*1*)), *2*)', 'Explosion', 'From a contradiction derive anything'),
-        ]
-        statement = 'INSERT INTO genericaxioms (name, pattern, displayname, description) VALUES (?, ?, ?, ?)'
-        c.executemany(statement, genericaxioms)
-        print(f'The generic axiom table has been loaded with initial axioms.')
+        # # Load the generic axioms table.
+        # genericaxioms = [
+        #     ('dneg intro', 'Implies(*1*, Not(Not(*1*)))', 'dneg intro', 'Double Negation Intro'),
+        #     ('dneg elim', 'Implies(Not(Not(*1*)), *1*)', 'dneg elim', 'Double Negation Elim'),
+        #     ('lem', 'Or(*1*, Not(*1*))', 'lem', 'Law of Excluded Middle'),
+        #     ('wlem', 'Or(Not(*1*), Not(Not(*1*)))', 'wlem', 'Weak Law of Excluded Middle'),
+        #     ('contradiction', 'And(*1*, Not(*1*))', 'Contradiction', 'All contradictions are true'),
+        #     ('explosion', 'Implies(And(*1*, Not(*1*)), *2*)', 'Explosion', 'From a contradiction derive anything'),
+        # ]
+        # statement = 'INSERT INTO genericaxioms (name, pattern, displayname, description) VALUES (?, ?, ?, ?)'
+        # c.executemany(statement, genericaxioms)
+        # print(f'The generic axiom table has been loaded with initial axioms.')
 
     # Commit and close the connection.
     connection.commit()
     connection.close()
 
-def addlogic(logic: str, database: str, description: str, connectors: list = [], intelimrules: list = [], axioms: list = []):
+def addlogic(logic: str, 
+             database: str, 
+             description: str, 
+             connectors: list = [], 
+             intelimrules: list = [], 
+             definitions: list = [],
+             axioms: list = []):
     """Add the database file and the tables for a new logic."""
 
     # Reserved name to avoid conflicts with other parts of the software.
@@ -134,6 +153,8 @@ def addlogic(logic: str, database: str, description: str, connectors: list = [],
             print(f'The connectors table for logic {logic} has been loaded.')
         except sqlite3.OperationalError:
             print(f'The connectors table received an operational error for logic {logic}.')
+    else:
+        print(f'There were no connectors to load.')
 
     # Load the intelimrules table.
     if len(intelimrules) > 0:
@@ -143,6 +164,19 @@ def addlogic(logic: str, database: str, description: str, connectors: list = [],
             print(f'The intelimrules table for logic {logic} has been loaded.')
         except sqlite3.OperationalError:
             print(f'The intelimrules table received an operational error for logic {logic}.')
+    else:
+        print(f'There were no intelims to load.')
+
+    # Load the definitions table.
+    if len(definitions) > 0:
+        try:
+            statement = 'INSERT INTO definitions (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)'
+            c.executemany(statement, definitions)
+            print(f'The definitions table for logic {logic} has been loaded.')
+        except sqlite3.OperationalError:
+            print(f'The definitions table received an operational error for logic {logic}.')
+    else:
+        print(f'There were no definitions to load.')
 
     # Load the axioms table.
     if len(axioms) > 0:
@@ -152,6 +186,8 @@ def addlogic(logic: str, database: str, description: str, connectors: list = [],
             print(f'The axioms table for logic {logic} has been loaded.')
         except sqlite3.OperationalError:
             print(f'The axioms table received an operational error for logic {logic}.')
+    else:
+        print(f'There were no axiomss to load.')
 
     connection.commit()
     print(f'Data loaded to the {metadata} tables have been committed.')
@@ -202,7 +238,8 @@ def deletelogic(logic: str):
     try:
         database = getdatabase(logic)
     except UnboundLocalError:
-        print(f'The logic {logic} does not exist in the database.')
+        #print(f'The logic "{logic}" is not defined in the database.')
+        pass
     else:
         connection = sqlite3.connect(database)
         c = connection.cursor()
@@ -233,20 +270,25 @@ def deletelogic(logic: str):
         connection = sqlite3.connect(metadata)
         c = connection.cursor()
 
+    # Delete from the axioms table.
+        statement = 'DELETE FROM definitions WHERE logic=?'
+        c.execute(statement, (logic,))
+        print(f'Any definitions associated with {logic} have been deleted.')
+
         # Delete from the axioms table.
         statement = 'DELETE FROM axioms WHERE logic=?'
         c.execute(statement, (logic,))
-        print(f'Axioms associated with {logic} have been deleted.')
+        print(f'Any axioms associated with {logic} have been deleted.')
 
         # Delete from the intelimrules table.
         statement = 'DELETE FROM intelimrules WHERE logic=?'
         c.execute(statement, (logic,))
-        print(f'Intelim rules associated with {logic} have been deleted.')
+        print(f'Any intelim rules associated with {logic} have been deleted.')
 
         # Delete from the connectors table.
         statement = 'DELETE FROM connectors WHERE logic=?'
         c.execute(statement, (logic,))
-        print(f'Connectors associated with {logic} have been deleted.')
+        print(f'Any connectors associated with {logic} have been deleted.')
 
         # Delete from the logics table.
         statement = 'DELETE FROM logics WHERE logic=?'
@@ -271,6 +313,21 @@ def getlogic(logic: str):
         return row
     else:
         return ('', '')
+    
+def getdefinitions(logic: str):
+    """Retrieve the axioms of this logic."""
+
+    try:
+        connection = sqlite3.connect(metadata)
+        c = connection.cursor()
+        statement = 'SELECT name, pattern, displayname, description FROM definitions WHERE logic=?'
+        c.execute(statement, (logic,))
+        rows = c.fetchall()
+        connection.commit()
+        connection.close()
+        return rows
+    except TypeError:
+        return ()
     
 def getaxioms(logic: str):
     """Retrieve the axioms of this logic."""

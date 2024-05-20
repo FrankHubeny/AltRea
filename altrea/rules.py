@@ -59,7 +59,7 @@ Examples:
 
 import pandas
 
-from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, TrueFalse, Falsehood, Truth, PremisesConclusion
+from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, TrueFalse, Falsehood, Truth, PremisesConclusion, Definition
 import altrea.data
 
 class Proof:
@@ -80,6 +80,7 @@ class Proof:
     linesindex = 4
     proofsindex = 5
     commentindex = 6
+    typeindex = 7
     lowestlevel = 0
     acceptedtypes = [And, Or, Not, Implies, Iff, Wff, Falsehood, Truth],
     false_name = Falsehood()
@@ -113,14 +114,15 @@ class Proof:
     One could redefine them just after instantiating an instance of the Proof class.
     """
 
+    addhypothesis_name = 'Add Hypothesis'
     axiom_name = 'Axiom'
+    definition_name = 'Definition'
     coimplication_intro_name = 'Coimplication Intro'
     coimplication_elim_name = 'Coimplication Elim'
     conjunction_intro_name = 'Conjunction Intro'
     conjunction_elim_name = 'Conjunction Elim'
     disjunction_intro_name = 'Disjunction Intro'
     disjunction_elim_name = 'Disjunction Elim'
-    explosion_name = 'Explosion'
     goal_name = 'GOAL'
     hypothesis_name = 'Hypothesis'
     implication_intro_name = 'Implication Intro'
@@ -133,49 +135,88 @@ class Proof:
     possibly_elim_name = 'Possibly Elim'
     premise_name = 'Premise'
     reiterate_name = 'Reiteration'
+    setlogic_name = 'Set Logic'
+    useproof_name = 'Use Saved Proof'
     comment_connector = ' - '
     stopped_connector = ': '
-    stopped_alreadyavailable = 'The statement is already available at the current level.'
-    stopped_axiomnotfound = 'The axiom was not found.'
-    stopped_blockclosed = 'Referenced block is closed.'
-    stopped_blocknotclosed = 'Referenced block is not closed.'
-    stopped_blockscope = 'Referenced block is out of scope.'
     stopped_closemainproof = 'The main proof cannot be closed only completed.'
-    stopped_notlem = 'The blocks will not work with LEM rule.'
+    log_closemainproof = '{0}: The main proof cannot be closed only completed.'
     stopped_linescope = 'Referenced item is out of scope.'
-    stopped_logiccannotuserule = 'The selected logic cannot use this rule.'
+    log_linescope = '{0}: The line {1} is out of scope.'
+    stopped_nodefinitionmatch = 'The referenced line does not match the definition.'
+    log_nodefinitionmatch = '{0}: The referenced item "{1}" on line {2} does not match the definition "{3}".'
     stopped_nogoal = 'The proof does not yet have a goal.'
+    log_nogoal = '{0}: The proof needs a goal before a line with the item "{1}" can be added to it.'
     stopped_nologic = 'No logic has been declared for the proof.'
+    log_nologic = '{0}: No logic has been declared for the proof.'
     stopped_nosavedproof = "The named saved proof does not exist in the logic's database."
+    log_nosavedproof = '{0}: The saved proof "{1}" cannot be found in the database.'
     stopped_nosuchline = 'The referenced line does not exist.'
+    log_nosuchline = '{0}: The line {1} cannot be found in the proof.'
     stopped_nosubs = 'There were no substitutions entered.'
+    log_nosubs = '{0}: There were no substitutions entered.'
     stopped_nosubproof = 'No subproof has yet been started to add an hypothesis to.'
-    stopped_nosuchblock = 'The referenced block does not exist.'
+    log_nosubproof = '{0}: There is no subproof to add the hypothesis "{1}" to.'
     stopped_notantecedent = 'One item is not the antecedent of the other.'
+    log_notantecedent = '{0}: Item "{1}" is not the antecedent of the other "{2}".'
     stopped_notcoimplicationelim = 'The refernced items cannot be used in coimplication elimination.'
-    stopped_notcomplete = 'The proof needs to be completed before it can be saved.'
+    log_notcoimplicationelim = '{0}: The referenced items "{1}" on line {2} and "{3}" on line {4} cannot be used in coimplication elimination.'
+
+    stopped_notcomplete = 'The proof needs to be completed before it can be saved.' 
+
     stopped_notconjunction = 'The referenced item is not a conjunction.'
+    log_notconjunction = '{0}: The referenced item "{1}" on line {2} is not a conjunction.'
     stopped_notcontradiction = 'The referenced items are not negations of each other.'
-    stopped_notdemorgan = 'The referenced item is not a DeMorgan statement.'
+    log_notcontradiction = '{0}: The reference items "{1}" on line {2} and "{3}" on line {4} are not negations of each other.'
     stopped_notdisjunction = 'The referenced item is not a disjunction.'
-    stopped_notdoublenegation = 'The referenced line is not a double negation.'
+    log_notdisjunction = '{0}: The referenced item "{1}" on line {2} is not a disjunction.'
     stopped_notfalse = 'The referenced item is not false.'
+    log_notfalse = '{0}: The referenced item "{1}" on line {2} is not false.'
     stopped_notimplication = 'The referenced item is not an implication.'
+    log_notimplication = '{0}: The referenced item "{1}" on line {2} is not an implication.'
     stopped_notmodusponens = 'The referenced items can not be used in implication elimination.'
+    log_notmodusponens = '{0}: The referenced items "{1}" on line {2} and "{3}" on line {4} cannot be used in implication elimination.'
     stopped_notnecessary = 'The referenced item is not necessary.'
-    stopped_notnormalsubproof = 'The subproof is not normal.'
+    log_notnecessary = '{0}: The referenced item "{1}" on line {2} is not necessary.'
     stopped_notreiteratescope = 'The referenced item is not in the reiterate scope.'
-    stopped_notsameconclusion = 'The two conclusions are not the same.'
+    log_notreiteratescope = '{0}: The referenced item on line {1} is not in the reiterate scope.'
     stopped_notsamestatement = 'The referenced items are not the same.'
-    stopped_notsamelevel = 'The two blocks are not at the same level.'
-    stopped_nosuchaxiom = 'The named axiom is not in the axiom list.'
+    log_notsamestatement = '{0}: The referenced items "{1}" and "{2}" are not the same.'
+    stopped_nosuchaxiom = 'The referenced named is not in the axiom list.'
+    log_nosuchaxiom = '{0}: The name "{1}" does not reference an axiom.'
+    stopped_nosuchdefinition = 'The referenced name is not in the definition list.'
+    log_nosuchdefinition = '{0}: The name "{1}" does not reference a definition.'
     stopped_novaluepassed = 'No value was passed to the function.'
+    log_novaluepassed = '{0}: No value was passed to the function.'
     stopped_notstrictsubproof = 'The subproof is not strict.'
-    stopped_sidenotselected = 'A side, left or right, must be selected.'
-    stopped_string = 'Input is not a Wff derived object.'
-    stopped_unavailableaxiom = 'The axiom is not available in the selected logic.'
-    stopped_undefinedlogic = 'This logic has not been defined.'
-    stopped_undefinedoperator = 'The operation is not defined in the selected logic.'
+    log_notstrictsubproof = '{0}: The subproof is "{1}" rather than "{2}".'
+    stopped_sidenotselected = 'A side, "left" or "right", must be selected.'
+    log_sidenotselected = '{0}: The input "{1}" was used rather than "left" or "right".'
+    stopped_string = 'Input is a string rather than an item in the proof.'
+    log_string = '{0}: The input "{1}" is a string rather than a declared item of the proof.'
+    stopped_notransformationrule = 'The transformation rule is not defined in the selected logic.'
+    log_notransformationrule = '{0}: This transformation rule is not part of the logic.'
+    log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
+
+    log_addhypothesis = '{0}: Item "{1}" has been added as an hypothesis to subproof {2}.'
+    log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
+    log_definition = '{0}: Item "{1}" has been added through the "{2}" definition.'
+    log_axiom = '{0}: Item "{1}" has been added through the "{2}" axiom.'
+    log_coimplication_elim = '{0}: Item "{1}" has been derived from the coimplication "{2}".'
+    log_coimplication_intro = '{0}: Item "{1}" has been derived from "{2}" and "{3}".'
+    log_conjunction_elim = '{0}: Item "{1}" has been derived from the conjunction "{2}" on line {3}.'
+    log_conjunction_intro = '{0}: The conjunction "{1}" has been derived from "{2}" on line {3} and "{4}" on line {5}.'
+    log_disjunction_elim = '{0}: Item "{1}" has been derived as the conclusion of both disjuncts of the disjunction "{2}" on line {3}.'
+    log_disjunction_intro = '{0}: Item "{1}" has been derived from item "{2}" on line {3} joined on the {4} with {5}.'
+    log_goal = '{0}: The goal "{1}" has been added to the goals.'
+    log_hypothesis = '{0}: A new subproof {1} has been started with item "{2}".'
+    log_implication_elim = '{0}: Item "{1}" has been derived from the implication "{2}" and item "{3}".'
+    log_implication_intro = '{0}: Item "{1}" has been derived upon closing subproof {2}.'
+    log_necessary_elim = '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
+    log_negation_elim = '{0}: Item "{1}" has been derived from the contradiction between "{2}" on line {3} and "{4}" on line {5}.'
+    log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the hypothesis "{2}" of subproof {3} which is now closed.'
+    log_premise = '{0}: Item "{1}" has been added to the premises.'
+    log_reiterate = '{0}: Item "{1}" on line {2} has been reiterated into subproof {3}.'
     label_name = 'Name'
     label_proofname = 'Proof Name'
     label_comment = 'Comment'
@@ -186,6 +227,7 @@ class Proof:
     label_proof = 'Proof'
     label_level = 'Level'
     label_lines = 'Lines'
+    label_linetype = 'Type'
     label_value = 'Value'
     label_displayname = 'Display Name'
     label_logic = 'Logic'
@@ -204,6 +246,8 @@ class Proof:
     label_noaxioms = 'No Axioms'
     label_connectors = 'Connectors'
     label_connector = 'Connector'
+    label_definitions = 'Definitions'
+    label_nodefinition = ' No Definitions'
     label_noconnectors = 'No Connectors'
     label_intelimrules = 'IntElim Rules'
     label_intelimrule = 'IntElim Rule'
@@ -220,6 +264,12 @@ class Proof:
     label_previousproofid = 'Previous Proof ID'
     label_previousproofchain = 'Previous Proof Chain'
     label_empty = 'Empty'
+    linetype_savedproof = ' SP'
+    linetype_axiom = ' AX'
+    linetype_definition = ' DEF'
+    linetype_notransformationrule = ' TR'
+    linetype_hypothesis = 'H'
+    linetype_premise = 'PR'
 
     def __init__(self, name: str = '', displayname: str = '', description: str = ''):
         """Create a Proof object with an optional name.
@@ -252,6 +302,7 @@ class Proof:
         self.logicdatabase = ''
         self.logicconnectors = []
         self.logicaxioms = []
+        self.logicdefinitions = []
         self.logicintelimrules = []
         self.logicoperators = [
             (self.coimplication_elim_tag, self.coimplication_elim_name),
@@ -260,7 +311,6 @@ class Proof:
             (self.conjunction_intro_tag, self.conjunction_intro_name),
             (self.disjunction_elim_tag, self.disjunction_elim_name),
             (self.disjunction_intro_tag, self.disjunction_intro_name),
-            (self.explosion_tag, self.explosion_name),
             (self.implication_elim_tag, self.implication_elim_name),
             (self.implication_intro_tag, self.implication_intro_name),
             (self.necessary_elim_tag, self.necessary_elim_name),
@@ -275,7 +325,7 @@ class Proof:
             (self.premise_tag, self.premise_name),
             (self.reiterate_tag, self.reiterate_name),
         ]
-        self.lines = [['', 0, 0, '', '', '', '']]
+        self.lines = [['', 0, 0, '', '', '', '', '']]
         self.previousproofchain = []
         self.previousproofid = -1
         self.currentproof = [1]
@@ -293,7 +343,17 @@ class Proof:
         self.letters = []
         self.truths = []
         self.falsehoods = []
-        self.objectdictionary = {'Implies': Implies, 'Iff': Iff, 'And': And, 'Or': Or, 'Not': Not, 'Necessary': Necessary, 'Possibly': Possibly}
+        self.objectdictionary = {
+            'Implies': Implies, 
+            'Iff': Iff, 
+            'And': And, 
+            'Or': Or, 
+            'Not': Not, 
+            'Necessary': Necessary, 
+            'Possibly': Possibly, 
+            'PremisesConclusion': PremisesConclusion,
+            'Definition': Definition,
+            }
         self.log = []
         self.showlogging = False
 
@@ -307,17 +367,17 @@ class Proof:
                 [
                     self.name,
                     statement,
-                    #statement.pattern(self.truefalselist),  
                     self.lines[length][1], 
                     self.lines[length][2], 
                     ''.join(['*', rule, '*']),
                     self.lines[length][4], 
                     self.lines[length][5],
-                    self.lines[length][6]
+                    self.lines[length][6],
+                    self.lines[length][7]
                 ]
             )
         if self.status == self.complete:
-            finalresult = self.getantecedentconsequent()
+            finalresult = self.buildpremisesconclusion()
             self.proofdatafinal.append([
                 self.proofdata[0][0], 
                 self.proofdata[0][1], 
@@ -391,11 +451,6 @@ class Proof:
                 if i > 0:
                     conclusion = And(conclusion, self.consequences[i])
         if len(self.premises) > 0:
-        #     antecedent = self.premises[0]
-        #     if len(self.premises) > 1:
-        #         for i in range(len(self.premises)):
-        #             if i > 0:
-        #                 antecedent = And(antecedent, self.premises[i])
             return PremisesConclusion(conclusion, self.premises)
         else:
             return PremisesConclusion(conclusion)
@@ -481,27 +536,6 @@ class Proof:
                         self.prooflist[0][1].append(len(self.lines))
                         newcomment = self.complete
                         self.consequences.append(statement)
-                        # finalresult = self.getantecedentconsequent()
-                        # self.proofdatafinal.append([
-                        #     self.proofdata[0][0], 
-                        #     self.proofdata[0][1], 
-                        #     self.proofdata[0][2], 
-                        #     self.proofdata[0][3],
-                        #     finalresult.pattern(self.truefalselist)
-                        #     ])
-                        # for i in range(len(self.proofdata)):
-                        #     if i > 0:
-                        #         self.proofdatafinal.append([
-                        #             self.proofdata[i][0],
-                        #             self.proofdata[i][1].pattern(self.truefalselist),
-                        #             self.proofdata[i][2],
-                        #             self.proofdata[i][3],
-                        #             self.proofdata[i][4],
-                        #             self.proofdata[i][5],
-                        #             self.proofdata[i][6],
-                        #             self.proofdata[i][7]
-                        #         ])
-                        #self.proofdata[0].append(finalresult.pattern(self.truefalselist))
                         self.logstep(f'The proof is complete.')
                 
         if comment == '':
@@ -702,6 +736,14 @@ class Proof:
             for i in self.logicaxioms:
                 print('{: >25} {: <25}'.format(i[0], i[1]))
 
+        # Display definitions
+        if len(self.logicdefinitions) == 0:
+            print('{: <25} {: <25}'.format(self.label_definitions, self.label_nodefinitions))
+        else:
+            print('{}'.format(self.label_definitions))
+            for i in self.logicdefinitions:
+                print('{: >25} {: <25}'.format(i[0], i[1]))
+
         # Display connectors.
         if len(self.logicconnectors) == 0:
             print('{: <25} {: <25}'.format(self.label_connectors, self.label_noconnectors))
@@ -813,8 +855,6 @@ class Proof:
             for k in range(len(s)):
                 newrows[i][0] = newrows[i][0].replace(''.join(['*', str(k+1), '*']), s[k].tree())
             newrows[i][0] = eval(newrows[i][0], self.objectdictionary)
-            #     i[0] = i[0].replace(''.join(['*', str(k+1), '*']), s[k].tree())
-            # i[0] = eval(i[0], self.objectdictionary)
 
         # Format the rules column using the names from the proofs logic operators.
         for i in newrows:
@@ -848,39 +888,66 @@ class Proof:
         return df
 
     def displayproof(self, 
+                    short: int = 0,
                     color: int = 1, 
                     latex: int = 1):
-        columns = [self.label_item, self.label_level, self.label_proof, self.label_rule, self.label_lines, self.label_proofs, self.label_comment]
+        """This function displays the proof lines.
+        
+        Parameters:
+            short: Display a three column proof with the item, combined rule and lines referenced and comments.  Using the
+            default presents all lines of the proof.
+            color: Displays the latex version with color.  This helps if one is using natural deduction with Fitch-style subordinate proofs.
+            latex: This sets the display for the statement to use latex rather than text.
+            
+        """
+
+        # Create the column.
+        if short == 1:
+            columns = [self.label_item, self.label_rule, self.label_comment]
+        else:
+            columns = [self.label_item, self.label_level, self.label_proof, self.label_rule, self.label_linetype, self.label_lines, self.label_proofs, self.label_comment]
+
+        # Create the index.
         indx = [self.displayname]
         for i in range(len(self.lines)-1):
             indx.append(i + 1)
+
+        # Create the rows of data.
         newp = []
-        if latex == 1:
-            for i in range(len(self.lines)):
-                # Format statement
+        for i in range(len(self.lines)):
+            if latex == 1:
                 statement = self.latexitem(prooflines=self.lines, i=i, status=self.status, saved=False, color=color)
-                newp.append([statement,
-                            self.lines[i][1],
-                            self.lines[i][2],
-                            self.lines[i][3],
-                            self.lines[i][4],
-                            self.lines[i][5],
-                            self.lines[i][6]
-                            ]
-                )
-        else:
-            for i in range(len(self.lines)):
-                # Format statement
+            else:
                 statement = self.stringitem(prooflines=self.lines, i=i)
-                newp.append([statement,
-                            self.lines[i][1],
-                            self.lines[i][2],
-                            self.lines[i][3],
-                            self.lines[i][4],
-                            self.lines[i][5],
-                            self.lines[i][6]
-                        ]
+            if short == 1:
+                if self.lines[i][self.linesindex] != '':
+                    rule = ''.join([self.lines[i][self.linesindex], ', ',self.lines[i][self.ruleindex]])
+                elif self.lines[i][self.proofsindex] != '':
+                    rule = ''.join([self.lines[i][self.proofsindex], ', ',self.lines[i][self.ruleindex]])
+                else:
+                    rule = self.lines[i][self.ruleindex]
+                newp.append(
+                    [
+                        statement,
+                        rule,
+                        self.lines[i][self.commentindex],
+                    ]
                 )
+            else:
+                newp.append(
+                    [
+                        statement,
+                        self.lines[i][self.levelindex],
+                        self.lines[i][self.proofidindex],
+                        self.lines[i][self.ruleindex],
+                        self.lines[i][self.typeindex],
+                        self.lines[i][self.linesindex],
+                        self.lines[i][self.proofsindex],
+                        self.lines[i][self.commentindex],
+                    ]
+                )
+
+        # Use pandas to display the proof lines.
         df = pandas.DataFrame(newp, index=indx, columns=columns)
         return df
 
@@ -902,13 +969,16 @@ class Proof:
         # Letters
         for i in self.letters:
             columns.append(''.join(['$', i[0].latex(), '$']))
-        columns.append('|')
+        for i in self.truths:
+            columns.append(''.join(['$', i[0].latex(), '$']))
+
+        # Separate the letters from the premises and conclusion.
+        columns.append('$\\parallel $')
 
         # Optional premises
         if len(self.premises) > 0:
             for i in self.premises:
                 columns.append(''.join(['$', i.latex(), '$']))
-            columns.append('|')
 
         # Required models sign
         columns.append('$\\models $')
@@ -927,6 +997,7 @@ class Proof:
             
         tt = []
         letters = len(self.letters)
+        countfalsegoal = 0
         ttrows = 2**letters
         status = 'Valid'
 
@@ -938,7 +1009,9 @@ class Proof:
             # Display the letters
             for i in self.letters:
                 row.append(i[0].booleanvalue)
-            row.append('|')
+            for i in self.truths:
+                row.append(True)
+            row.append('$\\parallel $')
 
             # Display the optional premises
             premisesvalue = True
@@ -946,15 +1019,17 @@ class Proof:
                 for i in self.premises:
                     row.append(i.getvalue())
                     premisesvalue = premisesvalue and i.getvalue()
-                row.append('|')
 
             # Display the goal and assessment of the interpretation on the line.
             row.append(' ')
-            row.append(goals.getvalue())
-            if premisesvalue == True and goals.getvalue() == False:
-                row.append('$\\color{red}X $')
+            goalvalue = goals.getvalue()
+            if not goalvalue:
+                countfalsegoal += 1
+            row.append(goalvalue)
+            if premisesvalue == True and goalvalue == False:
+                row.append('$\\color{red}\\times $')
                 status = 'Invalid'
-            elif premisesvalue == True and goals.getvalue() == True:
+            elif premisesvalue == True and goalvalue == True:
                 row.append('$\\color{green}\\checkmark $')
             else:
                 row.append(' ')
@@ -963,13 +1038,21 @@ class Proof:
                 if (total + 1) % (2**(letters - 1 - n)) == 0:
                     self.letters[n][0].booleanvalue = flip(self.letters[n][0].booleanvalue)
 
+        if countfalsegoal == 0:
+            status = 'Tautology'
         index = []
         for i in range(len(tt)):
             index.append(i+1)
         index.append(' ')
         summaryrow = []
-        for i in range(len(columns)-3):
+        for i in range(len(columns)-3-len(self.premises)):
             summaryrow.append(' ')
+        if status == 'Tautology':
+            for i in range(len(self.premises)):
+                summaryrow.append('$\\color{red}\\times $')
+        else:
+            for i in range(len(self.premises)):
+                summaryrow.append(' ')
         summaryrow.append(status)
         summaryrow.append(' ')
         summaryrow.append(' ')
@@ -1046,7 +1129,8 @@ class Proof:
                     rule, 
                     lines, 
                     blocks, 
-                    self.stoppedmessage
+                    self.stoppedmessage,
+                    ''
                 ]
             )
             self.logstep(self.stoppedmessage)
@@ -1233,17 +1317,17 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if type(hypothesis) == str:
-                self.logstep(f'STATE: The hypothesis "{hypothesis}" is a string.')
+                self.logstep(self.log_string.format(self.addhypothesis_name.upper(), hypothesis))
                 self.stopproof(self.stopped_string, self.blankstatement, self.hypothesis_name, '', '', comment)
             elif self.currentproofid == 0:
-                self.logstep(f'STATE: The current proof id is {str(self.currentproofid)}.')
+                self.logstep(self.log_nosubproof.format(self.addhypothesis_name.upper(), str(hypothesis)))
                 self.stopproof(self.stopped_nosubproof, self.blankstatement, self.hypothesis_name, '', '', comment)
 
         # If no errors, perform task
         if self.canproceed():
             nextline = len(self.lines)
             self.prooflist[self.currentproofid][3].append(nextline)
-            self.logstep(f'ADDHYPOTHESIS: Item "{str(hypothesis)}" has been added as an hypothesis to subproof {self.currentproofid}.')      
+            self.logstep(self.log_addhypothesis.format(self.addhypothesis_name.upper(), str(hypothesis), str(self.currentproofid))) 
             newcomment = self.iscomplete(hypothesis, comment)
             self.lines.append(
                 [
@@ -1253,7 +1337,8 @@ class Proof:
                     self.hypothesis_name, 
                     '', 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_hypothesis
                 ]
             )
             self.appendproofdata(hypothesis, self.hypothesis_tag)
@@ -1279,49 +1364,133 @@ class Proof:
             lines = ''
             for i in subs:
                 if len(subs) == 0:
+                    self.logstep(self.log_nosubs.format(self.useproof_name.upper()))
                     self.stopproof(self.stopped_nosubs, self.blankstatement, name, '', '', comment)
                 elif type(i) == int:
                     lines += ''.join([str(i), ','])
                     if not self.checkline(i):
-                        self.logstep(f'USEPROOF: The line {str(i)} is not in the proof.')
+                        self.logstep(self.log_nosuchline.format(self.useproof_name.upper(), str(i)))
                         self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(i), '', comment)
                     elif not self.checklinescope(i):
-                        self.logstep(f'USEPROOF: The line {str(i)} is not available.')
+                        self.logstep(self.log_linescope.format(self.useproof_name.upper(), str(i)))
                         self.stopproof(self.stopped_linescope, self.blankstatement, name, str(i), '', comment)
                     else:
                         s.append(self.getstatement(i))
                 elif type(i) == str:
-                    self.logstep(f'USEPROOF: The input "{i}" is a string.')
+                    self.logstep(self.log_string.format(self.useproof_name.upper(), i))
                     self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
                 else:
                     s.append(i)
             try:
-                displayname, description, received = altrea.data.getsavedproof(self.logic, name)
+                displayname, description, pattern = altrea.data.getsavedproof(self.logic, name)
             except TypeError:
-                self.logstep(f'USEPROOF: The name "{name}" is not a saved proof in the database.')
+                self.logstep(self.log_nosavedproof.format(self.useproof_name.upper(), name))
                 self.stopproof(self.stopped_nosavedproof, self.blankstatement, name, '', '', comment)
 
         # If no errors, perform task.
         if self.canproceed():
             for i in range(len(s)):
-                received = received.replace(''.join(['*', str(i+1), '*']), s[i].tree())
-            statement = eval(received, self.objectdictionary)
-            self.logstep(f'SAVED PROOF: Item "{str(statement)}" has been added through the "{description}" saved proof.')
-            newcomment = self.iscomplete(statement, comment)
+                pattern = pattern.replace(''.join(['*', str(i+1), '*']), s[i].tree())
+            premisesconclusion = eval(pattern, self.objectdictionary)
+            if len(premisesconclusion.premises) == 0:
+                self.logstep(self.log_useproof.format(self.useproof_name.format(), str(premisesconclusion.conclusion), description))
+            newcomment = self.iscomplete(premisesconclusion.conclusion, comment)
             if len(lines) > 0:
                 lines = lines[:-1]
             self.lines.append(
                 [
-                    statement, 
+                    premisesconclusion.conclusion, 
                     self.level, 
                     self.currentproofid, 
-                    displayname, 
+                    displayname,
                     lines, 
                     '', 
-                    newcomment
+                    newcomment,
+                    self.linetype_savedproof
                 ]
             )
-            self.appendproofdata(statement, displayname)
+            self.appendproofdata(premisesconclusion.conclusion, displayname)
+
+    def definition(self, 
+              name: str, 
+              line: int,
+              side: str,
+              comment: str = '',
+              *subs: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth
+              ):
+        """Various axioms may be invoked here such as the law of excluded middle.
+        
+        Parameters:
+            name: The name of the axiom one wishes to use.
+            line: The line containing statement one wants to transform by invoking the definition.
+            side: Which side of the definition to return, the left or the right.
+            subs: An arbitrary long list of substitutions.
+            comment: An optional comment.
+
+        Examples:
+
+        """
+
+        # Look for errors.
+        if self.canproceed():
+            if not self.checkline(line):
+                self.logstep(self.log_nosuchline.format(self.definition_name.upper(), str(i)))
+                self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(line), '', comment)
+            elif not self.checklinescope(line):
+                self.logstep(self.log_linescope.format(self.definition_name.upper(), str(line)))
+                self.stopproof(self.stopped_linescope, self.blankstatement, name, str(line), '', comment)
+            elif not side in ['left', 'right']:
+                self.logstep(self.log_sidenotselected.format(self.definition_name.upper(), side))
+                self.stopproof(self.stopped_sidenotselected, self.blankstatement, name, '', '', comment)
+            else:
+                for i in subs:
+                    if type(i) == str:
+                        self.logstep(self.log_string.format(self.definition_name.upper(), i))
+                        self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
+        if self.canproceed():
+            foundindex = -1
+            for i in range(len(self.logicdefinitions)):
+                if self.logicdefinitions[i][0] == name:
+                    foundindex = i
+                    break
+            if foundindex < 0:
+                self.logstep(self.log_nosuchdefinition.format(self.definition_name.upper(), name))
+                self.stopproof(self.stopped_nosuchdefinition, self.blankstatement, name, '', '', comment)
+            else:
+                definition = self.logicdefinitions[foundindex][1]
+                for i in range(len(subs)):
+                    definition = definition.replace(''.join(['*', str(i+1), '*']), subs[i].tree())
+                evaldefinition = eval(definition, self.objectdictionary)
+                linestatement = self.getstatement(line)
+                if side == 'left':
+                    matchstatement = evaldefinition.right
+                    returnstatement = evaldefinition.left
+                else:
+                    matchstatement = evaldefinition.left
+                    returnstatement = evaldefinition.right
+                if not matchstatement.equals(linestatement):
+                    self.logstep(self.log_nodefinitionmatch.format(self.definition_name, str(linestatement), str(line), str(matchstatement)))
+                    self.stopproof(self.stopped_nodefinitionmatch, self.blankstatement, name, '', '', comment)      
+
+        # If no errors, perform task.
+        if self.canproceed():
+            displayname = self.logicdefinitions[foundindex][2]
+            description = self.logicdefinitions[foundindex][3]
+            self.logstep(self.log_definition.format(self.definition_name.upper(),str(returnstatement), description))
+            newcomment = self.iscomplete(returnstatement, comment)
+            self.lines.append(
+                [
+                    returnstatement, 
+                    self.level, 
+                    self.currentproofid, 
+                    displayname,
+                    line, 
+                    '', 
+                    newcomment,
+                    self.linetype_definition
+                ]
+            )
+            self.appendproofdata(returnstatement, displayname)
 
     def axiom(self, 
               name: str, 
@@ -1346,15 +1515,15 @@ class Proof:
                 if type(i) == int:
                     lines += ''.join([str(i), ','])
                     if not self.checkline(i):
-                        self.logstep(f'AXIOM: The line {str(i)} cannot be found in the axiom list.')
+                        self.logstep(self.log_nosuchline.format(self.axiom_name.upper(), str(i)))
                         self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(i), '', comment)
                     elif not self.checklinescope(i):
-                        self.logstep(f'AXIOM: The line {str(i)} is not available.')
+                        self.logstep(self.log_linescope.format(self.axiom_name.upper(), str(i)))
                         self.stopproof(self.stopped_linescope, self.blankstatement, name, str(i), '', comment)
                     else:
                         s.append(self.getstatement(i))
                 elif type(i) == str:
-                    self.logstep(f'AXIOM: The input value "{i}" is a string.')
+                    self.logstep(self.log_string.format(self.axiom_name.upper(), i))
                     self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
                 else:
                     s.append(i)
@@ -1364,7 +1533,7 @@ class Proof:
                     foundindex = i
                     break
             if foundindex < 0:
-                self.logstep(f'AXIOM: Axiom name "{name}" cannot be found in the axiom list.')
+                self.logstep(self.log_nosuchaxiom.format(self.axiom_name.upper(), name))
                 self.stopproof(self.stopped_nosuchaxiom, self.blankstatement, name, '', '', comment)
 
         # If no errors, perform task.
@@ -1375,7 +1544,7 @@ class Proof:
             for i in range(len(s)):
                 pattern = pattern.replace(''.join(['*', str(i+1), '*']), s[i].tree())
             statement = eval(pattern, self.objectdictionary)
-            self.logstep(f'AXIOM: Item "{str(statement)}" has been added through the "{description}" axiom.')
+            self.logstep(self.log_axiom.format(self.axiom_name.upper(), str(statement), description))
             newcomment = self.iscomplete(statement, comment)
             if len(lines) > 0:
                 lines = lines[:-1]
@@ -1384,10 +1553,11 @@ class Proof:
                     statement, 
                     self.level, 
                     self.currentproofid, 
-                    displayname, 
+                    displayname,
                     lines, 
                     '', 
-                    newcomment
+                    newcomment,
+                    self.linetype_axiom
                 ]
             )
             self.appendproofdata(statement, displayname)
@@ -1425,37 +1595,37 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.coimplication_elim_tag):
-                self.logstep(f'STATE: The operator "{self.coimplication_elim_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.coimplication_elim_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.coimplication_elim_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.coimplication_elim_name, '', '', comment)
             elif not self.checkline(first):
-                self.logstep(f'STATE: Line {str(first)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.coimplication_elim_name.upper(), str(first)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.coimplication_elim_name, str(first), '', comment)
             elif not self.checkline(second):
-                self.logstep(f'STATE: Line {str(second)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.coimplication_elim_name.upper(), str(second)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.coimplication_elim_name, str(second), '', comment)
             elif not self.checklinescope(first):
-                self.logstep(f'STATE: Line {str(first)} is not available.')
+                self.logstep(self.log_linescope.format(self.coimplication_elim_name.upper(), str(first)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.coimplication_elim_name, str(first), '', comment)
             elif not self.checklinescope(second):
-                self.logstep(f'STATE: Line {str(second)} is not available.')
+                self.logstep(self.log_linescope.format(self.coimplication_elim_name.upper(), str(second)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.coimplication_elim_name, str(second), '', comment)
             else:
                 firststatement = self.getstatement(first)
                 secondstatement = self.getstatement(second)
                 if type(firststatement) != Iff and type(secondstatement) != Iff:
-                    self.logstep(f'STATE: Items "{str(firststatement)}" and "{str(secondstatement)}" cannot be used by the coimplication elimination rule.')
+                    self.logstep(self.log_notcoimplicationelim.format(self.coimplication_elim_name.upper(), str(firststatement), str(first), str(secondstatement), str(second)))
                     self.stopproof(self.stopped_notcoimplicationelim, self.blankstatement, self.coimplication_elim_name, self.reflines(first, second), '', comment)
                 elif type(firststatement) == Iff and not secondstatement.equals(firststatement.left) and not secondstatement.equals(firststatement.right):
-                    self.logstep(f'STATE: Items "{str(firststatement)}" and "{str(secondstatement)}" cannot be used by the coimplication elimination rule.')
+                    self.logstep(self.log_notcoimplicationelim.format(self.coimplication_elim_name.upper(), str(firststatement), str(first), str(secondstatement), str(second)))
                     self.stopproof(self.stopped_notcoimplicationelim, self.blankstatement, self.coimplication_elim_name, self.reflines(first, second), '', comment)
                 elif type(secondstatement) == Iff and not firststatement.equals(secondstatement.left) and not firststatement.equals(secondstatement.right):
-                    self.logstep(f'STATE: Items "{str(firststatement)}" and "{str(secondstatement)}" cannot be used by the coimplication elimination rule.')
+                    self.logstep(self.log_notcoimplicationelim.format(self.coimplication_elim_name.upper(), str(firststatement), str(first), str(secondstatement), str(second)))
                     self.stopproof(self.stopped_notcoimplicationelim, self.blankstatement, self.coimplication_elim_name, self.reflines(first, second), '', comment)
 
         # If no errors, perform task
         if self.canproceed():      
             if type(firststatement) == Iff:
-                self.logstep(f'COIMPLICATION_ELIM: Item "{str(firststatement.right)}" has been derived from the coimplication "{str(firststatement)}".')
+                self.logstep(self.log_coimplication_elim.format(self.coimplication_elim_name.upper(), str(firststatement.right), str(firststatement)))
                 newcomment = self.iscomplete(firststatement.right, comment)
                 self.lines.append(
                     [
@@ -1465,12 +1635,13 @@ class Proof:
                         self.coimplication_elim_name, 
                         self.reflines(first, second), 
                         '', 
-                        newcomment
+                        newcomment,
+                        self.linetype_notransformationrule
                     ]
                 )
                 self.appendproofdata(firststatement.right, self.coimplication_elim_tag)
             else:
-                self.logstep(f'COIMPLICATION_ELIM: Item "{str(secondstatement.right)}" has been derived from the coimplication "{str(secondstatement)}".')   
+                self.logstep(self.log_coimplication_elim.format(self.coimplication_elim_name.upper(), str(secondstatement.right), str(secondstatement)))
                 newcomment = self.iscomplete(secondstatement.right, comment)
                 self.lines.append(
                     [
@@ -1480,12 +1651,13 @@ class Proof:
                         self.coimplication_elim_name, 
                         self.reflines(first, second), 
                         '', 
-                        newcomment
+                        newcomment,
+                        self.linetype_notransformationrule
                     ]
                 ) 
                 self.appendproofdata(secondstatement.right, self.coimplication_elim_tag)
                 
-    def coimplication_intro(self, first: int, second: int, iff_connector: str = '<>', iff_latexconnector: str = '\\leftrightarrow)', comment: str = ''):
+    def coimplication_intro(self, first: int, second: int, comment: str = ''):
         """Derive a item in a proof using the if and only if symbol.
         
         Parameters:
@@ -1518,40 +1690,40 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.coimplication_intro_tag):
-                self.logstep(f'STATE: The operator "{self.coimplication_intro_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.coimplication_intro_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.coimplication_intro_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.coimplication_intro_name, '', '', comment)
             elif not self.checkline(first):
-                self.logstep(f'STATE: Line {str(first)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.coimplication_intro_name.upper(), str(first)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.coimplication_intro_name, str(first), '', comment)
             elif not self.checkline(second):
-                self.logstep(f'STATE: Line {str(second)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.coimplication_intro_name.upper(), str(second)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.coimplication_intro_name, str(second), '', comment)
             elif not self.checklinescope(first):
-                self.logstep(f'STATE: Line {str(first)} is not available.')
+                self.logstep(self.log_linescope.format(self.coimplication_intro_name.upper(), str(first)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.coimplication_intro_name, str(first), '', comment)
             elif not self.checklinescope(second):
-                self.logstep(f'STATE: Line {str(second)} is not available.')
+                self.logstep(self.log_linescope.format(self.coimplication_intro_name.upper(), str(second)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.coimplication_intro_name, str(second), '', comment)
             else:
                 firststatement = self.getstatement(first)
                 secondstatement = self.getstatement(second)
                 if type(firststatement) != Implies:
-                    self.logstep(f'STATE: The item "{str(firststatement)}" is not an implication.')
+                    self.logstep(self.log_notimplication.format(self.coimplication_intro_name.upper(), str(firststatement), str(first)))
                     self.stopproof(self.stopped_notimplication, self.blankstatement, self.coimplication_intro_name, str(first), '', comment)
                 elif type(secondstatement) != Implies:
-                    self.logstep(f'STATE: The item "{str(secondstatement)}" is not an implication.')
+                    self.logstep(self.log_notimplication.format(self.coimplication_intro_name.upper(), str(secondstatement), str(second)))
                     self.stopproof(self.stopped_notimplication, self.blankstatement, self.coimplication_intro_name, str(second), '', comment)
                 elif not firststatement.left.equals(secondstatement.right):
-                    self.logstep(f'STATE: Item "{str(firststatement.left)}" does not equal "{str(secondstatement.right)}".')
+                    self.logstep(self.log_notsamestatement.format(self.coimplication_intro_name.upper(), str(firststatement.left), str(secondstatement.right)))
                     self.stopproof(self.stopped_notsamestatement, self.blankstatement, self.coimplication_intro_name, self.reflines(first, second), '', comment)
                 elif not firststatement.right.equals(secondstatement.left):
-                    self.logstep(f'STATE: Item "{str(firststatement.right)}" does not equal "{str(secondstatement.left)}".')
+                    self.logstep(self.log_notsamestatement.format(self.coimplication_intro_name.upper(), str(firststatement.right), str(secondstatement.left)))
                     self.stopproof(self.stopped_notsamestatement, self.blankstatement, self.coimplication_intro_name, self.reflines(second, first), '', comment)
 
         # If no errors, perform task
         if self.canproceed():
-            newstatement = Iff(firststatement.left, firststatement.right, iff_connector, iff_latexconnector)
-            self.logstep(f'COIMPLICATION_INTRO: Item "{str(newstatement)}" has been derived from "{str(firststatement.left)}" and "{str(firststatement.right)}".')     
+            newstatement = Iff(firststatement.left, firststatement.right)
+            self.logstep(self.log_coimplication_intro.format(self.coimplication_intro_name.upper(), str(newstatement), str(firststatement.left), str(firststatement.right)))
             newcomment = self.iscomplete(newstatement, comment)
             self.lines.append(
                 [
@@ -1561,7 +1733,8 @@ class Proof:
                     self.coimplication_intro_name, 
                     self.reflines(first, second), 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )   
             self.appendproofdata(newstatement, self.coimplication_intro_tag)
@@ -1633,21 +1806,21 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.conjunction_elim_tag):
-                self.logstep(f'STATE: The operator "{self.conjunction_elim_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.conjunction_elim_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.conjunction_elim_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.conjunction_elim_name, '', '', comment)
             elif not self.checkline(line):
-                self.logstep(f'STATE: Line {str(line)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.conjunction_elim_name.upper(), str(line)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.conjunction_elim_name, str(line), '', comment)
             elif not self.checklinescope(line):
-                self.logstep(f'STATE: Line {str(line)} is not available.')
+                self.logstep(self.log_linescope.format(self.conjunction_elim_name.upper(), str(line)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.conjunction_elim_name, str(line), '', comment)
             else:
                 statement = self.getstatement(line)
                 if type(statement) != And:
-                    self.logstep(f'STATE: The item "{str(statement)}" is not a conjunction.')
+                    self.logstep(self.log_notconjunction.format(self.conjunction_elim_name.upper(), str(statement), str(line)))
                     self.stopproof(self.stopped_notconjunction, self.blankstatement, self.conjunction_elim_name, str(line), '', comment)
                 elif side not in ['left', 'right']:
-                    self.logstep(f'STATE: The value "{side}" must be either "left" or "right" to state which side of the conjunction to derive.')
+                    self.logstep(self.log_sidenotselected.format(self.conjunction_elim_name.upper(), side))
                     self.stopproof(self.stopped_sidenotselected, self.blankstatement, self.conjunction_elim_name, str(line), '', comment)
 
         # If no errors, perform the task
@@ -1656,7 +1829,7 @@ class Proof:
                 conjunct = statement.left
             else:
                 conjunct = statement.right
-            self.logstep(f'CONJUNCTION_ELIM: Item "{str(conjunct)}" has been derived from the conjunction "{str(statement)}" on line {str(line)}.')
+            self.logstep(self.log_conjunction_elim.format(self.conjunction_elim_name.upper(), str(conjunct), str(statement), str(line)))
             newcomment = self.iscomplete(conjunct, comment)
             self.lines.append(
                 [
@@ -1666,12 +1839,13 @@ class Proof:
                     self.conjunction_elim_name, 
                     str(line), 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )   
             self.appendproofdata(conjunct, self.conjunction_elim_tag)
                 
-    def conjunction_intro(self, first: int, second: int, and_connector: str = '&', and_latexconnector: str = '\\wedge', comment: str = ''):
+    def conjunction_intro(self, first: int, second: int, comment: str = ''):
         """The statement at first line number is joined as a conjunct to the statement at the second
         line number.  These these two conjuncts for a conjunction with the first conjunct on the
         left side and the second on the right side.
@@ -1735,27 +1909,27 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.conjunction_intro_tag):
-                self.logstep(f'STATE: The operator "{self.conjunction_intro_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.conjunction_intro_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.coimplication_intro_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.conjunction_intro_name, '', '', comment)
             elif not self.checkline(first):
-                self.logstep(f'STATE: Line {str(first)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.conjunction_intro_name.upper(), str(first)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.conjunction_intro_name, str(first), '', comment)
             elif not self.checkline(second):
-                self.logstep(f'STATE: Line {str(second)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.conjunction_intro_name.upper(), str(second)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.conjunction_intro_name, str(second), '', comment)
             elif not self.checklinescope(first):
-                self.logstep(f'STATE: Line {str(first)} is not available.')
+                self.logstep(self.log_linescope.format(self.conjunction_intro_name.upper(), str(first)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.conjunction_intro_name, str(first), '', comment) 
             elif not self.checklinescope(second):
-                self.logstep(f'STATE: Line {str(second)} is not available.')
+                self.logstep(self.log_linescope.format(self.conjunction_intro_name.upper(), str(second)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.conjunction_intro_name, str(second), '', comment)
                     
         # If no errors, perform task
         if self.canproceed():
             firstconjunct = self.getstatement(first)
             secondconjunct = self.getstatement(second)
-            andstatement = And(firstconjunct, secondconjunct, and_connector, and_latexconnector)
-            self.logstep(f'CONJUNCTION_INTRO: The conjunction "{str(andstatement)}" has been derived from "{str(firstconjunct)}" on line {str(first)} and "{str(secondconjunct)}" on line {str(second)}.')
+            andstatement = And(firstconjunct, secondconjunct)
+            self.logstep(self.log_conjunction_intro.format(self.conjunction_intro_name.upper(), str(andstatement), str(firstconjunct), str(first), str(secondconjunct), str(second)))
             newcomment = self.iscomplete(andstatement, comment)
             self.lines.append(
                 [
@@ -1765,7 +1939,8 @@ class Proof:
                     self.conjunction_intro_name, 
                     self.reflines(first, second), 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             ) 
             self.appendproofdata(andstatement, self.conjunction_intro_tag)
@@ -1853,46 +2028,46 @@ class Proof:
         # Look for errors.
         if self.canproceed():
             if not self.checkintelimrule(self.disjunction_elim_tag):
-                self.logstep(f'STATE: The operator "{self.disjunction_elim_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.disjunction_elim_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.disjunction_elim_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.disjunction_elim_name, '', '', comment)
             elif not self.checkline(disjunction_line):
-                self.logstep(f'STATE: The disjunction line {str(disjunction_line)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.disjunction_elim_name.upper(), str(disjunction_line)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.disjunction_elim_name, str(disjunction_line), '', comment)
             elif not self.checkline(left_implication_line):
-                self.logstep(f'STATE: The left implication line {str(left_implication_line)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.disjunction_elim_name.upper(), str(left_implication_line)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.disjunction_elim_name, str(left_implication_line), '', comment)
             elif not self.checkline(right_implication_line):
-                self.logstep(f'STATE: The right implication line {str(right_implication_line)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.disjunction_elim_name.upper(), str(right_implication_line)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.disjunction_elim_name, str(right_implication_line), '', comment)
             elif not self.checklinescope(disjunction_line):
-                self.logstep(f'STATE: The disjunction line {str(disjunction_line)} is not available.')
+                self.logstep(self.log_linescope.format(self.disjunction_elim_name.upper(), str(disjunction_line)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.disjunction_elim_name, str(disjunction_line), '', comment)
             elif not self.checklinescope(left_implication_line):
-                self.logstep(f'STATE: The left implication line {str(left_implication_line)} is not available.')
+                self.logstep(self.log_linescope.format(self.disjunction_elim_name.upper(), str(left_implication_line)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.disjunction_elim_name, str(left_implication_line), '', comment)
             elif not self.checklinescope(right_implication_line):
-                self.logstep(f'STATE: The right implication line {str(right_implication_line)} is not available.')
+                self.logstep(self.log_linescope.format(self.disjunction_elim_name.upper(), str(right_implication_line)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.disjunction_elim_name, str(right_implication_line), '', comment)
             else:
                 disjunction = self.getstatement(disjunction_line)
                 left_implication = self.getstatement(left_implication_line)
                 right_implication = self.getstatement(right_implication_line)
                 if type(disjunction) != Or:
-                    self.logstep(f'STATE: The item "{str(disjunction)}" is not a disjunction.')
+                    self.logstep(self.log_notdisjunction.format(self.disjunction_elim_name.upper(), str(disjunction), str(disjunction_line)))
                     self.stopproof(self.stopped_notdisjunction, self.blankstatement, self.disjunction_elim_name, str(disjunction_line), '', comment)
                 elif type(left_implication) != Implies:
-                    self.logstep(f'STATE: The item "{str(left_implication)}" is not an implication.')
+                    self.logstep(self.log_notimplication.format(self.disjunction_elim_name.upper(), str(left_implication), str(left_implication_line)))
                     self.stopproof(self.stopped_notimplication, self.blankstatement, self.disjunction_elim_name, str(left_implication_line), '', comment)
                 elif type(right_implication) != Implies:
-                    self.logstep(f'STATE: The item "{str(right_implication)}" is not an implication.')
+                    self.logstep(self.log_notimplication.format(self.disjunction_elim_name.upper(), str(right_implication), str(right_implication_line)))
                     self.stopproof(self.stopped_notimplication, self.blankstatement, self.disjunction_elim_name, str(right_implication_line), '', comment)
                 elif not right_implication.right.equals(left_implication.right):
-                    self.logstep(f'STATE: The items "{str(left_implication.right)}" and "{str(right_implication.right)}" are not the same.')
-                    self.stopproof(self.stopped_notsameconclusion, self.blankstatement, self.disjunction_elim_name, self.reflines(left_implication_line, right_implication_line), '', comment)
+                    self.logstep(self.log_notsamestatement.format(self.disjunction_elim_name.upper(), str(left_implication.right), str(right_implication.right)))
+                    self.stopproof(self.stopped_notsamestatement, self.blankstatement, self.disjunction_elim_name, self.reflines(left_implication_line, right_implication_line), '', comment)
 
         # With no errors, perform task.
         if self.canproceed():
-            self.logstep(f'DISJUNCTION_ELIM: Item "{str(right_implication.left)}" has been derived as the conclusion of both disjuncts of the disjunction "{str(disjunction)}" on line {str(disjunction_line)}.')   
+            self.logstep(self.log_disjunction_elim.format(self.disjunction_elim_name.upper(), str(right_implication.left), str(disjunction), str(disjunction_line)))
             newcomment = self.iscomplete(right_implication.right, comment)
             self.lines.append(
                 [
@@ -1902,7 +2077,8 @@ class Proof:
                     self.disjunction_elim_name, 
                     self.reflines(disjunction_line, left_implication_line, right_implication_line),
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )    
             self.appendproofdata(right_implication.left, self.disjunction_elim_tag)
@@ -1911,8 +2087,6 @@ class Proof:
                  line: int,
                  left: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth = None,
                  right: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth = None,  
-                 or_connector: str = '|', 
-                 or_latexconnector: str = '\\vee',
                  comment: str = ''):
         """The newdisjunct statement and the statement at the line number become a disjunction.
         
@@ -1968,34 +2142,34 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.disjunction_intro_tag):
-                self.logstep(f'STATE: The operator "{self.disjunction_intro_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.disjunction_intro_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.disjunction_intro_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.disjunction_intro_name, '', '', comment)
             elif left is not None and self.checkstring(left):
-                self.logstep(f'STATE: The left input {str(left)} is a string.')
+                self.logstep(self.log_string.format(self.disjunction_intro_name.upper(), left))
                 self.stopproof(self.stopped_string, self.blankstatement, self.disjunction_intro_name, str(line), '', comment)
             elif right is not None and self.checkstring(right):
-                self.logstep(f'STATE: The right input {str(right)} is a string.')
+                self.logstep(self.log_string.format(self.disjunction_intro_name.upper(), right))
                 self.stopproof(self.stopped_string, self.blankstatement, self.disjunction_intro_name, str(line), '', comment)
             elif not self.checkline(line):
-                self.logstep(f'STATE: Line {str(line)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.disjunction_intro_name.upper(), str(line)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.disjunction_intro_name, str(line), '', comment)
             elif not self.checklinescope(line):
-                self.logstep(f'STATE: Line {str(line)} is not available.')
+                self.logstep(self.log_linescope.format(self.disjunction_intro_name.upper(), str(line)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.disjunction_intro_name, str(line), '', comment)
             else:
                 statement = self.getstatement(line)
                 if left is None and right is None:
-                    self.logstep(f'STATE: No value for either the left or the right parameter has been entered to form the disjunction.')
+                    self.logstep(self.log_novaluepassed.format(self.disjunction_intro_name.upper()))
                     self.stopproof(self.stopped_novaluepassed, self.blankstatement, self.disjunction_intro_name, str(line), '', comment)
 
         # If no errors, perform task
         if self.canproceed():
             if left is None:
-                disjunction = Or(statement, right, or_connector, or_latexconnector)
-                self.logstep(f'DISJUNCTION_INTRO: Item "{str(disjunction)}" has been derived from item "{str(statement)}" on line {str(line)} joined on the right with {str(right)}.')
+                disjunction = Or(statement, right)
+                self.logstep(self.log_disjunction_intro.format(self.disjunction_intro_name.upper(), str(disjunction), str(statement), str(line), 'right', str(left)))
             elif right is None:
-                disjunction = Or(left, statement, or_connector, or_latexconnector)
-                self.logstep(f'DISJUNCTION_INTRO: Item "{str(disjunction)}" has been derived from item "{str(statement)}" on line {str(line)} joined on the left with {str(left)}.')
+                disjunction = Or(left, statement)
+                self.logstep(self.log_disjunction_intro.format(self.disjunction_intro_name.upper(), str(disjunction), str(statement), str(line), 'left', str(left)))
             newcomment = self.iscomplete(disjunction, comment)
             self.lines.append(
                 [
@@ -2005,150 +2179,11 @@ class Proof:
                     self.disjunction_intro_name, 
                     str(line), 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )    
             self.appendproofdata(disjunction, self.disjunction_intro_tag)
-
-    def explosion(self, 
-                  statement: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth, 
-                  comment: str = ''):
-        """An arbitrary statement is entered in the proof given a false statement immediately preceding it.
-        
-        Parameters:
-            expr: The statement to add to the proof.
-            statement: The new statment to insert.
-            comment: A optional comment for this line of the proof.
-
-        Examples:
-            In this example the premises are contradictory and so we can derive anything.  In particular,
-            we can derive the goal, whatever goal we want.  I emphasized this by assigning a proposition to
-            `mygoal`.  This could be anything and the proof would still work.  
-
-            If our logic is inconsistent then we can come up with a contradiction such as the one on lines
-            1 and 2.  Then all well-formed formulas are true.  
-
-            >>> from altrea.boolean import Or, Not, And, Implies, Wff
-            >>> from altrea.rules import Proof
-            >>> from altrea.display import showproof, showlines
-            >>> prf = Proof()
-            >>> A = Wff('A')
-            >>> B = Wff('B')
-            >>> C = Wff('C')
-            >>> prf.setlogic('C')
-            >>> mygoal = C
-            >>> prf.setlogic('C')
-            >>> prf.goal(mygoal)
-            >>> prf.premise(A)
-            >>> prf.premise(Not(A))
-            >>> prf.negation_elim(1, 2)
-            >>> prf.explosion(mygoal)
-            >>> showproof(prFalsehood, latex=0)
-              Item               Reason   Comment
-            0    C                 GOAL
-            1    A              Premise
-            2   ~A              Premise
-            3    X  1, 2, Negation Elim
-            4    C         3, Explosion  COMPLETE
-
-            The following example shows how explosion can be useful in coming to a specific
-            conclusion given a disjunction.  Assume one of the disjuncts derives the desired
-            results but the other does not.  If that other result is a contradiction
-            then we can use explosion to derive the desireable result.  With both the
-            left and right sides of the disjunction deriving the same result, the 
-            disjunction can be eliminated and the desirable result becomes an item of the proof.
-
-            The next example shows how that works.  The goal is to show that from ~A or B we can derive
-            the implication A implies B.  The ~A side of the disjunction led to a contradiction.
-            Essentially we could throw that side away, but since we need both sides of the disjunction
-            to reach the same conclusion, explosion makes that possible.
-
-            >>> from altrea.boolean import Or, Not, And, Implies, Wff
-            >>> from altrea.rules import Proof
-            >>> from altrea.display import showproof, showlines
-            >>> prf = Proof()
-            >>> A = Wff('A')
-            >>> B = Wff('B')
-            >>> prf.setlogic('C')
-            >>> prf.goal(Implies(Or(Not(A), B), Implies(A, B)))
-            >>> prf.hypothesis(Or(Not(A), B))
-            >>> prf.hypothesis(Not(A))
-            >>> prf.hypothesis(A)
-            >>> prf.reiterate(2)
-            >>> prf.negation_elim(3, 4)
-            >>> prf.explosion(B)
-            >>> prf.implication_intro()
-            >>> prf.implication_intro()
-            >>> prf.hypothesis(B)
-            >>> prf.hypothesis(A)
-            >>> prf.reiterate(9)
-            >>> prf.implication_intro()
-            >>> prf.implication_intro()
-            >>> prf.disjunction_elim(1, 8, 13)
-            >>> prf.implication_intro()
-            >>> showproof(prFalsehood, latex=0)
-                              Item                      Reason   Comment
-            0   (~A | B) > (A > B)                        GOAL
-            1           ~A | B __|                  Hypothesis
-            2           ~A __|   |                  Hypothesis
-            3        A __|   |   |                  Hypothesis
-            4       ~A   |   |   |              2, Reiteration
-            5        X   |   |   |         3, 4, Negation Elim
-            6        B   |   |   |                5, Explosion
-            7        A > B   |   |      3-6, Implication Intro
-            8     ~A > (A > B)   |      2-7, Implication Intro
-            9            B __|   |                  Hypothesis
-            10       A __|   |   |                  Hypothesis
-            11       B   |   |   |              9, Reiteration
-            12       A > B   |   |    10-11, Implication Intro
-            13     B > (A > B)   |     9-12, Implication Intro
-            14           A > B   |  1, 8, 13, Disjunction Elim
-            15  (~A | B) > (A > B)     1-14, Implication Intro  COMPLETE
-
-            You might wonder what happens if both disjuncts lead to a contradiction.  Then you
-            would be able to derive that contradiction and every well-formed formula becomes
-            a true proposition.  What it means is that the premises are not consistent.  Some of
-            them should be removed because in reality not everything you can formulate into
-            a proposition is true.
-        """
-        
-        # Look for errors
-        if self.canproceed():
-            line = len(self.lines) - 1
-            if not self.checkintelimrule(self.explosion_tag):
-                self.logstep(f'STATE: The operator "{self.explosion_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.explosion_name, '', '', comment)
-            elif self.checkstring(statement):
-                self.logstep(f'STATE: The input {statement} is a string.')
-                self.stopproof(self.stopped_string, self.blankstatement, self.explosion_name, '', '', comment)
-            elif not self.checkline(line):
-                self.logstep(f'STATE: Line {str(line)} is not in the proof.')
-                self.stopproof(self.stopped_nosuchline, self.blankstatement, self.explosion_name, str(line), '', comment)
-            elif not self.checklinescope(line):
-                self.logstep(f'STATE: Line {str(line)} is not available.')
-                self.stopproof(self.stopped_linescope, self.blankstatement, self.explosion_name, str(line), '', comment) 
-            else:
-                falsestatement = self.getstatement(line)
-                if str(falsestatement) != str(self.false_name):
-                    self.logstep(f'STATE: The item "{str(falsestatement)}" is not the expected false value "{str(self.false_name)}".')
-                    self.stopproof(self.stopped_notfalse, self.blankstatement, self.explosion_name, str(line), '', comment)
-
-        # If no errors, perform task
-        if self.canproceed():
-            self.logstep(f'EXPLOSION: Item "{str(statement)}" has been derived from the false item on line {str(line)}.')   
-            newcomment = self.iscomplete(statement, comment)
-            self.lines.append(
-                [
-                    statement, 
-                    self.level, 
-                    self.currentproofid, 
-                    self.explosion_name, 
-                    str(line), 
-                    '',
-                    newcomment
-                ]
-            ) 
-            (statement)
                                
     def goal(self,
                 goal: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth, 
@@ -2193,10 +2228,10 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if self.checkstring(goal):
-                self.logstep(f'STATE: The input "{goal}" is a string.')
+                self.logstep(self.log_string.format(self.goal_name.upper(), goal))
                 self.stopproof(self.stopped_string, goal, self.goal_name, 0, 0, comment)
             elif self.logic == '':
-                self.logstep(f'STATE: There is no value assigned for the logic being used.')
+                self.logstep(self.log_nologic.format(self.goal_name.upper()))
                 self.stopproof(self.stopped_nologic, self.blankstatement, self.goal_name, 0, 0, comment)
 
         # If no errors, perform task
@@ -2217,7 +2252,7 @@ class Proof:
                 self.lines[0][self.commentindex] = comment
             elif comment != '':
                 self.lines[0][self.commentindex] += ''.join([self.comment_connector, comment])
-            self.logstep(f'GOAL: The goal "{str(goal)}" has been added to the goals.')
+            self.logstep(self.log_goal.format(self.goal_name.upper(), str(goal)))
 
     def hypothesis(self, 
                    hypothesis: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
@@ -2234,10 +2269,10 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if self.checkstring(hypothesis):
-                self.logstep(f'STATE: The hypothesis "{hypothesis}" is a string.')
+                self.logstep(self.log_string.format(self.hypothesis_name.upper(), hypothesis))
                 self.stopproof(self.stopped_string, self.blankstatement, self.hypothesis_name, '', '', comment)
             elif not self.checkhasgoal():
-                self.logstep(f'STATE: A goal needs to be declared before an hypothesis can be declared.')
+                self.logstep(self.log_nogoal.format(self.hypothesis_name.upper(), str(hypothesis)))
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.hypothesis_name, '', '', comment)
 
         # If no errors, perform task
@@ -2250,7 +2285,7 @@ class Proof:
             self.previousproofid = self.currentproofid  
             self.previousproofchain.append(self.currentproofid) 
             self.currentproofid = len(self.prooflist) - 1
-            self.logstep(f'HYPOTHESIS: A new subproof {str(self.currentproofid)} has been started with item "{str(hypothesis)}".')
+            self.logstep(self.log_hypothesis.format(self.hypothesis_name.upper(), str(self.currentproofid), str(hypothesis)))
             newcomment = self.iscomplete(hypothesis, comment)
             self.lines.append(
                 [
@@ -2260,7 +2295,8 @@ class Proof:
                     self.hypothesis_name, 
                     '', 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_hypothesis
                 ]
             )      
             self.appendproofdata(hypothesis, self.hypothesis_tag)       
@@ -2299,35 +2335,36 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.implication_elim_tag):
-                self.logstep(f'STATE: The operator "{self.implication_elim_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.implication_elim_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.implication_elim_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.implication_elim_name, '', '', comment)
             elif not self.checkline(first):
-                self.logstep(f'STATE: Line {str(first)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.implication_elim_name.upper(), str(first)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.implication_elim_name, str(first), '', comment)
             elif not self.checkline(second):
-                self.logstep(f'STATE: Line {str(second)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.implication_elim_name.upper(), str(first)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.implication_elim_name, str(second), '', comment)
             elif not self.checklinescope(first):
-                self.logstep(f'STATE: Line {str(first)} is not available.')
+                self.logstep(self.log_linescope.format(self.implication_elim_name.upper(), str(first)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.implication_elim_name, str(first), '', comment)
             elif not self.checklinescope(second):
-                self.logstep(f'STATE: Line {str(second)} is not in the proof.')
+                self.logstep(self.log_linescope.format(self.implication_elim_name.upper(), str(second)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.implication_elim_name, str(second), '', comment)
             else:
                 firststatement = self.getstatement(first)
                 secondstatement = self.getstatement(second)
                 if type(firststatement) == Implies and type(secondstatement) == Implies:
                     if not firststatement.left.equals(secondstatement) and not secondstatement.left.equals(firststatement):
-                        self.logstep(f'STATE: Both items "{str(firststatement)}" and "{str(secondstatement)}" are implications, but neither is the antecedent of the other.')
+                        self.logstep(self.log_notantecedent.format(self.implication_elim_name.upper(), str(firststatement), str(secondstatement)))
+                        self.logstep(self.log_notantecedent.format(self.implication_elim_name.upper(), str(secondstatement), str(firststatement)))
                         self.stopproof(self.stopped_notantecedent, self.blankstatement, self.implication_elim_name, self.reflines(first, second), '', comment)
                 elif type(firststatement) == Implies and not secondstatement.equals(firststatement.left):
-                    self.logstep(f'STATE: The first item "{str(firststatement)}" is an implication, but the second item "{str(secondstatement)}" is not the antecedent of it.')
+                    self.logstep(self.log_notantecedent.format(self.implication_elim_name.upper(), str(firststatement), str(secondstatement)))
                     self.stopproof(self.stopped_notantecedent, self.blankstatement, self.implication_elim_name, self.reflines(first, second), '', comment)
                 elif type(secondstatement) == Implies and not firststatement.equals(secondstatement.left):
-                    self.logstep(f'STATE: The second item "{str(secondstatement)}" is an implication, but the first item "{str(firststatement)}" is not the antecedent of it.')
+                    self.logstep(self.log_notantecedent.format(self.implication_elim_name.upper(), str(secondstatement), str(firststatement)))
                     self.stopproof(self.stopped_notantecedent, self.blankstatement, self.implication_elim_name, self.reflines(first, second), '', comment)
                 elif type(firststatement) != Implies and type(secondstatement) != Implies:
-                    self.logstep(f'STATE: Neither item "{str(firststatement)}" nor "{str(secondstatement)}" is an implication.')
+                    self.logstep(self.log_notmodusponens.format(self.implication_elim_name.upper(), str(firststatement), str(first), str(secondstatement), str(second)))
                     self.stopproof(self.stopped_notmodusponens, self.blankstatement, self.implication_elim_name, self.reflines(first, second), '', comment)
 
         # If no errors, perform task
@@ -2335,16 +2372,16 @@ class Proof:
             if type(firststatement) == Implies and type(secondstatement) == Implies:
                 if str(firststatement) == str(secondstatement.left):  
                     statement = secondstatement.right
-                    self.logstep(f'IMPLICATION_ELIM: Item "{str(secondstatement.right)}" has been derived from the implication "{str(secondstatement)}" and item "{str(firststatement)}".')
+                    self.logstep(self.log_implication_elim.format(self.implication_elim_name.upper(), str(secondstatement.right), str(secondstatement), str(firststatement)))
                 else:
                     statement = firststatement.right
-                    self.logstep(f'IMPLICATION_ELIM: Item "{str(firststatement.right)}" has been derived from the implication "{str(firststatement)}" and item "{str(secondstatement)}".')
+                    self.logstep(self.log_implication_elim.format(self.implication_elim_name.upper(), str(firststatement.right), str(firststatement), str(secondstatement)))
             elif type(firststatement) == Implies:
                 statement = firststatement.right
-                self.logstep(f'IMPLICATION_ELIM: Item "{str(firststatement.right)}" has been derived from the implication "{str(firststatement)}" and item "{str(secondstatement)}".')
+                self.logstep(self.log_implication_elim.format(self.implication_elim_name.upper(), str(firststatement.right), str(firststatement), str(secondstatement)))
             else:
                 statement = secondstatement.right
-                self.logstep(f'IMPLICATION_ELIM: Item "{str(secondstatement.right)}" has been derived from the implication "{str(secondstatement)}" and item "{str(firststatement)}".')
+                self.logstep(self.log_implication_elim.format(self.implication_elim_name.upper(), str(secondstatement.right), str(secondstatement), str(firststatement)))
             newcomment = self.iscomplete(statement, comment)
             self.lines.append(
                 [
@@ -2354,12 +2391,13 @@ class Proof:
                     self.implication_elim_name, 
                     self.reflines(first, second), 
                     '', 
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )
             self.appendproofdata(statement, self.implication_elim_tag)
 
-    def implication_intro(self, comment: str = '', implies_connector: str = '>', implies_latexconnector: str = '\\Rightarrow'):
+    def implication_intro(self, comment: str = ''):
         """From a subproof derive the implication where the antecendent is the hypotheses of subproof joined as conjuncts and the
         consequent is the last line of the proof so far entered.  In the process of deriving the implication as an item of the
         proof, the subproof is closed.
@@ -2465,10 +2503,10 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.implication_intro_tag):
-                self.logstep(f'STATE: The operator "{self.implication_intro_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.implication_intro_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.implication_intro_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.implication_intro_name, '', '', comment)
             elif self.currentproofid == 0:
-                self.logstep(f'STATE: The current proof id is {str(self.currentproofid)}.  Since it is zero there is no subproof to close.')
+                self.logstep(self.log_closemainproof.format(self.implication_intro_name.upper()))
                 self.stopproof(self.stopped_closemainproof, self.blankstatement, self.implication_intro_name, '', '')
 
         # If no errors, perform task
@@ -2485,8 +2523,8 @@ class Proof:
             else: 
                 self.previousproofchain = [] 
                 self.previousproofid = -1  
-            implication = Implies(antecedent, consequent, implies_connector, implies_latexconnector)
-            self.logstep(f'IMPLICATION_INTRO: Item "{str(implication)}" has been derived upon closing subproof {proofid}.')    
+            implication = Implies(antecedent, consequent)
+            self.logstep(self.log_implication_intro.format(self.implication_intro_name.upper(), str(implication), str(proofid)))
             newcomment = self.iscomplete(implication, comment)
             self.lines.append(
                 [
@@ -2496,7 +2534,8 @@ class Proof:
                     self.implication_intro_name, 
                     '', 
                     self.refproof(proofid), 
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )   
             self.appendproofdata(implication, self.implication_intro_tag)     
@@ -2515,23 +2554,23 @@ class Proof:
         # Look for errors.
         if self.canproceed():
             if not self.checkintelimrule(self.necessary_elim_tag):
-                self.logstep(f'STATE: The operator "{self.necessary_elim_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.necessary_elim_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.necessary_elim_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.necessary_elim_name, '', '', comment)
             elif not self.checkline(line):
-                self.logstep(f'STATE: Line {str(line)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.implication_intro_name.upper(), str(line)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.necessary_elim_name, str(line), '', comment)
             elif not self.checklinescope(line):
-                self.logstep(f'STATE: Line {str(line)} is not available.')
+                self.logstep(self.log_linescope.format(self.necessary_elim_name.upper(), str(line)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.necessary_elim_name, str(line), '', comment)
             else:
                 statement = self.getstatement(line)
                 if type(statement) != Necessary:
-                    self.logstep(f'STATE: The item "{str(statement)}" is not a necessary item.')
+                    self.logstep(self.log_notnecessary.format(self.necessary_elim_name.upper(), str(statement), str(line)))
                     self.stopproof(self.stopped_notnecessary, self.blankstatement, self.necessary_elim_name, str(line), '', comment)
 
         # If no errors, perform task
         if self.canproceed():
-            self.logstep(f'NECESSARY_ELIM: Item "{str(statement.truefalse)}" has been derived from the necessary item "{str(statement)}" on line {str(line)}.')   
+            self.logstep(self.log_necessary_elim.format(self.necessary_elim_name.upper(), str(statement.truefalse), str(statement), str(line)))
             newcomment = self.iscomplete(statement.truefalse, comment)
             self.lines.append(
                 [
@@ -2541,7 +2580,8 @@ class Proof:
                     self.necessary_elim_name, 
                     str(line), 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )      
             self.appendproofdata(statement.truefalse, self.necessary_elim_tag)  
@@ -2557,10 +2597,10 @@ class Proof:
         # Look for errors.
         if self.canproceed():
             if not self.checkintelimrule(self.necessary_intro_tag):
-                self.logstep(f'STATE: The operator "{self.necessary_intro_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.necessary_elim_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.necessary_intro_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.necessary_elim_name, '', '', comment)
             elif self.subproof_status != self.subproof_strict:
-                self.logstep(f'STATE: The subordinate proof status is "{self.subproof_status}" rather than "{self.subproof_strict}".')
+                self.logstep(self.log_notstrictsubproof.format(self.necessary_elim_name.upper(), self.subproof_status, self.subproof_strict))
                 self.stopproof(self.stopped_notstrictsubproof, self.blankstatement, self.necessary_elim_name, '', '', comment)
 
     def negation_elim(self, first: int, second: int, comment: str = ''):
@@ -2593,30 +2633,30 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.negation_elim_tag):
-                self.logstep(f'STATE: The operator "{self.negation_elim_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.negation_elim_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.negation_elim_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.negation_elim_name, '', '', comment)
             elif not self.checkline(first):
-                self.logstep(f'STATE: Line {str(first)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.negation_elim_name.upper(), str(first)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.negation_elim_name, str(first), '', comment)
             elif not self.checkline(second):
-                self.logstep(f'STATE: Line {str(second)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.negation_elim_name.upper(), str(second)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.negation_elim_name, str(second), '', comment)
             elif not self.checklinescope(first):
-                self.logstep(f'STATE: Line {str(first)} is not available.')
+                self.logstep(self.log_linescope.format(self.negation_elim_name.upper(), str(first)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.negation_elim_name, str(first), '', comment)
             elif not self.checklinescope(second):
-                self.logstep(f'STATE: Line {str(second)} is not available.')
+                self.logstep(self.log_linescope.format(self.negation_elim_name.upper(), str(second)))
                 self.stopproof(self.stopped_linescope, self.blankstatement, self.negation_elim_name, str(second), '', comment)
             else:
                 firststatement = self.getstatement(first)
                 secondstatement = self.getstatement(second)
                 if not Not(firststatement).equals(secondstatement) and not Not(secondstatement).equals(firststatement):
-                    self.logstep(f'STATE: The items "{str(firststatement)}" and "{str(secondstatement)}" are not the negations of each other.')
+                    self.logstep(self.log_notcontradiction.format(self.negation_elim_name.upper(), str(firststatement), str(first), str(secondstatement), str(second)))
                     self.stopproof(self.stopped_notcontradiction, self.blankstatement, self.negation_elim_name, self.reflines(first, second), '', comment)
 
         # If no errors, perform task
         if self.canproceed():
-            self.logstep(f'NEGATION_ELIM: Item "{str(self.false_name)}" has been derived from the contradiction between "{str(firststatement)}" on line {str(first)} and "{str(secondstatement)}" on line {str(second)}.')   
+            self.logstep(self.log_negation_elim.format(self.negation_elim_name.upper(), str(self.false_name), str(firststatement), str(first), str(secondstatement), str(second)))
             newcomment = self.iscomplete(self.false_name, comment)
             self.lines.append(
                 [
@@ -2626,12 +2666,13 @@ class Proof:
                     self.negation_elim_name, 
                     self.reflines(first, second), 
                     '',
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )      
             self.appendproofdata(self.false_name, self.negation_elim_tag)    
 
-    def negation_intro(self, comment: str = '', not_connector: str = '~', not_latexconnector: str = '\\lnot'):
+    def negation_intro(self, comment: str = ''):
         """This rule closes a subordinate proof that ends in a contradiction by negating the hypotheses of
         the subordinate proof. 
 
@@ -2673,13 +2714,13 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkintelimrule(self.negation_intro_tag):
-                self.logstep(f'STATE: The operator "{self.negation_intro_name}" is not part of the logic.')
-                self.stopproof(self.stopped_undefinedoperator, self.blankstatement, self.negation_intro_name, '', '', comment)
+                self.logstep(self.log_notransformationrule.format(self.negation_intro_name.upper()))
+                self.stopproof(self.stopped_notransformationrule, self.blankstatement, self.negation_intro_name, '', '', comment)
             elif self.currentproofid == 0:
-                self.logstep(f'STATE: The current proof id is {str(self.currentproofid)}.  Since it is zero there is no subproof to close.')
+                self.logstep(self.log_closemainproof.format(self.negation_intro_name.upper()))
                 self.stopproof(self.stopped_closemainproof, self.blankstatement, self.negation_intro_name, '', '', comment)
             elif str(self.lines[len(self.lines)-1][self.statementindex]) != str(self.false_name):
-                self.logstep(f'STATE: The item "{str(self.lines[len(self.lines)-1][self.statementindex])}" is not false "{str(self.false_name)}".')
+                self.logstep(self.log_notfalse.format(self.negation_intro_name.upper(), str(self.lines[len(self.lines)-1][self.statementindex]), str(len(self.lines)-1)))
                 self.stopproof(self.stopped_notfalse, self.blankstatement, self.negation_intro_name, str(len(self.lines)-1), '', comment)
         
         # If no errors, perform task
@@ -2696,8 +2737,8 @@ class Proof:
             else: 
                 self.previousproofchain = [] 
                 self.previousproofid = -1  
-            negation = Not(antecedent, not_connector, not_latexconnector)
-            self.logstep(f'NEGATION_INTRO: Item "{str(negation)}" has been derived as the negation of the hypothesis "{str(antecedent)}" of subproof {str(proofid)} which is now closed.') 
+            negation = Not(antecedent)
+            self.logstep(self.log_negation_intro.format(self.negation_intro_name.upper(), str(negation), str(antecedent), str(proofid)))
             newcomment = self.iscomplete(negation, comment)
             self.lines.append(
                 [
@@ -2707,7 +2748,8 @@ class Proof:
                     self.negation_intro_name, 
                     '', 
                     self.refproof(proofid), 
-                    newcomment
+                    newcomment,
+                    self.linetype_notransformationrule
                 ]
             )  
             self.appendproofdata(negation, self.negation_intro_tag)
@@ -2726,10 +2768,10 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if self.checkstring(premise):
-                self.logstep(f'STATE: The premise input "{premise}" is a string.')
+                self.logstep(self.log_string.format(self.premise_name.upper(), premise))
                 self.stopproof(self.stopped_string, self.blankstatement, self.premise_name, '', '', comment)
             elif not self.checkhasgoal():
-                self.logstep(f'STATE: No goal has been set prior to the premise "{str(premise)}"')
+                self.logstep(self.log_nogoal.format(self.premise_name.upper(), str(premise)))
                 self.stopproof(self.stopped_nogoal, self.blankstatement, self.premise_name, '', '', comment)
 
         # If no errors, perform task
@@ -2737,7 +2779,7 @@ class Proof:
             self.premises.append(premise)
             nextline = len(self.lines)
             self.prooflist[self.currentproofid][3].append(nextline)
-            self.logstep(f'PREMISE: Item "{str(premise)}" has been added to the premises.')
+            self.logstep(self.log_premise.format(self.premise_name.upper(), str(premise)))
             newcomment = self.iscomplete(premise, comment)
             self.lines.append(
                 [
@@ -2747,7 +2789,8 @@ class Proof:
                     self.premise_name, 
                     '', 
                     '', 
-                    newcomment
+                    newcomment,
+                    self.linetype_premise
                 ]
             )
             self.appendproofdata(premise, self.premise_tag)
@@ -2785,20 +2828,20 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if not self.checkline(line):
-                self.logstep(f'STATE: Line {str(line)} is not in the proof.')
+                self.logstep(self.log_nosuchline.format(self.reiterate_name.upper(), str(line)))
                 self.stopproof(self.stopped_nosuchline, self.blankstatement, self.reiterate_name, str(line), '', comment)
             else:
                 proofid, statement = self.getproofidstatement(line)
                 if not proofid in self.previousproofchain:
-                    self.logstep(f'STATE: Line {str(line)} is not in the chain of parent proofs of the current proof.')
+                    self.logstep(self.log_notreiteratescope.format(self.reiterate_name.upper(), str(line)))
                     self.stopproof(self.stopped_notreiteratescope, self.blankstatement, self.reiterate_name, str(line), '', comment)
                 if self.subproof_status == self.subproof_strict and type(statement) != Necessary:
-                    self.logstep(f'STATE: The status of the sub proof is "{self.subproof_status}" but the statement "{str(statement)}" on line {str(line)} is not a necessary statement.')
+                    self.logstep(self.log_notnecessary.format(self.reiterate_name.upper(), str(statement), str(line)))
                     self.stopproof(self.stopped_notnecessary, self.blankstatement, self.reiterate_name, str(line), '', comment)
 
         # If no errors, perform task
         if self.canproceed():
-            self.logstep(f'REITERATE: Item "{str(statement)}" on line {str(line)} has been reiterated into subproof {self.currentproofid}.')   
+            self.logstep(self.log_reiterate.format(self.reiterate_name.upper(), str(statement), str(line), str(self.currentproofid)))
             newcomment = self.iscomplete(statement, comment)
             self.lines.append(
                 [
@@ -2808,7 +2851,8 @@ class Proof:
                     self.reiterate_name, 
                     str(line), 
                     '',
-                    newcomment
+                    newcomment,
+                    ''
                 ]
             )  
             self.appendproofdata(statement, self.reiterate_tag)
@@ -2846,10 +2890,14 @@ class Proof:
             description = self.label_nodescription
         self.logicdatabase = database
         self.logicdescription = description
-        self.logstep(f'SETLOGIC: "{logic}" has been selected as the logic described as "{self.logicdescription}" and stored in database "{self.logicdatabase}".')
+        self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
         self.proofdata[0].append(logic)
         try:
             self.logicaxioms = altrea.data.getaxioms(logic)
+        except TypeError:
+            self.logicaxioms = []
+        try:
+            self.logicdefinitions = altrea.data.getdefinitions(logic)
         except TypeError:
             self.logicaxioms = []
         if database != 'No Database':
@@ -2885,7 +2933,6 @@ class Proof:
                 (self.conjunction_intro_tag, self.conjunction_intro_name),
                 (self.disjunction_elim_tag, self.disjunction_elim_name),
                 (self.disjunction_intro_tag, self.disjunction_intro_name),
-                #(self.explosion_tag, self.explosion_name),
                 (self.implication_elim_tag, self.implication_elim_name),
                 (self.implication_intro_tag, self.implication_intro_name),
                 (self.necessary_elim_tag, self.necessary_elim_name),

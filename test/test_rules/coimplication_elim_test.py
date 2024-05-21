@@ -4,14 +4,14 @@
 
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff, TrueFalse, Falsehood, Truth
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
 from altrea.rules import Proof
 t = Proof()
-A = t.truefalse('A')
-B = t.truefalse('B')
-C = t.truefalse('C')
-D = t.truefalse('D')
-E = t.truefalse('E')
+A = t.proposition('A')
+B = t.proposition('B')
+C = t.proposition('C')
+D = t.proposition('D')
+E = t.proposition('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run
@@ -48,11 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(B)
     prf.premise(Iff(A, B))
@@ -81,11 +81,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(B)
     prf.premise(Iff(A, B))
@@ -114,11 +114,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_2(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(B)
     prf.premise(Iff(A, B))
@@ -147,11 +147,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(B)
     prf.hypothesis(Iff(A, B))

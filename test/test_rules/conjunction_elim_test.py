@@ -4,14 +4,14 @@
 
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff, TrueFalse, Falsehood, Truth
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
 from altrea.rules import Proof
 t = Proof()
-A = t.truefalse('A')
-B = t.truefalse('B')
-C = t.truefalse('C')
-D = t.truefalse('D')
-E = t.truefalse('E')
+A = t.proposition('A')
+B = t.proposition('B')
+C = t.proposition('C')
+D = t.proposition('D')
+E = t.proposition('E')
 
 """------------------------------------------------------------------------------
                                    Clean Run
@@ -72,20 +72,20 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(Iff(And(A, B), And(B, A)))
     prf.hypothesis(And(A, B), comment="Don't use `addhypothesis` to start the subproof.")
-    prf.conjunction_elim(1, comment='The left side is the default.')
+    prf.conjunction_elim(1, side='left', comment='The left side is the default.')
     prf.conjunction_elim(1, side='right', comment='Now do the right side.')
     prf.conjunction_intro(3, 2, comment='Put the conjuncts on the opposite side.')
     prf.implication_intro()
     prf.hypothesis(And(B, A))
-    prf.conjunction_elim(6)
+    prf.conjunction_elim(6, side='left')
     prf.conjunction_elim(6, side='right')
     prf.conjunction_intro(8, 7, comment='The order is reversed.')
     prf.implication_intro()
@@ -113,15 +113,15 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(C)
     prf.premise(And(A, B))
-    prf.conjunction_elim(0)
+    prf.conjunction_elim(0, side='left')
     prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
@@ -145,16 +145,16 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(C)
     prf.hypothesis(And(A, B))
     prf.hypothesis(C)
-    prf.conjunction_elim(1)
+    prf.conjunction_elim(1, side='left')
     prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
@@ -178,15 +178,15 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_notconjunction_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(C)
     prf.premise(A)
-    prf.conjunction_elim(1)
+    prf.conjunction_elim(1, side='left')
     prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
     assert eval(input_n) == expected
     
@@ -210,11 +210,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_sidenotselected_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(C)
     prf.premise(And(A, B))

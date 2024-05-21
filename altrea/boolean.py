@@ -49,7 +49,7 @@ class Wff:
     t_latexname = '\\top'
 
     
-    def __init__(self, name: str, latexname: str = ''):
+    def __init__(self, name: str, latexname: str = '', kind: str = 'Proposition'):
         if name in self.reserved_names or latexname in self.reserved_names:
             raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
         elif name == '':
@@ -60,6 +60,7 @@ class Wff:
             self.name = name
             self.latexname = latexname
             self.booleanvalue = None
+            self.kind = kind
 
     def __str__(self):
         return f'{self.name}'
@@ -79,7 +80,7 @@ class Wff:
         except ValueError:
             idx = len(wfflist)
             wfflist.append(self.name)
-        return ''.join(['*', str(idx), '*'])
+        return ''.join(['{', str(idx), '}'])
     
     def treetuple(self):
         return self.name
@@ -471,13 +472,13 @@ class Truth(Wff):
     def setvalue(self, value: bool):
         self.booleanvalue = True
 
-class TrueFalse(Wff):
+class Proposition(Wff):
     """A well formed formula which is can be either true or false, but not both and not neither."""
 
     is_variable = True
     booleanvalue = True
 
-    def __init__(self, name: str, latexname: str = ''):
+    def __init__(self, name: str, latexname: str = '', kind: str = 'Proposition'):
         if name in self.reserved_names or latexname in self.reserved_names:
             raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
         elif name == '':
@@ -493,6 +494,7 @@ class TrueFalse(Wff):
                 self.latexname = self.name
             else:
                 self.latexname = latexname
+        self.kind = kind
 
     def __str__(self):
         return f'{self.name}'

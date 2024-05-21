@@ -4,14 +4,14 @@
 
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff, TrueFalse, Falsehood, Truth
+from altrea.boolean import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
 from altrea.rules import Proof
 t = Proof()
-A = t.truefalse('A')
-B = t.truefalse('B')
-C = t.truefalse('C')
-D = t.truefalse('D')
-E = t.truefalse('E')
+A = t.proposition('A')
+B = t.proposition('B')
+C = t.proposition('C')
+D = t.proposition('D')
+E = t.proposition('E')
 
 """------------------------------------------------------------------------------
                                 Clean Run 1
@@ -48,11 +48,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_elim_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -96,11 +96,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_elim_clean_2(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Implies(B, A))
@@ -137,11 +137,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -172,11 +172,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_2(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -205,11 +205,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_3(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -239,11 +239,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -274,11 +274,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_2(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -308,11 +308,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_3(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -342,11 +342,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nodisjunction_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(And(A, A))
@@ -376,11 +376,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notimplication_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -410,11 +410,11 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notimplication_2(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -426,7 +426,7 @@ def test_conjunction_intro_notimplication_2(input_n, expected):
     
 """------------------------------------------------------------------------------
                                   Stopped Run
-                            stopped_notsameconclusion
+                            stopped_notsamestatement
 ------------------------------------------------------------------------------"""
 
 # The consequents of the two implications are not the same.
@@ -439,16 +439,16 @@ testdata = [
     ("prf.lines[12][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[12][prf.linesindex]", "7, 11"),
     ("prf.lines[12][prf.proofsindex]", ""),
-    ("prf.lines[12][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notsameconclusion),
+    ("prf.lines[12][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notsamestatement),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notsameconclusion_1(input_n, expected):
     prf = Proof()
-    A = prf.truefalse('A')
-    B = prf.truefalse('B')
-    C = prf.truefalse('C')
-    D = prf.truefalse('D')
-    E = prf.truefalse('E')
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
     prf.setlogic('C')
     prf.goal(A)
     prf.premise(Implies(B, A))

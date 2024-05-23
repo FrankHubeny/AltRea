@@ -188,7 +188,7 @@ def test_conjunction_intro_nosuchline_2(input_n, expected):
     
 """------------------------------------------------------------------------------
                                   Stopped Run
-                              stopped_nosuchline
+                              stopped_nointeger
 ------------------------------------------------------------------------------"""
 # The third referenced line of the three does not exist in the proof.
 testdata = [
@@ -200,10 +200,10 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "3.1416"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notinteger),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_conjunction_intro_nosuchline_3(input_n, expected):
+def test_conjunction_intro_notinteger_3(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')

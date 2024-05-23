@@ -102,7 +102,7 @@ testdata = [
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
     ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
-    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
 ]

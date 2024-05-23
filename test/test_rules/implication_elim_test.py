@@ -91,7 +91,7 @@ def test_implication_elim_nosuchline_1(input_n, expected):
     
 """------------------------------------------------------------------------------
                                   Stopped Run
-                               stopped_nosuchline                        
+                               stopped_notinteger                        
 ------------------------------------------------------------------------------"""
 
 # The second referenced line of the three does not exist in the proof.
@@ -104,10 +104,10 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[3][prf.linesindex]", "-2.56789"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notinteger),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_implication_elim_nosuchline_2(input_n, expected):
+def test_implication_elim_notinteger_2(input_n, expected):
     prf = Proof()
     A = Wff('A')
     B = Wff('B')

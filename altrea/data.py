@@ -2,7 +2,7 @@
 
 import sqlite3
 
-from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Falsehood, Truth, PremisesConclusion
+from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Falsehood, Truth, ConclusionPremises
 
 metadata = 'altrea/data/metadata.db'
 

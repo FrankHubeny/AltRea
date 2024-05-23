@@ -497,13 +497,13 @@ class Proposition(Wff):
         self.kind = kind
 
     def __str__(self):
-        return f'{self.name}'
+        return self.name
     
     def latex(self):
-        return f'{self.latexname}'
+        return self.latexname
     
     def tree(self):
-        return f'{self.name}'
+        return self.name
     
     # def pattern(self):
     #     return f'{self.name}'
@@ -583,7 +583,7 @@ class Definition(Wff):
     def setvalue(self):
         self.booleanvalue = None
 
-class PremisesConclusion(Wff):
+class ConclusionPremises(Wff):
     """A premises and conclusion pairing of Wff objects."""
 
     is_variable = True
@@ -638,23 +638,25 @@ class PremisesConclusion(Wff):
     
     def tree(self):
         if len(self.premises) > 0:
-            prem = self.premises[0].tree()
+            prem = ''.join(['[', self.premises[0].tree()])
             for i in range(len(self.premises)):
                 if i > 0:
                     prem += ''.join([', ', self.premises[i].tree()])
-            return f'{self.lb}{prem}{self.rb} {self.tree_connector} {self.conclusion.tree()}'
-        else:
-            return f'{self.tree_connector} {self.conclusion.tree()}'
+            prem += ']'
+        else: 
+            prem = '[]'
+        return f'{self.lb}{prem}{self.rb} {self.tree_connector} {self.conclusion.tree()}'
     
     def pattern(self, wfflist: list):
         if len(self.premises) > 0:
-            prem = self.premises[0].pattern(wfflist)
+            prem = ''.join(['[', self.premises[0].pattern(wfflist)])
             for i in range(len(self.premises)):
                 if i > 0:
                     prem += ''.join([', ', self.premises[i].pattern(wfflist)])
-            return f'PremisesConclusion({self.conclusion.pattern(wfflist)}, {prem})'
+            prem += ']'
         else:
-            return f'PremisesConclusion({self.conclusion.pattern(wfflist)})'
+            prem = '[]'
+        return f'ConclusionPremises({self.conclusion.pattern(wfflist)}, {prem})'
     
     def treetuple(self):
         if len(self.premises) > 0:

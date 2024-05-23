@@ -428,13 +428,18 @@ class Proof:
         self.showlogging = False
         self.logstep(self.log_proof.format(self.proof_name.upper(), name, displayname, description))
 
-    """SUPPORT FUNCTIONS NOT INTENTED TO BE DIRECTLY CALLED BY THE USER"""
+    """SUPPORT FUNCTIONS 
+    
+    These are not intended to be called by the user while constructing a proof.
+    """
 
     def appendproofdata(self, 
                         statement:  And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
                         rule: str):
         """Append a list representing a line of the proof which will be used to save the proof
-        lines as a string."""
+        lines as a string.
+        """
+
         length = len(self.lines) - 1
         self.proofdata.append(
                 [
@@ -489,15 +494,22 @@ class Proof:
 
         return self.status != self.complete and self.status != self.stopped 
     
-    def completedproof(self):
-        """Check if the proof is complete.  This is used to check if the current proof can be saved."""
-
-        return self.status == self.complete
-    
     def checkhasgoal(self):
         """Check if the proof has at least one goal."""
 
         return len(self.goals) > 0
+    
+    def checkitemlines(self, caller: str, name: str, comment: str, lineslist: list):
+        p = []
+        lines = []
+        for i in lineslist:
+            if type(i) == int:
+                if self.goodline(i, caller, name, comment):
+                    p.append(self.getstatement(i).tree())
+                    lines.append(i)
+                else:
+                    break
+        return p, lines
     
     def checkline(self, line: int):
         """Check if the line is an integer within the range of the proof lines."""
@@ -507,63 +519,38 @@ class Proof:
         else:
             return False
 
-    # def checkintelimrule(self, intelimrule: str):
-    #     """Check if the operator is defined in the selected logic."""
+    def checkpremises(self, caller:str, name: str, comment: str, premiselist: list = [], matchpremiselist: list = []):
+        if len(premiselist) > 0:
+            premises = [i.tree() for i in premiselist]
+            for i in premises:
+                if not i in matchpremiselist:
+                    self.logstep(self.log_premisesdontmatch.format(caller.upper(), i))
+                    self.stopproof(self.stopped_premisesdontmatch, self.blankstatement, name, str(i), '', comment)
 
-    #     found = False
-    #     for i in self.logicintelimrules:
-    #         if i[0] == intelimrule:
-    #             found = True
-    #             break
-    #     return found
+    def checksubs(self, caller: str, name: str, comment: str, subslist: list):
+        s = []
+        for i in subslist:
+            if len(subslist) == 0:
+                self.logstep(self.log_nosubs.format(caller.upper()), '')
+                self.stopproof(self.stopped_nosubs, self.blankstatement, name, '', '', comment)
+                break
+            elif self.goodobject(i, caller, name, comment):
+                s.append(i)
+            else:
+                break
+        return s
     
-    # def checklinescope(self, line: int):
-    #     """Check if the line is in the current current proof."""
+    def completedproof(self):
+        """Check if the proof is complete.  This is used to check if the current proof can be saved."""
 
-    #     return self.lines[line][2] == self.currentproofid
-    
-    # def checkstring(self, wff: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth):
-    #     return type(wff) == str
-        
-    # def getantecedentconsequent(self):
-    #     consequent = self.consequences[0]
-    #     if len(self.consequences) > 1:
-    #         for i in range(len(self.consequences)):
-    #             if i > 0:
-    #                 consequent = And(consequent, self.consequences[i])
-    #     if len(self.premises) > 0:
-    #         antecedent = self.premises[0]
-    #         if len(self.premises) > 1:
-    #             for i in range(len(self.premises)):
-    #                 if i > 0:
-    #                     antecedent = And(antecedent, self.premises[i])
-    #         return Implies(antecedent, consequent)
-    #     else:
-    #         return consequent
-
-    # def getcurrentitemid(self):
-    #     """Returns the number of the current item of the proof."""
-
-    #     return len(self.lines)
-    
-    # def getlevelstatement(self, line: int) -> tuple:
-    #     """Given a line id, return the level and the statement on that line."""
-
-    #     level = self.lines[line][self.levelindex]
-    #     statement = self.lines[line][self.statementindex]
-    #     return level, statement
-
-    # def getpreviousproofid(self, proofid: int) -> int:
-    #     """Returns the previous proof id of the current proof id."""
-
-    #     return self.prooflist[proofid][2]
+        return self.status == self.complete
     
     def getproof(self, proofid: int) -> tuple:
-        """Returns the level, one or more hypothesis statements conjoined together, the conclusion statement 
-        and the parent proof id.
+        """Returns one or more hypothesis statements conjoined together, the conclusion statement 
+        and the parent proof id.  It is used by functions such as implication_intro and
+        negation_intro to close a subordinate proof.
         """
 
-        #level = self.prooflist[proofid][0]
         hypothesis = self.lines[self.prooflist[proofid][3][0]][self.statementindex]
         if len(self.prooflist[proofid][3]) > 1:
             for i in range(len(self.prooflist[proofid][3])):
@@ -571,23 +558,54 @@ class Proof:
                     hypothesis = And(hypothesis, self.lines[self.prooflist[proofid][3][i]][self.statementindex])
 
         conclusion = self.lines[self.prooflist[proofid][1][1]][self.statementindex]
-        #previousproofid = self.getpreviousproofid(proofid)
         previousproofid = self.prooflist[proofid][2]
-        #return level, hypothesis, conclusion, previousproofid
         return hypothesis, conclusion, previousproofid
-    
-    # def getproofidstatement(self, line):
-    #     """Returns the proof id in the line."""
-
-    #     proofid = self.lines[line][self.proofidindex]
-    #     statement = self.lines[line][self.statementindex]
-    #     return proofid, statement
     
     def getstatement(self, line):
         """Returns the statement associated with the line number."""
 
         return self.lines[line][self.statementindex]
 
+    def goodline(self, line: int, caller: str, name: str, comment: str):
+        if type(line) != int:
+            self.logstep(self.log_notinteger.format(caller.upper(), line))
+            self.stopproof(self.stopped_notinteger, self.blankstatement, name, str(line), '', comment)
+        elif len(self.lines) <= line or line <= 0:
+            self.logstep(self.log_nosuchline.format(caller.upper(), line))
+            self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(line), '', comment)
+            return False
+        elif self.lines[line][2] != self.currentproofid:
+            self.logstep(self.log_linescope.format(caller.upper(), line))
+            self.stopproof(self.stopped_linescope, self.blankstatement, name, str(line), '', comment)
+            return False
+        else:
+            return True
+        
+    def goodobject(self, object, caller: str, name: str, comment: str):
+        if type(object) == str:
+            self.logstep(self.log_string.format(caller.upper(), object))
+            self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
+            return False
+        elif type(object) == int:
+            self.logstep(self.log_int.format(caller.upper(), object))
+            self.stopproof(self.stopped_int, self.blankstatement, name, '', '', comment)
+            return False
+        else:
+            return True
+
+    def goodtransformationrule(self, tag: str, caller: str, comment: str):
+        found = False
+        for i in self.logicintelimrules:
+            if i[0] == tag:
+                found = True
+                break
+        if not found:
+            self.logstep(self.log_notransformationrule.format(caller.upper()))
+            self.stopproof(self.stopped_notransformationrule, self.blankstatement, tag, '', '', comment)
+            return False
+        else:
+            return True
+        
     def iscomplete(self, 
                    statement:  And | Or | Not | Implies | Iff | Wff | Falsehood | Truth = None, 
                    comment: str = ''):
@@ -617,12 +635,140 @@ class Proof:
                 return comment
             else:
                 return ''.join([newcomment, self.dash_connector, comment])
-    
+
+    def latexitem(self, prooflines: list, i: int, status: str, saved: bool = False, color: int = 1):
+        """Formats a statement or item in a proof line for display as latex."""
+
+        if prooflines[i][0] != self.blankstatement:
+            base = ' \\hspace{0.35cm}|'
+            hypothesisbase = ''.join(['\\underline{', base, '}']) 
+            statement = ''
+            for j in range(1, prooflines[i][self.levelindex]):
+                statement = base + statement
+            if prooflines[i][self.statementindex] != '':
+                if prooflines[i][self.levelindex] > 0:
+                    if i < len(prooflines) - 1:
+                        if prooflines[i][self.ruleindex] == self.hypothesis_name:
+                            if prooflines[i+1][self.ruleindex] != self.hypothesis_name or prooflines[i][self.levelindex] < prooflines[i+1][self.levelindex]:
+                                statement = hypothesisbase + statement
+                            else:
+                                statement = base + statement
+                        else:
+                            statement = base + statement   
+                    else:
+                        if prooflines[i][self.ruleindex] == self.hypothesis_name:
+                            statement = hypothesisbase + statement
+                        else:
+                            statement = base + statement
+
+            if i == 0:
+                if saved:
+                    statement = ''.join(['$\\color{blue}', prooflines[0][0].latex(), '$']) #, statement, ])
+                else:
+                    if self.goals_latex != '':
+                        statement = ''.join(['$\\color{blue}', self.goals_latex, '$']) #, statement, ])
+                    else:
+                        statement = ''
+            elif color == 1 and status != self.complete and status != self.stopped and prooflines[i][1] == self.level and self.currentproofid == prooflines[i][2] and i > 0:
+                statement = ''.join(['$\\color{green}', prooflines[i][0].latex(), statement, '$' ])
+            elif color == 1 and status != self.complete and status != self.stopped and (prooflines[i][2] in self.previousproofchain) and i > 0:
+                statement = ''.join(['$\\color{red}', prooflines[i][0].latex(), statement, '$' ])
+            elif color == 1 and prooflines[i][6][0:8] == self.complete: 
+                statement = ''.join(['$\\color{blue}', prooflines[i][0].latex(), statement, '$' ])
+            elif color == 1 and prooflines[i][6][0:18] == self.partialcompletion:
+                statement = ''.join(['$\\color{blue}', prooflines[i][0].latex(), statement, '$'])
+            else:
+                if type(prooflines[i][0]) == str:
+                    statement = ''.join([prooflines[i][0], statement])
+                else:
+                    statement = ''.join(['$', prooflines[i][0].latex(), statement, '$' ])
+        else:
+            statement = self.blankstatement
+        return statement
+       
     def logstep(self, message: str):
+        """This function adds a log message collected during the proof construction
+        so it can be displayed later or in an ongoing manner.
+        """
+
         self.log.append(message)
         if self.showlogging:
             print(message)
 
+    def reflines(self, *lines):
+        """Convert integers to strings and join separated by commas."""
+
+        joined = ''
+        if len(lines) > 0:
+            joined = str(lines[0])
+            for i in range(len(lines)):
+                if i > 0:
+                    joined = ''.join([joined, ', ', str(lines[i])])
+        return joined
+    
+    def refproof(self, proofid: int):
+        """Formats a proof used in a proof."""
+
+        proof = self.prooflist[proofid][1]
+        return ''.join([str(proof[0]), '-', str(proof[1])])
+    
+    def stopproof(self, message: str, statement, rule: str, lines: str, blocks: str, comment: str = ''):
+        """Logs a status message in the line of a proof that shows no further lines can be added until the error is fixed."""
+
+        self.status = self.stopped
+        self.stoppedmessage = ''
+        if rule == self.goal_name:
+            if comment == '':
+                self.lines[0][self.commentindex] = ''.join([self.stopped, self.colon_connector, message])
+            else:
+                self.lines[0][self.commentindex] = ''.join([self.stopped, self.colon_connector, message, self.dash_connector, comment])
+        else:
+            if comment == '':
+                self.stoppedmessage = ''.join([self.stopped, self.colon_connector, message])
+            else:
+                self.stoppedmessage = ''.join([self.stopped, self.colon_connector, message, self.dash_connector, comment])
+            self.lines.append(
+                [
+                    statement, 
+                    self.level, 
+                    self.currentproofid, 
+                    rule, 
+                    lines, 
+                    blocks, 
+                    self.stoppedmessage,
+                    ''
+                ]
+            )
+            self.logstep(self.stoppedmessage)
+
+    def stringitem(self, prooflines: list, i: int):
+        """Formats the statement or item in a proof line so it can be displayed as a string.
+        It includes indenting based on the level of the subordinate proofs.
+        """
+
+        base = '   |'
+        hypothesisbase = ' __|'
+        statement = ''
+        for j in range(1, prooflines[i][self.levelindex]):
+            statement = base + statement
+        if prooflines[i][self.statementindex] != '':
+            if prooflines[i][self.levelindex] > 0:
+                if i < len(prooflines) - 1:
+                    if prooflines[i][self.ruleindex] == self.hypothesis_name:
+                        if prooflines[i+1][self.ruleindex] != self.hypothesis_name or prooflines[i][self.levelindex] < prooflines[i+1][self.levelindex]:
+                            statement = hypothesisbase + statement
+                        else:
+                            statement = base + statement
+                    else:
+                        statement = base + statement   
+                else:
+                    if prooflines[i][self.ruleindex] == self.hypothesis_name:
+                        statement = hypothesisbase + statement
+                    else:
+                        statement = base + statement
+        statement = ''.join([str(prooflines[i][self.statementindex]), statement])
+        return statement
+    
     def substitute(self, originalstring: str, *subs):
         """Substitute placeholders for strings representing the desired objects.  Then eval (evaluate) the resulting
         string to return the desired objects.
@@ -675,79 +821,348 @@ class Proof:
             self.logstep(self.log_nosubs.format(self.substitution_name.upper(), originalstring))
             self.stopproof(self.stopped_nosubs, self.blankstatement, self.hypothesis_name, '', '', '')
 
-    def stringitem(self, prooflines: list, i: int):
-        base = '   |'
-        hypothesisbase = ' __|'
-        statement = ''
-        for j in range(1, prooflines[i][self.levelindex]):
-            statement = base + statement
-        if prooflines[i][self.statementindex] != '':
-            if prooflines[i][self.levelindex] > 0:
-                if i < len(prooflines) - 1:
-                    if prooflines[i][self.ruleindex] == self.hypothesis_name:
-                        if prooflines[i+1][self.ruleindex] != self.hypothesis_name or prooflines[i][self.levelindex] < prooflines[i+1][self.levelindex]:
-                            statement = hypothesisbase + statement
-                        else:
-                            statement = base + statement
-                    else:
-                        statement = base + statement   
-                else:
-                    if prooflines[i][self.ruleindex] == self.hypothesis_name:
-                        statement = hypothesisbase + statement
-                    else:
-                        statement = base + statement
-        statement = ''.join([str(prooflines[i][self.statementindex]), statement])
-        return statement
+    """DISPLAY FUNCTIONS
+    
+    These functions provide a display to the user who would be epected to call them
+    if he chooses to do so.
+    """
+    def displaylogic(self):
+        """Display an identification of the axiom with its axioms and definitions."""
 
-    def latexitem(self, prooflines: list, i: int, status: str, saved: bool = False, color: int = 1):
-        if prooflines[i][0] != self.blankstatement:
-            base = ' \\hspace{0.35cm}|'
-            hypothesisbase = ''.join(['\\underline{', base, '}']) 
-            statement = ''
-            for j in range(1, prooflines[i][self.levelindex]):
-                statement = base + statement
-            if prooflines[i][self.statementindex] != '':
-                if prooflines[i][self.levelindex] > 0:
-                    if i < len(prooflines) - 1:
-                        if prooflines[i][self.ruleindex] == self.hypothesis_name:
-                            if prooflines[i+1][self.ruleindex] != self.hypothesis_name or prooflines[i][self.levelindex] < prooflines[i+1][self.levelindex]:
-                                statement = hypothesisbase + statement
-                            else:
-                                statement = base + statement
-                        else:
-                            statement = base + statement   
-                    else:
-                        if prooflines[i][self.ruleindex] == self.hypothesis_name:
-                            statement = hypothesisbase + statement
-                        else:
-                            statement = base + statement
+        # Display minimal information about the logic
+        print('{: >22}'.format(self.label_logic))
+        print('{: <20} {: <50}'.format(self.logic, self.logicdescription))
 
-            if i == 0:
-                if saved:
-                    statement = ''.join(['$\\color{blue}', prooflines[0][0].latex(), '$']) #, statement, ])
-                else:
-                    if self.goals_latex != '':
-                        statement = ''.join(['$\\color{blue}', self.goals_latex, '$']) #, statement, ])
-                    else:
-                        statement = ''
-            elif color == 1 and status != self.complete and status != self.stopped and prooflines[i][1] == self.level and self.currentproofid == prooflines[i][2] and i > 0:
-                statement = ''.join(['$\\color{green}', prooflines[i][0].latex(), statement, '$' ])
-            elif color == 1 and status != self.complete and status != self.stopped and (prooflines[i][2] in self.previousproofchain) and i > 0:
-                statement = ''.join(['$\\color{red}', prooflines[i][0].latex(), statement, '$' ])
-            elif color == 1 and prooflines[i][6][0:8] == self.complete: 
-                statement = ''.join(['$\\color{blue}', prooflines[i][0].latex(), statement, '$' ])
-            elif color == 1 and prooflines[i][6][0:18] == self.partialcompletion:
-                statement = ''.join(['$\\color{blue}', prooflines[i][0].latex(), statement, '$'])
-            else:
-                if type(prooflines[i][0]) == str:
-                    statement = ''.join([prooflines[i][0], statement])
-                else:
-                    statement = ''.join(['$', prooflines[i][0].latex(), statement, '$' ])
+        # Display axioms
+        if len(self.logicaxioms) == 0:
+            print('{: >23}'.format(self.label_noaxioms))
         else:
-            statement = self.blankstatement
-        return statement
+            print('{: >23}'.format(self.label_axioms))
+            for i in self.logicaxioms:
+                print('{: <20} {: <50}'.format(i[0], i[1]))
+
+        # Display definitions
+        if len(self.logicdefinitions) == 0:
+            print('{: >26}'.format(self.label_nodefinitions))
+        else:
+            print('{: >26}'.format(self.label_definitions))
+            for i in self.logicdefinitions:
+                print('{: <20} {: <50}'.format(i[0], i[1]))
+
+    def displaylog(self):
+        """Displays a log of the proof steps.  This will display the entire log that
+        was collected for the proof.  It may be useful just prior to displaying the 
+        proof itself with `displayproof()` for two different views on the proof or `writeproof()` 
+        for a natural language proof."""
+
+        size = len(self.log)
+        for i in range(len(self.log)):
+            if size < 10:
+                print('{: >1} {}'.format(i, self.log[i]))
+            elif size < 100:
+                print('{: >2} {}'.format(i, self.log[i]))
+            elif size < 1000:
+                print('{: >3} {}'.format(i, self.log[i]))
+            else:
+                print('{: >4} {}'.format(i, self.log[i]))
+
+    def displayproof(self, 
+                    short: int = 0,
+                    color: int = 1, 
+                    latex: int = 1):
+        """This function displays the proof lines.
+        
+        Parameters:
+            short: Display a three column proof with the item, combined rule and lines referenced and comments.  Using the
+            default presents all lines of the proof.
+            color: Displays the latex version with color.  This helps if one is using natural deduction with Fitch-style subordinate proofs.
+            latex: This sets the display for the statement to use latex rather than text.
+            
+        """
+
+        # Create the column.
+        if short == 1:
+            columns = [self.label_item, self.label_rule, self.label_comment]
+        else:
+            columns = [self.label_item, self.label_level, self.label_proof, self.label_rule, self.label_linetype, self.label_lines, self.label_proofs, self.label_comment]
+
+        # Create the index.
+        indx = [self.displayname]
+        for i in range(len(self.lines)-1):
+            indx.append(i + 1)
+
+        # Create the rows of data.
+        newp = []
+        for i in range(len(self.lines)):
+            if latex == 1:
+                statement = self.latexitem(prooflines=self.lines, i=i, status=self.status, saved=False, color=color)
+            else:
+                statement = self.stringitem(prooflines=self.lines, i=i)
+            if short == 1:
+                if self.lines[i][self.linesindex] != '':
+                    rule = ''.join([self.lines[i][self.linesindex], ', ',self.lines[i][self.ruleindex]])
+                elif self.lines[i][self.proofsindex] != '':
+                    rule = ''.join([self.lines[i][self.proofsindex], ', ',self.lines[i][self.ruleindex]])
+                else:
+                    rule = self.lines[i][self.ruleindex]
+                newp.append(
+                    [
+                        statement,
+                        rule,
+                        self.lines[i][self.commentindex],
+                    ]
+                )
+            else:
+                newp.append(
+                    [
+                        statement,
+                        self.lines[i][self.levelindex],
+                        self.lines[i][self.proofidindex],
+                        self.lines[i][self.ruleindex],
+                        self.lines[i][self.typeindex],
+                        self.lines[i][self.linesindex],
+                        self.lines[i][self.proofsindex],
+                        self.lines[i][self.commentindex],
+                    ]
+                )
+
+        # Use pandas to display the proof lines.
+        df = pandas.DataFrame(newp, index=indx, columns=columns)
+        return df
+    
+    def getgenericaxioms(self, *args, latex: int = 1):
+        """Provide a list of generic axioms which the user may add to the proof."""
+
+        # Get generic axiom data.
+        axioms = altrea.data.getgenericaxioms()
+
+        # Create a copy of the list of tuples as a list of lists to update it.
+        axiomslist = [list(i) for i in axioms]
+
+        # Convert references to proof lines into Wff objects.
+        expandedargs = []
+        for i in args:
+            if type(i) == int:        
+                expandedargs.append(self.getstatement(i))
+            else:
+                expandedargs.append(i)
+
+        # Format the item column by evaluating using the object dictionary.
+        for i in axiomslist:
+            for k in range(len(expandedargs)):
+                i[1] = i[1].replace(''.join(['*', str(k+1), '*']), expandedargs[k].tree())
+            i[1] = eval(i[1], self.objectdictionary)
+
+        # Display in latex or text.
+        for i in axiomslist:
+            if latex == 1:
+                i[1] = ''.join(['$', i[1].latex(), '$'])
+            else:
+                i[1] = str(i[1])  
+
+        # Set up the DataFrame.
+        columns = ['Name', 'Pattern', 'Display', 'Description']
+        index = [i for i in range(len(axiomslist))]
+        df = pandas.DataFrame(axiomslist, index=index, columns=columns)
+        return df
+    
+    def proofdetails(self, proofname: str, *args, latex: int = 1):
+        """Display the details of a proof."""
+
+        # Retrieve proof data.
+        displayname, description, pattern = altrea.data.getsavedproof(self.logic, proofname)
+        rows = altrea.data.getproofdetails(self.logic, proofname)
+
+        # Change references to proof lines into the items on those lines.
+        s = []
+        for i in args:
+            if type(i) == int:        
+                s.append(self.getstatement(i))
+            else:
+                s.append(i)
+        statement = pattern
+        for k in range(len(s)):
+            statement = statement.replace(''.join(['*', str(k+1), '*']), s[k].tree())
+        newrows =[]
+        newrows.append([statement, 0, 0, self.goal_name, '', '', ''])
+        for i in rows:
+            newrows.append(list(i))
+
+        # Format the item column using the dictionary.
+        for i in range(len(newrows)):
+            for k in range(len(s)):
+                newrows[i][0] = newrows[i][0].replace(''.join(['*', str(k+1), '*']), s[k].tree())
+            newrows[i][0] = eval(newrows[i][0], self.objectdictionary)
+
+        # Format the rules column using the names from the proofs logic operators.
+        for i in newrows:
+            for k in self.logicoperators:
+                i[3] = i[3].replace(''.join(['*', k[0], '*']), k[1])
+        for i in newrows:
+            for k in self.basicoperators:
+                i[3] = i[3].replace(''.join(['*', k[0], '*']), k[1])
+        for i in newrows:
+            for k in self.basicoperators:
+                i[3] = i[3].replace('*', '')
+
+        # Display the proof.
+        newp = []
+        if latex == 1:
+            for i in range(len(newrows)):
+                item = self.latexitem(newrows, i, self.complete, saved=True)
+                newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])
+        else:
+            for i in range(len(newrows)):
+                item = self.stringitem(newrows, i)
+                newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])  
+
+        # Prepare to run DataFrame.
+        columns = [self.label_item, self.label_level, self.label_proof, self.label_rule, self.label_lines, self.label_proofs, self.label_comment]
+        index = [displayname]
+        for i in range(len(newrows)):
+            if i > 0:
+                index.append(i)
+        df = pandas.DataFrame(newp, index=index, columns=columns)
+        return df
+    
+    def proofdetailsraw(self, proofname: str):
+        """Display the proof details as saved to the database."""
+
+        # Retrieve proof data.
+        rows = altrea.data.getproofdetails(self.logic, proofname)
+
+        # Prepare to run DataFrame.
+        columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
+        index = []
+        for i in range(len(rows)):
+            index.append(i)
+        df = pandas.DataFrame(rows, index=index, columns=columns)
+        return df
+
+    def reportstatus(self):
+        """A text version of thee `statusreport` function."""
+
+        # Display general information.
+        print('{: <25} {: <25}'.format(self.label_proofname, self.name))
+        print('{: <25} {: <25}'.format(self.label_displayname, self.displayname))
+        print('{: <25} {: <25}'.format(self.label_displayname, self.displayname))
+        print('{: <25} {: <25}'.format(self.label_description, self.description))
+        print('{: <25} {: <25}'.format(self.label_logic, self.logic))
+        print('{: <25} {: <25}'.format(self.label_logicdescription, self.logicdescription))
+        print('{: <25} {: <25}'.format(self.label_logicdatabase, self.logicdatabase))
+
+        # Display axioms
+        if len(self.logicaxioms) == 0:
+            print('{: <25} {: <25}'.format(self.label_axioms, self.label_noaxioms))
+        else:
+            print('{}'.format(self.label_axioms))
+            for i in self.logicaxioms:
+                print('{: >25} {: <25}'.format(i[0], i[1]))
+
+        # Display definitions
+        if len(self.logicdefinitions) == 0:
+            print('{: <25} {: <25}'.format(self.label_definitions, self.label_nodefinitions))
+        else:
+            print('{}'.format(self.label_definitions))
+            for i in self.logicdefinitions:
+                print('{: >25} {: <25}'.format(i[0], i[1]))
+
+        # Display connectors.
+        if len(self.logicconnectors) == 0:
+            print('{: <25} {: <25}'.format(self.label_connectors, self.label_noconnectors))
+        else:
+            print('{}'.format(self.label_connectors))
+            for i in self.logicconnectors:
+                print('{: >25} {: <25}'.format(i[1], i[2]))
+
+        # Display intelim rules.
+        if len(self.logicintelimrules) == 0:
+            print('{: <25} {: <25}'.format(self.label_intelimrules, self.label_nointelimrules))
+        else:
+            print('{}'.format(self.label_intelimrules))
+            for i in self.logicintelimrules:
+                print('{: <25} {: <25}'.format(' ', i[1]))
+
+        # Display goals.
+        if len(self.goals) == 0:
+            print('{: <25} {: <25}'.format(self.label_goals, self.label_nogoals))
+        else:
+            print('{}'.format(self.label_goals))
+            for i in self.goals:
+                print('{: <25} {: <25}'.format(' ', str(i)))
+
+        # Display premises.
+        if len(self.premises) == 0:
+            print('{: <25} {: <25}'.format(self.label_premises, self.label_nopremises))
+        else:
+            print('{}'.format(self.label_premises))
+            for i in self.premises:
+                print('{: <25} {: <25}'.format(' ', str(i)))
+
+        # Display derived goals.
+        if len(self.derivedgoals) == 0:
+            print('{: <25} {: <25}'.format(self.label_derivedgoals, self.label_noderivedgoals))
+        else:
+            print('{}'.format(self.derivedgoals))
+            for i in self.derivedgoals:
+                print('{: <25} {: <25}'.format(' ', str(i)))
+
+        # Display proof statuses.
+        if self.status == '':
+            print('{: <25} {: <25}'.format(self.label_proofstatus, self.label_inprogress))
+        else:
+            print('{: <25} {: <25}'.format(self.label_proofstatus, self.status))
+        if self.stoppedmessage == '':
+            print('{: <25} {: <25}'.format(self.label_stoppedstatus, self.label_notstopped))
+        else:
+            print('{: <25} {: <25}'.format(self.label_stoppedstatus, self.stoppedmessage))
+        print('{: <25} {: <25}'.format(self.label_prooflevel, self.level))
+        print('{: <25} {: <25}'.format(self.label_currentproofid, self.currentproofid))
+        print('{: <25} {: <25}'.format(self.label_previousproofid, self.previousproofid))
+        if self.previousproofchain == []:
+            print('{: <25} {: <25}'.format(self.label_previousproofchain, self.label_empty))
+        else:
+            print('{: <25} {: <25}'.format(self.label_previousproofchain, self.previousproofchain))
+
+    def savedproofs(self):
+        """Display a list of saved proofs for the logic being used."""
+
+        rows = altrea.data.getavailableproofs(self.logic)
+        if len(rows) > 0:
+            columns = [self.label_name, self.label_item, self.label_displayname, self.label_description]
+            index = []
+            for i in range(len(rows)):
+                index.append(i)
+            df = pandas.DataFrame(rows, index=index, columns=columns)
+            return df
+        else:
+            print(self.message_noproofs.format(self.logic))
+
+    def showlog(self, show: bool = True):
+        """This function turns logging on if it is turned off.
+
+        Parameters:
+            show: This boolean turns the immediate display of logging on (default True) or off (False).
+        
+        Examples:
+
+        """
+
+        if show:
+            self.showlogging = True
+            self.logstep(self.message_logdisplayed)
+        else:
+            self.showlogging = False
 
     def statusreport(self, *args, latex=1):
+        """A pandas DataFrame version of the `reportstatus` function.
+        
+        Parameters:
+            args: These values will be substituted in for the metavariables.
+            latex: Use a latex formatting.  This is the default.  Any value besides 1 will turn
+                on a text display.
+        """
+
         axiomslist = [list(i) for i in self.logicaxioms]
         columns = [self.label_name, self.label_value]
         data = []
@@ -838,264 +1253,6 @@ class Proof:
         for i in range(len(data)):
             index.append(str(i))
         df = pandas.DataFrame(data, index=index, columns=columns)
-        return df
-
-    def displaylogic(self):
-        """Display an identification of the axiom with its axioms and definitions."""
-
-        # Display minimal information about the logic
-        print('{: >22}'.format(self.label_logic))
-        print('{: <20} {: <50}'.format(self.logic, self.logicdescription))
-
-        # Display axioms
-        if len(self.logicaxioms) == 0:
-            print('{: >23}'.format(self.label_noaxioms))
-        else:
-            print('{: >23}'.format(self.label_axioms))
-            for i in self.logicaxioms:
-                print('{: <20} {: <50}'.format(i[0], i[1]))
-
-        # Display definitions
-        if len(self.logicdefinitions) == 0:
-            print('{: >26}'.format(self.label_nodefinitions))
-        else:
-            print('{: >26}'.format(self.label_definitions))
-            for i in self.logicdefinitions:
-                print('{: <20} {: <50}'.format(i[0], i[1]))
-
-    def reportstatus(self):
-        # Display general information.
-        print('{: <25} {: <25}'.format(self.label_proofname, self.name))
-        print('{: <25} {: <25}'.format(self.label_displayname, self.displayname))
-        print('{: <25} {: <25}'.format(self.label_displayname, self.displayname))
-        print('{: <25} {: <25}'.format(self.label_description, self.description))
-        print('{: <25} {: <25}'.format(self.label_logic, self.logic))
-        print('{: <25} {: <25}'.format(self.label_logicdescription, self.logicdescription))
-        print('{: <25} {: <25}'.format(self.label_logicdatabase, self.logicdatabase))
-
-        # Display axioms
-        if len(self.logicaxioms) == 0:
-            print('{: <25} {: <25}'.format(self.label_axioms, self.label_noaxioms))
-        else:
-            print('{}'.format(self.label_axioms))
-            for i in self.logicaxioms:
-                print('{: >25} {: <25}'.format(i[0], i[1]))
-
-        # Display definitions
-        if len(self.logicdefinitions) == 0:
-            print('{: <25} {: <25}'.format(self.label_definitions, self.label_nodefinitions))
-        else:
-            print('{}'.format(self.label_definitions))
-            for i in self.logicdefinitions:
-                print('{: >25} {: <25}'.format(i[0], i[1]))
-
-        # Display connectors.
-        if len(self.logicconnectors) == 0:
-            print('{: <25} {: <25}'.format(self.label_connectors, self.label_noconnectors))
-        else:
-            print('{}'.format(self.label_connectors))
-            for i in self.logicconnectors:
-                print('{: >25} {: <25}'.format(i[1], i[2]))
-
-        # Display intelim rules.
-        if len(self.logicintelimrules) == 0:
-            print('{: <25} {: <25}'.format(self.label_intelimrules, self.label_nointelimrules))
-        else:
-            print('{}'.format(self.label_intelimrules))
-            for i in self.logicintelimrules:
-                print('{: <25} {: <25}'.format(' ', i[1]))
-
-        # Display goals.
-        if len(self.goals) == 0:
-            print('{: <25} {: <25}'.format(self.label_goals, self.label_nogoals))
-        else:
-            print('{}'.format(self.label_goals))
-            for i in self.goals:
-                print('{: <25} {: <25}'.format(' ', str(i)))
-
-        # Display premises.
-        if len(self.premises) == 0:
-            print('{: <25} {: <25}'.format(self.label_premises, self.label_nopremises))
-        else:
-            print('{}'.format(self.label_premises))
-            for i in self.premises:
-                print('{: <25} {: <25}'.format(' ', str(i)))
-
-        # Display derived goals.
-        if len(self.derivedgoals) == 0:
-            print('{: <25} {: <25}'.format(self.label_derivedgoals, self.label_noderivedgoals))
-        else:
-            print('{}'.format(self.derivedgoals))
-            for i in self.derivedgoals:
-                print('{: <25} {: <25}'.format(' ', str(i)))
-
-        # Display proof statuses.
-        if self.status == '':
-            print('{: <25} {: <25}'.format(self.label_proofstatus, self.label_inprogress))
-        else:
-            print('{: <25} {: <25}'.format(self.label_proofstatus, self.status))
-        if self.stoppedmessage == '':
-            print('{: <25} {: <25}'.format(self.label_stoppedstatus, self.label_notstopped))
-        else:
-            print('{: <25} {: <25}'.format(self.label_stoppedstatus, self.stoppedmessage))
-        print('{: <25} {: <25}'.format(self.label_prooflevel, self.level))
-        print('{: <25} {: <25}'.format(self.label_currentproofid, self.currentproofid))
-        print('{: <25} {: <25}'.format(self.label_previousproofid, self.previousproofid))
-        if self.previousproofchain == []:
-            print('{: <25} {: <25}'.format(self.label_previousproofchain, self.label_empty))
-        else:
-            print('{: <25} {: <25}'.format(self.label_previousproofchain, self.previousproofchain))
-
-    def reflines(self, *lines):
-        """Convert integers to strings and join separated by commas."""
-
-        joined = ''
-        if len(lines) > 0:
-            joined = str(lines[0])
-            for i in range(len(lines)):
-                if i > 0:
-                    joined = ''.join([joined, ', ', str(lines[i])])
-        return joined
-    
-    def refproof(self, proofid: int):
-        """Formats a proof used in a proof."""
-
-        proof = self.prooflist[proofid][1]
-        return ''.join([str(proof[0]), '-', str(proof[1])])
-
-    def proofdetailsraw(self, proofname: str):
-        """Display the proof details as saved to the database."""
-
-        # Retrieve proof data.
-        rows = altrea.data.getproofdetails(self.logic, proofname)
-
-        # Prepare to run DataFrame.
-        columns = ['Item', 'Level', 'Proof', 'Rule', 'Lines', 'Proofs', 'Comment']
-        index = []
-        for i in range(len(rows)):
-            index.append(i)
-        df = pandas.DataFrame(rows, index=index, columns=columns)
-        return df
-    
-    def proofdetails(self, proofname: str, *args, latex: int = 1):
-        # Retrieve proof data.
-        displayname, description, pattern = altrea.data.getsavedproof(self.logic, proofname)
-        rows = altrea.data.getproofdetails(self.logic, proofname)
-
-        # Change references to proof lines into the items on those lines.
-        s = []
-        for i in args:
-            if type(i) == int:        
-                s.append(self.getstatement(i))
-            else:
-                s.append(i)
-        statement = pattern
-        for k in range(len(s)):
-            statement = statement.replace(''.join(['*', str(k+1), '*']), s[k].tree())
-        newrows =[]
-        newrows.append([statement, 0, 0, self.goal_name, '', '', ''])
-        for i in rows:
-            newrows.append(list(i))
-
-        # Format the item column using the dictionary.
-        for i in range(len(newrows)):
-            for k in range(len(s)):
-                newrows[i][0] = newrows[i][0].replace(''.join(['*', str(k+1), '*']), s[k].tree())
-            newrows[i][0] = eval(newrows[i][0], self.objectdictionary)
-
-        # Format the rules column using the names from the proofs logic operators.
-        for i in newrows:
-            for k in self.logicoperators:
-                i[3] = i[3].replace(''.join(['*', k[0], '*']), k[1])
-        for i in newrows:
-            for k in self.basicoperators:
-                i[3] = i[3].replace(''.join(['*', k[0], '*']), k[1])
-        for i in newrows:
-            for k in self.basicoperators:
-                i[3] = i[3].replace('*', '')
-
-        # Display the proof.
-        newp = []
-        if latex == 1:
-            for i in range(len(newrows)):
-                item = self.latexitem(newrows, i, self.complete, saved=True)
-                newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])
-        else:
-            for i in range(len(newrows)):
-                item = self.stringitem(newrows, i)
-                newp.append([item, newrows[i][1], newrows[i][2], newrows[i][3], newrows[i][4], newrows[i][5], newrows[i][6]])  
-
-        # Prepare to run DataFrame.
-        columns = [self.label_item, self.label_level, self.label_proof, self.label_rule, self.label_lines, self.label_proofs, self.label_comment]
-        index = [displayname]
-        for i in range(len(newrows)):
-            if i > 0:
-                index.append(i)
-        df = pandas.DataFrame(newp, index=index, columns=columns)
-        return df
-
-    def displayproof(self, 
-                    short: int = 0,
-                    color: int = 1, 
-                    latex: int = 1):
-        """This function displays the proof lines.
-        
-        Parameters:
-            short: Display a three column proof with the item, combined rule and lines referenced and comments.  Using the
-            default presents all lines of the proof.
-            color: Displays the latex version with color.  This helps if one is using natural deduction with Fitch-style subordinate proofs.
-            latex: This sets the display for the statement to use latex rather than text.
-            
-        """
-
-        # Create the column.
-        if short == 1:
-            columns = [self.label_item, self.label_rule, self.label_comment]
-        else:
-            columns = [self.label_item, self.label_level, self.label_proof, self.label_rule, self.label_linetype, self.label_lines, self.label_proofs, self.label_comment]
-
-        # Create the index.
-        indx = [self.displayname]
-        for i in range(len(self.lines)-1):
-            indx.append(i + 1)
-
-        # Create the rows of data.
-        newp = []
-        for i in range(len(self.lines)):
-            if latex == 1:
-                statement = self.latexitem(prooflines=self.lines, i=i, status=self.status, saved=False, color=color)
-            else:
-                statement = self.stringitem(prooflines=self.lines, i=i)
-            if short == 1:
-                if self.lines[i][self.linesindex] != '':
-                    rule = ''.join([self.lines[i][self.linesindex], ', ',self.lines[i][self.ruleindex]])
-                elif self.lines[i][self.proofsindex] != '':
-                    rule = ''.join([self.lines[i][self.proofsindex], ', ',self.lines[i][self.ruleindex]])
-                else:
-                    rule = self.lines[i][self.ruleindex]
-                newp.append(
-                    [
-                        statement,
-                        rule,
-                        self.lines[i][self.commentindex],
-                    ]
-                )
-            else:
-                newp.append(
-                    [
-                        statement,
-                        self.lines[i][self.levelindex],
-                        self.lines[i][self.proofidindex],
-                        self.lines[i][self.ruleindex],
-                        self.lines[i][self.typeindex],
-                        self.lines[i][self.linesindex],
-                        self.lines[i][self.proofsindex],
-                        self.lines[i][self.commentindex],
-                    ]
-                )
-
-        # Use pandas to display the proof lines.
-        df = pandas.DataFrame(newp, index=indx, columns=columns)
         return df
 
     def truthtable(self):
@@ -1238,120 +1395,94 @@ class Proof:
         if self.status == self.complete:
             print(f'    Therefore, {self.goals_string} which completes the proof.')
 
-        
-    def savedproofs(self):
-        """Display a list of saved proofs for the logic being used."""
-
-        rows = altrea.data.getavailableproofs(self.logic)
-        if len(rows) > 0:
-            columns = [self.label_name, self.label_item, self.label_displayname, self.label_description]
-            index = []
-            for i in range(len(rows)):
-                index.append(i)
-            df = pandas.DataFrame(rows, index=index, columns=columns)
-            return df
-        else:
-            print(self.message_noproofs.format(self.logic))
-
-    def getgenericaxioms(self, *args, latex: int = 1):
-        """Provide a list of generic axioms which the user may add to the proof."""
-
-        # Get generic axiom data.
-        axioms = altrea.data.getgenericaxioms()
-
-        # Create a copy of the list of tuples as a list of lists to update it.
-        axiomslist = [list(i) for i in axioms]
-
-        # Convert references to proof lines into Wff objects.
-        expandedargs = []
-        for i in args:
-            if type(i) == int:        
-                expandedargs.append(self.getstatement(i))
-            else:
-                expandedargs.append(i)
-
-        # Format the item column by evaluating using the object dictionary.
-        for i in axiomslist:
-            for k in range(len(expandedargs)):
-                i[1] = i[1].replace(''.join(['*', str(k+1), '*']), expandedargs[k].tree())
-            i[1] = eval(i[1], self.objectdictionary)
-
-        # Display in latex or text.
-        for i in axiomslist:
-            if latex == 1:
-                i[1] = ''.join(['$', i[1].latex(), '$'])
-            else:
-                i[1] = str(i[1])  
-
-        # Set up the DataFrame.
-        columns = ['Name', 'Pattern', 'Display', 'Description']
-        index = [i for i in range(len(axiomslist))]
-        df = pandas.DataFrame(axiomslist, index=index, columns=columns)
-        return df
+    """DATABASE FUNCTIONS 
     
-    def stopproof(self, message: str, statement, rule: str, lines: str, blocks: str, comment: str = ''):
-        """Logs a status message in the line of a proof that shows no further lines can be added until the error is fixed."""
+    These are intended for the user to call.  They have an effect if a logic has been defined
+    in advance which gives them a database to work with.
+    """
 
-        self.status = self.stopped
-        self.stoppedmessage = ''
-        if rule == self.goal_name:
-            if comment == '':
-                self.lines[0][self.commentindex] = ''.join([self.stopped, self.colon_connector, message])
-            else:
-                self.lines[0][self.commentindex] = ''.join([self.stopped, self.colon_connector, message, self.dash_connector, comment])
-        else:
-            if comment == '':
-                self.stoppedmessage = ''.join([self.stopped, self.colon_connector, message])
-            else:
-                self.stoppedmessage = ''.join([self.stopped, self.colon_connector, message, self.dash_connector, comment])
-            self.lines.append(
-                [
-                    statement, 
-                    self.level, 
-                    self.currentproofid, 
-                    rule, 
-                    lines, 
-                    blocks, 
-                    self.stoppedmessage,
-                    ''
-                ]
-            )
-            self.logstep(self.stoppedmessage)
- 
-    """SUPPORT FUNCTIONS CALLABLE BY THE USER"""
-
-    def showlog(self, show: bool = True):
-        """This function turns logging on if it is turned off.
+    def removeaxiom(self, name: str):
+        """Remove an axiom from the current proof as well as the logic's database if one has been identified.
+        This is mainly useful for logics with stored axioms although removing an axiom for an
+        unidentified logic will force the user not to use the default axiom.  That default axiom
+        will return when a new proof has been started.  
 
         Parameters:
-            show: This boolean turns the immediate display of logging on (default True) or off (False).
+            name: The name of the axiom to be removed.
         
-        Examples:
+        """
+        
+        # Look for errors
 
+        # If no errors, perform the task
+        pass
+
+    def removedefinition(self, name: str):
+        """Remove an axiom from the current proof as well as the logic's database if one has been identified.
+        This is mainly useful for logics with stored definitions although removing a definition for an
+        unidentified logic will force the user not to use the default definition.  That default definition
+        will return when a new proof has been started.
+
+        Parameters:
+            name: The name of the axiom to be removed.
+        
         """
 
-        if show:
-            self.showlogging = True
-            self.logstep(self.message_logdisplayed)
+        # Look for errors
+
+        # If no errors, perform the task
+        pass
+
+    def replaceproof(self):
+        """Delete the proof that already exists with that name and save a proof with the same name 
+        in the database file associated with the logic.
+        
+        The replacement proof must be complete before it can be saved.
+        """
+
+        if self.completedproof(): 
+            altrea.data.deleteproof(self.logic, self.name)
+            self.logstep(self.log_proofdeleted.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
+            altrea.data.addproof(self.proofdatafinal)
+            self.logstep(self.log_proofsaved.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
         else:
-            self.showlogging = False
+            print(self.stopped_notcomplete)
 
-    def displaylog(self):
-        """Displays a log of the proof steps.  This will display the entire log that
-        was collected for the proof.  It may be useful just prior to displaying the 
-        proof itself with `displayproof()` for two different views on the proof or `writeproof()` 
-        for a natural language proof."""
+    def saveaxiom(self, name: str, displayname: str, description: str, conclusion: None, premise: list = []):
+        """Save an axiom for the current proof and in the logic's database if one has been identified.
+        
+        Parameters:
+            name: The name of the axiom by which it will be accessed when one needs to use it.
+            displayname: The way the axiom will be displayed in a proof.
+            description: The description of the axiom to help understand it.
+            conclusion: An object, not a string, that represents the conclusion that will be placed in the proof
+                when the axiom is referenced.
+            premises: A list of objects, not strings, that need to be matched in proof lines before the
+                axiom can be used.
+        """
+        
+        # Look for errors
 
-        size = len(self.log)
-        for i in range(len(self.log)):
-            if size < 10:
-                print('{: >1} {}'.format(i, self.log[i]))
-            elif size < 100:
-                print('{: >2} {}'.format(i, self.log[i]))
-            elif size < 1000:
-                print('{: >3} {}'.format(i, self.log[i]))
-            else:
-                print('{: >4} {}'.format(i, self.log[i]))
+        # If no errors, perform the task
+        pass
+
+    def savedefinition(self, name: str, displayname: str, description: str, conclusion, premise):
+        """Save a definition for the current proof and in the logic's database if one has been identified. 
+
+        Parameters:
+            name: The name of the axiom by which it will be accessed when one needs to use it.
+            displayname: The way the axiom will be displayed in a proof.
+            description: The description of the axiom to help understand it.
+            conclusion: An object, not a string, that represents the conclusion that will be placed in the proof
+                when the axiom is referenced.
+            premises: A list of objects, not strings, that need to be matched in proof lines before the
+                axiom can be used.
+        """
+        
+        # Look for errors
+
+        # If no errors, perform the task
+        pass
 
     def saveproof(self):
         """Save the proof to a database file associated with the logic.
@@ -1410,24 +1541,13 @@ class Proof:
             self.logstep(self.log_proofsaved.format(self.saveproof_name.upper(), self.name, self.logicdatabase, self.logic))
         else:
             print(self.stopped_notcomplete)
-            
 
-    def replaceproof(self):
-        """Delete the proof that already exists with that name and save a proof with the same name 
-        in the database file associated with the logic.
-        
-        The replacement proof must be complete before it can be saved.
-        """
-
-        if self.completedproof(): 
-            altrea.data.deleteproof(self.logic, self.name)
-            self.logstep(self.log_proofdeleted.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
-            altrea.data.addproof(self.proofdatafinal)
-            self.logstep(self.log_proofsaved.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
-        else:
-            print(self.stopped_notcomplete)
-
-    """FUNCTIONS TO BUILD PROOFS"""
+    """NATURAL DEDUCTION AND GENERAL PROOF CONSTRUCTION
+    
+    These functions include an introduction and an elimination function for each logical connective.
+    Also included here are functions to define a goal, reiterate from a parent proof, define a premise 
+    or define an hypotheses.
+    """
 
     def addhypothesis(self,
                       hypothesis: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
@@ -1507,9 +1627,6 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if self.goodobject(hypothesis, self.addhypothesis_name, self.addhypothesis_name, comment):
-            # if type(hypothesis) == str:
-            #     self.logstep(self.log_string.format(self.addhypothesis_name.upper(), hypothesis))
-            #     self.stopproof(self.stopped_string, self.blankstatement, self.hypothesis_name, '', '', comment)
                 if self.currentproofid == 0:
                     self.logstep(self.log_nosubproof.format(self.addhypothesis_name.upper(), hypothesis))
                     self.stopproof(self.stopped_nosubproof, self.blankstatement, self.hypothesis_name, '', '', comment)
@@ -1534,186 +1651,6 @@ class Proof:
             )
             self.appendproofdata(hypothesis, self.hypothesis_tag)
     
-    def goodobject(self, object, caller: str, name: str, comment: str):
-        if type(object) == str:
-            self.logstep(self.log_string.format(caller.upper(), object))
-            self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
-            return False
-        elif type(object) == int:
-            self.logstep(self.log_int.format(caller.upper(), object))
-            self.stopproof(self.stopped_int, self.blankstatement, name, '', '', comment)
-            return False
-        else:
-            return True
-
-
-    def checksubs(self, caller: str, name: str, comment: str, subslist: list):
-        s = []
-        for i in subslist:
-            if len(subslist) == 0:
-                self.logstep(self.log_nosubs.format(caller.upper()), '')
-                self.stopproof(self.stopped_nosubs, self.blankstatement, name, '', '', comment)
-                break
-            elif self.goodobject(i, caller, name, comment):
-                s.append(i)
-            else:
-                break
-        return s
-    
-    def goodline(self, line: int, caller: str, name: str, comment: str):
-        if type(line) != int:
-            self.logstep(self.log_notinteger.format(caller.upper(), line))
-            self.stopproof(self.stopped_notinteger, self.blankstatement, name, str(line), '', comment)
-        elif len(self.lines) <= line or line <= 0:
-            self.logstep(self.log_nosuchline.format(caller.upper(), line))
-            self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(line), '', comment)
-            return False
-        elif self.lines[line][2] != self.currentproofid:
-            self.logstep(self.log_linescope.format(caller.upper(), line))
-            self.stopproof(self.stopped_linescope, self.blankstatement, name, str(line), '', comment)
-            return False
-        else:
-            return True
-
-    def checkitemlines(self, caller: str, name: str, comment: str, lineslist: list):
-        p = []
-        lines = []
-        for i in lineslist:
-            if type(i) == int:
-                if self.goodline(i, caller, name, comment):
-                    p.append(self.getstatement(i).tree())
-                    lines.append(i)
-                else:
-                    break
-        return p, lines
-    
-    def checkpremises(self, caller:str, name: str, comment: str, premiselist: list = [], matchpremiselist: list = []):
-        if len(premiselist) > 0:
-            premises = [i.tree() for i in premiselist]
-            for i in premises:
-                if not i in matchpremiselist:
-                    self.logstep(self.log_premisesdontmatch.format(caller.upper(), i))
-                    self.stopproof(self.stopped_premisesdontmatch, self.blankstatement, name, str(i), '', comment)
-
-    def useproof(self, 
-                 name: str, 
-                 subslist: list,
-                 premiselist: list = [],
-                 comment: str = ''):
-        """Various proofs may be invoked here such as the law of excluded middle.
-        
-        Parameters:
-            name: The name of the saved proof one wishes to use.
-            subslist: A list of object substitutions, not strings, given in order that they will be made.
-            premiselist: A list of integers representing the lines in the code that stand for the premises of the
-                proof being used.  After the substitutions are made and they match between the saved proof and these
-                lines then the conclusion of the saved proof will be made available. 
-            comment: An optional comment.
-
-        Examples:
-
-        """
-
-        # Look for errors: Get the saved proof.
-        if self.canproceed():
-            try:
-                displayname, description, pattern = altrea.data.getsavedproof(self.logic, name)
-            except TypeError:
-                self.logstep(self.log_nosavedproof.format(self.useproof_name.upper(), name))
-                self.stopproof(self.stopped_nosavedproof, self.blankstatement, name, '', '', comment)
-            
-        # Look for errors: Check the substitution values.
-        if self.canproceed():
-            subs = self.checksubs(self.useproof_name.upper(), name, comment, subslist)
-
-        # Look for errors: Check lines entered from the proof.
-        if self.canproceed():
-            matchpremiselist, lineslist = self.checkitemlines(self.useproof_name.upper(), name, comment, premiselist)
-
-        # Look for errors: Check that all premises from the saved proof are covered by lines in the currrent proof.
-        if self.canproceed():
-            conclusionpremises = self.substitute(pattern, *subs)
-            self.checkpremises(self.useproof_name.upper(), name, comment, conclusionpremises.premises, matchpremiselist)
-
-        # If no errors, perform task.
-        if self.canproceed():
-            self.logstep(self.log_useproof.format(self.useproof_name.upper(), conclusionpremises.conclusion, description))
-            newcomment = self.iscomplete(conclusionpremises.conclusion, comment)
-            self.lines.append(
-                [
-                    conclusionpremises.conclusion, 
-                    self.level, 
-                    self.currentproofid, 
-                    displayname,
-                    self.reflines(*lineslist), 
-                    '', 
-                    newcomment,
-                    self.linetype_savedproof
-                ]
-            )
-            self.appendproofdata(conclusionpremises.conclusion, displayname)
-
-    def definition(self, name: str, premiselist: list, subslist: list, comment: str = ''):
-        """Various axioms may be invoked here such as the law of excluded middle.
-        
-        Parameters:
-            name: The name of the axiom one wishes to use.
-            premiselist: This is a set of line numbers referencing one side of the definition.  Usually there is only one
-                such line number, but putting them in a list allows for more than one.
-            subslist: An arbitrary long list of substitutions that will be made into the retrieved definition string
-                before forming the object and testing whether the definition matches lines in the proof.
-            comment: An optional comment.
-
-        Examples:
-
-        """
-
-        # Look for errors: Find the definitions
-        if self.canproceed():
-            foundindex = -1
-            for i in range(len(self.logicdefinitions)):
-                if self.logicdefinitions[i][0] == name:
-                    foundindex = i
-                    break
-            if foundindex < 0:
-                self.logstep(self.log_nosuchdefinition.format(self.definition_name.upper(), name))
-                self.stopproof(self.stopped_nosuchdefinition, self.blankstatement, name, '', '', comment)
-            else:
-                definition = self.logicdefinitions[foundindex][1]
-                displayname = self.logicdefinitions[foundindex][2]
-                description = self.logicdefinitions[foundindex][3]
-                
-        # Look for errors: Check the substitution values.
-        if self.canproceed():
-            subs = self.checksubs(self.definition_name.upper(), name, comment, subslist)
-
-        # Look for errors: Check lines entered from the proof.
-        if self.canproceed():
-            matchpremiselist, lineslist = self.checkitemlines(self.definition_name.upper(), name, comment, premiselist)
-
-        # Look for errors: Check that all premises from the saved proof are covered by lines in the currrent proof.
-        if self.canproceed():
-            conclusionpremises = self.substitute(definition, *subs)
-            self.checkpremises(self.definition_name.upper(), name, comment, conclusionpremises.premises, matchpremiselist) 
-
-        # If no errors, perform task.
-        if self.canproceed():
-            self.logstep(self.log_definition.format(self.definition_name.upper(), conclusionpremises.conclusion, description))
-            newcomment = self.iscomplete(conclusionpremises.conclusion, comment)
-            self.lines.append(
-                [
-                    conclusionpremises.conclusion, 
-                    self.level, 
-                    self.currentproofid, 
-                    displayname,
-                    self.reflines(*lineslist), 
-                    '', 
-                    newcomment,
-                    self.linetype_definition
-                ]
-            )
-            self.appendproofdata(conclusionpremises.conclusion, displayname)
-
     def axiom(self, name: str, subslist: list, premiselist: list = [], comment: str = ''):
         """Various axioms may be invoked here such as the law of excluded middle.
         
@@ -1774,19 +1711,6 @@ class Proof:
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, displayname)
-
-    def goodtransformationrule(self, tag: str, caller: str, comment: str):
-        found = False
-        for i in self.logicintelimrules:
-            if i[0] == tag:
-                found = True
-                break
-        if not found:
-            self.logstep(self.log_notransformationrule.format(caller.upper()))
-            self.stopproof(self.stopped_notransformationrule, self.blankstatement, tag, '', '', comment)
-            return False
-        else:
-            return True
 
     def coimplication_elim(self, first: int, second: int, comment: str = ''):
         """Given an if and only if (iff) statement and a proposition one can derive the other proposition.
@@ -2138,6 +2062,67 @@ class Proof:
             ) 
             self.appendproofdata(andstatement, self.conjunction_intro_tag)
 
+    def definition(self, name: str, premiselist: list, subslist: list, comment: str = ''):
+        """Various axioms may be invoked here such as the law of excluded middle.
+        
+        Parameters:
+            name: The name of the axiom one wishes to use.
+            premiselist: This is a set of line numbers referencing one side of the definition.  Usually there is only one
+                such line number, but putting them in a list allows for more than one.
+            subslist: An arbitrary long list of substitutions that will be made into the retrieved definition string
+                before forming the object and testing whether the definition matches lines in the proof.
+            comment: An optional comment.
+
+        Examples:
+
+        """
+
+        # Look for errors: Find the definitions
+        if self.canproceed():
+            foundindex = -1
+            for i in range(len(self.logicdefinitions)):
+                if self.logicdefinitions[i][0] == name:
+                    foundindex = i
+                    break
+            if foundindex < 0:
+                self.logstep(self.log_nosuchdefinition.format(self.definition_name.upper(), name))
+                self.stopproof(self.stopped_nosuchdefinition, self.blankstatement, name, '', '', comment)
+            else:
+                definition = self.logicdefinitions[foundindex][1]
+                displayname = self.logicdefinitions[foundindex][2]
+                description = self.logicdefinitions[foundindex][3]
+                
+        # Look for errors: Check the substitution values.
+        if self.canproceed():
+            subs = self.checksubs(self.definition_name.upper(), name, comment, subslist)
+
+        # Look for errors: Check lines entered from the proof.
+        if self.canproceed():
+            matchpremiselist, lineslist = self.checkitemlines(self.definition_name.upper(), name, comment, premiselist)
+
+        # Look for errors: Check that all premises from the saved proof are covered by lines in the currrent proof.
+        if self.canproceed():
+            conclusionpremises = self.substitute(definition, *subs)
+            self.checkpremises(self.definition_name.upper(), name, comment, conclusionpremises.premises, matchpremiselist) 
+
+        # If no errors, perform task.
+        if self.canproceed():
+            self.logstep(self.log_definition.format(self.definition_name.upper(), conclusionpremises.conclusion, description))
+            newcomment = self.iscomplete(conclusionpremises.conclusion, comment)
+            self.lines.append(
+                [
+                    conclusionpremises.conclusion, 
+                    self.level, 
+                    self.currentproofid, 
+                    displayname,
+                    self.reflines(*lineslist), 
+                    '', 
+                    newcomment,
+                    self.linetype_definition
+                ]
+            )
+            self.appendproofdata(conclusionpremises.conclusion, displayname)
+
     def disjunction_elim(self, disjunction_line: int, left_implication_line: int, right_implication_line: int, comment: str = ''):
         """This rule take a disjunction and two implications with antecedents on each side of the disjunction.
         If the two implications reach the same conclusion, then that conclusion may be derived.
@@ -2356,6 +2341,14 @@ class Proof:
                 ]
             )    
             self.appendproofdata(disjunction, self.disjunction_intro_tag)
+
+    def falsehood(self, name: str, latex: str = ''):
+        newfalsehood = Falsehood(name, latex)
+        self.objectdictionary.update({name: newfalsehood})
+        self.falsehoods.append([newfalsehood, name])
+        howmany = len(self.falsehoods)
+        self.logstep(f'TRUTH: The letter "{newfalsehood.name}" (latex: "{newfalsehood.latexname}") for a generic falsehood formula has been defined making {howmany} so far.')
+        return newfalsehood
                                
     def goal(self,
                 goal: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth, 
@@ -2942,6 +2935,28 @@ class Proof:
                 ]
             )
             self.appendproofdata(premise, self.premise_tag)
+
+    def proposition(self, name: str, latex: str = '', kind: str = 'proposition'):
+        """This function creates an object which can be given a true or false value.
+        The function puts the object in a dictionary that is used when a string
+        representation saved into the database or a file is read by the user
+        to create an object recognized by the proof and for doing substitutions.
+
+        Parameters:
+            name: The text name for the proposition returned when the object is
+                used in a string.
+            latex: The optional text name for the proposition when it is used
+                in a latex context.
+            kind: A designation for the kind of object being created.  The default
+                is a proposition.
+        
+        """
+        p = Proposition(name, latex, kind)
+        self.objectdictionary.update({name: p})
+        self.letters.append([p, name])
+        howmany = len(self.letters)
+        self.logstep(self.log_proposition.format(self.proposition_name.upper(), p, howmany))
+        return p
        
     def reiterate(self, line: int, comment: str = ''):
         """The scope of the introduction/elimination transformation rules is its own proof, not a
@@ -3011,74 +3026,6 @@ class Proof:
                 ]
             )  
             self.appendproofdata(statement, self.reiterate_tag)
-
-    def saveaxiom(self, name: str, displayname: str, description: str, conclusion: None, premise: list = []):
-        """Save an axiom for the current proof and in the logic's database if one has been identified.
-        
-        Parameters:
-            name: The name of the axiom by which it will be accessed when one needs to use it.
-            displayname: The way the axiom will be displayed in a proof.
-            description: The description of the axiom to help understand it.
-            conclusion: An object, not a string, that represents the conclusion that will be placed in the proof
-                when the axiom is referenced.
-            premises: A list of objects, not strings, that need to be matched in proof lines before the
-                axiom can be used.
-        """
-        
-        # Look for errors
-
-        # If no errors, perform the task
-        pass
-
-    def removeaxiom(self, name: str):
-        """Remove an axiom from the current proof as well as the logic's database if one has been identified.
-        This is mainly useful for logics with stored axioms although removing an axiom for an
-        unidentified logic will force the user not to use the default axiom.  That default axiom
-        will return when a new proof has been started.  
-
-        Parameters:
-            name: The name of the axiom to be removed.
-        
-        """
-        
-        # Look for errors
-
-        # If no errors, perform the task
-        pass
-
-    def savedefinition(self, name: str, displayname: str, description: str, conclusion, premise):
-        """Save a definition for the current proof and in the logic's database if one has been identified. 
-
-        Parameters:
-            name: The name of the axiom by which it will be accessed when one needs to use it.
-            displayname: The way the axiom will be displayed in a proof.
-            description: The description of the axiom to help understand it.
-            conclusion: An object, not a string, that represents the conclusion that will be placed in the proof
-                when the axiom is referenced.
-            premises: A list of objects, not strings, that need to be matched in proof lines before the
-                axiom can be used.
-        """
-        
-        # Look for errors
-
-        # If no errors, perform the task
-        pass
-
-    def removedefinition(self, name: str):
-        """Remove an axiom from the current proof as well as the logic's database if one has been identified.
-        This is mainly useful for logics with stored definitions although removing a definition for an
-        unidentified logic will force the user not to use the default definition.  That default definition
-        will return when a new proof has been started.
-
-        Parameters:
-            name: The name of the axiom to be removed.
-        
-        """
-
-        # Look for errors
-
-        # If no errors, perform the task
-        pass
 
     def setlogic(self, logic: str = ''):
         """Sets the logic for the proof.
@@ -3156,48 +3103,6 @@ class Proof:
                                 self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
                             else:
                                 self.logicconnectors.append(i)
-            # else:
-            #     self.logicintelimrules = [
-            #         (self.coimplication_elim_tag, self.coimplication_elim_name),
-            #         (self.coimplication_intro_tag, self.coimplication_intro_name),
-            #         (self.conjunction_elim_tag, self.conjunction_elim_name),
-            #         (self.conjunction_intro_tag, self.conjunction_intro_name),
-            #         (self.disjunction_elim_tag, self.disjunction_elim_name),
-            #         (self.disjunction_intro_tag, self.disjunction_intro_name),
-            #         (self.implication_elim_tag, self.implication_elim_name),
-            #         (self.implication_intro_tag, self.implication_intro_name),
-            #         (self.necessary_elim_tag, self.necessary_elim_name),
-            #         (self.necessary_intro_tag, self.necessary_intro_name),
-            #         (self.negation_elim_tag, self.negation_elim_name),
-            #         (self.negation_intro_tag, self.negation_intro_name),
-            #         (self.possibly_elim_tag, self.possibly_elim_name),
-            #         (self.possibly_intro_tag, self.possibly_intro_name),
-            #     ]
-            #     self.logicconnectors = [
-
-            #     ]
-
-    def proposition(self, name: str, latex: str = '', kind: str = 'proposition'):
-        """This function creates an object which can be given a true or false value.
-        The function puts the object in a dictionary that is used when a string
-        representation saved into the database or a file is read by the user
-        to create an object recognized by the proof and for doing substitutions.
-
-        Parameters:
-            name: The text name for the proposition returned when the object is
-                used in a string.
-            latex: The optional text name for the proposition when it is used
-                in a latex context.
-            kind: A designation for the kind of object being created.  The default
-                is a proposition.
-        
-        """
-        p = Proposition(name, latex, kind)
-        self.objectdictionary.update({name: p})
-        self.letters.append([p, name])
-        howmany = len(self.letters)
-        self.logstep(self.log_proposition.format(self.proposition_name.upper(), p, howmany))
-        return p
 
     def truth(self, name: str, latex: str = ''):
         newtruth = Truth(name, latex)
@@ -3206,11 +3111,61 @@ class Proof:
         howmany = len(self.truths)
         self.logstep(f'TRUTH: The letter "{newtruth.name}" (latex: "{newtruth.latexname}") for a generic truth formula has been defined making {howmany} so far.')
         return newtruth
+    
+    def useproof(self, 
+                 name: str, 
+                 subslist: list,
+                 premiselist: list = [],
+                 comment: str = ''):
+        """Various proofs may be invoked here such as the law of excluded middle.
+        
+        Parameters:
+            name: The name of the saved proof one wishes to use.
+            subslist: A list of object substitutions, not strings, given in order that they will be made.
+            premiselist: A list of integers representing the lines in the code that stand for the premises of the
+                proof being used.  After the substitutions are made and they match between the saved proof and these
+                lines then the conclusion of the saved proof will be made available. 
+            comment: An optional comment.
 
-    def falsehood(self, name: str, latex: str = ''):
-        newfalsehood = Falsehood(name, latex)
-        self.objectdictionary.update({name: newfalsehood})
-        self.falsehoods.append([newfalsehood, name])
-        howmany = len(self.falsehoods)
-        self.logstep(f'TRUTH: The letter "{newfalsehood.name}" (latex: "{newfalsehood.latexname}") for a generic falsehood formula has been defined making {howmany} so far.')
-        return newfalsehood
+        Examples:
+
+        """
+
+        # Look for errors: Get the saved proof.
+        if self.canproceed():
+            try:
+                displayname, description, pattern = altrea.data.getsavedproof(self.logic, name)
+            except TypeError:
+                self.logstep(self.log_nosavedproof.format(self.useproof_name.upper(), name))
+                self.stopproof(self.stopped_nosavedproof, self.blankstatement, name, '', '', comment)
+            
+        # Look for errors: Check the substitution values.
+        if self.canproceed():
+            subs = self.checksubs(self.useproof_name.upper(), name, comment, subslist)
+
+        # Look for errors: Check lines entered from the proof.
+        if self.canproceed():
+            matchpremiselist, lineslist = self.checkitemlines(self.useproof_name.upper(), name, comment, premiselist)
+
+        # Look for errors: Check that all premises from the saved proof are covered by lines in the currrent proof.
+        if self.canproceed():
+            conclusionpremises = self.substitute(pattern, *subs)
+            self.checkpremises(self.useproof_name.upper(), name, comment, conclusionpremises.premises, matchpremiselist)
+
+        # If no errors, perform task.
+        if self.canproceed():
+            self.logstep(self.log_useproof.format(self.useproof_name.upper(), conclusionpremises.conclusion, description))
+            newcomment = self.iscomplete(conclusionpremises.conclusion, comment)
+            self.lines.append(
+                [
+                    conclusionpremises.conclusion, 
+                    self.level, 
+                    self.currentproofid, 
+                    displayname,
+                    self.reflines(*lineslist), 
+                    '', 
+                    newcomment,
+                    self.linetype_savedproof
+                ]
+            )
+            self.appendproofdata(conclusionpremises.conclusion, displayname)

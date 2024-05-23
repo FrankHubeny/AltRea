@@ -65,7 +65,7 @@ testdata = [
     ("prf.lines[0][prf.ruleindex]", ""),
     ("prf.lines[0][prf.linesindex]", ""),
     ("prf.lines[0][prf.proofsindex]", ""),
-    ("prf.lines[0][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
+    ("prf.lines[0][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_goal_string_1(input_n, expected):
@@ -95,7 +95,7 @@ testdata = [
     ("prf.lines[0][prf.ruleindex]", ""),
     ("prf.lines[0][prf.linesindex]", ""),
     ("prf.lines[0][prf.proofsindex]", ""),
-    ("prf.lines[0][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nologic),
+    ("prf.lines[0][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nologic),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_goal_nologic_1(input_n, expected):

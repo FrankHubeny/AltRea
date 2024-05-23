@@ -132,7 +132,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "10"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_1(input_n, expected):
@@ -167,7 +167,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "-10"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_2(input_n, expected):
@@ -200,7 +200,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "3.1416"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notinteger),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notinteger),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notinteger_3(input_n, expected):
@@ -234,7 +234,7 @@ testdata = [
     ("prf.lines[5][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[5][prf.linesindex]", "1"),
     ("prf.lines[5][prf.proofsindex]", ""),
-    ("prf.lines[5][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[5][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
@@ -269,7 +269,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_2(input_n, expected):
@@ -303,7 +303,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_3(input_n, expected):
@@ -337,7 +337,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "1"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notdisjunction),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notdisjunction),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nodisjunction_1(input_n, expected):
@@ -371,7 +371,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "1"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notimplication),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notimplication),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notimplication_1(input_n, expected):
@@ -405,7 +405,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "1"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notimplication),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notimplication),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notimplication_2(input_n, expected):
@@ -439,7 +439,7 @@ testdata = [
     ("prf.lines[12][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[12][prf.linesindex]", "7, 11"),
     ("prf.lines[12][prf.proofsindex]", ""),
-    ("prf.lines[12][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notsamestatement),
+    ("prf.lines[12][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notsamestatement),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notsameconclusion_1(input_n, expected):

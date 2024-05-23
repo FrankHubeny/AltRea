@@ -124,7 +124,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.negation_intro_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_closemainproof),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_closemainproof),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_closemainproof_1(input_n, expected):
@@ -153,7 +153,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.negation_intro_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notfalse),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notfalse),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_notfalse_1(input_n, expected):

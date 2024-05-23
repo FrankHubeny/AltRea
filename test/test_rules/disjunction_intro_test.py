@@ -104,7 +104,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_string_1(input_n, expected):
@@ -136,7 +136,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_string_2(input_n, expected):
@@ -167,7 +167,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
     ("prf.lines[2][prf.linesindex]", "-2"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_nosuchline_1(input_n, expected):
@@ -197,7 +197,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.disjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_linescope_1(input_n, expected):
@@ -230,7 +230,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_novaluepassed),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_novaluepassed),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_string_2(input_n, expected):

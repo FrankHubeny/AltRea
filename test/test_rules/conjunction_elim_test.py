@@ -67,7 +67,7 @@ testdata = [
     ("prf.lines[12][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[12][prf.linesindex]", "5, 10"),
     ("prf.lines[12][prf.proofsindex]", ""),
-    ("prf.lines[12][prf.commentindex]", t.complete + t.comment_connector + "Now it works using line 5 first."),
+    ("prf.lines[12][prf.commentindex]", t.complete + t.dash_connector + "Now it works using line 5 first."),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_clean_1(input_n, expected):
@@ -108,7 +108,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.conjunction_elim_name),
     ("prf.lines[2][prf.linesindex]", "0"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_nosuchline_1(input_n, expected):
@@ -140,7 +140,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.conjunction_elim_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
@@ -173,7 +173,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.conjunction_elim_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notconjunction),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notconjunction),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_notconjunction_1(input_n, expected):
@@ -205,7 +205,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.conjunction_elim_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_sidenotselected),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_sidenotselected),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_sidenotselected_1(input_n, expected):

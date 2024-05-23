@@ -122,7 +122,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "3"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_1(input_n, expected):
@@ -155,7 +155,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "3"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_2(input_n, expected):
@@ -188,7 +188,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
@@ -221,7 +221,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):

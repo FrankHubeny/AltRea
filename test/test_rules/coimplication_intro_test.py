@@ -75,7 +75,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[3][prf.linesindex]", "5"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_1(input_n, expected):
@@ -108,7 +108,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[3][prf.linesindex]", "4"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_2(input_n, expected):
@@ -141,7 +141,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_linescope_1(input_n, expected):
@@ -174,7 +174,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_linescope_2(input_n, expected):
@@ -207,7 +207,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notimplication),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notimplication),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_notimplication_1(input_n, expected):
@@ -240,7 +240,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notimplication),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notimplication),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_intro_notimplication_2(input_n, expected):
@@ -273,7 +273,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.coimplication_intro_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notsamestatement),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notsamestatement),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_coimplication_elim_nosuchline_1(input_n, expected):

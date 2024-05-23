@@ -73,7 +73,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[3][prf.linesindex]", "3"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_nosuchline_1(input_n, expected):
@@ -104,7 +104,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[3][prf.linesindex]", "-2.56789"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notinteger),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notinteger),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notinteger_2(input_n, expected):
@@ -136,7 +136,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_linescope_1(input_n, expected):
@@ -169,7 +169,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_linescope_2(input_n, expected):
@@ -201,7 +201,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notantecedent),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notantecedent),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notantecedent_1(input_n, expected):
@@ -232,7 +232,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[3][prf.linesindex]", "2, 1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notantecedent),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notantecedent),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notantecedent_2(input_n, expected):
@@ -263,7 +263,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notmodusponens),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notmodusponens),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notmodusponens_1(input_n, expected):

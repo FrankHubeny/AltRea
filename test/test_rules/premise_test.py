@@ -73,7 +73,7 @@ testdata = [
     ("prf.lines[1][prf.ruleindex]", t.premise_name),
     ("prf.lines[1][prf.linesindex]", ""),
     ("prf.lines[1][prf.proofsindex]", ""),
-    ("prf.lines[1][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_string_1(input_n, expected):
@@ -102,7 +102,7 @@ testdata = [
     ("prf.lines[1][prf.ruleindex]", t.premise_name),
     ("prf.lines[1][prf.linesindex]", ""),
     ("prf.lines[1][prf.proofsindex]", ""),
-    ("prf.lines[1][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nogoal),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nogoal),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_nogoal_1(input_n, expected):

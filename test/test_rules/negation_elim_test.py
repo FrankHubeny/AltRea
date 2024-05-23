@@ -75,7 +75,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[3][prf.linesindex]", "3"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_nosuchline_1(input_n, expected):
@@ -108,7 +108,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[3][prf.linesindex]", "3567"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_nosuchline_2(input_n, expected):
@@ -140,7 +140,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_linescope_1(input_n, expected):
@@ -173,7 +173,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_linescope),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_linescope_2(input_n, expected):
@@ -206,7 +206,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notcontradiction),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notcontradiction),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_notcontradiction_1(input_n, expected):

@@ -114,6 +114,9 @@ class Proof:
     One could redefine them just after instantiating an instance of the Proof class.
     """
 
+    """The first set of strings provide names of natural deduction function
+    calls that are displayed in reports."""
+
     addhypothesis_name = 'Add Hypothesis'
     axiom_name = 'Axiom'
     definition_name = 'Definition'
@@ -133,17 +136,30 @@ class Proof:
     negation_elim_name = 'Negation Elim'
     possibly_intro_name = 'Possibly Intro'
     possibly_elim_name = 'Possibly Elim'
+    reiterate_name = 'Reiteration'
+
+    """This set of strings provide names for proof structures which need not
+    be used with natural deduction.
+    """
+
     premise_name = 'Premise'
     proof_name = 'Proof'
     proposition_name = 'Proposition'
-    reiterate_name = 'Reiteration'
     setlogic_name = 'Set Logic'
     substitution_name = 'Substitute'
     useproof_name = 'Use Saved Proof'
     saveproof_name = 'Save Proof'
     replaceproof_name = 'Replace Proof'
-    comment_connector = ' - '
-    stopped_connector = ': '
+
+    """This set of strings provides formatting details for other strings."""
+
+    dash_connector = ' - '
+    colon_connector = ': '
+    space_connector = ' '
+
+    """This set of strings provides information for stopped messages and
+    their associated logging.
+    """
     stopped_closemainproof = 'The main proof cannot be closed only completed.'
     log_closemainproof = '{0}: The main proof cannot be closed only completed.'
     stopped_int = 'Input is an integer rather than an object from the proof.'
@@ -158,19 +174,21 @@ class Proof:
     log_nologic = '{0}: No logic has been declared for the proof.'
     stopped_nosavedproof = "The named saved proof does not exist in the logic's database."
     log_nosavedproof = '{0}: The saved proof "{1}" cannot be found in the database.'
-    stopped_nosuchline = 'The referenced line does not exist.'
-    log_nosuchline = '{0}: The line {1} cannot be found in the proof.'
-    stopped_nosubs = 'There were no substitutions entered.'
-    log_nosubs = '{0}: There were no substitutions entered for "{1}".'
     stopped_nosubproof = 'No subproof has yet been started to add an hypothesis to.'
     log_nosubproof = '{0}: There is no subproof to add the hypothesis "{1}" to.'
+    stopped_nosubs = 'There were no substitutions entered.'
+    log_nosubs = '{0}: There were no substitutions entered for "{1}".'
+    stopped_nosuchaxiom = 'The referenced named is not in the axiom list.'
+    log_nosuchaxiom = '{0}: The name "{1}" does not reference an axiom.'
+    stopped_nosuchdefinition = 'The referenced name is not in the definition list.'
+    log_nosuchdefinition = '{0}: The name "{1}" does not reference a definition.'
+    stopped_nosuchline = 'The referenced line does not exist.'
+    log_nosuchline = '{0}: The line {1} cannot be found in the proof.'
     stopped_notantecedent = 'One item is not the antecedent of the other.'
     log_notantecedent = '{0}: Item "{1}" is not the antecedent of the other "{2}".'
     stopped_notcoimplicationelim = 'The refernced items cannot be used in coimplication elimination.'
     log_notcoimplicationelim = '{0}: The referenced items "{1}" on line {2} and "{3}" on line {4} cannot be used in coimplication elimination.'
-
     stopped_notcomplete = 'The proof needs to be completed before it can be saved.' 
-
     stopped_notconjunction = 'The referenced item is not a conjunction.'
     log_notconjunction = '{0}: The referenced item "{1}" on line {2} is not a conjunction.'
     stopped_notcontradiction = 'The referenced items are not negations of each other.'
@@ -187,42 +205,41 @@ class Proof:
     log_notmodusponens = '{0}: The referenced items "{1}" on line {2} and "{3}" on line {4} cannot be used in implication elimination.'
     stopped_notnecessary = 'The referenced item is not necessary.'
     log_notnecessary = '{0}: The referenced item "{1}" on line {2} is not necessary.'
+    stopped_notransformationrule = 'The transformation rule is not defined in the selected logic.'
+    log_notransformationrule = '{0}: This transformation rule is not part of the logic.'
     stopped_notreiteratescope = 'The referenced item is not in the reiterate scope.'
     log_notreiteratescope = '{0}: The referenced item on line {1} is not in the reiterate scope.'
     stopped_notsamestatement = 'The referenced items are not the same.'
     log_notsamestatement = '{0}: The referenced items "{1}" and "{2}" are not the same.'
-    stopped_nosuchaxiom = 'The referenced named is not in the axiom list.'
-    log_nosuchaxiom = '{0}: The name "{1}" does not reference an axiom.'
-    stopped_nosuchdefinition = 'The referenced name is not in the definition list.'
-    log_nosuchdefinition = '{0}: The name "{1}" does not reference a definition.'
-    stopped_novaluepassed = 'No value was passed to the function.'
-    log_novaluepassed = '{0}: No value was passed to the function.'
     stopped_notstrictsubproof = 'The subproof is not strict.'
     log_notstrictsubproof = '{0}: The subproof is "{1}" rather than "{2}".'
+    stopped_novaluepassed = 'No value was passed to the function.'
+    log_novaluepassed = '{0}: No value was passed to the function.'
     stopped_premisesdontmatch = 'A premise in the saved proof does not match a line in the current proof.'
     log_premisesdontmatch = '{0}: The premise "{i}" does not match a line from the current proof.'
     stopped_sidenotselected = 'A side, "left" or "right", must be selected.'
     log_sidenotselected = '{0}: The input "{1}" was used rather than "left" or "right".'
     stopped_string = 'Input is a string rather than an object from the proof.'
     log_string = '{0}: The input "{1}" is a string rather than an object from the proof.'
-    stopped_notransformationrule = 'The transformation rule is not defined in the selected logic.'
-    log_notransformationrule = '{0}: This transformation rule is not part of the logic.'
-    log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
+
+    """Strings to log messages upon successful completion of tasks."""
+    
+    
 
     log_addhypothesis = '{0}: Item "{1}" has been added as an hypothesis to subproof {2}.'
-    log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
-    log_definition = '{0}: Item "{1}" has been added using the "{2}" definition.'
     log_axiom = '{0}: Item "{1}" has been added through the "{2}" axiom.'
     log_coimplication_elim = '{0}: Item "{1}" has been derived from the coimplication "{2}".'
     log_coimplication_intro = '{0}: Item "{1}" has been derived from "{2}" and "{3}".'
     log_conjunction_elim = '{0}: Item "{1}" has been derived from the conjunction "{2}" on line {3}.'
     log_conjunction_intro = '{0}: The conjunction "{1}" has been derived from "{2}" on line {3} and "{4}" on line {5}.'
+    log_definition = '{0}: Item "{1}" has been added using the "{2}" definition.'
     log_disjunction_elim = '{0}: Item "{1}" has been derived as the conclusion of both disjuncts of the disjunction "{2}" on line {3}.'
     log_disjunction_intro = '{0}: Item "{1}" has been derived from item "{2}" on line {3} joined on the {4} with {5}.'
     log_goal = '{0}: The goal "{1}" has been added to the goals.'
     log_hypothesis = '{0}: A new subproof {1} has been started with item "{2}".'
     log_implication_elim = '{0}: Item "{1}" has been derived from the implication "{2}" and item "{3}".'
     log_implication_intro = '{0}: Item "{1}" has been derived upon closing subproof {2}.'
+    log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
     log_necessary_elim = '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
     log_negation_elim = '{0}: Item "{1}" has been derived from the contradiction between "{2}" on line {3} and "{4}" on line {5}.'
     log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the hypothesis "{2}" of subproof {3} which is now closed.'
@@ -235,59 +252,73 @@ class Proof:
     log_proofsaved = '{0}: The proof "{1}" was saved to database "{2}" under logic "{3}".'
     log_proofdeleted = '{0}: The proof "{1}" was deleted form the database "{2}" under logic "{3}".'
     log_substitute = '{0}: The placeholder(s) in the string "{1}" have been replaced with "{2}" to become "{3}".'
-    log_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
-    log_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
-    label_name = 'Name'
-    label_proofname = 'Proof Name'
+    log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
+
+    """Messages associated with processes outside of a proof construction."""
+
+    message_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
+    message_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
+    message_logdisplayed = 'The log will be displayed.'
+    message_noproofs = 'There are no saved proofs for logic {0}'
+    
+    """Labels for various reports."""
+
+    label_axiom = 'Axiom'
+    label_axioms = 'Axioms'
     label_comment = 'Comment'
+    label_connector = 'Connector'
+    label_connectors = 'Connectors'
+    label_currentproofid = 'Current Proof ID'
+    label_definitions = 'Definitions'
+    label_derivedgoal = 'Derived Goal'
+    label_derivedgoals = 'Derived Goals'
     label_description = 'Description'
+    label_displayname = 'Display Name'
+    label_empty = 'Empty'
+    label_goal = 'Goal'
+    label_goals = 'Goals'
+    label_inprogress = 'In Progress'
+    label_intelimrule = 'IntElim Rule'
+    label_intelimrules = 'IntElim Rules'
     label_item = 'Item'
-    label_rule = 'Rule'
-    label_proofs = 'Proofs'
-    label_proof = 'Proof'
+    label_left = 'left'
     label_level = 'Level'
     label_lines = 'Lines'
     label_linetype = 'Type'
-    label_value = 'Value'
-    label_displayname = 'Display Name'
     label_logic = 'Logic'
-    label_logicdescription = 'Logic Description'
-    label_nodescription = 'No Description'
     label_logicdatabase = 'Logic Database'
-    label_nodatabase = 'No Database'
-    label_goals = 'Goals'
-    label_goal = 'Goal'
-    label_nogoals = 'No Goals'
-    label_derivedgoals = 'Derived Goals'
-    label_derivedgoal = 'Derived Goal'
-    label_noderivedgoals = 'No Derived Goals'
-    label_axioms = 'Axioms'
-    label_axiom = 'Axiom'
+    label_logicdescription = 'Logic Description'
+    label_name = 'Name'
     label_noaxioms = 'No Axioms'
-    label_connectors = 'Connectors'
-    label_connector = 'Connector'
-    label_definitions = 'Definitions'
-    label_nodefinition = ' No Definitions'
     label_noconnectors = 'No Connectors'
-    label_intelimrules = 'IntElim Rules'
-    label_intelimrule = 'IntElim Rule'
+    label_nodatabase = 'No Database'
+    label_nodefinition = ' No Definitions'
+    label_nodefinitions = 'No Definitions'
+    label_noderivedgoals = 'No Derived Goals'
+    label_nodescription = 'No Description'
+    label_nogoals = 'No Goals'
     label_nointelimrules = 'No IntElim Rules'
-    label_premises = 'Premises'
-    label_premise = 'Premise'
     label_nopremises = 'No Premises'
-    label_proofstatus = 'Proof Status'
-    label_inprogress = 'In Progress'
-    label_stoppedstatus = 'Stopped Status'
     label_notstopped = 'Not Stopped'
-    label_prooflevel = 'Proof Level'
-    label_currentproofid = 'Current Proof ID'
-    label_previousproofid = 'Previous Proof ID'
+    label_premise = 'Premise'
+    label_premises = 'Premises'
     label_previousproofchain = 'Previous Proof Chain'
-    label_empty = 'Empty'
-    label_left = 'left'
+    label_previousproofid = 'Previous Proof ID'
+    label_proof = 'Proof'
+    label_prooflevel = 'Proof Level'
+    label_proofname = 'Proof Name'
+    label_proofs = 'Proofs'
+    label_proofstatus = 'Proof Status'
     label_right = 'right'
-    message_noproofs = 'There are not saved proofs for logic {0}'
-    message_logdisplayed = 'The log will be displayed.'
+    label_rule = 'Rule'
+    label_stoppedstatus = 'Stopped Status'
+    label_value = 'Value'
+    #label_notstopped = 'Not Stopped'
+
+    
+
+    """The following tags are used to differentiate between lines of a proof."""
+
     linetype_savedproof = ' SP'
     linetype_axiom = ' AX'
     linetype_definition = ' DEF'
@@ -322,12 +353,27 @@ class Proof:
         self.derivedgoalswff = []
         self.comment = ''
         self.logic = ''
-        self.logicdescription = ''
-        self.logicdatabase = ''
+        self.logicdescription = self.label_nodescription
+        self.logicdatabase = self.label_nodatabase
         self.logicconnectors = []
         self.logicaxioms = []
         self.logicdefinitions = []
-        self.logicintelimrules = []
+        self.logicintelimrules = [
+                (self.coimplication_elim_tag, self.coimplication_elim_name),
+                (self.coimplication_intro_tag, self.coimplication_intro_name),
+                (self.conjunction_elim_tag, self.conjunction_elim_name),
+                (self.conjunction_intro_tag, self.conjunction_intro_name),
+                (self.disjunction_elim_tag, self.disjunction_elim_name),
+                (self.disjunction_intro_tag, self.disjunction_intro_name),
+                (self.implication_elim_tag, self.implication_elim_name),
+                (self.implication_intro_tag, self.implication_intro_name),
+                (self.necessary_elim_tag, self.necessary_elim_name),
+                (self.necessary_intro_tag, self.necessary_intro_name),
+                (self.negation_elim_tag, self.negation_elim_name),
+                (self.negation_intro_tag, self.negation_intro_name),
+                (self.possibly_elim_tag, self.possibly_elim_name),
+                (self.possibly_intro_tag, self.possibly_intro_name),
+        ]
         self.logicoperators = [
             (self.coimplication_elim_tag, self.coimplication_elim_name),
             (self.coimplication_intro_tag, self.coimplication_intro_name),
@@ -507,17 +553,17 @@ class Proof:
     #     statement = self.lines[line][self.statementindex]
     #     return level, statement
 
-    def getpreviousproofid(self, proofid: int) -> int:
-        """Returns the previous proof id of the current proof id."""
+    # def getpreviousproofid(self, proofid: int) -> int:
+    #     """Returns the previous proof id of the current proof id."""
 
-        return self.prooflist[proofid][2]
+    #     return self.prooflist[proofid][2]
     
     def getproof(self, proofid: int) -> tuple:
         """Returns the level, one or more hypothesis statements conjoined together, the conclusion statement 
         and the parent proof id.
         """
 
-        level = self.prooflist[proofid][0]
+        #level = self.prooflist[proofid][0]
         hypothesis = self.lines[self.prooflist[proofid][3][0]][self.statementindex]
         if len(self.prooflist[proofid][3]) > 1:
             for i in range(len(self.prooflist[proofid][3])):
@@ -525,8 +571,10 @@ class Proof:
                     hypothesis = And(hypothesis, self.lines[self.prooflist[proofid][3][i]][self.statementindex])
 
         conclusion = self.lines[self.prooflist[proofid][1][1]][self.statementindex]
-        previousproofid = self.getpreviousproofid(proofid)
-        return level, hypothesis, conclusion, previousproofid
+        #previousproofid = self.getpreviousproofid(proofid)
+        previousproofid = self.prooflist[proofid][2]
+        #return level, hypothesis, conclusion, previousproofid
+        return hypothesis, conclusion, previousproofid
     
     # def getproofidstatement(self, line):
     #     """Returns the proof id in the line."""
@@ -568,7 +616,7 @@ class Proof:
             if newcomment == '':
                 return comment
             else:
-                return ''.join([newcomment, self.comment_connector, comment])
+                return ''.join([newcomment, self.dash_connector, comment])
     
     def logstep(self, message: str):
         self.log.append(message)
@@ -792,6 +840,29 @@ class Proof:
         df = pandas.DataFrame(data, index=index, columns=columns)
         return df
 
+    def displaylogic(self):
+        """Display an identification of the axiom with its axioms and definitions."""
+
+        # Display minimal information about the logic
+        print('{: >22}'.format(self.label_logic))
+        print('{: <20} {: <50}'.format(self.logic, self.logicdescription))
+
+        # Display axioms
+        if len(self.logicaxioms) == 0:
+            print('{: >23}'.format(self.label_noaxioms))
+        else:
+            print('{: >23}'.format(self.label_axioms))
+            for i in self.logicaxioms:
+                print('{: <20} {: <50}'.format(i[0], i[1]))
+
+        # Display definitions
+        if len(self.logicdefinitions) == 0:
+            print('{: >26}'.format(self.label_nodefinitions))
+        else:
+            print('{: >26}'.format(self.label_definitions))
+            for i in self.logicdefinitions:
+                print('{: <20} {: <50}'.format(i[0], i[1]))
+
     def reportstatus(self):
         # Display general information.
         print('{: <25} {: <25}'.format(self.label_proofname, self.name))
@@ -883,7 +954,7 @@ class Proof:
             joined = str(lines[0])
             for i in range(len(lines)):
                 if i > 0:
-                    joined += ''.join([', ', str(lines[i])])
+                    joined = ''.join([joined, ', ', str(lines[i])])
         return joined
     
     def refproof(self, proofid: int):
@@ -1225,14 +1296,14 @@ class Proof:
         self.stoppedmessage = ''
         if rule == self.goal_name:
             if comment == '':
-                self.lines[0][self.commentindex] = ''.join([self.stopped, self.stopped_connector, message])
+                self.lines[0][self.commentindex] = ''.join([self.stopped, self.colon_connector, message])
             else:
-                self.lines[0][self.commentindex] = ''.join([self.stopped, self.stopped_connector, message, self.comment_connector, comment])
+                self.lines[0][self.commentindex] = ''.join([self.stopped, self.colon_connector, message, self.dash_connector, comment])
         else:
             if comment == '':
-                self.stoppedmessage = ''.join([self.stopped, self.stopped_connector, message])
+                self.stoppedmessage = ''.join([self.stopped, self.colon_connector, message])
             else:
-                self.stoppedmessage = ''.join([self.stopped, self.stopped_connector, message, self.comment_connector, comment])
+                self.stoppedmessage = ''.join([self.stopped, self.colon_connector, message, self.dash_connector, comment])
             self.lines.append(
                 [
                     statement, 
@@ -2350,7 +2421,7 @@ class Proof:
             if self.lines[0][self.commentindex] == '':
                 self.lines[0][self.commentindex] = comment
             elif comment != '':
-                self.lines[0][self.commentindex] += ''.join([self.comment_connector, comment])
+                self.lines[0][self.commentindex] += ''.join([self.dash_connector, comment])
             self.logstep(self.log_goal.format(self.goal_name.upper(), goal))
 
     def hypothesis(self, 
@@ -2600,7 +2671,8 @@ class Proof:
             proofid = self.currentproofid
             self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
             self.level -= 1
-            level, antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            #level, antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
             self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
             if len(self.previousproofchain) > 1:  
@@ -2804,7 +2876,8 @@ class Proof:
         if self.canproceed():
             proofid = self.currentproofid
             self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
-            level, antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            #level, antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
             self.level -= 1
             self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
@@ -2939,11 +3012,80 @@ class Proof:
             )  
             self.appendproofdata(statement, self.reiterate_tag)
 
-    def setlogic(self, logic: str):
+    def saveaxiom(self, name: str, displayname: str, description: str, conclusion: None, premise: list = []):
+        """Save an axiom for the current proof and in the logic's database if one has been identified.
+        
+        Parameters:
+            name: The name of the axiom by which it will be accessed when one needs to use it.
+            displayname: The way the axiom will be displayed in a proof.
+            description: The description of the axiom to help understand it.
+            conclusion: An object, not a string, that represents the conclusion that will be placed in the proof
+                when the axiom is referenced.
+            premises: A list of objects, not strings, that need to be matched in proof lines before the
+                axiom can be used.
+        """
+        
+        # Look for errors
+
+        # If no errors, perform the task
+        pass
+
+    def removeaxiom(self, name: str):
+        """Remove an axiom from the current proof as well as the logic's database if one has been identified.
+        This is mainly useful for logics with stored axioms although removing an axiom for an
+        unidentified logic will force the user not to use the default axiom.  That default axiom
+        will return when a new proof has been started.  
+
+        Parameters:
+            name: The name of the axiom to be removed.
+        
+        """
+        
+        # Look for errors
+
+        # If no errors, perform the task
+        pass
+
+    def savedefinition(self, name: str, displayname: str, description: str, conclusion, premise):
+        """Save a definition for the current proof and in the logic's database if one has been identified. 
+
+        Parameters:
+            name: The name of the axiom by which it will be accessed when one needs to use it.
+            displayname: The way the axiom will be displayed in a proof.
+            description: The description of the axiom to help understand it.
+            conclusion: An object, not a string, that represents the conclusion that will be placed in the proof
+                when the axiom is referenced.
+            premises: A list of objects, not strings, that need to be matched in proof lines before the
+                axiom can be used.
+        """
+        
+        # Look for errors
+
+        # If no errors, perform the task
+        pass
+
+    def removedefinition(self, name: str):
+        """Remove an axiom from the current proof as well as the logic's database if one has been identified.
+        This is mainly useful for logics with stored definitions although removing a definition for an
+        unidentified logic will force the user not to use the default definition.  That default definition
+        will return when a new proof has been started.
+
+        Parameters:
+            name: The name of the axiom to be removed.
+        
+        """
+
+        # Look for errors
+
+        # If no errors, perform the task
+        pass
+
+    def setlogic(self, logic: str = ''):
         """Sets the logic for the proof.
         
         Parameters:
-            logic: The code identifying the logic.
+            logic: The code identifying the logic.  Accepting the default links the proof to no database of saved proofs
+                and offers a default set of axioms and definitions with all transformation rules available.
             
         Examples:
             If you do not know which logics are avaiable, you may run `displaylogics()`.
@@ -2964,69 +3106,76 @@ class Proof:
             0              STOPPED: This logic has not been defined.
             """
         
-        self.logic = logic
-        try:
-            database, description = altrea.data.getlogic(logic)
-        except TypeError:
-            database = self.label_nodatabase
-            description = self.label_nodescription
-        self.logicdatabase = database
-        self.logicdescription = description
-        self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
-        self.proofdata[0].append(logic)
-        try:
-            self.logicaxioms = altrea.data.getaxioms(logic)
-        except TypeError:
-            self.logicaxioms = []
-        try:
-            self.logicdefinitions = altrea.data.getdefinitions(logic)
-        except TypeError:
-            self.logicaxioms = []
-        if database != 'No Database':
-            try:
-                intelimrules = altrea.data.getintelimrules(logic)
-            except:
-                self.logstep(self.log_couldnotgettransformationrules.format(self.setlogic_name.upper(), self.logic))
-            else:
-                if len(intelimrules) > 0:
-                    self.logicintelimrules = []
-                    for i in intelimrules:
-                        if i[0] != '':
-                            self.logicintelimrules.append((i[0], eval(i[1])))
-                        else:
-                            self.logicintelimrules.append(i)
-            try: 
-                connectors = altrea.data.getconnectors(logic)
-            except:
-                self.logstep(self.log_couldnotgetconnectors.format(self.setlogic_name.upper(), self.logic))
-            else:
-                if len(connectors) > 0:
-                    self.connectors = []
-                    for i in connectors:
-                        if i[0] != '':
-                            self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
-                        else:
-                            self.logicconnectors.append(i)
-        else:
-            self.logicintelimrules = [
-                (self.coimplication_elim_tag, self.coimplication_elim_name),
-                (self.coimplication_intro_tag, self.coimplication_intro_name),
-                (self.conjunction_elim_tag, self.conjunction_elim_name),
-                (self.conjunction_intro_tag, self.conjunction_intro_name),
-                (self.disjunction_elim_tag, self.disjunction_elim_name),
-                (self.disjunction_intro_tag, self.disjunction_intro_name),
-                (self.implication_elim_tag, self.implication_elim_name),
-                (self.implication_intro_tag, self.implication_intro_name),
-                (self.necessary_elim_tag, self.necessary_elim_name),
-                (self.necessary_intro_tag, self.necessary_intro_name),
-                (self.negation_elim_tag, self.negation_elim_name),
-                (self.negation_intro_tag, self.negation_intro_name),
-                (self.possibly_elim_tag, self.possibly_elim_name),
-                (self.possibly_intro_tag, self.possibly_intro_name),
-            ]
-            self.logicconnectors = [
+        # Look for errors
 
-            ]
+        # If no errors, perform the task
+        self.logic = logic
+        if logic == '':
+            self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
+            self.proofdata[0].append(logic)
+        else:
+            try:
+                database, description = altrea.data.getlogic(logic)
+            except TypeError:
+                database = self.label_nodatabase
+                description = self.label_nodescription
+            self.logicdatabase = database
+            self.logicdescription = description
+            self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
+            self.proofdata[0].append(logic)
+            try:
+                self.logicaxioms = altrea.data.getaxioms(logic)
+            except TypeError:
+                self.logicaxioms = []
+            try:
+                self.logicdefinitions = altrea.data.getdefinitions(logic)
+            except TypeError:
+                self.logicaxioms = []
+            if database != 'No Database':
+                try:
+                    intelimrules = altrea.data.getintelimrules(logic)
+                except:
+                    self.logstep(self.message_couldnotgettransformationrules.format(self.setlogic_name.upper(), self.logic))
+                else:
+                    if len(intelimrules) > 0:
+                        self.logicintelimrules = []
+                        for i in intelimrules:
+                            if i[0] != '':
+                                self.logicintelimrules.append((i[0], eval(i[1])))
+                            else:
+                                self.logicintelimrules.append(i)
+                try: 
+                    connectors = altrea.data.getconnectors(logic)
+                except:
+                    self.logstep(self.message_couldnotgetconnectors.format(self.setlogic_name.upper(), self.logic))
+                else:
+                    if len(connectors) > 0:
+                        self.connectors = []
+                        for i in connectors:
+                            if i[0] != '':
+                                self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
+                            else:
+                                self.logicconnectors.append(i)
+            # else:
+            #     self.logicintelimrules = [
+            #         (self.coimplication_elim_tag, self.coimplication_elim_name),
+            #         (self.coimplication_intro_tag, self.coimplication_intro_name),
+            #         (self.conjunction_elim_tag, self.conjunction_elim_name),
+            #         (self.conjunction_intro_tag, self.conjunction_intro_name),
+            #         (self.disjunction_elim_tag, self.disjunction_elim_name),
+            #         (self.disjunction_intro_tag, self.disjunction_intro_name),
+            #         (self.implication_elim_tag, self.implication_elim_name),
+            #         (self.implication_intro_tag, self.implication_intro_name),
+            #         (self.necessary_elim_tag, self.necessary_elim_name),
+            #         (self.necessary_intro_tag, self.necessary_intro_name),
+            #         (self.negation_elim_tag, self.negation_elim_name),
+            #         (self.negation_intro_tag, self.negation_intro_name),
+            #         (self.possibly_elim_tag, self.possibly_elim_name),
+            #         (self.possibly_intro_tag, self.possibly_intro_name),
+            #     ]
+            #     self.logicconnectors = [
+
+            #     ]
 
     def proposition(self, name: str, latex: str = '', kind: str = 'proposition'):
         """This function creates an object which can be given a true or false value.

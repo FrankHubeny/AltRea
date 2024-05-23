@@ -69,7 +69,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[3][prf.linesindex]", "10"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_nosuchline_1(input_n, expected):
@@ -96,7 +96,7 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_1(input_n, expected):
@@ -122,7 +122,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_2(input_n, expected):
@@ -147,7 +147,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_3(input_n, expected):
@@ -172,7 +172,7 @@ testdata = [
     ("prf.lines[5][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[5][prf.linesindex]", "2"),
     ("prf.lines[5][prf.proofsindex]", ""),
-    ("prf.lines[5][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notreiteratescope),
+    ("prf.lines[5][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_4(input_n, expected):

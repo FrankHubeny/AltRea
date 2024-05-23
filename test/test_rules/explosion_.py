@@ -137,7 +137,7 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.explosion_name),
     ("prf.lines[4][prf.linesindex]", ""),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_string),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_string_2(input_n, expected):
@@ -170,7 +170,7 @@ testdata = [
     ("prf.lines[1][prf.ruleindex]", t.explosion_name),
     ("prf.lines[1][prf.linesindex]", "0"),
     ("prf.lines[1][prf.proofsindex]", ""),
-    ("prf.lines[1][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_nosuchline),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_nosuchline_1(input_n, expected):
@@ -200,7 +200,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.explosion_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_notfalse),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notfalse),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_explosion_linescope_1(input_n, expected):

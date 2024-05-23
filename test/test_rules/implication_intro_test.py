@@ -180,7 +180,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.implication_intro_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.stopped_connector + t.stopped_closemainproof),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_closemainproof),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_notantecedent_2(input_n, expected):

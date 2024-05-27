@@ -137,6 +137,10 @@ class Proof:
     possibly_intro_name = 'Possibly Intro'
     possibly_elim_name = 'Possibly Elim'
     reiterate_name = 'Reiteration'
+    removeaxiom_name = 'Remove Axiom'
+    removedefinition_name = 'Remove Definition'
+    saveaxiom_name = 'Save Axiom'
+    savedefinition_name = 'Save Definition'
 
     """This set of strings provide names for proof structures which need not
     be used with natural deduction.
@@ -162,8 +166,8 @@ class Proof:
     """
     stopped_closemainproof = 'The main proof cannot be closed only completed.'
     log_closemainproof = '{0}: The main proof cannot be closed only completed.'
-    stopped_int = 'Input is an integer rather than an object from the proof.'
-    log_int = '{0}: The input "{1}" is an integer rather than an object from the proof.'
+    # stopped_int = 'Input is an integer rather than an object from the proof.'
+    # log_int = '{0}: The input "{1}" is an integer rather than an object from the proof.'
     stopped_linescope = 'Referenced item is out of scope.'
     log_linescope = '{0}: The line {1} is out of scope.'
     stopped_nodefinitionmatch = 'The referenced line does not match the definition.'
@@ -172,18 +176,22 @@ class Proof:
     log_nogoal = '{0}: The proof needs a goal before a line with the item "{1}" can be added to it.'
     stopped_nologic = 'No logic has been declared for the proof.'
     log_nologic = '{0}: No logic has been declared for the proof.'
+    stopped_logicalreadydefined = 'A specified logic is already being used.'
+    log_logicalreadydefined = '{0}: The logic "{1}" is already being used.'
+    stopped_logicnotfound = 'The desired logic could not be found.'
+    log_logicnotfound = '{0}: The desired logic "{1}" could not be found.'
     stopped_nosavedproof = "The named saved proof does not exist in the logic's database."
     log_nosavedproof = '{0}: The saved proof "{1}" cannot be found in the database.'
     stopped_nosubproof = 'No subproof has yet been started to add an hypothesis to.'
     log_nosubproof = '{0}: There is no subproof to add the hypothesis "{1}" to.'
     stopped_nosubs = 'There were no substitutions entered.'
     log_nosubs = '{0}: There were no substitutions entered for "{1}".'
-    stopped_nosuchaxiom = 'The referenced named is not in the axiom list.'
+    stopped_nosuchaxiom = 'The referenced name is not in the axiom list.'
     log_nosuchaxiom = '{0}: The name "{1}" does not reference an axiom.'
     stopped_nosuchdefinition = 'The referenced name is not in the definition list.'
     log_nosuchdefinition = '{0}: The name "{1}" does not reference a definition.'
-    stopped_nosuchline = 'The referenced line does not exist.'
-    log_nosuchline = '{0}: The line {1} cannot be found in the proof.'
+    stopped_nosuchline = 'The referenced line is not a previous line of the proof.'
+    log_nosuchline = '{0}: The line {1} is not a previous line of the proof.'
     stopped_notantecedent = 'One item is not the antecedent of the other.'
     log_notantecedent = '{0}: Item "{1}" is not the antecedent of the other "{2}".'
     stopped_notcoimplicationelim = 'The refernced items cannot be used in coimplication elimination.'
@@ -213,19 +221,19 @@ class Proof:
     log_notsamestatement = '{0}: The referenced items "{1}" and "{2}" are not the same.'
     stopped_notstrictsubproof = 'The subproof is not strict.'
     log_notstrictsubproof = '{0}: The subproof is "{1}" rather than "{2}".'
+    stopped_notwff = 'The input is not an instance of the Wff object.'
+    log_notwff = '{0}: The input "{1}" is not an instance of the Wff object.'
     stopped_novaluepassed = 'No value was passed to the function.'
     log_novaluepassed = '{0}: No value was passed to the function.'
-    stopped_premisesdontmatch = 'A premise in the saved proof does not match a line in the current proof.'
-    log_premisesdontmatch = '{0}: The premise "{i}" does not match a line from the current proof.'
+    stopped_premisesdontmatch = 'A required premise does not match a line in the current proof.'
+    log_premisesdontmatch = '{0}: The premise "{1}" does not match a line from the current proof.'
     stopped_sidenotselected = 'A side, "left" or "right", must be selected.'
     log_sidenotselected = '{0}: The input "{1}" was used rather than "left" or "right".'
-    stopped_string = 'Input is a string rather than an object from the proof.'
-    log_string = '{0}: The input "{1}" is a string rather than an object from the proof.'
+    # stopped_string = 'Input is a string rather than an object from the proof.'
+    # log_string = '{0}: The input "{1}" is a string rather than an object from the proof.'
 
     """Strings to log messages upon successful completion of tasks."""
     
-    
-
     log_addhypothesis = '{0}: Item "{1}" has been added as an hypothesis to subproof {2}.'
     log_axiom = '{0}: Item "{1}" has been added through the "{2}" axiom.'
     log_coimplication_elim = '{0}: Item "{1}" has been derived from the coimplication "{2}".'
@@ -240,6 +248,7 @@ class Proof:
     log_implication_elim = '{0}: Item "{1}" has been derived from the implication "{2}" and item "{3}".'
     log_implication_intro = '{0}: Item "{1}" has been derived upon closing subproof {2}.'
     log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
+    #log_logicnotfound = '{0}: The desired logic "{1}" could not be found so the default logic "{2}" will be used with "{3}".'
     log_necessary_elim = '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
     log_negation_elim = '{0}: Item "{1}" has been derived from the contradiction between "{2}" on line {3} and "{4}" on line {5}.'
     log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the hypothesis "{2}" of subproof {3} which is now closed.'
@@ -256,8 +265,12 @@ class Proof:
 
     """Messages associated with processes outside of a proof construction."""
 
+    message_axiomremoved = '{0}: The axiom named "{1}" has been removed.'
+    message_axiomsaved = '{0}: The axiom named "{1}" has been saved.'
     message_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
     message_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
+    message_definitionremoved = '{0}: The definition named "{1}" has been removed.'
+    message_definitionsaved = '{0}: The definition named "{1}" has been saved.'
     message_logdisplayed = 'The log will be displayed.'
     message_noproofs = 'There are no saved proofs for logic {0}'
     
@@ -313,16 +326,18 @@ class Proof:
     label_rule = 'Rule'
     label_stoppedstatus = 'Stopped Status'
     label_value = 'Value'
-    #label_notstopped = 'Not Stopped'
 
-    
+    """Convenience strings for the user when entering string values."""
+
+    left = 'left'
+    right = 'right'
 
     """The following tags are used to differentiate between lines of a proof."""
 
-    linetype_savedproof = ' SP'
-    linetype_axiom = ' AX'
-    linetype_definition = ' DEF'
-    linetype_notransformationrule = ' TR'
+    linetype_savedproof = 'SP'
+    linetype_axiom = 'AX'
+    linetype_definition = 'DEF'
+    linetype_transformationrule = 'TR'
     linetype_hypothesis = 'H'
     linetype_premise = 'PR'
 
@@ -353,11 +368,26 @@ class Proof:
         self.derivedgoalswff = []
         self.comment = ''
         self.logic = ''
-        self.logicdescription = self.label_nodescription
-        self.logicdatabase = self.label_nodatabase
+        self.logicdescription = ''
+        self.logicdatabase = ''
         self.logicconnectors = []
-        self.logicaxioms = []
-        self.logicdefinitions = []
+        self.logicaxioms = [
+            ('explosion', 'ConclusionPremises({1}, [{0}, Not({0})])', 'Explosion', 'From a Contradiction Derive Anything'),
+            ('contradiction', 'ConclusionPremises(And({0}, Not({0})), [])', 'Contradiction', 'All Contradictions Are True'),
+            ('dneg intro', 'ConclusionPremises(Not(Not({0})), [{0}])', 'DN Intro', 'Double Negation Introduction'),
+            ('dneg elim', 'ConclusionPremises({0}, [Not(Not({0}))])', 'DN Elim', 'Double Negation Elimination'),
+            ('lem', 'ConclusionPremises(Or({0}, Not({0})), [])', 'LEM', 'Law of Excluded Middle'),
+            ('wlem', 'ConclusionPremises(Or(Not({0}), Not(Not({0}))), [])', 'Weak LEM', 'Weak Law of Excluded Middle'),
+            ('or to not and', 'ConclusionPremises(And(Not({0}), Not({1})), [Or({0}, {1})])', 'De Morgan', 'De Morgan Or To Not-And'),
+            ('not and to or', 'ConclusionPremises(Or({0}, {1}), [And(Not({0}), Not({1}))])', 'De Morgan', 'De Morgan Not-And To Or'),
+            ('and to not or', 'ConclusionPremises(Or(Not({0}), Not({1})), [And({0}, {1})])', 'De Morgan', 'De Morgan And To Not-Or'),
+            ('not or to and', 'ConclusionPremises(And({0}, {1}), [Or(Not({0}), Not({1}))])', 'De Morgan', 'De Morgan Not-Or To And'),
+            ('modus ponens', 'ConclusionPremises({1}, [{0}, Implies({0}, {1})])', 'Modus Ponens', 'Given A and A > B Derive B'),
+        ]
+        self.logicdefinitions = [
+            ('iff intro', 'ConclusionPremises(Iff({0}, {1}), [And(Implies({0}, {1}), Implies({1}, {0}))])', 'Iff Intro', 'Coimplication Introduction'),
+            ('iff elim', 'ConclusionPremises(And(Implies({0}, {1}), Implies({1}, {0})), [Iff({0}, {1})])', 'Iff Elim', 'Coimplication Elimination'),
+        ]
         self.logicintelimrules = [
                 (self.coimplication_elim_tag, self.coimplication_elim_name),
                 (self.coimplication_intro_tag, self.coimplication_intro_name),
@@ -425,6 +455,8 @@ class Proof:
             'Definition': Definition,
             }
         self.log = []
+        self.latexwrittenproof = ''
+        self.writtenproof = ''
         self.showlogging = False
         self.logstep(self.log_proof.format(self.proof_name.upper(), name, displayname, description))
 
@@ -499,16 +531,16 @@ class Proof:
 
         return len(self.goals) > 0
     
-    def checkitemlines(self, caller: str, name: str, comment: str, lineslist: list):
+    def checkitemlines(self, caller: str, displayname: str, comment: str, lineslist: list):
         p = []
         lines = []
         for i in lineslist:
-            if type(i) == int:
-                if self.goodline(i, caller, name, comment):
-                    p.append(self.getstatement(i).tree())
-                    lines.append(i)
-                else:
-                    break
+            #if type(i) == int:
+            if self.goodline(i, caller, displayname, comment):
+                p.append(self.getstatement(i).tree())
+                lines.append(i)
+            else:
+                break
         return p, lines
     
     def checkline(self, line: int):
@@ -519,22 +551,23 @@ class Proof:
         else:
             return False
 
-    def checkpremises(self, caller:str, name: str, comment: str, premiselist: list = [], matchpremiselist: list = []):
+    def checkpremises(self, caller:str, displayname: str, comment: str, premiselist: list = [], matchpremiselist: list = []):
         if len(premiselist) > 0:
             premises = [i.tree() for i in premiselist]
             for i in premises:
                 if not i in matchpremiselist:
                     self.logstep(self.log_premisesdontmatch.format(caller.upper(), i))
-                    self.stopproof(self.stopped_premisesdontmatch, self.blankstatement, name, str(i), '', comment)
+                    self.stopproof(self.stopped_premisesdontmatch, self.blankstatement, displayname, '', '', comment)
+                    break
 
-    def checksubs(self, caller: str, name: str, comment: str, subslist: list):
+    def checksubs(self, caller: str, displayname: str, comment: str, subslist: list):
         s = []
         for i in subslist:
             if len(subslist) == 0:
                 self.logstep(self.log_nosubs.format(caller.upper()), '')
-                self.stopproof(self.stopped_nosubs, self.blankstatement, name, '', '', comment)
+                self.stopproof(self.stopped_nosubs, self.blankstatement, displayname, '', '', comment)
                 break
-            elif self.goodobject(i, caller, name, comment):
+            elif self.goodobject(i, caller, displayname, comment):
                 s.append(i)
             else:
                 break
@@ -566,29 +599,32 @@ class Proof:
 
         return self.lines[line][self.statementindex]
 
-    def goodline(self, line: int, caller: str, name: str, comment: str):
+    def goodline(self, line: int, caller: str, displayname: str, comment: str):
         if type(line) != int:
             self.logstep(self.log_notinteger.format(caller.upper(), line))
-            self.stopproof(self.stopped_notinteger, self.blankstatement, name, str(line), '', comment)
+            self.stopproof(self.stopped_notinteger, self.blankstatement, displayname, str(line), '', comment)
         elif len(self.lines) <= line or line <= 0:
             self.logstep(self.log_nosuchline.format(caller.upper(), line))
-            self.stopproof(self.stopped_nosuchline, self.blankstatement, name, str(line), '', comment)
+            self.stopproof(self.stopped_nosuchline, self.blankstatement, displayname, str(line), '', comment)
             return False
         elif self.lines[line][2] != self.currentproofid:
             self.logstep(self.log_linescope.format(caller.upper(), line))
-            self.stopproof(self.stopped_linescope, self.blankstatement, name, str(line), '', comment)
+            self.stopproof(self.stopped_linescope, self.blankstatement, displayname, str(line), '', comment)
             return False
         else:
             return True
         
-    def goodobject(self, object, caller: str, name: str, comment: str):
-        if type(object) == str:
-            self.logstep(self.log_string.format(caller.upper(), object))
-            self.stopproof(self.stopped_string, self.blankstatement, name, '', '', comment)
-            return False
-        elif type(object) == int:
-            self.logstep(self.log_int.format(caller.upper(), object))
-            self.stopproof(self.stopped_int, self.blankstatement, name, '', '', comment)
+    def goodobject(self, object, caller: str, displayname: str, comment: str):
+        if not isinstance(object, Wff):
+            self.logstep(self.log_notwff.format(caller.upper(), object))
+            self.stopproof(self.stopped_notwff, self.blankstatement, displayname, '', '', comment)
+        # if type(object) == str:
+        #     self.logstep(self.log_string.format(caller.upper(), object))
+        #     self.stopproof(self.stopped_string, self.blankstatement, displayname, '', '', comment)
+        #     return False
+        # elif type(object) == int:
+        #     self.logstep(self.log_int.format(caller.upper(), object))
+        #     self.stopproof(self.stopped_int, self.blankstatement, displayname, '', '', comment)
             return False
         else:
             return True
@@ -769,7 +805,7 @@ class Proof:
         statement = ''.join([str(prooflines[i][self.statementindex]), statement])
         return statement
     
-    def substitute(self, originalstring: str, *subs):
+    def substitute(self, originalstring: str, subs: list, displayname: str):
         """Substitute placeholders for strings representing the desired objects.  Then eval (evaluate) the resulting
         string to return the desired objects.
 
@@ -819,7 +855,7 @@ class Proof:
             return reconstructedobject
         else:
             self.logstep(self.log_nosubs.format(self.substitution_name.upper(), originalstring))
-            self.stopproof(self.stopped_nosubs, self.blankstatement, self.hypothesis_name, '', '', '')
+            self.stopproof(self.stopped_nosubs, self.blankstatement, displayname, '', '', '')
 
     """DISPLAY FUNCTIONS
     
@@ -928,42 +964,6 @@ class Proof:
 
         # Use pandas to display the proof lines.
         df = pandas.DataFrame(newp, index=indx, columns=columns)
-        return df
-    
-    def getgenericaxioms(self, *args, latex: int = 1):
-        """Provide a list of generic axioms which the user may add to the proof."""
-
-        # Get generic axiom data.
-        axioms = altrea.data.getgenericaxioms()
-
-        # Create a copy of the list of tuples as a list of lists to update it.
-        axiomslist = [list(i) for i in axioms]
-
-        # Convert references to proof lines into Wff objects.
-        expandedargs = []
-        for i in args:
-            if type(i) == int:        
-                expandedargs.append(self.getstatement(i))
-            else:
-                expandedargs.append(i)
-
-        # Format the item column by evaluating using the object dictionary.
-        for i in axiomslist:
-            for k in range(len(expandedargs)):
-                i[1] = i[1].replace(''.join(['*', str(k+1), '*']), expandedargs[k].tree())
-            i[1] = eval(i[1], self.objectdictionary)
-
-        # Display in latex or text.
-        for i in axiomslist:
-            if latex == 1:
-                i[1] = ''.join(['$', i[1].latex(), '$'])
-            else:
-                i[1] = str(i[1])  
-
-        # Set up the DataFrame.
-        columns = ['Name', 'Pattern', 'Display', 'Description']
-        index = [i for i in range(len(axiomslist))]
-        df = pandas.DataFrame(axiomslist, index=index, columns=columns)
         return df
     
     def proofdetails(self, proofname: str, *args, latex: int = 1):
@@ -1392,8 +1392,10 @@ class Proof:
                         proofpremises = ''.join([proofpremises, ' and ', str(self.premises[i])])
             proofpremises = ''.join([proofpremises, ' as premises.'])
             print(proofpremises)
+        proofconclusion = ''
         if self.status == self.complete:
-            print(f'    Therefore, {self.goals_string} which completes the proof.')
+            proofconclusion = f'    Therefore, {self.goals_string} which completes the proof.'
+        self.writtenproof = ''.join([proofvariables, '\n', proofpremises, '\n', proofconclusion, '\n'])
 
     """DATABASE FUNCTIONS 
     
@@ -1415,10 +1417,21 @@ class Proof:
         # Look for errors
 
         # If no errors, perform the task
-        pass
+        indexfound = -1
+        for i in range(len(self.logicaxioms)):
+            if self.logicaxioms[i][0] == name:
+                indexfound = i
+                break
+        if indexfound == -1:
+            print(f'Could not find the axiom with the name {name}.')
+        else:
+            self.logicaxioms.pop(i)
+            if self.logicdatabase != self.label_nodatabase:
+                altrea.data.deleteaxiom(self.logic, name)
+                self.logstep(self.message_axiomremoved.format(self.removeaxiom_name.upper(), name))
 
     def removedefinition(self, name: str):
-        """Remove an axiom from the current proof as well as the logic's database if one has been identified.
+        """Remove a definition from the current proof as well as the logic's database if one has been identified.
         This is mainly useful for logics with stored definitions although removing a definition for an
         unidentified logic will force the user not to use the default definition.  That default definition
         will return when a new proof has been started.
@@ -1431,7 +1444,18 @@ class Proof:
         # Look for errors
 
         # If no errors, perform the task
-        pass
+        indexfound = -1
+        for i in range(len(self.logicaxioms)):
+            if self.logicdefinitions[i][0] == name:
+                indexfound = i
+                break
+        if indexfound == -1:
+            print(f'Could not find the axiom with the name {name}.')
+        else:
+            self.logicdefinitions.pop(i)
+            if self.logicdatabase != self.label_nodatabase:
+                altrea.data.deletedefinition(self.logic, name)
+                self.logstep(self.message_definitionremoved.format(self.removedefinition_name.upper(), name))
 
     def replaceproof(self):
         """Delete the proof that already exists with that name and save a proof with the same name 
@@ -1462,9 +1486,24 @@ class Proof:
         """
         
         # Look for errors
+        noerrors = True
+        if type(conclusion) == str:
+            print(f'The conclusion {conclusion} is a string, but it should be a proof object.')
+            noerrors = False
+        else:
+            for i in premise:
+                if type(i) == str and noerrors:
+                    print(f'The premise {i} is a string but should be a proof object.')
+                    noerrors = False
 
         # If no errors, perform the task
-        pass
+        if noerrors:
+            conclusionpremise = ConclusionPremises(conclusion, premise).pattern(self.truefalselist)
+            axiom = [name, conclusionpremise, displayname, description]
+            if self.logic != '':
+                altrea.data.addaxiom(self.logic, name, conclusionpremise, displayname, description)
+            self.logicaxioms.append(axiom)
+            self.logstep(self.message_axiomsaved.format(self.saveaxiom_name.upper(), name))
 
     def savedefinition(self, name: str, displayname: str, description: str, conclusion, premise):
         """Save a definition for the current proof and in the logic's database if one has been identified. 
@@ -1480,9 +1519,24 @@ class Proof:
         """
         
         # Look for errors
+        noerrors = True
+        if type(conclusion) == str:
+            print(f'The conclusion {conclusion} is a string, but it should be a proof object.')
+            noerrors = False
+        else:
+            for i in premise:
+                if type(i) == str and noerrors:
+                    print(f'The premise {i} is a string but should be a proof object.')
+                    noerrors = False
 
         # If no errors, perform the task
-        pass
+        if noerrors:
+            conclusionpremise = ConclusionPremises(conclusion, premise).pattern(self.truefalselist)
+            definition = [name, conclusionpremise, displayname, description]
+            if self.logic != '':
+                altrea.data.adddefinition(self.logic, name, conclusionpremise, displayname, description)
+            self.logicdefinitions.append(definition)
+            self.logstep(self.message_definitionsaved.format(self.savedefinition_name.upper(), name))
 
     def saveproof(self):
         """Save the proof to a database file associated with the logic.
@@ -1572,7 +1626,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(B)
             >>> prf.hypothesis(A, comment='Each call to `hypothesis` creates a sub proof.')
             >>> prf.hypothesis(C, comment='Now I have a sub sub proof.')
@@ -1597,7 +1651,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(B, comment='There is a difference between A and "A"')
             >>> prf.hypothesis('A')
             >>> showproof(prFalsehood, latex=0)
@@ -1615,7 +1669,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> #prf.goal(B, comment='There is a difference between A and "A"')
             >>> prf.hypothesis(A)
             >>> showproof(prFalsehood, latex=0)
@@ -1680,16 +1734,19 @@ class Proof:
 
         # Look for errors: Check the substitution values.
         if self.canproceed():
-            subs = self.checksubs(self.useproof_name.upper(), name, comment, subslist)
+            subs = self.checksubs(self.axiom_name.upper(), displayname, comment, subslist)
 
         # Look for errors: Check lines entered from the proof.
         if self.canproceed():
-            matchpremiselist, lineslist = self.checkitemlines(self.useproof_name.upper(), name, comment, premiselist)
+            matchpremiselist, lineslist = self.checkitemlines(self.axiom_name.upper(), displayname, comment, premiselist)
 
-        # Look for errors: Check that all premises from the saved proof are covered by lines in the currrent proof.
+        # Look for errors: Can substitutions be made
         if self.canproceed():
-            conclusionpremises = self.substitute(pattern, *subs)
-            self.checkpremises(self.useproof_name.upper(), name, comment, conclusionpremises.premises, matchpremiselist)
+            conclusionpremises = self.substitute(pattern, subs, displayname)
+
+        # Look for errors: Do premises match identified lines in the current proof.
+        if self.canproceed():
+            self.checkpremises(self.axiom_name.upper(), displayname, comment, conclusionpremises.premises, matchpremiselist)
 
         # If no errors, perform task.
         if self.canproceed():
@@ -1729,7 +1786,7 @@ class Proof:
             >>> p = Proof()
             >>> A = Wff('A')
             >>> B = Wff('B')
-            >>> p.setlogic('C')
+            >>> p.setlogic()
             >>> p.goal(B)
             >>> p.premise(Iff(A, B))
             >>> p.premise(A)
@@ -1777,7 +1834,7 @@ class Proof:
                         self.reflines(first, second), 
                         '', 
                         newcomment,
-                        self.linetype_notransformationrule
+                        self.linetype_transformationrule
                     ]
                 )
                 self.appendproofdata(firststatement.right, self.coimplication_elim_tag)
@@ -1793,7 +1850,7 @@ class Proof:
                         self.reflines(first, second), 
                         '', 
                         newcomment,
-                        self.linetype_notransformationrule
+                        self.linetype_transformationrule
                     ]
                 ) 
                 self.appendproofdata(secondstatement.right, self.coimplication_elim_tag)
@@ -1815,7 +1872,7 @@ class Proof:
             >>> p = Proof()
             >>> A = Wff('A')
             >>> B = Wff('B')
-            >>> p.setlogic('C')
+            >>> p.setlogic()
             >>> p.goal(Iff(A, B))
             >>> p.premise(Implies(A, B))
             >>> p.premise(Implies(B, A))
@@ -1866,7 +1923,7 @@ class Proof:
                     self.reflines(first, second), 
                     '',
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )   
             self.appendproofdata(newstatement, self.coimplication_intro_tag)
@@ -1904,7 +1961,7 @@ class Proof:
             >>> prf = Proof()
             >>> A = Wff('A')
             >>> B = Wff('B')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(Iff(And(A, B), And(B, A)))
             >>> prf.hypothesis(And(A, B), comment="Don't use `addhypothesis` to start the subproof.")
             >>> prf.conjunction_elim(1, comment='The left side is the default.')
@@ -1968,7 +2025,7 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )   
             self.appendproofdata(conjunct, self.conjunction_elim_tag)
@@ -1997,7 +2054,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(And(A, B))
             >>> prf.premise(A)
             >>> prf.premise(B)
@@ -2018,7 +2075,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(And(A, A))
             >>> prf.premise(A)
             >>> prf.conjunction_intro(1, 1)
@@ -2057,12 +2114,12 @@ class Proof:
                     self.reflines(first, second), 
                     '',
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             ) 
             self.appendproofdata(andstatement, self.conjunction_intro_tag)
 
-    def definition(self, name: str, premiselist: list, subslist: list, comment: str = ''):
+    def definition(self, name: str, subslist: list, premiselist: list, comment: str = ''):
         """Various axioms may be invoked here such as the law of excluded middle.
         
         Parameters:
@@ -2094,16 +2151,19 @@ class Proof:
                 
         # Look for errors: Check the substitution values.
         if self.canproceed():
-            subs = self.checksubs(self.definition_name.upper(), name, comment, subslist)
+            subs = self.checksubs(self.definition_name.upper(), displayname, comment, subslist)
 
         # Look for errors: Check lines entered from the proof.
         if self.canproceed():
-            matchpremiselist, lineslist = self.checkitemlines(self.definition_name.upper(), name, comment, premiselist)
+            matchpremiselist, lineslist = self.checkitemlines(self.definition_name.upper(), displayname, comment, premiselist)
 
-        # Look for errors: Check that all premises from the saved proof are covered by lines in the currrent proof.
+        # Look for errors: Try to make the requested substitutions.
         if self.canproceed():
-            conclusionpremises = self.substitute(definition, *subs)
-            self.checkpremises(self.definition_name.upper(), name, comment, conclusionpremises.premises, matchpremiselist) 
+            conclusionpremises = self.substitute(definition, subs, displayname)
+
+        # Look for errors: Check that the premises match the identified proof lines.
+        if self.canproceed():
+            self.checkpremises(self.definition_name.upper(), displayname, comment, conclusionpremises.premises, matchpremiselist) 
 
         # If no errors, perform task.
         if self.canproceed():
@@ -2146,7 +2206,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(A)
             >>> prf.premise(Or(A, A))
             >>> prf.hypothesis(A)
@@ -2172,7 +2232,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(A)
             >>> prf.premise(Implies(B, A))
             >>> prf.premise(Implies(C, A))
@@ -2242,7 +2302,7 @@ class Proof:
                     self.reflines(disjunction_line, left_implication_line, right_implication_line),
                     '',
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )    
             self.appendproofdata(right_implication.left, self.disjunction_elim_tag)
@@ -2273,7 +2333,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(Or(A, B))
             >>> prf.premise(A)
             >>> prf.disjunction_intro(1, right=B)
@@ -2292,7 +2352,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(Or(A, B))
             >>> prf.premise(B)
             >>> prf.disjunction_intro(1, left=A)
@@ -2337,7 +2397,7 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )    
             self.appendproofdata(disjunction, self.disjunction_intro_tag)
@@ -2381,7 +2441,7 @@ class Proof:
             >>> from altrea.display import showproof
             >>> prf = Proof()
             >>> A = Wff('A')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(A)
             >>> prf.premise(A)
             >>> showproof(prFalsehood, latex=0)
@@ -2393,7 +2453,7 @@ class Proof:
         # Look for errors
         if self.canproceed():
             if self.goodobject(goal, self.goal_name, self.goal_name, comment):
-                if self.logic == '':
+                if self.logicdatabase == '':
                     self.logstep(self.log_nologic.format(self.goal_name.upper()))
                     self.stopproof(self.stopped_nologic, self.blankstatement, self.goal_name, 0, 0, comment)
 
@@ -2480,7 +2540,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> prf = Proof()
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(B, comment='Modus Ponens')
             >>> prf.premise(A)
             >>> prf.premise(Implies(A, B))
@@ -2544,7 +2604,7 @@ class Proof:
                     self.reflines(first, second), 
                     '', 
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )
             self.appendproofdata(statement, self.implication_elim_tag)
@@ -2568,7 +2628,7 @@ class Proof:
             >>> from altrea.display import showproof, showlines
             >>> A = Wff('A')
             >>> prf = Proof()
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(Implies(A, A), comment='Reflexivity of Implication')
             >>> prf.hypothesis(A)
             >>> prf.implication_intro()
@@ -2593,7 +2653,7 @@ class Proof:
             >>> prf = Proof()
             >>> A = Wff('A')
             >>> B = Wff('B')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(Implies(A, Implies(B, A)), comment='Axiom of Conditioned Repetition')
             >>> prf.hypothesis(A)
             >>> prf.hypothesis(B)
@@ -2620,7 +2680,7 @@ class Proof:
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof, fitchnotation
             >>> prf = Proof()
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> C = Wff('C')
@@ -2686,7 +2746,7 @@ class Proof:
                     '', 
                     self.refproof(proofid), 
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )   
             self.appendproofdata(implication, self.implication_intro_tag)     
@@ -2728,7 +2788,7 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )      
             self.appendproofdata(statement.truefalse, self.necessary_elim_tag)  
@@ -2766,7 +2826,7 @@ class Proof:
             >>> from altrea.display import showproof
             >>> prf = Proof()
             >>> A = Wff('A')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(And(A, A))
             >>> prf.premise(A)
             >>> prf.premise(Not(A))
@@ -2807,7 +2867,7 @@ class Proof:
                     self.reflines(first, second), 
                     '',
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )      
             self.appendproofdata(self.false_name, self.negation_elim_tag)    
@@ -2828,7 +2888,7 @@ class Proof:
             >>> A = Wff('A')
             >>> B = Wff('B')
             >>> prf = Proof()
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(Not(A), comment='Modus Tollens')
             >>> prf.premise(Implies(A, B))
             >>> prf.premise(Not(B))
@@ -2892,7 +2952,7 @@ class Proof:
                     '', 
                     self.refproof(proofid), 
                     newcomment,
-                    self.linetype_notransformationrule
+                    self.linetype_transformationrule
                 ]
             )  
             self.appendproofdata(negation, self.negation_intro_tag)
@@ -2936,7 +2996,7 @@ class Proof:
             )
             self.appendproofdata(premise, self.premise_tag)
 
-    def proposition(self, name: str, latex: str = '', kind: str = 'proposition'):
+    def proposition(self, name: str, latex: str = '', kind: str = 'proposition', comment: str = ''):
         """This function creates an object which can be given a true or false value.
         The function puts the object in a dictionary that is used when a string
         representation saved into the database or a file is read by the user
@@ -2975,7 +3035,7 @@ class Proof:
             >>> from altrea.display import showproof, showlines
             >>> prf = Proof()
             >>> A = Wff('A')
-            >>> prf.setlogic('C')
+            >>> prf.setlogic()
             >>> prf.goal(Not(Not(A)))
             >>> prf.premise(A)
             >>> prf.hypothesis(Not(A))
@@ -3027,7 +3087,7 @@ class Proof:
             )  
             self.appendproofdata(statement, self.reiterate_tag)
 
-    def setlogic(self, logic: str = ''):
+    def setlogic(self, logic: str = '', comment: str = ''):
         """Sets the logic for the proof.
         
         Parameters:
@@ -3054,55 +3114,64 @@ class Proof:
             """
         
         # Look for errors
+        if self.canproceed():
+            database = self.label_nodatabase
+            description = self.label_nodescription
+            if self.logic != '':
+                self.logstep(self.log_logicalreadydefined.format(self.setlogic_name.upper(), self.logic))
+                self.stopproof(self.stopped_logicalreadydefined, self.blankstatement, self.setlogic_name, '', '', comment)
+            else:
+                self.logic = logic
+                if logic != '':
+                #     self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
+                #     self.proofdata[0].append(logic)
+                # else:
+                    try:
+                        database, description = altrea.data.getlogic(logic)
+                    except TypeError:
+                        self.logstep(self.log_logicnotfound.format(self.setlogic_name.upper(), logic))
+                        self.stopproof(self.stopped_logicnotfound, self.blankstatement, self.setlogic_name, '', '', comment)
 
         # If no errors, perform the task
-        self.logic = logic
-        if logic == '':
-            self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
-            self.proofdata[0].append(logic)
-        else:
-            try:
-                database, description = altrea.data.getlogic(logic)
-            except TypeError:
-                database = self.label_nodatabase
-                description = self.label_nodescription
+        if self.canproceed():
             self.logicdatabase = database
             self.logicdescription = description
-            self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
             self.proofdata[0].append(logic)
-            try:
-                self.logicaxioms = altrea.data.getaxioms(logic)
-            except TypeError:
-                self.logicaxioms = []
-            try:
-                self.logicdefinitions = altrea.data.getdefinitions(logic)
-            except TypeError:
-                self.logicaxioms = []
-            if database != 'No Database':
+            self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
+            if self.logic != '':
                 try:
-                    intelimrules = altrea.data.getintelimrules(logic)
-                except:
-                    self.logstep(self.message_couldnotgettransformationrules.format(self.setlogic_name.upper(), self.logic))
-                else:
-                    if len(intelimrules) > 0:
-                        self.logicintelimrules = []
-                        for i in intelimrules:
-                            if i[0] != '':
-                                self.logicintelimrules.append((i[0], eval(i[1])))
-                            else:
-                                self.logicintelimrules.append(i)
-                try: 
-                    connectors = altrea.data.getconnectors(logic)
-                except:
-                    self.logstep(self.message_couldnotgetconnectors.format(self.setlogic_name.upper(), self.logic))
-                else:
-                    if len(connectors) > 0:
-                        self.connectors = []
-                        for i in connectors:
-                            if i[0] != '':
-                                self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
-                            else:
-                                self.logicconnectors.append(i)
+                    self.logicaxioms = altrea.data.getaxioms(logic)
+                except TypeError:
+                    self.logicaxioms = []
+                try:
+                    self.logicdefinitions = altrea.data.getdefinitions(logic)
+                except TypeError:
+                    self.logicaxioms = []
+                if database != 'No Database':
+                    try:
+                        intelimrules = altrea.data.getintelimrules(logic)
+                    except:
+                        self.logstep(self.message_couldnotgettransformationrules.format(self.setlogic_name.upper(), self.logic))
+                    else:
+                        if len(intelimrules) > 0:
+                            self.logicintelimrules = []
+                            for i in intelimrules:
+                                if i[0] != '':
+                                    self.logicintelimrules.append((i[0], eval(i[1])))
+                                else:
+                                    self.logicintelimrules.append(i)
+                    try: 
+                        connectors = altrea.data.getconnectors(logic)
+                    except:
+                        self.logstep(self.message_couldnotgetconnectors.format(self.setlogic_name.upper(), self.logic))
+                    else:
+                        if len(connectors) > 0:
+                            self.connectors = []
+                            for i in connectors:
+                                if i[0] != '':
+                                    self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
+                                else:
+                                    self.logicconnectors.append(i)
 
     def truth(self, name: str, latex: str = ''):
         newtruth = Truth(name, latex)
@@ -3141,16 +3210,19 @@ class Proof:
             
         # Look for errors: Check the substitution values.
         if self.canproceed():
-            subs = self.checksubs(self.useproof_name.upper(), name, comment, subslist)
+            subs = self.checksubs(self.useproof_name.upper(), displayname, comment, subslist)
 
         # Look for errors: Check lines entered from the proof.
         if self.canproceed():
-            matchpremiselist, lineslist = self.checkitemlines(self.useproof_name.upper(), name, comment, premiselist)
+            matchpremiselist, lineslist = self.checkitemlines(self.useproof_name.upper(), displayname, comment, premiselist)
 
-        # Look for errors: Check that all premises from the saved proof are covered by lines in the currrent proof.
+        # Look for errors: Check if substitutions can be made.
         if self.canproceed():
-            conclusionpremises = self.substitute(pattern, *subs)
-            self.checkpremises(self.useproof_name.upper(), name, comment, conclusionpremises.premises, matchpremiselist)
+            conclusionpremises = self.substitute(pattern, subs, displayname)
+
+        # Look for errors: Check if premises match identified lines in the current proof.
+        if self.canproceed():
+            self.checkpremises(self.useproof_name.upper(), displayname, comment, conclusionpremises.premises, matchpremiselist)
 
         # If no errors, perform task.
         if self.canproceed():

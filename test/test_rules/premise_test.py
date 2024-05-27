@@ -53,7 +53,7 @@ def test_premise_clean_1(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
     prf.premise(Not(A))
@@ -61,7 +61,7 @@ def test_premise_clean_1(input_n, expected):
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                                stopped_string
+                                stopped_notwff
 ------------------------------------------------------------------------------"""
 
 testdata = [
@@ -73,17 +73,17 @@ testdata = [
     ("prf.lines[1][prf.ruleindex]", t.premise_name),
     ("prf.lines[1][prf.linesindex]", ""),
     ("prf.lines[1][prf.proofsindex]", ""),
-    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notwff),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_premise_string_1(input_n, expected):
+def test_premise_notwff_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise('A') 
     assert eval(input_n) == expected
@@ -112,7 +112,7 @@ def test_premise_nogoal_1(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     # prf.goal(Not(Not(A)))
     prf.premise(A) 
     assert eval(input_n) == expected

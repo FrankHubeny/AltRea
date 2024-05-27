@@ -45,7 +45,7 @@ def test_disjunction_intro_clean_1(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Or(A, B))
     prf.premise(A)
     prf.disjunction_intro(1, right=B)
@@ -83,7 +83,7 @@ def test_disjunction_intro_clean_2(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Or(A, B))
     prf.premise(B)
     prf.disjunction_intro(1, left=A)
@@ -91,7 +91,7 @@ def test_disjunction_intro_clean_2(input_n, expected):
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                                stopped_string
+                                stopped_notwff
 ------------------------------------------------------------------------------"""
 
 # Stop if the left input value is a string.
@@ -104,17 +104,17 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notwff),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_disjunction_intro_string_1(input_n, expected):
+def test_disjunction_intro_notwff_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Or(A, B))
     prf.premise(B)
     prf.disjunction_intro(1, left='A')
@@ -123,7 +123,7 @@ def test_disjunction_intro_string_1(input_n, expected):
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                                stopped_string
+                                stopped_notwff
 ------------------------------------------------------------------------------"""
 
 # Stop if the right input value is a string.
@@ -134,19 +134,19 @@ testdata = [
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
     ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
-    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notwff),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_disjunction_intro_string_2(input_n, expected):
+def test_disjunction_intro_notwff_2(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Or(A, B))
     prf.premise(B)
     prf.disjunction_intro(1, right='A')
@@ -177,7 +177,7 @@ def test_disjunction_intro_nosuchline_1(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Or(A, B))
     prf.premise(A)
     prf.disjunction_intro(-2, right=B)
@@ -207,7 +207,7 @@ def test_disjunction_intro_linescope_1(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Or(A, B))
     prf.hypothesis(A)
     prf.implication_intro()
@@ -240,7 +240,7 @@ def test_disjunction_intro_string_2(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Or(A, B))
     prf.premise(B)
     prf.disjunction_intro(1)

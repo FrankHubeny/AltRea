@@ -49,7 +49,7 @@ testdata = [
 def test_reiterate_clean_1(input_n, expected):
     prf = Proof()
     A = Wff('A')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
     prf.hypothesis(Not(A))
@@ -75,7 +75,7 @@ testdata = [
 def test_reiterate_nosuchline_1(input_n, expected):
     prf = Proof()
     A = Wff('A')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
     prf.hypothesis(Not(A))
@@ -102,7 +102,7 @@ testdata = [
 def test_reiterate_notreiteratescope_1(input_n, expected):
     prf = Proof()
     A = Wff('A')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.implication_intro()
@@ -128,7 +128,7 @@ testdata = [
 def test_reiterate_notreiteratescope_2(input_n, expected):
     prf = Proof()
     A = Wff('A')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.reiterate(1)
@@ -153,7 +153,7 @@ testdata = [
 def test_reiterate_notreiteratescope_3(input_n, expected):
     prf = Proof()
     A = Wff('A')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
     prf.reiterate(1)
@@ -180,7 +180,7 @@ def test_reiterate_notreiteratescope_4(input_n, expected):
     A = Wff('A')
     B = Wff('B')
     C = Wff('C')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.hypothesis(B)

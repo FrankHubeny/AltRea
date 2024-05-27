@@ -5,6 +5,8 @@ import sqlite3
 from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Falsehood, Truth, ConclusionPremises
 
 metadata = 'altrea/data/metadata.db'
+datafolder = 'altrea/data/'
+#proofsfolder = 'altrea/proofs/'
 
 def getreservedwords():
     return ['No Database', '']
@@ -87,28 +89,18 @@ def createmetadatatables():
                 )
         print(f'The axioms table has been created.')
 
-        # # Create the generic axioms table in the metadata database.
-        # c.execute("""CREATE TABLE genericaxioms (
-        #         name        TEXT PRIMARY KEY,
-        #         pattern     TEXT NOT NULL,
-        #         displayname TEXT NOT NULL,
-        #         description TEXT NOT NULL
-        #         )"""
-        #         )
-        # print(f'The generic axioms table has been created.')
-
-        # # Load the generic axioms table.
-        # genericaxioms = [
-        #     ('dneg intro', 'Implies(*1*, Not(Not(*1*)))', 'dneg intro', 'Double Negation Intro'),
-        #     ('dneg elim', 'Implies(Not(Not(*1*)), *1*)', 'dneg elim', 'Double Negation Elim'),
-        #     ('lem', 'Or(*1*, Not(*1*))', 'lem', 'Law of Excluded Middle'),
-        #     ('wlem', 'Or(Not(*1*), Not(Not(*1*)))', 'wlem', 'Weak Law of Excluded Middle'),
-        #     ('contradiction', 'And(*1*, Not(*1*))', 'Contradiction', 'All contradictions are true'),
-        #     ('explosion', 'Implies(And(*1*, Not(*1*)), *2*)', 'Explosion', 'From a contradiction derive anything'),
-        # ]
-        # statement = 'INSERT INTO genericaxioms (name, pattern, displayname, description) VALUES (?, ?, ?, ?)'
-        # c.executemany(statement, genericaxioms)
-        # print(f'The generic axiom table has been loaded with initial axioms.')
+        # Create the bibliography table in the metadata database.
+        c.execute("""CREATE TABLE bibliography (
+                logic       TEXT NOT NULL,
+                name        TEXT NOT NULL,
+                pattern     TEXT NOT NULL,
+                displayname TEXT NOT NULL,
+                description TEXT NOT NULL,
+                UNIQUE(logic, name) ON CONFLICT REPLACE,
+                FOREIGN KEY (logic) REFERENCES logics(logic)
+                )"""
+                )
+        print(f'The bibliography table has been created.')
 
     # Commit and close the connection.
     connection.commit()
@@ -199,10 +191,12 @@ def addlogic(logic: str,
     c = connection.cursor()
     try:
         c.execute("""CREATE TABLE proofs (
-                    name        TEXT PRIMARY KEY,
-                    pattern     TEXT NOT NULL,
-                    displayname TEXT NULL,
-                    description TEXT NULL
+                    name         TEXT PRIMARY KEY,
+                    pattern      TEXT NOT NULL,
+                    displayname  TEXT NULL,
+                    description  TEXT NULL,
+                    textversion  TEXT NULL,
+                    latexversion TEXT NULL
                     )"""
                 )
         print(f'The proofs table has been created in {database}.')
@@ -343,21 +337,6 @@ def getaxioms(logic: str):
         return rows
     except TypeError:
         return ()
-    
-def getgenericaxioms():
-    """Retrieve some axioms one might choose to use in one's logic."""
-
-    try:
-        connection = sqlite3.connect(metadata)
-        c = connection.cursor()
-        statement = 'SELECT name, pattern, displayname, description FROM genericaxioms'
-        c.execute(statement)
-        rows = c.fetchall()
-        connection.commit()
-        connection.close()
-        return rows
-    except TypeError:
-        return ()
 
 def getdefinedlogics():
     connection = sqlite3.connect(metadata)
@@ -441,7 +420,16 @@ def addaxiom(logic: str, name: str, pattern: str, displayname: str, description:
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
     row = (logic, name, pattern, displayname, description)
-    statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
+    statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+    c.execute(statement, row)
+    connection.commit()
+    connection.close()
+
+def adddefinition(logic: str, name: str, pattern: str, displayname: str, description: str):
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    row = (logic, name, pattern, displayname, description)
+    statement = "INSERT INTO definitions (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
     c.execute(statement, row)
     connection.commit()
     connection.close()
@@ -454,34 +442,42 @@ def deleteaxiom(logic: str, name: str):
     connection.commit()
     connection.close()
 
-def addgenericaxiom(name: str, pattern: str, displayname: str, description: str):
+def deletedefinition(logic: str, name: str):
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    row = (name, pattern, displayname, description)
-    statement = "INSERT INTO genericaxioms (name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
-    c.execute(statement, row)
+    statement = 'DELETE FROM definitions WHERE logic=? and name=?'
+    c.execute(statement, (logic, name,))
     connection.commit()
     connection.close()
 
-def usegenericaxiom(logic: str, name: str):
-    connection = sqlite3.connect(metadata)
-    c = connection.cursor()
-    statement = 'SELECT pattern, displayname, description FROM genericaxioms where name='
-    c.execute(statement, (name,))
-    pattern, displayname, description = c.fetchone()
-    row = (logic, name, pattern, displayname, description)
-    statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
-    c.execute(statement, row)
-    connection.commit()
-    connection.close()
+# def addgenericaxiom(name: str, pattern: str, displayname: str, description: str):
+#     connection = sqlite3.connect(metadata)
+#     c = connection.cursor()
+#     row = (name, pattern, displayname, description)
+#     statement = "INSERT INTO genericaxioms (name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
+#     c.execute(statement, row)
+#     connection.commit()
+#     connection.close()
 
-def deletegenericaxiom(name: str):
-    connection = sqlite3.connect(metadata)
-    c = connection.cursor()
-    statement = 'DELETE FROM genericaxioms WHERE name=?'
-    c.execute(statement, (name,))
-    connection.commit()
-    connection.close()
+# def usegenericaxiom(logic: str, name: str):
+#     connection = sqlite3.connect(metadata)
+#     c = connection.cursor()
+#     statement = 'SELECT pattern, displayname, description FROM genericaxioms where name='
+#     c.execute(statement, (name,))
+#     pattern, displayname, description = c.fetchone()
+#     row = (logic, name, pattern, displayname, description)
+#     statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
+#     c.execute(statement, row)
+#     connection.commit()
+#     connection.close()
+
+# def deletegenericaxiom(name: str):
+#     connection = sqlite3.connect(metadata)
+#     c = connection.cursor()
+#     statement = 'DELETE FROM genericaxioms WHERE name=?'
+#     c.execute(statement, (name,))
+#     connection.commit()
+#     connection.close()
 
 def addintelimrule(logic: str, name: str, description: str):
     """Add a single operator to a logic."""
@@ -618,3 +614,14 @@ def testlogic(logic: str):
             else:
                 for i in proofs:
                     print(i)
+
+def saveprooftofile(filename: str, proof: str):
+    import os
+    #fullfilename = ''.join([proofsfolder, filename, '.txt'])
+    if os.path.exists(filename):
+        print(f'The file at {filename} already exists.')
+    else:
+        f = open(filename, 'w')
+        f.write(proof)
+        f.close()
+        print(f'The file named "{filename}" has been written.')

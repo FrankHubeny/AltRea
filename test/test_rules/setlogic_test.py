@@ -33,7 +33,7 @@ testdata = [
 def test_setlogic_clean_1(input_n, expected):
     prf = Proof()
     A = Wff('A')
-    prf.setlogic('C')
+    prf.setlogic()
     assert eval(input_n) == expected
 
     

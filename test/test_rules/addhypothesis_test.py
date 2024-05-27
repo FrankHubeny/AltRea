@@ -53,7 +53,7 @@ def test_addhypothesis_clean_1(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(B)
     prf.hypothesis(A, comment='Each call to `hypothesis` creates a sub proof.')
     prf.hypothesis(C, comment='Now I have a sub sub proof.')
@@ -62,7 +62,7 @@ def test_addhypothesis_clean_1(input_n, expected):
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                                stopped_string
+                                stopped_notwff
 ------------------------------------------------------------------------------"""
 
 testdata = [
@@ -74,17 +74,17 @@ testdata = [
     ("prf.lines[1][prf.ruleindex]", t.hypothesis_name),
     ("prf.lines[1][prf.linesindex]", ""),
     ("prf.lines[1][prf.proofsindex]", ""),
-    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notwff),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_addhypothesis_string_1(input_n, expected):
+def test_addhypothesis_notwff_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis(A)  
     prf.addhypothesis('~A')
@@ -115,39 +115,12 @@ def test_addhypothesis_nosubproof_1(input_n, expected):
     C = prf.proposition('C')
     D = prf.proposition('D')
     E = prf.proposition('E')
-    prf.setlogic('C')
+    prf.setlogic()
     prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     # prf.hypothesis(A)  
     prf.addhypothesis(Not(A))
     
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                                stopped_string
-------------------------------------------------------------------------------"""
 
-testdata = [
-    ('len(prf.lines)', 3),
-    #
-    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
-    ("prf.lines[1][prf.levelindex]", 1),
-    ("prf.lines[1][prf.proofidindex]", 1),
-    ("prf.lines[1][prf.ruleindex]", t.hypothesis_name),
-    ("prf.lines[1][prf.linesindex]", ""),
-    ("prf.lines[1][prf.proofsindex]", ""),
-    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_string),
-]
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_addhypothesis_string_1(input_n, expected):
-    prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
-    prf.setlogic('C')
-    prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
-    prf.hypothesis(A)  
-    prf.addhypothesis('~A')
     
 
     

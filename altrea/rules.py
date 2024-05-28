@@ -192,6 +192,8 @@ class Proof:
     log_nosuchdefinition = '{0}: The name "{1}" does not reference a definition.'
     stopped_nosuchline = 'The referenced line is not a previous line of the proof.'
     log_nosuchline = '{0}: The line {1} is not a previous line of the proof.'
+    stopped_nosuchproof = 'The referenced name is not in the saved proof database.'
+    log_nosuchproof = '{0}: The name "{1}" does not reference a saved proof.'
     stopped_notantecedent = 'One item is not the antecedent of the other.'
     log_notantecedent = '{0}: Item "{1}" is not the antecedent of the other "{2}".'
     stopped_notcoimplicationelim = 'The refernced items cannot be used in coimplication elimination.'
@@ -254,6 +256,7 @@ class Proof:
     log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the hypothesis "{2}" of subproof {3} which is now closed.'
     log_premise = '{0}: Item "{1}" has been added to the premises.'
     log_proof = '{0}: A proof named "{1}" or "{2}" with description "{3}" has been started.'
+    log_proofhasnoname = '{0}: The proof either has an empty name "{1}" or empty displayname "{2}" or empty description "{3}".'
     log_proposition = '{0}: The letter "{1}" for a generic well-formed formula has been defined with {2} so far for this proof.'
     log_reiterate = '{0}: Item "{1}" on line {2} has been reiterated into subproof {3}.'
     log_complete = 'The proof is complete.'
@@ -267,6 +270,8 @@ class Proof:
 
     message_axiomremoved = '{0}: The axiom named "{1}" has been removed.'
     message_axiomsaved = '{0}: The axiom named "{1}" has been saved.'
+    message_badpremise = 'The premise "{0}" is not an instance of altrea.boolean.Wff.'
+    message_badconclusion = 'The conclusion "{0}" is not an instance of altrea.boolean.Wff.'
     message_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
     message_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
     message_definitionremoved = '{0}: The definition named "{1}" has been removed.'
@@ -312,6 +317,7 @@ class Proof:
     label_nogoals = 'No Goals'
     label_nointelimrules = 'No IntElim Rules'
     label_nopremises = 'No Premises'
+    label_nosavedproofs = 'No Saved Proofs'
     label_notstopped = 'Not Stopped'
     label_premise = 'Premise'
     label_premises = 'Premises'
@@ -324,6 +330,7 @@ class Proof:
     label_proofstatus = 'Proof Status'
     label_right = 'right'
     label_rule = 'Rule'
+    label_savedproofs = 'Saved Proofs'
     label_stoppedstatus = 'Stopped Status'
     label_value = 'Value'
 
@@ -387,6 +394,8 @@ class Proof:
         self.logicdefinitions = [
             ('iff intro', 'ConclusionPremises(Iff({0}, {1}), [And(Implies({0}, {1}), Implies({1}, {0}))])', 'Iff Intro', 'Coimplication Introduction'),
             ('iff elim', 'ConclusionPremises(And(Implies({0}, {1}), Implies({1}, {0})), [Iff({0}, {1})])', 'Iff Elim', 'Coimplication Elimination'),
+        ]
+        self.logicsavedproofs = [        
         ]
         self.logicintelimrules = [
                 (self.coimplication_elim_tag, self.coimplication_elim_name),
@@ -883,6 +892,14 @@ class Proof:
         else:
             print('{: >26}'.format(self.label_definitions))
             for i in self.logicdefinitions:
+                print('{: <20} {: <50}'.format(i[0], i[1]))
+
+        # Display saved proofs
+        if len(self.logicsavedproofs) == 0:
+            print('{: >28}'.format(self.label_nosavedproofs))
+        else:
+            print('{: >28}'.format(self.label_savedproofs))
+            for i in self.logicsavedproofs:
                 print('{: <20} {: <50}'.format(i[0], i[1]))
 
     def displaylog(self):
@@ -1487,14 +1504,15 @@ class Proof:
         
         # Look for errors
         noerrors = True
-        if type(conclusion) == str:
-            print(f'The conclusion {conclusion} is a string, but it should be a proof object.')
-            noerrors = False
-        else:
+        if isinstance(conclusion, altrea.boolean.Wff):
             for i in premise:
-                if type(i) == str and noerrors:
-                    print(f'The premise {i} is a string but should be a proof object.')
+                if not isinstance(i, altrea.boolean.Wff):
+                    print(self.message_badpremise.format(i))
                     noerrors = False
+                    break
+        else:
+            print(self.message_badconclusion.format(conclusion))
+            noerrors = False
 
         # If no errors, perform the task
         if noerrors:
@@ -1520,14 +1538,15 @@ class Proof:
         
         # Look for errors
         noerrors = True
-        if type(conclusion) == str:
-            print(f'The conclusion {conclusion} is a string, but it should be a proof object.')
-            noerrors = False
-        else:
+        if isinstance(conclusion, altrea.boolean.Wff):
             for i in premise:
-                if type(i) == str and noerrors:
-                    print(f'The premise {i} is a string but should be a proof object.')
+                if not isinstance(i, altrea.boolean.Wff):
+                    print(self.message_badpremise.format(i))
                     noerrors = False
+                    break
+        else:
+            print(self.message_badconclusion.format(conclusion))
+            noerrors = False
 
         # If no errors, perform the task
         if noerrors:
@@ -1591,8 +1610,11 @@ class Proof:
         """
 
         if self.completedproof():  
-            altrea.data.addproof(self.proofdatafinal)
-            self.logstep(self.log_proofsaved.format(self.saveproof_name.upper(), self.name, self.logicdatabase, self.logic))
+            if self.name == '' or self.displayname == '' or self.description == '':
+                self.logstep(self.log_proofhasnoname.format(self.saveproof_name.upper(), self.name, self.displayname, self.description))
+            else:
+                altrea.data.addproof(self.proofdatafinal)
+                self.logstep(self.log_proofsaved.format(self.saveproof_name.upper(), self.name, self.logicdatabase, self.logic))
         else:
             print(self.stopped_notcomplete)
 
@@ -3115,17 +3137,14 @@ class Proof:
         
         # Look for errors
         if self.canproceed():
-            database = self.label_nodatabase
-            description = self.label_nodescription
             if self.logic != '':
                 self.logstep(self.log_logicalreadydefined.format(self.setlogic_name.upper(), self.logic))
                 self.stopproof(self.stopped_logicalreadydefined, self.blankstatement, self.setlogic_name, '', '', comment)
             else:
+                database = self.label_nodatabase
+                description = self.label_nodescription
                 self.logic = logic
                 if logic != '':
-                #     self.logstep(self.log_logicdescription.format(self.setlogic_name.upper(), logic, self.logicdescription, self.logicdatabase))
-                #     self.proofdata[0].append(logic)
-                # else:
                     try:
                         database, description = altrea.data.getlogic(logic)
                     except TypeError:
@@ -3146,7 +3165,11 @@ class Proof:
                 try:
                     self.logicdefinitions = altrea.data.getdefinitions(logic)
                 except TypeError:
-                    self.logicaxioms = []
+                    self.logicdefinitions = []
+                try:
+                    self.logicsavedproofs = altrea.data.getavailableproofs(logic)
+                except TypeError:
+                    self.logicsavedoriifs = []
                 if database != 'No Database':
                     try:
                         intelimrules = altrea.data.getintelimrules(logic)

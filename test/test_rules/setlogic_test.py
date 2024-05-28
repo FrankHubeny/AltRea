@@ -39,13 +39,29 @@ def test_setlogic_clean_1(input_n, expected):
     
 """------------------------------------------------------------------------------
                                   Stopped Run
-                        
+                            stopped_logicnotfound
 ------------------------------------------------------------------------------"""
 
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                        
-------------------------------------------------------------------------------"""
+# Clean test
+testdata = [
+    ('len(prf.lines)', 2),
+    #
+    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", "Set Logic"),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_logicnotfound),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_setlogic_logicnotfound_1(input_n, expected):
+    prf = Proof()
+    A = Wff('A')
+    prf.setlogic("_?_")
+    assert eval(input_n) == expected
+
+
 
 """------------------------------------------------------------------------------
                                   Stopped Run

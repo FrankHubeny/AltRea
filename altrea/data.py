@@ -419,10 +419,18 @@ def addproof(proofdata: list):
 def addaxiom(logic: str, name: str, pattern: str, displayname: str, description: str):
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    row = (logic, name, pattern, displayname, description)
-    statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
-    c.execute(statement, row)
-    connection.commit()
+    statement = 'SELECT COUNT(*) FROM axioms WHERE logic=? AND name=?'
+    c.execute(statement, (logic, name,))
+    howmany = c.fetchone()
+    if howmany == 0:
+        row = (logic, name, pattern, displayname, description)
+        statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        c.execute(statement, row)
+        connection.commit()
+        #print(f'The axiom "{name}" has been loaded to the database.')
+    else:
+        pass
+        #print(f'There is already an axiom by the name "{name}" in the database.')
     connection.close()
 
 def adddefinition(logic: str, name: str, pattern: str, displayname: str, description: str):
@@ -449,35 +457,6 @@ def deletedefinition(logic: str, name: str):
     c.execute(statement, (logic, name,))
     connection.commit()
     connection.close()
-
-# def addgenericaxiom(name: str, pattern: str, displayname: str, description: str):
-#     connection = sqlite3.connect(metadata)
-#     c = connection.cursor()
-#     row = (name, pattern, displayname, description)
-#     statement = "INSERT INTO genericaxioms (name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
-#     c.execute(statement, row)
-#     connection.commit()
-#     connection.close()
-
-# def usegenericaxiom(logic: str, name: str):
-#     connection = sqlite3.connect(metadata)
-#     c = connection.cursor()
-#     statement = 'SELECT pattern, displayname, description FROM genericaxioms where name='
-#     c.execute(statement, (name,))
-#     pattern, displayname, description = c.fetchone()
-#     row = (logic, name, pattern, displayname, description)
-#     statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
-#     c.execute(statement, row)
-#     connection.commit()
-#     connection.close()
-
-# def deletegenericaxiom(name: str):
-#     connection = sqlite3.connect(metadata)
-#     c = connection.cursor()
-#     statement = 'DELETE FROM genericaxioms WHERE name=?'
-#     c.execute(statement, (name,))
-#     connection.commit()
-#     connection.close()
 
 def addintelimrule(logic: str, name: str, description: str):
     """Add a single operator to a logic."""

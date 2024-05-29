@@ -254,7 +254,7 @@ class Proof:
     log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
     log_necessary_elim = '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
     log_negation_elim = '{0}: Item "{1}" has been derived from the contradiction between "{2}" on line {3} and "{4}" on line {5}.'
-    log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the hypothesis "{2}" of subproof {3} which is now closed.'
+    log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the antecedent of "{2}".'
     log_premise = '{0}: Item "{1}" has been added to the premises.'
     log_proof = '{0}: A proof named "{1}" or "{2}" with description "{3}" has been started.'
     log_proofalreadyexists = '{0}: A proof name "{1}" already exists in the database.'
@@ -2971,34 +2971,43 @@ class Proof:
         # Look for general errors
         if self.canproceed():
             if self.goodtransformationrule(self.negation_intro_tag, self.negation_intro_name, comment):
-                pass
+                previousstatement = self.lines[len(self.lines)-1][self.statementindex]
+                if type(previousstatement) == Implies:
+                    if str(previousstatement.right) == str(self.false_name):
+                        pass
+                    else:
+                        self.logstep(self.log_notfalse.format(self.negation_intro_name.upper(), previousstatement, len(self.lines)-1))
+                        self.stopproof(self.stopped_notfalse, self.blankstatement, self.negation_intro_name, str(len(self.lines)-1), '', comment)
+                else:
+                    self.logstep(self.log_notimplication.format(self.negation_intro_name.upper(), previousstatement, len(self.lines)-1))
+                    self.stopproof(self.stopped_notimplication, self.blankstatement, self.negation_intro_name, str(len(self.lines)-1), '', comment)
 
         # Look for specific errors
-        if self.canproceed():
-            if self.currentproofid == 0:
-                self.logstep(self.log_closemainproof.format(self.negation_intro_name.upper()))
-                self.stopproof(self.stopped_closemainproof, self.blankstatement, self.negation_intro_name, '', '', comment)
-            elif str(self.lines[len(self.lines)-1][self.statementindex]) != str(self.false_name):
-                self.logstep(self.log_notfalse.format(self.negation_intro_name.upper(), self.lines[len(self.lines)-1][self.statementindex], len(self.lines)-1))
-                self.stopproof(self.stopped_notfalse, self.blankstatement, self.negation_intro_name, str(len(self.lines)-1), '', comment)
+        # if self.canproceed():
+        #     if self.currentproofid == 0:
+        #         self.logstep(self.log_closemainproof.format(self.negation_intro_name.upper()))
+        #         self.stopproof(self.stopped_closemainproof, self.blankstatement, self.negation_intro_name, '', '', comment)
+        #     elif str(self.lines[len(self.lines)-1][self.statementindex]) != str(self.false_name):
+        #         self.logstep(self.log_notfalse.format(self.negation_intro_name.upper(), self.lines[len(self.lines)-1][self.statementindex], len(self.lines)-1))
+        #         self.stopproof(self.stopped_notfalse, self.blankstatement, self.negation_intro_name, str(len(self.lines)-1), '', comment)
         
         # If no errors, perform task
         if self.canproceed():
-            proofid = self.currentproofid
-            self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
-            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
-            #level, antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
-            self.level -= 1
-            self.currentproofid = previousproofid
-            self.currentproof = self.prooflist[previousproofid][1]
-            if len(self.previousproofchain) > 1:  
-                self.previousproofchain.pop(len(self.previousproofchain)-1)  
-                self.previousproofid = self.previousproofchain[len(self.previousproofchain)-1] 
-            else: 
-                self.previousproofchain = [] 
-                self.previousproofid = -1  
-            negation = Not(antecedent)
-            self.logstep(self.log_negation_intro.format(self.negation_intro_name.upper(), negation, antecedent, proofid))
+            # proofid = self.currentproofid
+            # self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
+            # antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            # #level, antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            # self.level -= 1
+            # self.currentproofid = previousproofid
+            # self.currentproof = self.prooflist[previousproofid][1]
+            # if len(self.previousproofchain) > 1:  
+            #     self.previousproofchain.pop(len(self.previousproofchain)-1)  
+            #     self.previousproofid = self.previousproofchain[len(self.previousproofchain)-1] 
+            # else: 
+            #     self.previousproofchain = [] 
+            #     self.previousproofid = -1  
+            negation = Not(previousstatement.left)
+            self.logstep(self.log_negation_intro.format(self.negation_intro_name.upper(), negation, previousstatement.left))
             newcomment = self.iscomplete(negation, comment)
             self.lines.append(
                 [
@@ -3007,7 +3016,7 @@ class Proof:
                     self.currentproofid, 
                     self.negation_intro_name, 
                     '', 
-                    self.refproof(proofid), 
+                    "", 
                     newcomment,
                     self.linetype_transformationrule
                 ]

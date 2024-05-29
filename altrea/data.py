@@ -1,6 +1,7 @@
 """This module interfaces between the python sqlite3 database."""
 
 import sqlite3
+import pandas
 
 from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Falsehood, Truth, ConclusionPremises
 
@@ -346,7 +347,10 @@ def getdefinedlogics():
     rows = c.fetchall()
     connection.commit()
     connection.close()
-    return rows
+    index = [i for i in range(1, len(rows)+1)]
+    columns = ['Name', 'Database', 'Description']
+    df = pandas.DataFrame(rows, index=index, columns=columns)
+    return df
 
 def getproofdetails(logic: str, name: str):
     database = getdatabase(logic)
@@ -392,6 +396,8 @@ def deleteproof(logic: str, name: str):
     connection.close()
 
 def addproof(proofdata: list):
+    """Add a proof to a logic."""
+
     database = getdatabase(proofdata[0][3])
     connection = sqlite3.connect(database)
     c = connection.cursor()
@@ -417,6 +423,8 @@ def addproof(proofdata: list):
         connection.close()
 
 def addaxiom(logic: str, name: str, pattern: str, displayname: str, description: str):
+    """Add an axiom to a logic."""
+
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
     statement = 'SELECT COUNT(*) FROM axioms WHERE logic=? AND name=?'
@@ -427,35 +435,61 @@ def addaxiom(logic: str, name: str, pattern: str, displayname: str, description:
         statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
         c.execute(statement, row)
         connection.commit()
-        #print(f'The axiom "{name}" has been loaded to the database.')
+        print(f'The axiom "{name}" defined as "{pattern}" has been loaded to the "{logic}" database.')
     else:
-        pass
-        #print(f'There is already an axiom by the name "{name}" in the database.')
+        print(f'There is already an axiom by the name "{name}" in the "{logic}" database.')
     connection.close()
 
 def adddefinition(logic: str, name: str, pattern: str, displayname: str, description: str):
+    """Add a definition to a logic."""
+
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    row = (logic, name, pattern, displayname, description)
-    statement = "INSERT INTO definitions (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
-    c.execute(statement, row)
-    connection.commit()
+    statement = 'SELECT COUNT(*) FROM axioms WHERE logic=? AND name=?'
+    c.execute(statement, (logic, name,))
+    howmany = c.fetchone()
+    if howmany[0] == 0:
+        row = (logic, name, pattern, displayname, description)
+        statement = "INSERT INTO definitions (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        c.execute(statement, row)
+        connection.commit()
+        print(f'The definition "{name}" defined as "{pattern}" has been loaded to the "{logic}" database.')
+    else:
+        print(f'There is already a definition by the name "{name}" in the "{logic}" database.') 
     connection.close()
 
 def deleteaxiom(logic: str, name: str):
+    """Delete an axiom from a logic."""
+
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    statement = 'DELETE FROM axioms WHERE logic=? and name=?'
+    statement = 'SELECT COUNT(*) FROM axioms WHERE logic=? AND name=?'
     c.execute(statement, (logic, name,))
-    connection.commit()
+    howmany = c.fetchone()
+    if howmany > 0:
+        statement = 'DELETE FROM axioms WHERE logic=? and name=?'
+        c.execute(statement, (logic, name,))
+        connection.commit()
+        print(f'The axiom "{name}" has been deleted from the "{logic}" database.')
+    else:
+        print(f'There is no axiom by the name "{name}" in the "{logic}" database.')
     connection.close()
 
 def deletedefinition(logic: str, name: str):
+    """Delete a definition from a logic."""
+
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    statement = 'DELETE FROM definitions WHERE logic=? and name=?'
+    statement = 'SELECT COUNT(*) FROM definitions WHERE logic=? AND name=?'
     c.execute(statement, (logic, name,))
-    connection.commit()
+    howmany = c.fetchone()
+    if howmany[0] > 0:
+        statement = 'DELETE FROM definitions WHERE logic=? and name=?'
+        c.execute(statement, (logic, name,))
+        connection.commit()
+        print(f'The definition "{name}" has been deleted from the "{logic}" database.')
+    else:
+        print(f'There is no definition by the name "{name}" in the "{logic}" database.')
     connection.close()
 
 def addintelimrule(logic: str, name: str, description: str):

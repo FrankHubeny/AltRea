@@ -231,8 +231,6 @@ class Proof:
     log_premisesdontmatch = '{0}: The premise "{1}" does not match a line from the current proof.'
     stopped_sidenotselected = 'A side, "left" or "right", must be selected.'
     log_sidenotselected = '{0}: The input "{1}" was used rather than "left" or "right".'
-    # stopped_string = 'Input is a string rather than an object from the proof.'
-    # log_string = '{0}: The input "{1}" is a string rather than an object from the proof.'
 
     """Strings to log messages upon successful completion of tasks."""
     
@@ -250,7 +248,6 @@ class Proof:
     log_implication_elim = '{0}: Item "{1}" has been derived from the implication "{2}" and item "{3}".'
     log_implication_intro = '{0}: Item "{1}" has been derived upon closing subproof {2}.'
     log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
-    #log_logicnotfound = '{0}: The desired logic "{1}" could not be found so the default logic "{2}" will be used with "{3}".'
     log_necessary_elim = '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
     log_negation_elim = '{0}: Item "{1}" has been derived from the contradiction between "{2}" on line {3} and "{4}" on line {5}.'
     log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the hypothesis "{2}" of subproof {3} which is now closed.'
@@ -261,7 +258,7 @@ class Proof:
     log_reiterate = '{0}: Item "{1}" on line {2} has been reiterated into subproof {3}.'
     log_complete = 'The proof is complete.'
     log_partiallycomplete = 'The proof is partially complete.'
-    log_proofsaved = '{0}: The proof "{1}" was saved to database "{2}" under logic "{3}".'
+    log_proofsaved = '{0}: The proof "{1}" was saved as "{2}" to database "{3}" under logic "{4}".'
     log_proofdeleted = '{0}: The proof "{1}" was deleted form the database "{2}" under logic "{3}".'
     log_substitute = '{0}: The placeholder(s) in the string "{1}" have been replaced with "{2}" to become "{3}".'
     log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
@@ -627,13 +624,6 @@ class Proof:
         if not isinstance(object, Wff):
             self.logstep(self.log_notwff.format(caller.upper(), object))
             self.stopproof(self.stopped_notwff, self.blankstatement, displayname, '', '', comment)
-        # if type(object) == str:
-        #     self.logstep(self.log_string.format(caller.upper(), object))
-        #     self.stopproof(self.stopped_string, self.blankstatement, displayname, '', '', comment)
-        #     return False
-        # elif type(object) == int:
-        #     self.logstep(self.log_int.format(caller.upper(), object))
-        #     self.stopproof(self.stopped_int, self.blankstatement, displayname, '', '', comment)
             return False
         else:
             return True
@@ -1454,7 +1444,7 @@ class Proof:
         will return when a new proof has been started.
 
         Parameters:
-            name: The name of the axiom to be removed.
+            name: The name of the definition to be removed.
         
         """
 
@@ -1462,32 +1452,32 @@ class Proof:
 
         # If no errors, perform the task
         indexfound = -1
-        for i in range(len(self.logicaxioms)):
+        for i in range(len(self.logicdefinitions)):
             if self.logicdefinitions[i][0] == name:
                 indexfound = i
                 break
         if indexfound == -1:
-            print(f'Could not find the axiom with the name {name}.')
+            print(f'Could not find the definition with the name {name}.')
         else:
             self.logicdefinitions.pop(i)
             if self.logicdatabase != self.label_nodatabase:
                 altrea.data.deletedefinition(self.logic, name)
                 self.logstep(self.message_definitionremoved.format(self.removedefinition_name.upper(), name))
 
-    def replaceproof(self):
+    def removeproof(self):
         """Delete the proof that already exists with that name and save a proof with the same name 
         in the database file associated with the logic.
         
         The replacement proof must be complete before it can be saved.
         """
 
-        if self.completedproof(): 
-            altrea.data.deleteproof(self.logic, self.name)
-            self.logstep(self.log_proofdeleted.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
-            altrea.data.addproof(self.proofdatafinal)
-            self.logstep(self.log_proofsaved.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
-        else:
-            print(self.stopped_notcomplete)
+        #if self.completedproof(): 
+        altrea.data.deleteproof(self.logic, self.name)
+        self.logstep(self.log_proofdeleted.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
+            # altrea.data.addproof(self.proofdatafinal)
+            # self.logstep(self.log_proofsaved.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
+        # else:
+        #     print(self.stopped_notcomplete)
 
     def saveaxiom(self, name: str, displayname: str, description: str, conclusion: None, premise: list = []):
         """Save an axiom for the current proof and in the logic's database if one has been identified.
@@ -1614,7 +1604,7 @@ class Proof:
                 self.logstep(self.log_proofhasnoname.format(self.saveproof_name.upper(), self.name, self.displayname, self.description))
             else:
                 altrea.data.addproof(self.proofdatafinal)
-                self.logstep(self.log_proofsaved.format(self.saveproof_name.upper(), self.name, self.logicdatabase, self.logic))
+                self.logstep(self.log_proofsaved.format(self.saveproof_name.upper(), self.name, self.proofdatafinal[0][4], self.logicdatabase, self.logic))
         else:
             print(self.stopped_notcomplete)
 

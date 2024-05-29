@@ -88,6 +88,14 @@ class Wff:
     def setvalue(self, value: bool):
         self.booleanvalue = value
 
+    # def setname(self, name: str, latexname: str = ''):
+    #     self.name = name
+    #     if self.latexname == '':
+    #         self.latexname = ''.join(['\\text{', name, '}'])
+    #     else:
+    #         self.latexname = latexname
+
+
     def equals(self, otherwff):
         return str(self) == str(otherwff)
     

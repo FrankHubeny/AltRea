@@ -409,18 +409,17 @@ def addproof(proofdata: list):
     statement = 'SELECT COUNT(*) FROM proofs where name=?'
     c.execute(statement, (name,))
     howmany = c.fetchone()
-    if howmany[0] > 0:
-        print(f'A proof named "{name}" already exists.')
-    else:
+    if howmany[0] == 0:
         row = (name, pattern, displayname, description)
         statement = 'INSERT INTO proofs (name, pattern, displayname, description) VALUES (?, ?, ?, ?)'
         c.execute(statement, row)
-        print(f'The proof "{name}" for logic "{logic}" has been added to {database}.')
+        #print(f'The proof "{name}" for logic "{logic}" has been added to {database}.')
         statement = 'INSERT INTO proofdetails (name, item, level, proof, rule, lines, usedproofs, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         c.executemany(statement, proofdata[1:])
-        print(f'The proof details for "{name}" for logic "{logic}" have been added to {database}.')
+        #print(f'The proof details for "{name}" for logic "{logic}" have been added to {database}.')
         connection.commit()
         connection.close()
+    return howmany[0]
 
 def addaxiom(logic: str, name: str, pattern: str, displayname: str, description: str):
     """Add an axiom to a logic."""
@@ -430,7 +429,7 @@ def addaxiom(logic: str, name: str, pattern: str, displayname: str, description:
     statement = 'SELECT COUNT(*) FROM axioms WHERE logic=? AND name=?'
     c.execute(statement, (logic, name,))
     howmany = c.fetchone()
-    if howmany == 0:
+    if howmany[0] == 0:
         row = (logic, name, pattern, displayname, description)
         statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
         c.execute(statement, row)
@@ -466,7 +465,7 @@ def deleteaxiom(logic: str, name: str):
     statement = 'SELECT COUNT(*) FROM axioms WHERE logic=? AND name=?'
     c.execute(statement, (logic, name,))
     howmany = c.fetchone()
-    if howmany > 0:
+    if howmany[0] > 0:
         statement = 'DELETE FROM axioms WHERE logic=? and name=?'
         c.execute(statement, (logic, name,))
         connection.commit()

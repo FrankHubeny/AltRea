@@ -139,6 +139,7 @@ class Proof:
     reiterate_name = 'Reiteration'
     removeaxiom_name = 'Remove Axiom'
     removedefinition_name = 'Remove Definition'
+    removeproof_name = 'Remove Proof'
     saveaxiom_name = 'Save Axiom'
     savedefinition_name = 'Save Definition'
 
@@ -199,12 +200,15 @@ class Proof:
     stopped_notcoimplicationelim = 'The refernced items cannot be used in coimplication elimination.'
     log_notcoimplicationelim = '{0}: The referenced items "{1}" on line {2} and "{3}" on line {4} cannot be used in coimplication elimination.'
     stopped_notcomplete = 'The proof needs to be completed before it can be saved.' 
+    log_notcomplete = '{0}: The proof named "{1}" cannot be saved because it is not yet complete.'
     stopped_notconjunction = 'The referenced item is not a conjunction.'
     log_notconjunction = '{0}: The referenced item "{1}" on line {2} is not a conjunction.'
     stopped_notcontradiction = 'The referenced items are not negations of each other.'
     log_notcontradiction = '{0}: The reference items "{1}" on line {2} and "{3}" on line {4} are not negations of each other.'
     stopped_notdisjunction = 'The referenced item is not a disjunction.'
     log_notdisjunction = '{0}: The referenced item "{1}" on line {2} is not a disjunction.'
+    stopped_notenoughsubs = 'There are not enough substitution values for the metavariables.'
+    log_notenoughsubs = '{0}: The metaformula "{1}" require more substution values than are provided in this list "{2}".'
     stopped_notfalse = 'The referenced item is not false.'
     log_notfalse = '{0}: The referenced item "{1}" on line {2} is not false.'
     stopped_notimplication = 'The referenced item is not an implication.'
@@ -253,6 +257,7 @@ class Proof:
     log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the hypothesis "{2}" of subproof {3} which is now closed.'
     log_premise = '{0}: Item "{1}" has been added to the premises.'
     log_proof = '{0}: A proof named "{1}" or "{2}" with description "{3}" has been started.'
+    log_proofalreadyexists = '{0}: A proof name "{1}" already exists in the database.'
     log_proofhasnoname = '{0}: The proof either has an empty name "{1}" or empty displayname "{2}" or empty description "{3}".'
     log_proposition = '{0}: The letter "{1}" for a generic well-formed formula has been defined with {2} so far for this proof.'
     log_reiterate = '{0}: Item "{1}" on line {2} has been reiterated into subproof {3}.'
@@ -265,12 +270,16 @@ class Proof:
 
     """Messages associated with processes outside of a proof construction."""
 
+    message_axiomalreadyexists = '{0}: An axiom with the name "{1}" already exists.'
+    message_axiomnotfound = '{0}: An axiom with the name "{1}" was not found.'
     message_axiomremoved = '{0}: The axiom named "{1}" has been removed.'
     message_axiomsaved = '{0}: The axiom named "{1}" has been saved.'
     message_badpremise = 'The premise "{0}" is not an instance of altrea.boolean.Wff.'
     message_badconclusion = 'The conclusion "{0}" is not an instance of altrea.boolean.Wff.'
     message_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
     message_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
+    message_definitionalreadyexists = '{0}: A definition with the name "{1}" already exists.'
+    message_definitionnotfound = '{0}: A definition with the name "{1}" was not found.'
     message_definitionremoved = '{0}: The definition named "{1}" has been removed.'
     message_definitionsaved = '{0}: The definition named "{1}" has been saved.'
     message_logdisplayed = 'The log will be displayed.'
@@ -439,7 +448,6 @@ class Proof:
         self.subproof_status = self.subproof_normal
         self.proofdata = [[self.name, self.displayname, self.description]]
         self.proofdatafinal = []
-        self.truefalselist = []
         self.prooflist = [[self.lowestlevel, self.currentproof, self.previousproofid, [], self.subproof_status]]  
         self.level = self.lowestlevel
         self.status = ''
@@ -494,18 +502,19 @@ class Proof:
             )
         if self.status == self.complete:
             finalresult = self.buildconclusionpremises()
+            propositionlist = []
             self.proofdatafinal.append([
                 self.proofdata[0][0], 
                 self.proofdata[0][1], 
                 self.proofdata[0][2], 
                 self.proofdata[0][3],
-                finalresult.pattern(self.truefalselist)
+                finalresult.pattern(propositionlist)
                 ])
             for i in range(len(self.proofdata)):
                 if i > 0:
                     self.proofdatafinal.append([
                         self.proofdata[i][0],
-                        self.proofdata[i][1].pattern(self.truefalselist),
+                        self.proofdata[i][1].pattern(propositionlist),
                         self.proofdata[i][2],
                         self.proofdata[i][3],
                         self.proofdata[i][4],
@@ -848,10 +857,14 @@ class Proof:
 
         if len(subs) > 0:
             prep = [i.tree() for i in subs]
-            substitutedstring = originalstring.format(*prep)
-            reconstructedobject = eval(substitutedstring, self.objectdictionary)
-            self.logstep(self.log_substitute.format(self.substitution_name.upper(), originalstring, prep, substitutedstring))
-            return reconstructedobject
+            try:
+                substitutedstring = originalstring.format(*prep)
+                reconstructedobject = eval(substitutedstring, self.objectdictionary)
+                self.logstep(self.log_substitute.format(self.substitution_name.upper(), originalstring, prep, substitutedstring))
+                return reconstructedobject
+            except IndexError:
+                self.logstep(self.log_notenoughsubs.format(self.substitution_name.upper(), originalstring, subs))
+                self.stopproof(self.stopped_notenoughsubs, self.blankstatement, displayname, '', '', '')
         else:
             self.logstep(self.log_nosubs.format(self.substitution_name.upper(), originalstring))
             self.stopproof(self.stopped_nosubs, self.blankstatement, displayname, '', '', '')
@@ -1309,6 +1322,7 @@ class Proof:
         tt = []
         letters = len(self.letters)
         countfalsegoal = 0
+        counttruepremises = 0
         ttrows = 2**letters
         status = 'Valid'
 
@@ -1330,6 +1344,8 @@ class Proof:
                 for i in self.premises:
                     row.append(i.getvalue())
                     premisesvalue = premisesvalue and i.getvalue()
+                if premisesvalue == True:
+                    counttruepremises += 1
 
             # Display the goal and assessment of the interpretation on the line.
             row.append(' ')
@@ -1349,7 +1365,9 @@ class Proof:
                 if (total + 1) % (2**(letters - 1 - n)) == 0:
                     self.letters[n][0].booleanvalue = flip(self.letters[n][0].booleanvalue)
 
-        if countfalsegoal == 0:
+        if len(self.premises) > 0 and counttruepremises == 0:
+            status = 'Vacuously Valid'
+        elif countfalsegoal == 0:
             status = 'Tautology'
         index = []
         for i in range(len(tt)):
@@ -1430,7 +1448,7 @@ class Proof:
                 indexfound = i
                 break
         if indexfound == -1:
-            print(f'Could not find the axiom with the name {name}.')
+            self.logstep(self.message_axiomnotfound.format(self.removeaxiom_name.upper(), name))
         else:
             self.logicaxioms.pop(i)
             if self.logicdatabase != self.label_nodatabase:
@@ -1457,14 +1475,14 @@ class Proof:
                 indexfound = i
                 break
         if indexfound == -1:
-            print(f'Could not find the definition with the name {name}.')
+            self.logstep(self.message_definitionnotfound.format(self.removedefinition_name.upper(), name))
         else:
             self.logicdefinitions.pop(i)
             if self.logicdatabase != self.label_nodatabase:
                 altrea.data.deletedefinition(self.logic, name)
                 self.logstep(self.message_definitionremoved.format(self.removedefinition_name.upper(), name))
 
-    def removeproof(self):
+    def removeproof(self, name: str):
         """Delete the proof that already exists with that name and save a proof with the same name 
         in the database file associated with the logic.
         
@@ -1472,8 +1490,11 @@ class Proof:
         """
 
         #if self.completedproof(): 
-        altrea.data.deleteproof(self.logic, self.name)
-        self.logstep(self.log_proofdeleted.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
+        howmany = altrea.data.deleteproof(self.logic, name)
+        if howmany == 1:
+            self.logstep(self.log_proofdeleted.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
+        else:
+            self.logstep(self.log_nosavedproof.format(self.removeproof_name.upper(), name))
             # altrea.data.addproof(self.proofdatafinal)
             # self.logstep(self.log_proofsaved.format(self.replaceproof_name.upper(), self.name, self.logicdatabase, self.logic))
         # else:
@@ -1506,14 +1527,23 @@ class Proof:
 
         # If no errors, perform the task
         if noerrors:
-            conclusionpremise = ConclusionPremises(conclusion, premise).pattern(self.truefalselist)
+            propositionlist = []
+            conclusionpremise = ConclusionPremises(conclusion, premise).pattern(propositionlist)
             axiom = [name, conclusionpremise, displayname, description]
-            if self.logic != '':
-                altrea.data.addaxiom(self.logic, name, conclusionpremise, displayname, description)
-            self.logicaxioms.append(axiom)
-            self.logstep(self.message_axiomsaved.format(self.saveaxiom_name.upper(), name))
+            found = False
+            for i in self.logicaxioms:
+                if i[0] == name:
+                    found = True
+                    break
+            if found:
+                self.logstep(self.message_axiomalreadyexists.format(self.saveaxiom_name.upper(), name))
+            else:
+                if self.logic != '':
+                    altrea.data.addaxiom(self.logic, name, conclusionpremise, displayname, description)
+                self.logicaxioms.append(axiom)
+                self.logstep(self.message_axiomsaved.format(self.saveaxiom_name.upper(), name))
 
-    def savedefinition(self, name: str, displayname: str, description: str, conclusion, premise):
+    def savedefinition(self, name: str, displayname: str, description: str, conclusion: None, premise: list = []):
         """Save a definition for the current proof and in the logic's database if one has been identified. 
 
         Parameters:
@@ -1540,14 +1570,23 @@ class Proof:
 
         # If no errors, perform the task
         if noerrors:
-            conclusionpremise = ConclusionPremises(conclusion, premise).pattern(self.truefalselist)
+            propositionlist = []
+            conclusionpremise = ConclusionPremises(conclusion, premise).pattern(propositionlist)
             definition = [name, conclusionpremise, displayname, description]
-            if self.logic != '':
-                altrea.data.adddefinition(self.logic, name, conclusionpremise, displayname, description)
-            self.logicdefinitions.append(definition)
-            self.logstep(self.message_definitionsaved.format(self.savedefinition_name.upper(), name))
+            found = False
+            for i in self.logicdefinitions:
+                if i[0] == name:
+                    found = True
+                    break
+            if found:
+                self.logstep(self.message_definitionalreadyexists.format(self.savedefinition_name.upper(), name))
+            else:
+                if self.logic != '':
+                    altrea.data.adddefinition(self.logic, name, conclusionpremise, displayname, description)
+                self.logicdefinitions.append(definition)
+                self.logstep(self.message_definitionsaved.format(self.savedefinition_name.upper(), name))
 
-    def saveproof(self):
+    def saveproof(self, comment: str = ''):
         """Save the proof to a database file associated with the logic.
         
         The proof must be complete before it can be saved.
@@ -1603,10 +1642,16 @@ class Proof:
             if self.name == '' or self.displayname == '' or self.description == '':
                 self.logstep(self.log_proofhasnoname.format(self.saveproof_name.upper(), self.name, self.displayname, self.description))
             else:
-                altrea.data.addproof(self.proofdatafinal)
-                self.logstep(self.log_proofsaved.format(self.saveproof_name.upper(), self.name, self.proofdatafinal[0][4], self.logicdatabase, self.logic))
+                howmany = altrea.data.addproof(self.proofdatafinal)
+                if howmany == 0:
+                    proof = [self.name, self.proofdatafinal[0][4], self.displayname, self.description]
+                    self.logicsavedproofs.append(proof)
+                    self.logstep(self.log_proofsaved.format(self.saveproof_name.upper(), self.name, self.proofdatafinal[0][4], self.logicdatabase, self.logic))
+                else:
+                    self.logstep(self.log_proofalreadyexists.format(self.saveproof_name.upper(), self.name))
         else:
-            print(self.stopped_notcomplete)
+            self.logstep(self.log_notcomplete.format(self.saveproof_name.upper(), self.name))
+            self.stopproof(self.stopped_notcomplete, self.blankstatement, self.saveproof_name, '', '', comment)
 
     """NATURAL DEDUCTION AND GENERAL PROOF CONSTRUCTION
     
@@ -3029,7 +3074,7 @@ class Proof:
         howmany = len(self.letters)
         self.logstep(self.log_proposition.format(self.proposition_name.upper(), p, howmany))
         return p
-       
+
     def reiterate(self, line: int, comment: str = ''):
         """The scope of the introduction/elimination transformation rules is its own proof, not a
         subordinate proof nor a parent proof.  However, the items that are in the current item's
@@ -3160,31 +3205,31 @@ class Proof:
                     self.logicsavedproofs = altrea.data.getavailableproofs(logic)
                 except TypeError:
                     self.logicsavedoriifs = []
-                if database != 'No Database':
-                    try:
-                        intelimrules = altrea.data.getintelimrules(logic)
-                    except:
-                        self.logstep(self.message_couldnotgettransformationrules.format(self.setlogic_name.upper(), self.logic))
-                    else:
-                        if len(intelimrules) > 0:
-                            self.logicintelimrules = []
-                            for i in intelimrules:
-                                if i[0] != '':
-                                    self.logicintelimrules.append((i[0], eval(i[1])))
-                                else:
-                                    self.logicintelimrules.append(i)
-                    try: 
-                        connectors = altrea.data.getconnectors(logic)
-                    except:
-                        self.logstep(self.message_couldnotgetconnectors.format(self.setlogic_name.upper(), self.logic))
-                    else:
-                        if len(connectors) > 0:
-                            self.connectors = []
-                            for i in connectors:
-                                if i[0] != '':
-                                    self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
-                                else:
-                                    self.logicconnectors.append(i)
+                # if database != 'No Database':
+                #     try:
+                #         intelimrules = altrea.data.getintelimrules(logic)
+                #     except:
+                #         self.logstep(self.message_couldnotgettransformationrules.format(self.setlogic_name.upper(), self.logic))
+                #     else:
+                #         if len(intelimrules) > 0:
+                #             self.logicintelimrules = []
+                #             for i in intelimrules:
+                #                 if i[0] != '':
+                #                     self.logicintelimrules.append((i[0], eval(i[1])))
+                #                 else:
+                #                     self.logicintelimrules.append(i)
+                #     try: 
+                #         connectors = altrea.data.getconnectors(logic)
+                #     except:
+                #         self.logstep(self.message_couldnotgetconnectors.format(self.setlogic_name.upper(), self.logic))
+                #     else:
+                #         if len(connectors) > 0:
+                #             self.connectors = []
+                #             for i in connectors:
+                #                 if i[0] != '':
+                #                     self.logicconnectors.append((eval(i[0], self.objectdictionary), i[0], i[1]))
+                #                 else:
+                #                     self.logicconnectors.append(i)
 
     def truth(self, name: str, latex: str = ''):
         newtruth = Truth(name, latex)

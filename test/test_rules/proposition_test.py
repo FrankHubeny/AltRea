@@ -4,7 +4,7 @@
 
 import pytest
 
-from altrea.boolean import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
 from altrea.rules import Proof
 t = Proof()
 A = t.proposition('A', '\\alpha ')

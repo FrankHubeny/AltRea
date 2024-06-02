@@ -1,4 +1,4 @@
-# boolean.py
+# wffs.py
 """This file contains classes for logical statements and functions on them.
 
 It contains the following classes:

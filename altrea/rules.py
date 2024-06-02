@@ -52,14 +52,14 @@ welcome and encouraged to copy these files to a local directory under a new name
 Then import from these files rather than the altrea files to experiment with using python. 
 
 Examples:
-    >>> from myaltrea.boolean import And, Or, Not, Implies, Iff, Wff
+    >>> from myaltrea.wffs import And, Or, Not, Implies, Iff, Wff
     >>> import myaltrea.rules
 """
 
 
 import pandas
 
-from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, Proposition, Falsehood, Truth, ConclusionPremises, Definition
+from altrea.wffs import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, Proposition, Falsehood, Truth, ConclusionPremises, Definition
 import altrea.data
 
 class Proof:
@@ -274,8 +274,8 @@ class Proof:
     message_axiomnotfound = '{0}: An axiom with the name "{1}" was not found.'
     message_axiomremoved = '{0}: The axiom named "{1}" has been removed.'
     message_axiomsaved = '{0}: The axiom named "{1}" has been saved.'
-    message_badpremise = 'The premise "{0}" is not an instance of altrea.boolean.Wff.'
-    message_badconclusion = 'The conclusion "{0}" is not an instance of altrea.boolean.Wff.'
+    message_badpremise = 'The premise "{0}" is not an instance of altrea.wffs.Wff.'
+    message_badconclusion = 'The conclusion "{0}" is not an instance of altrea.wffs.Wff.'
     message_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
     message_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
     message_definitionalreadyexists = '{0}: A definition with the name "{1}" already exists.'
@@ -1026,7 +1026,7 @@ class Proof:
             objects returned not the string "And(A, B)" but the object And(A, B).
 
         See Also:
-            In altrea.boolean.Wff the tree() function is defined for each object instantiated.  When And(A, B).tree()
+            In altrea.wffs.Wff the tree() function is defined for each object instantiated.  When And(A, B).tree()
             is called it returns "And("+A.tree()+", "+B.tree()+")" which in turn returns since A.tree() = "A" and 
             B.tree() = "B" the string that is ultimately returned is "And(A, B)".
         """
@@ -2072,9 +2072,9 @@ class Proof:
         
         # Look for errors
         noerrors = True
-        if isinstance(conclusion, altrea.boolean.Wff):
+        if isinstance(conclusion, altrea.wffs.Wff):
             for i in premise:
-                if not isinstance(i, altrea.boolean.Wff):
+                if not isinstance(i, altrea.wffs.Wff):
                     print(self.message_badpremise.format(i))
                     noerrors = False
                     break
@@ -2131,9 +2131,9 @@ class Proof:
         
         # Look for errors
         noerrors = True
-        if isinstance(conclusion, altrea.boolean.Wff):
+        if isinstance(conclusion, altrea.wffs.Wff):
             for i in premise:
-                if not isinstance(i, altrea.boolean.Wff):
+                if not isinstance(i, altrea.wffs.Wff):
                     print(self.message_badpremise.format(i))
                     noerrors = False
                     break
@@ -2179,7 +2179,7 @@ class Proof:
         Example:
             Suppose one has created the following proof that given q one can derive p > q.  
 
-            >>> from altrea.boolean import Wff, Or, Not, And, Implies, Iff, Necessary, Possibly
+            >>> from altrea.wffs import Wff, Or, Not, And, Implies, Iff, Necessary, Possibly
             >>> from altrea.rules import Proof
             >>> from altrea.display import displayproof, fitchnotation, showproof
             >>> addcond = Proof(name='add cond', displayname='add cond', description='Principle of Added Condition')
@@ -2283,7 +2283,7 @@ class Proof:
             introduces an implication in the parent proof containing all of the hypotheses as conjoints
             of an `And` object.  That process is illustrated in this example.  The comments are optional.
 
-            >>> from altrea.boolean import Implies, And
+            >>> from altrea. import Implies, And
             >>> from altrea.rules import Proof
             >>> pr = Proof()
             >>> A = pr.proposition('A')
@@ -2455,7 +2455,7 @@ class Proof:
         Examples:
             The following is a simple example of how the coimplication elimination rule works.
 
-            >>> from altrea.boolean import Iff
+            >>> from altrea.wffs import Iff
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('A')
@@ -2577,7 +2577,7 @@ class Proof:
         Examples:
             The following is a simple example of how the coimplication introduction rule works.
 
-            >>> from altrea.boolean import Implies, Wff, Iff
+            >>> from altrea. import Implies, Wff, Iff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof
             >>> p = Proof()
@@ -2701,7 +2701,7 @@ class Proof:
             not the use of `prf.left` and `prf.right`.  These values are defined
             in the Proof object so you don't have to remember what the strings are.
 
-            >>> from altrea.boolean import And, Implies, Iff, Wff
+            >>> from altrea.wffs import And, Implies, Iff, Wff
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('A')
@@ -2826,7 +2826,7 @@ class Proof:
             bottom of the proof.  In a Jupyter Notebook where latex can be used it may be
             helpful to set latex=1.
             
-            >>> from altrea.boolean import And
+            >>> from altrea. import And
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('A')
@@ -2845,7 +2845,7 @@ class Proof:
 
             This example shows that an obvious result can be derived by letting the first and second lines be the same.  
 
-            >>> from altrea.boolean import And, Wff
+            >>> from altrea.wffs import And, Wff
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('A')
@@ -3018,7 +3018,7 @@ class Proof:
             close that proof with an implication introduction.  Since A is on both sides of the disjunction,
             we can refer to the same subordinate proof twice in the use of disjunction elimination.
 
-            >>> from altrea.boolean import Or, Wff
+            >>> from altrea.wffs import Or, Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof, showlines
             >>> prf = Proof()
@@ -3044,7 +3044,7 @@ class Proof:
             It also illustrates the `showlines` display.  This display shows what is in the lines of a proof.
             The `showproof` display illustrated in the above example uses a natural deduction display style.
 
-            >>> from altrea.boolean import Or, Implies, Wff
+            >>> from altrea.wffs import Or, Implies, Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof, showlines
             >>> prf = Proof()
@@ -3200,7 +3200,7 @@ class Proof:
             One can place the new statement on either the left side or the right side of the
             referenced statement.  The first example shows how this is done for the right side.
 
-            >>> from altrea.boolean import Or, Implies, Wff
+            >>> from altrea.wffs import Or, Implies, Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof, showlines
             >>> prf = Proof()
@@ -3219,7 +3219,7 @@ class Proof:
 
             The second example shows how this is done for the left side.
 
-            >>> from altrea.boolean import Or, Implies, Wff
+            >>> from altrea.wffs import Or, Implies, Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof, showlines
             >>> prf = Proof()
@@ -3388,7 +3388,7 @@ class Proof:
             An error is returned if a string is passed.  When Q was passed it was not the string 'A'
             but the Wff A.
 
-            >>> from altrea.boolean import Wff
+            >>> from altrea.wffs import Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof
             >>> prf = Proof()
@@ -3521,7 +3521,7 @@ class Proof:
             Implication elimination is also called "Modus Ponens".  If you have "A" and "A > B" then from both of them
             you can derive "B".
 
-            >>> from altrea.boolean import Implies
+            >>> from altrea.wffs import Implies
             >>> from altrea.rules import Proof
             >>> pr = Proof()
             >>> A = pr.proposition('A')
@@ -3663,7 +3663,7 @@ class Proof:
             any statement whatsoever, call it "A", can be used as the antecedent of the conditional.  It also illustrates how the 
             `displaylog` function can provide additional information about the proof.
 
-            >>> from altrea.boolean import Implies, Wff
+            >>> from altrea.wffs import Implies, Wff
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('A')
@@ -3697,7 +3697,7 @@ class Proof:
             contained only one line, the hypothesis.  The hypothesis became both the antecedent and, since it was the last
             line of the subordinate proof, the consequent of the implication.
         
-            >>> from altrea.boolean import Implies, Wff
+            >>> from altrea.wffs import Implies, Wff
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('A')
@@ -3718,7 +3718,7 @@ class Proof:
             from outside of it can be used.  A call to `reiterate` makes sure only lines
             are used from a chain of proofs leading to the current one.
 
-            >>> from altrea.boolean import Implies, Wff
+            >>> from altrea.wffs import Implies, Wff
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('A')
@@ -3745,7 +3745,7 @@ class Proof:
             One can then set latex=1 rather than latex=0 on `displayproof`.  By setting short=0 one can see all of the data that is
             stored for each line of a proof.
 
-            >>> from altrea.boolean import Implies, Wff
+            >>> from altrea.wffs import Implies, Wff
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> prf.setlogic()
@@ -3936,7 +3936,7 @@ class Proof:
             comment: An optional comment the user may add to this line of the proof.
 
         Examples:
-            >>> from altrea.boolean import And, Not, Wff
+            >>> from altrea. import And, Not, Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof
             >>> prf = Proof()
@@ -4022,7 +4022,7 @@ class Proof:
         Examples:
             The following example is known as modus tollens.
             
-            >>> from altrea.boolean import Implies, Not, Wff
+            >>> from altrea.wffs import Implies, Not, Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof
             >>> A = Wff('A')
@@ -4129,7 +4129,7 @@ class Proof:
             In this example, the goal is declared to be "A".  Then the premise is offered which is also "A".
             That immediately completes the proof.
 
-            >>> from altrea.boolean import Implies
+            >>> from altrea.wffs import Implies
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> prf.setlogic()
@@ -4203,7 +4203,7 @@ class Proof:
         Examples:
             The follow are some of the ways to define propositional variables.
 
-            >>> from altrea.boolean import Wff, And, Or, Not
+            >>> from altrea.wffs import Wff, And, Or, Not
             >>> from altrea.rules import Proof
             >>> prf = Proof()
             >>> A = prf.proposition('α', 'α')
@@ -4346,7 +4346,7 @@ class Proof:
             If a logic has been incorrectly set an error message may appear
             such as in the following example.
             
-            >>> from altrea.boolean import Wff
+            >>> from altrea.wffs import Wff
             >>> from altrea.rules import Proof
             >>> from altrea.display import showproof
             >>> p = Proof()

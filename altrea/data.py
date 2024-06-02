@@ -3,7 +3,7 @@
 import sqlite3
 import pandas
 
-from altrea.boolean import And, Or, Not, Implies, Iff, Wff, Falsehood, Truth, ConclusionPremises
+from altrea.wffs import And, Or, Not, Implies, Iff, Wff, Falsehood, Truth, ConclusionPremises
 
 metadata = 'altrea/data/metadata.db'
 datafolder = 'altrea/data/'

@@ -40,6 +40,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_clean_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -50,6 +51,46 @@ def test_disjunction_intro_clean_1(input_n, expected):
     prf.premise(A)
     prf.disjunction_intro(1, right=B)
     assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                Restricted Mode Error
+------------------------------------------------------------------------------"""
+
+# Clean test
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[1][prf.statementindex])", str(A)),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
+    #
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.disjunction_intro_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_restrictednowff),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_disjunction_intro_restricted_1(input_n, expected):
+    prf = Proof()
+    prf.setrestricted(True)
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic()
+    prf.goal(Or(A, B))
+    prf.premise(A)
+    prf.disjunction_intro(1, right=B)
+    assert eval(input_n) == expected
+
 
 """------------------------------------------------------------------------------
                                 Clean Run 2
@@ -78,6 +119,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_clean_2(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -109,6 +151,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_notwff_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -141,6 +184,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_notwff_2(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -172,6 +216,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_nosuchline_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -202,6 +247,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_linescope_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -235,6 +281,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_intro_string_2(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')

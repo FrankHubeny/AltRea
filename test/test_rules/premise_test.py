@@ -43,7 +43,7 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.premise_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.contradicted),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_premise_clean_1(input_n, expected):

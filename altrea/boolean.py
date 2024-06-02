@@ -41,11 +41,12 @@ class Wff:
     possibly_latexconnector = '\\Diamond'
     possible_treeconnector = 'P'
     wff_treeconnector = 'Wff'
-    reserved_names = ['And', 'Or', 'Not', 'Implies', 'Iff', 'Wff']
+    reserved_names = ['And', 'Or', 'Not', 'Implies', 'Iff', 'Wff', 'Falsehood', 'Truth', 'Proposition']
 
-    f_name = 'X'
+    f_name = 'Falsehood'
     f_latexname = '\\bot'
-    t_name = 'T'
+    falsehood_treeconnector = 'Falsehood'
+    t_name = 'Truth'
     t_latexname = '\\top'
 
     
@@ -153,46 +154,48 @@ class Falsehood(Wff):
     """
 
     is_variable = True
+    booleanvalue = False
 
-    def __init__(self, name: str = '', latexname: str = ''):
-        if name in self.reserved_names or latexname in self.reserved_names:
-            raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
-        elif type(name) != str or type(latexname) != str:
-            raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
-        else:
-            self.booleanvalue = False
-            if name == '':
-                self.name = self.f_name
-            else:
-                self.name = name
-            if latexname == '':
-                if name == '':
-                    self.latex = self.f_latexname
-                else:
-                    self.latex = self.name
-            else:
-                self.latex = latexname
+    def __init__(self, wff: Wff):
+        # if name in self.reserved_names or latexname in self.reserved_names:
+        #     raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
+        # elif type(name) != str or type(latexname) != str:
+        #     raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
+        # else:
+        #     self.booleanvalue = False
+        #     if name == '':
+        #         self.name = self.f_name
+        #     else:
+        #         self.name = name
+        #     if latexname == '':
+        #         if name == '':
+        #             self.latex = self.f_latexname
+        #         else:
+        #             self.latex = self.name
+        #     else:
+        #         self.latex = latexname
+        self.wff = wff
 
 
     def __str__(self):
-        return f'{self.f_name}'
+        return f'{self.f_name}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
-        return f'{self.f_latexname}'
+        return f'{self.f_latexname}{self.lb}{self.wff.latex()}{self.rb}'
     
     def tree(self):
-        return f'{self.f_name}'
+        return f'{self.falsehood_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
     
-    # def pattern(self, wfflist: list):
-    #     return f'{self.f_name}'
+    def pattern(self, wfflist: list):
+        return f'{self.falsehood_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
     
     def treetuple(self):
-        return self.f_name
+        return self.falsehood_treeconnector, self.lb, self.wff.treetuple(), self.rb
     
     def getvalue(self):
         return self.booleanvalue
     
-    def setvalue(self, value: bool):
+    def setvalue(self, value: bool = False):
         self.booleanvalue = False
 
 class Iff(Wff):
@@ -598,7 +601,7 @@ class ConclusionPremises(Wff):
     booleanvalue = None
     lb = '{'
     rb = '}'
-    tree_connector = '|='
+    tree_connector = '|-'
 
     def __init__(self, 
                  conclusion: Wff, 

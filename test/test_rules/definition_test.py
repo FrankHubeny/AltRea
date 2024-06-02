@@ -52,6 +52,44 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_definition_iff_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic()
+    prf.goal(B)
+    prf.premise(Implies(A, B))
+    prf.premise(Implies(B, A))
+    prf.conjunction_intro(1, 2)
+    prf.definition('iff intro', [A, B], [3])
+    prf.definition('iff elim', [A, B], [4])
+    
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                        Restricted True Stopped No Definitions
+------------------------------------------------------------------------------"""
+
+# Clean test of coimplication intro and elim by definitiion
+
+testdata = [
+    ('len(prf.lines)', 5),
+    #
+    ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
+    ("prf.lines[4][prf.levelindex]", 0),
+    ("prf.lines[4][prf.proofidindex]", 0),
+    ("prf.lines[4][prf.ruleindex]", "iff intro"),
+    ("prf.lines[4][prf.linesindex]", ""),
+    ("prf.lines[4][prf.proofsindex]", ""),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchdefinition),
+    ("prf.lines[4][prf.typeindex]", ""),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_definition_restricted_1(input_n, expected):
+    prf = Proof()
+    prf.setrestricted(True)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -101,6 +139,7 @@ def test_definition_premisesdontmatch_1(input_n, expected):
     D = prf.proposition('D')
     E = prf.proposition('E')
     prf.setlogic()
+    prf.setrestricted(False)
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
@@ -138,6 +177,7 @@ def test_definition_premisesdontmatch_2(input_n, expected):
     D = prf.proposition('D')
     E = prf.proposition('E')
     prf.setlogic()
+    prf.setrestricted(False)
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
@@ -178,6 +218,7 @@ def test_definition_nosubs_1(input_n, expected):
     D = prf.proposition('D')
     E = prf.proposition('E')
     prf.setlogic()
+    prf.setrestricted(False)
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
@@ -210,6 +251,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_definition_notwff_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -247,6 +289,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_definition_notinteger_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -285,6 +328,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_definition_nosuchline_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -322,6 +366,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_definition_linescope_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')

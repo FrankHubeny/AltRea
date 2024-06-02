@@ -44,6 +44,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_contradiction_explosion_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -88,6 +89,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_dn_intro_elim_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -131,6 +133,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_dn_intro_elim_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -173,6 +176,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_modusponens_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -253,6 +257,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_demorgan_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -266,6 +271,41 @@ def test_axiom_demorgan_1(input_n, expected):
     prf.premise(And(A, B))
     prf.axiom('and to not or', [A, B], [4])
     prf.axiom('not or to and', [A, B], [5])
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                Stopped
+                        restricted mode with no default axioms
+------------------------------------------------------------------------------"""
+
+# Clean test of double negation intro and elim
+
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", 'dneg intro'),
+    ("prf.lines[2][prf.linesindex]", ""),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchaxiom),
+    ("prf.lines[2][prf.typeindex]", ""),
+    #
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_axiom_restricted_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic()
+    prf.goal(B)
+    prf.premise(C)
+    prf.axiom('dneg intro', [C], [1])
+    prf.axiom('dneg elim', [C], [2])
     assert eval(input_n) == expected
 
 
@@ -292,6 +332,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_nosuchaxiom_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -325,6 +366,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_nosuchaxiom_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -366,6 +408,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_premisesdontmatch_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -410,6 +453,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_notwff_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -454,6 +498,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_notwff_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -498,6 +543,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_nosuchline_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
@@ -533,6 +579,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_axiom_linescope_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')

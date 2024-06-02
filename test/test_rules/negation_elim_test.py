@@ -37,17 +37,18 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(prf.lines[3][prf.statementindex])", str(t.false_name)),
+    ("str(prf.lines[3][prf.statementindex])", str(Falsehood(And(A, Not(A))))),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
     ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.vacuous),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_elim_clean_1(input_n, expected):
     prf = Proof()
+    prf.setrestricted(True)
     A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')

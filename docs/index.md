@@ -29,7 +29,6 @@ your use case by looking at the different pages.
 ## Acknowledgements
 
 The project uses the following python packages with their dependencies:
-- `sympy` for Symbols and Boolean algebra 
 - `pandas` to help display data.
 
 This documentation was built using `mkdocs` based on the explanation from

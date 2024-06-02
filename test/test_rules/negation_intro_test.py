@@ -29,7 +29,7 @@ testdata = [
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", ""),
     #
-    ("str(prf.lines[4][prf.statementindex])", str(t.false_name)),
+    ("str(prf.lines[4][prf.statementindex])", str(Falsehood(And(Not(A), A)))),
     ("prf.lines[4][prf.levelindex]", 1),
     ("prf.lines[4][prf.proofidindex]", 1),
     ("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
@@ -80,7 +80,7 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(prf.lines[3][prf.statementindex])", str(t.false_name)),
+    ("str(prf.lines[3][prf.statementindex])", str(Falsehood(And(A, Not(A))))),
     ("prf.lines[3][prf.levelindex]", 1),
     ("prf.lines[3][prf.proofidindex]", 1),
     ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),

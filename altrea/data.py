@@ -315,7 +315,7 @@ def getdefinitions(logic: str):
     try:
         connection = sqlite3.connect(metadata)
         c = connection.cursor()
-        statement = 'SELECT name, pattern, displayname, description FROM definitions WHERE logic=?'
+        statement = 'SELECT name, pattern, displayname, description FROM definitions WHERE logic=? ORDER BY name'
         c.execute(statement, (logic,))
         rows = c.fetchall()
         connection.commit()
@@ -330,7 +330,7 @@ def getaxioms(logic: str):
     try:
         connection = sqlite3.connect(metadata)
         c = connection.cursor()
-        statement = 'SELECT name, pattern, displayname, description FROM axioms WHERE logic=?'
+        statement = 'SELECT name, pattern, displayname, description FROM axioms WHERE logic=? ORDER BY name'
         c.execute(statement, (logic,))
         rows = c.fetchall()
         connection.commit()
@@ -342,7 +342,7 @@ def getaxioms(logic: str):
 def getdefinedlogics():
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    statement = 'SELECT logic, database, description FROM logics'
+    statement = 'SELECT logic, database, description FROM logics ORDER BY logic'
     c.execute(statement)
     rows = c.fetchall()
     connection.commit()
@@ -371,7 +371,7 @@ def getavailableproofs(logic: str):
     database = getdatabase(logic)
     connection = sqlite3.connect(database)
     c = connection.cursor()
-    statement = 'SELECT name, pattern, displayname, description FROM proofs'
+    statement = 'SELECT name, pattern, displayname, description FROM proofs ORDER BY name'
     try:
         c.execute(statement)
     except sqlite3.OperationalError:

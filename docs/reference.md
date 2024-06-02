@@ -3,8 +3,10 @@ an **information-oriented** approach. Use it as a
 reference for the technical implementation of the
 `altrea` project code.
 
-::: altrea.tf
+::: altrea.boolean
 
-::: altrea.display
+::: altrea.rules
 
-::: altrea.exception
+::: altrea.data
+
+

@@ -302,6 +302,7 @@ def test_axiom_restricted_1(input_n, expected):
     D = prf.proposition('D')
     E = prf.proposition('E')
     prf.setlogic()
+    prf.setrestricted(True)
     prf.goal(B)
     prf.premise(C)
     prf.axiom('dneg intro', [C], [1])

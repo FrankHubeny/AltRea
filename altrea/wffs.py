@@ -83,19 +83,18 @@ class Wff:
             wfflist.append(self.name)
         return ''.join(['{', str(idx), '}'])
     
+    def makeschemafromlist(self, wfflist: list):
+        try:
+            idx = wfflist.index(self)
+            return ''.join(['{', str(idx), '}'])
+        except ValueError:
+            return self.name
+    
     def treetuple(self):
         return self.name
     
     def setvalue(self, value: bool):
         self.booleanvalue = value
-
-    # def setname(self, name: str, latexname: str = ''):
-    #     self.name = name
-    #     if self.latexname == '':
-    #         self.latexname = ''.join(['\\text{', name, '}'])
-    #     else:
-    #         self.latexname = latexname
-
 
     def equals(self, otherwff):
         return str(self) == str(otherwff)
@@ -143,6 +142,9 @@ class And(Wff):
     def pattern(self, wfflist: list):
         return f'{self.and_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.and_treeconnector}{self.lb}{self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)}{self.rb}'
+    
     def treetuple(self):
         return self.and_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
@@ -188,6 +190,9 @@ class Falsehood(Wff):
     
     def pattern(self, wfflist: list):
         return f'{self.falsehood_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.falsehood_treeconnector}{self.lb}{self.wff.makeschemafromlist(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.falsehood_treeconnector, self.lb, self.wff.treetuple(), self.rb
@@ -238,6 +243,9 @@ class Iff(Wff):
     def pattern(self, wfflist: list):
         return f'{self.iff_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.iff_treeconnector}{self.lb}{self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)}{self.rb}'
+    
     def treetuple(self):
         return self.iff_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
 
@@ -282,6 +290,9 @@ class Implies(Wff):
     def pattern(self, wfflist: list):
         return f'{self.implies_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.implies_treeconnector}{self.lb}{self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)}{self.rb}'
+    
     def treetuple(self):
         return self.implies_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
@@ -315,6 +326,9 @@ class Necessary(Wff):
     
     def pattern(self, wfflist: list):
         return f'{self.necessary_treeconnector}{self.lb}{self.truefalse.pattern(wfflist)}{self.rb}'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.necessary_treeconnector}{self.lb}{self.truefalse.makeschemafromlist(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.necessary_treeconnector, self.lb, self.truefalse.treetuple(), self.rb
@@ -352,6 +366,9 @@ class Not(Wff):
     
     def pattern(self, wfflist: list):
         return f'{self.not_treeconnector}{self.lb}{self.negated.pattern(wfflist)}{self.rb}'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.not_treeconnector}{self.lb}{self.negated.makeschemafromlist(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.not_treeconnector, self.lb, self.negated.treetuple(), self.rb
@@ -399,6 +416,9 @@ class Or(Wff):
     def pattern(self, wfflist: list):
         return f'{self.or_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
     
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.or_treeconnector}{self.lb}{self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)}{self.rb}'
+    
     def treetuple(self):
         return self.or_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
         
@@ -432,6 +452,9 @@ class Possibly(Wff):
     
     def pattern(self, wfflist):
         return f'{self.possible_treeconnector}{self.lb}{self.truefalse.pattern(wfflist)}{self.rb}'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.possible_treeconnector}{self.lb}{self.truefalse.makeschemafromlist(wfflist)}{self.rb}'
     
     def treetuple(self):
         return self.possible_treeconnector, self.lb, self.truefalse.treetuple(), self.rb
@@ -549,6 +572,9 @@ class Axiom(Wff):
     def pattern(self, wfflist: list):
         return f'Axiom({self.schema.pattern(wfflist)})'
     
+    def makeschemafromlist(self, wfflist: list):
+        return f'Axiom({self.schema.makeschemafromlist(wfflist)})'
+    
     def treetuple(self):
         return f'{self.schema.treetuple()}'
         
@@ -584,6 +610,9 @@ class Definition(Wff):
     
     def pattern(self, wfflist: list):
         return f'Definition({self.left.pattern(wfflist)}, {self.right.pattern(wfflist)})'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'Definition({self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)})'
     
     def treetuple(self):
         return f'{self.left.treetuple()} {self.connector} {self.right.treetuple()}'
@@ -623,9 +652,9 @@ class ConclusionPremises(Wff):
             for i in range(len(self.premises)):
                 if i > 0:
                     prem += ''.join([', ', str(self.premises[i])])
-            return f'{self.lb}{prem}{self.rb} {self.connector} {self.conclusion}'
+            return f'{self.lb}{prem}{self.rb} {self.derivedconnector} {self.conclusion}'
         else:
-            return f'{self.connector} {str(self.conclusion)}'
+            return f'{self.derivedconnector} {str(self.conclusion)}'
     
     def latex(self):
         if len(self.premises) > 0:
@@ -645,7 +674,7 @@ class ConclusionPremises(Wff):
                     prem += ''.join([', ', self.premises[i].latex()])
             return f'{self.lb}{prem}{self.rb} {self.derivedlatexconnector} {self.conclusion.latex()}'
         else:
-            return f'{self.latexconnector} {self.conclusion.latex()}'
+            return f'{self.derivedlatexconnector} {self.conclusion.latex()}'
     
     def tree(self):
         if len(self.premises) > 0:

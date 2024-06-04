@@ -47,13 +47,13 @@ def createmetadatatables():
         print('The logics table has been created.')
 
         # Create the intelimrules table in the metadata database.
-        c.execute("""CREATE TABLE intelimrules (
-                  logic       TEXT NOT NULL, 
-                  name        TEXT NOT NULL, 
-                  description TEXT NOT NULL, 
-                  UNIQUE(logic, name) ON CONFLICT REPLACE,
-                  FOREIGN KEY (logic) REFERENCES logics(logic))""")
-        print('The intelimrules table has been created.')
+        # c.execute("""CREATE TABLE intelimrules (
+        #           logic       TEXT NOT NULL, 
+        #           name        TEXT NOT NULL, 
+        #           description TEXT NOT NULL, 
+        #           UNIQUE(logic, name) ON CONFLICT REPLACE,
+        #           FOREIGN KEY (logic) REFERENCES logics(logic))""")
+        # print('The intelimrules table has been created.')
 
         # Create the connectors table in the metadata database.
         c.execute("""CREATE TABLE connectors (
@@ -90,6 +90,19 @@ def createmetadatatables():
                 )
         print(f'The axioms table has been created.')
 
+        # Create the rules table in the metadata database.
+        c.execute("""CREATE TABLE rules (
+                logic       TEXT NOT NULL,
+                name        TEXT NOT NULL,
+                pattern     TEXT NOT NULL,
+                displayname TEXT NOT NULL,
+                description TEXT NOT NULL,
+                UNIQUE(logic, name) ON CONFLICT REPLACE,
+                FOREIGN KEY (logic) REFERENCES logics(logic)
+                )"""
+                )
+        print(f'The rules table has been created.')
+
         # Create the bibliography table in the metadata database.
         c.execute("""CREATE TABLE bibliography (
                 logic       TEXT NOT NULL,
@@ -111,7 +124,7 @@ def addlogic(logic: str,
              database: str, 
              description: str, 
              connectors: list = [], 
-             intelimrules: list = [], 
+             rules: list = [], 
              definitions: list = [],
              axioms: list = []):
     """Add the database file and the tables for a new logic."""
@@ -149,16 +162,16 @@ def addlogic(logic: str,
     else:
         print(f'There were no connectors to load.')
 
-    # Load the intelimrules table.
-    if len(intelimrules) > 0:
+    # Load the rules table.
+    if len(rules) > 0:
         try:
-            statement = 'INSERT INTO intelimrules (logic, name, description) VALUES (?, ?, ?)'
-            c.executemany(statement, intelimrules)
-            print(f'The intelimrules table for logic {logic} has been loaded.')
+            statement = 'INSERT INTO rules (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)'
+            c.executemany(statement, rules)
+            print(f'The rules table for logic {logic} has been loaded.')
         except sqlite3.OperationalError:
-            print(f'The intelimrules table received an operational error for logic {logic}.')
+            print(f'The rules table received an operational error for logic {logic}.')
     else:
-        print(f'There were no intelims to load.')
+        print(f'There were no rules to load.')
 
     # Load the definitions table.
     if len(definitions) > 0:
@@ -275,10 +288,10 @@ def deletelogic(logic: str):
         c.execute(statement, (logic,))
         print(f'Any axioms associated with {logic} have been deleted.')
 
-        # Delete from the intelimrules table.
-        statement = 'DELETE FROM intelimrules WHERE logic=?'
+        # Delete from the rules table.
+        statement = 'DELETE FROM rules WHERE logic=?'
         c.execute(statement, (logic,))
-        print(f'Any intelim rules associated with {logic} have been deleted.')
+        print(f'Any transformation rules associated with {logic} have been deleted.')
 
         # Delete from the connectors table.
         statement = 'DELETE FROM connectors WHERE logic=?'
@@ -316,6 +329,21 @@ def getdefinitions(logic: str):
         connection = sqlite3.connect(metadata)
         c = connection.cursor()
         statement = 'SELECT name, pattern, displayname, description FROM definitions WHERE logic=? ORDER BY name'
+        c.execute(statement, (logic,))
+        rows = c.fetchall()
+        connection.commit()
+        connection.close()
+        return rows
+    except TypeError:
+        return ()
+    
+def getrules(logic: str):
+    """Retrieve the transformation rules of this logic."""
+
+    try:
+        connection = sqlite3.connect(metadata)
+        c = connection.cursor()
+        statement = 'SELECT name, pattern, displayname, description FROM rules WHERE logic=? ORDER BY name'
         c.execute(statement, (logic,))
         rows = c.fetchall()
         connection.commit()
@@ -367,7 +395,7 @@ def getproofdetails(logic: str, name: str):
         connection.close()
         return rows
 
-def getavailableproofs(logic: str):
+def getproofs(logic: str):
     database = getdatabase(logic)
     connection = sqlite3.connect(database)
     c = connection.cursor()
@@ -587,21 +615,21 @@ def testlogic(logic: str):
             print(i)
 
     # Test the connectors.
-    print(f'{spacer}')
-    print('What connectors are available?')
-    connectors = getconnectors(logic)
-    if len(connectors) == 0:
-        print(f'The logic "{logic}" has no connectors.')
-    else:
-        for i in connectors:
-            print(i)
+    # print(f'{spacer}')
+    # print('What connectors are available?')
+    # connectors = getconnectors(logic)
+    # if len(connectors) == 0:
+    #     print(f'The logic "{logic}" has no connectors.')
+    # else:
+    #     for i in connectors:
+    #         print(i)
 
-    # Test the intelim rules.
+    # Test the transformation rules.
     print(f'{spacer}')
-    print('What intelim rules are available?')
-    intelimrules = getintelimrules(logic)
+    print('What transformation rules are available?')
+    intelimrules = getrules(logic)
     if len(intelimrules) == 0:
-        print(f'The logic "{logic}" has no intelimrules.')
+        print(f'The logic "{logic}" has no transformation rules.')
     else:
         for i in intelimrules:
             print(i)
@@ -610,7 +638,7 @@ def testlogic(logic: str):
     print(f'{spacer}')
     print('What proofs have been saved?')
     try:
-        proofs = getavailableproofs(logic)
+        proofs = getproofs(logic)
     except sqlite3.OperationalError:
         print(f'The proofs and proofdetails tables are not available for {logic}.')
     except UnboundLocalError:

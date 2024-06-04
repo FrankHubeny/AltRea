@@ -23,12 +23,8 @@ connectors = [
     (logicname, 'And', 'Conjunction'), 
     (logicname, 'Or', 'Disjunction'), 
 ]
-intelimrules = [
-    (logicname, t.conjunction_elim_tag, 'self.conjunction_elim_name'),
-    (logicname, t.conjunction_intro_tag, 'self.conjunction_intro_name'),
-    (logicname, t.disjunction_elim_tag, 'self.disjunction_elim_name'),
-    (logicname, t.disjunction_intro_tag, 'self.disjunction_intro_name'),
-
+rules = [
+    (logicname, 'modusponens', 'ConclusionPremises({1}, [{0}, Implies({0}, {1})])', 'Modus Ponens', 'Modus Ponens'),
 ]
 definitions = [
     (logicname, 'not_from_notnot', 'ConclusionPremises(Not({0}), [{0}])', 'Not From Not Not', 'Not Is the Same As What It Negates'),
@@ -45,7 +41,7 @@ axioms = [
 ------------------------------------------------------------------------------"""
 
 # clean construction
-altrea.data.addlogic(logicname, logicdisplay, logicdescription, connectors, intelimrules, definitions, axioms)
+altrea.data.addlogic(logicname, logicdisplay, logicdescription, connectors, rules, definitions, axioms)
 
 """------------------------------------------------------------------------------
                                 SETLOGIC
@@ -678,6 +674,171 @@ def test_database_saveproof_removeproof_1(input_n, expected):
     prf.useproof('modusponens', [A, B], [1, 2])
     assert eval(input_n) == expected
 
+"""------------------------------------------------------------------------------
+                                RULE
+------------------------------------------------------------------------------"""
+
+# Clean run using a rule
+
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", str(B)),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", "Modus Ponens"),
+    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", "Testing"),
+    ("prf.lines[3][prf.typeindex]", t.linetype_transformationrule),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_rule_clean_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic(logicname)
+    prf.removeproof('modusponens')
+    prf.goal(C)
+    prf.premise(A)
+    prf.premise(Implies(A, B))
+    prf.rule('modusponens', [A, B], [1, 2], "Testing")
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                RULE
+                            stopped_premisesdontmatch
+------------------------------------------------------------------------------"""
+
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", "Modus Ponens"),
+    ("prf.lines[3][prf.linesindex]", ""),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_premisesdontmatch),
+    ("prf.lines[3][prf.typeindex]", ""),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_rule_premisesdontmatch_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic(logicname)
+    prf.goal(B)
+    prf.premise(A)
+    prf.premise(Implies(A, B))
+    prf.rule('modusponens', [A, B], [1, ])
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                RULE
+                                stopped_notenoughsubs
+------------------------------------------------------------------------------"""
+
+# Clean run using the proof saved above with premises.
+
+testdata = [
+    ('len(prf.lines)', 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", "Modus Ponens"),
+    ("prf.lines[3][prf.linesindex]", ""),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notenoughsubs),
+    ("prf.lines[3][prf.typeindex]", ""),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_rule_notenoughsubs_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic(logicname)
+    prf.goal(B)
+    prf.premise(A)
+    prf.premise(Implies(A, B))
+    prf.rule('modusponens', [A], [1, 2])
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                  RULE
+                            stopped_nosavedproof
+------------------------------------------------------------------------------"""
+
+# Error: no saved proof by that name
+
+testdata = [
+    ('len(prf.lines)', 2),
+    #
+    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", "testpro"),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notransformationrule),
+    ("prf.lines[1][prf.typeindex]", ""),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_rule_nosuchproof_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic(logicname)
+    prf.goal(And(A, B))
+    prf.rule('testpro', [B])
+    assert eval(input_n) == expected
+"""------------------------------------------------------------------------------
+                            SUBSTITUTION
+                                Clean Run
+------------------------------------------------------------------------------"""
+
+# Clean test substituting one letter for another.
+
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[2][prf.statementindex])", str(Not(B))),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.substitution_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    ("prf.lines[2][prf.commentindex]", ""),
+    ("prf.lines[2][prf.typeindex]", t.linetype_substitution),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_substitution_clean_1(input_n, expected):
+    prf = Proof()
+    prf.setrestricted(False)
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic(logicname)
+    prf.goal(A)
+    prf.premise(B)
+    prf.substitution(1, [B], [Not(B)])
+    assert eval(input_n) == expected
+    
 """------------------------------------------------------------------------------
                                 SAVEDEFINITION
 ------------------------------------------------------------------------------"""

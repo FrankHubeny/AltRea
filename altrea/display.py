@@ -171,14 +171,14 @@ def displayproofdetails(p: Proof, newrows: list, latex: int = 1):
     df = pandas.DataFrame(newp, index=index, columns=columns)
     return df
 
-def availableproofs(logic: str):
-    rows = altrea.data.getavailableproofs(logic)
-    columns = ['Name', 'Pattern', 'Display', 'Description']
-    index = []
-    for i in range(len(rows)):
-            index.append(i)
-    df = pandas.DataFrame(rows, index=index, columns=columns)
-    return df
+# def availableproofs(logic: str):
+#     rows = altrea.data.getproofs(logic)
+#     columns = ['Name', 'Pattern', 'Display', 'Description']
+#     index = []
+#     for i in range(len(rows)):
+#             index.append(i)
+#     df = pandas.DataFrame(rows, index=index, columns=columns)
+#     return df
 
 # def metadata(p: Proof):
 #     """Display the metadata associated with a proof.

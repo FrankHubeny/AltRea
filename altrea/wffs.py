@@ -175,6 +175,79 @@ class And(Wff):
             return (True)
         else:
             return (True, False)
+        
+class ConsistentWith(Wff):
+    """A well formed formula with two arguments which are also well formed formulas connected
+    by logical and.
+    """
+
+    is_variable = False
+
+    def __init__(self, 
+                 left: Wff, 
+                 right: Wff, 
+                 consistentwith_connector: str = '&', 
+                 consistentwith_latexconnector: str = '\\circ',
+                 consistentwith_treeconnector: str = 'o'):
+        self.left = left
+        self.right = right
+        self.consistentwith_connector = consistentwith_connector
+        self.consistentwith_latexconnector = consistentwith_latexconnector
+        self.consistentwith_treeconnector = consistentwith_treeconnector
+        self.booleanvalue = left.booleanvalue and right.booleanvalue
+        leftmultivalue = left.getmultivalue()
+        rightmultivalue = right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (False):
+            self.multivalue = (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            self.multivalue = (True)
+        else:
+            self.multivalue = (True, False)
+
+    def __str__(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left} {self.consistentwith_connector} {self.right}'
+        elif self.left.is_variable:
+            return f'{self.left} {self.consistentwith_connector} {self.lb}{self.right}{self.rb}'
+        elif self.right.is_variable:
+            return f'{self.lb}{self.left}{self.rb} {self.consistentwith_connector} {self.right}'
+        else:
+            return f'{self.lb}{self.left}{self.rb} {self.consistentwith_connector} {self.lb}{self.right}{self.rb}'
+        
+    def latex(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left.latex()} {self.consistentwith_latexconnector} {self.right.latex()}'
+        elif self.left.is_variable:
+            return f'{self.left.latex()} {self.consistentwith_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        elif self.right.is_variable:
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.consistentwith_latexconnector} {self.right.latex()}'
+        else:
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.consistentwith_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.consistentwith_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def pattern(self, wfflist: list):
+        return f'{self.consistentwith_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.consistentwith_treeconnector}{self.lb}{self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)}{self.rb}'
+    
+    def treetuple(self):
+        return self.consistentwith_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
+        
+    def getvalue(self):
+        return self.left.getvalue() and self.right.getvalue()
+    
+    def getmultivalue(self):
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue== (False) or rightmultivalue == (False):
+            return (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            return (True)
+        else:
+            return (True, False)
 
 class Falsehood(Wff):
     """This well formed formula is the result of a contradiction in a proof which may be useful for explosions.
@@ -294,6 +367,76 @@ class Iff(Wff):
             return (True)
         else:
             return (True, False) 
+        
+class StrictIff(Wff):
+    """A well formed formula with two arguments which are also well formed formulas
+    joined by if and only if.
+    """
+
+    is_variable = False
+
+    def __init__(self, 
+                 left: Wff, 
+                 right: Wff, 
+                 strictiff_connector: str = '<=>', 
+                 strictiff_latexconnector: str = '\\equiv ',
+                 strictiff_treeconnector: str = '<=>'):
+        self.left = left
+        self.right = right
+        self.strictiff_connector = strictiff_connector
+        self.strictiff_latexconnector = strictiff_latexconnector
+        self.strictiff_treeconnector = strictiff_treeconnector
+        self.booleanvalue = ((not left.booleanvalue) or right.booleanvalue) and ((not right.booleanvalue) or left.booleanvalue)
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (False):
+            self.multivalue = (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            self.multivalue = (True)
+        else:
+            self.multivalue = (True, False) 
+
+    def __str__(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left} {self.strictiff_connector} {self.right}'
+        elif self.left.is_variable:
+            return f'{self.left} {self.strictiff_connector} {self.lb}{self.right}{self.rb}'
+        elif self.right.is_variable:
+            return f'{self.lb}{self.left}{self.rb} {self.strictiff_connector} {self.right}'
+        else:
+            return f'{self.lb}{self.left}{self.rb} {self.strictiff_connector} {self.lb}{self.right}{self.rb}'
+        
+    def latex(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left.latex()} {self.strictiff_latexconnector} {self.right.latex()}'
+        elif self.left.is_variable:
+            return f'{self.left.latex()} {self.strictiff_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        elif self.right.is_variable:
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.strictiff_latexconnector} {self.right.latex()}'
+        else:
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.strictiff_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.strictiff_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def pattern(self, wfflist: list):
+        return f'{self.strictiff_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.strictiff_treeconnector}{self.lb}{self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)}{self.rb}'
+    
+    def treetuple(self):
+        return self.strictiff_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
+    
+    def getmultivalue(self):
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (False):
+            return (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            return (True)
+        else:
+            return (True, False) 
 
 class Implies(Wff):
     """A well formed formula with two arguments which are also well formed formulas joined
@@ -363,6 +506,79 @@ class Implies(Wff):
         else:
             return (True, False)
 
+class StrictImplies(Wff):
+    """A well formed formula with two arguments which are also well formed formulas joined
+    by implies.  The antecedent is the first of the two arguments.  The consequent is the
+    second.
+    """
+
+    is_variable = False
+
+    def __init__(self, 
+                 left: Wff, 
+                 right: Wff, 
+                 strictimplies_connector: str = '->', 
+                 strictimplies_latexconnector: str = '\\prec ',
+                 strictimplies_treeconnector: str = '->'):
+        self.left = left
+        self.right = right
+        self.strictimplies_connector = strictimplies_connector
+        self.strictimplies_latexconnector = strictimplies_latexconnector
+        self.strictimplies_treeconnector = strictimplies_treeconnector
+        self.booleanvalue = None
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (True):
+            self.multivalue = (True)
+        elif leftmultivalue == (True) and rightmultivalue == (False):
+            self.multivalue = (False)
+        else:
+            self.multivalue = (True, False)
+    
+    def __str__(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left} {self.strictimplies_connector} {self.right}'
+        elif self.left.is_variable:
+            return f'{self.left} {self.strictimplies_connector} {self.lb}{self.right}{self.rb}'
+        elif self.right.is_variable:
+            return f'{self.lb}{self.left}{self.rb} {self.strictimplies_connector} {self.right}'
+        else:
+            return f'{self.lb}{self.left}{self.rb} {self.strictimplies_connector} {self.lb}{self.right}{self.rb}'
+        
+    def latex(self):
+        if self.left.is_variable and self.right.is_variable:
+            return f'{self.left.latex()} {self.strictimplies_latexconnector} {self.right.latex()}'
+        elif self.left.is_variable:
+            return f'{self.left.latex()} {self.strictimplies_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        elif self.right.is_variable:
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.strictimplies_latexconnector} {self.right.latex()}'
+        else:
+            return f'{self.lb}{self.left.latex()}{self.rb} {self.strictimplies_latexconnector} {self.lb}{self.right.latex()}{self.rb}'
+        
+    def tree(self):
+        return f'{self.strictimplies_treeconnector}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def pattern(self, wfflist: list):
+        return f'{self.strictimplies_treeconnector}{self.lb}{self.left.pattern(wfflist)}, {self.right.pattern(wfflist)}{self.rb}'
+    
+    def makeschemafromlist(self, wfflist: list):
+        return f'{self.strictimplies_treeconnector}{self.lb}{self.left.makeschemafromlist(wfflist)}, {self.right.makeschemafromlist(wfflist)}{self.rb}'
+    
+    def treetuple(self):
+        return self.strictimplies_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
+        
+    def getvalue(self):
+        return (not self.left.getvalue()) or self.right.getvalue()
+    
+    def getmultivalue(self):
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (True):
+            return (True)
+        elif leftmultivalue == (True) and rightmultivalue == (False):
+            return (False)
+        else:
+            return (True, False)
 
 class Necessary(Wff):
     """A well-formed formula which is necessarily true."""
@@ -533,7 +749,7 @@ class Possibly(Wff):
 
     is_variable = True
 
-    def __init__(self, wff, possibly_connector: str = 'Pos', possibly_latexconnector: str = '\\Diamond'):
+    def __init__(self, wff, possibly_connector: str = 'Pos', possibly_latexconnector: str = '\\Diamond~'):
         self.wff = wff
         self.possibly_connector = possibly_connector
         self.possibly_latexconnector = possibly_latexconnector
@@ -842,3 +1058,6 @@ class ConclusionPremises(Wff):
 
     # def getmultivalue(self):
     #     return self.multivalue
+
+
+

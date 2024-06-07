@@ -80,6 +80,7 @@ class Proof:
     proofsindex = 5
     commentindex = 6
     typeindex = 7
+    subproofstatusindex = 8
     lowestlevel = 0
     acceptedtypes = [And, Or, Not, Implies, Iff, Wff, Falsehood, Truth],
     coimplication_intro_tag = 'COI'
@@ -91,6 +92,7 @@ class Proof:
     explosion_tag = 'X'
     hypothesis_tag = 'H'
     implication_intro_tag = 'II'
+    implication_intro_strict_tag = 'IIS'
     implication_elim_tag = 'IE'
     necessary_intro_tag = 'NEI'
     necessary_elim_tag = 'NEE'
@@ -129,6 +131,7 @@ class Proof:
     goal_name = 'GOAL'
     hypothesis_name = 'Hypothesis'
     implication_intro_name = 'Implication Intro'
+    implication_intro_strict_name = 'Strict Implication Intro'
     implication_elim_name = 'Implication Elim'
     necessary_intro_name = 'Necessary Intro'
     necessary_elim_name = 'Necessary Elim'
@@ -277,6 +280,7 @@ class Proof:
     log_hypothesis = '{0}: A new subproof {1} has been started with item "{2}".'
     log_implication_elim = '{0}: Item "{1}" has been derived from the implication "{2}" and item "{3}".'
     log_implication_intro = '{0}: Item "{1}" has been derived upon closing subproof {2}.'
+    log_implication_intro_strict = '{0}: Item "{1}" has been derived upon closing the strict subproof {2}.'
     log_logdisplayed = 'The log will be displayed.'
     log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
     log_necessary_elim = '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
@@ -485,7 +489,7 @@ class Proof:
             (self.premise_tag, self.premise_name),
             (self.reiterate_tag, self.reiterate_name),
         ]
-        self.lines = [['', 0, 0, '', '', '', '', '']]
+        self.lines = [['', 0, 0, '', '', '', '', '', '']]
         self.previousproofchain = []
         self.previousproofid = -1
         self.currentproof = [1]
@@ -545,7 +549,8 @@ class Proof:
                     self.lines[length][4], 
                     self.lines[length][5],
                     self.lines[length][6],
-                    self.lines[length][7]
+                    self.lines[length][7],
+                    self.lines[length][8]
                 ]
             )
         if self.status == self.complete:
@@ -571,7 +576,8 @@ class Proof:
                             self.proofdata[i][4],
                             self.proofdata[i][5],
                             self.proofdata[i][6],
-                            self.proofdata[i][7]
+                            self.proofdata[i][7],
+                            self.proofdata[i][8]
                         ]
                     )    
         
@@ -681,6 +687,9 @@ class Proof:
 
     #     return self.status == self.complete or self.status == self.vacuous
     
+    def getpreviousproofid(self, proofid: int) -> int:
+        return self.prooflist[proofid][2]
+
     def getproof(self, proofid: int) -> tuple:
         """Returns one or more hypothesis statements conjoined together, the conclusion statement 
         and the parent proof id.  It is used by functions such as implication_intro and
@@ -881,10 +890,19 @@ class Proof:
         """Formats a statement or item in a proof line for display as latex."""
 
         if prooflines[i][0] != self.blankstatement:
-            base = ' \\hspace{0.35cm}|'
+            normalbase = ' \\hspace{0.35cm}|'
+            strictbase = ' \\hspace{0.35cm}\\diamond'
+            if prooflines[i][self.subproofstatusindex] == self.subproof_strict:
+                base = strictbase
+            else:
+                base = normalbase
+            #base = ' \\hspace{0.35cm}|'
             hypothesisbase = ''.join(['\\underline{', base, '}']) 
             statement = ''
             for j in range(1, prooflines[i][self.levelindex]):
+                # if prooflines[i][self.subproofstatusindex] == self.subproof_strict:
+                #     statement = strictbase + statement
+                # else:
                 statement = base + statement
             if prooflines[i][self.statementindex] != '':
                 if prooflines[i][self.levelindex] > 0:
@@ -2441,7 +2459,8 @@ class Proof:
                     '', 
                     '',
                     newcomment,
-                    self.linetype_hypothesis
+                    self.linetype_hypothesis,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(hypothesis, 
@@ -2531,7 +2550,8 @@ class Proof:
                     self.reflines(*lineslist), 
                     '', 
                     newcomment,
-                    self.linetype_axiom
+                    self.linetype_axiom,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 
@@ -2655,7 +2675,8 @@ class Proof:
                     lines, 
                     '', 
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(statement, 
@@ -2777,7 +2798,8 @@ class Proof:
                                   right), 
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )   
             self.appendproofdata(newstatement, 
@@ -2894,7 +2916,8 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )   
             self.appendproofdata(conjunct, 
@@ -3003,7 +3026,8 @@ class Proof:
                                   right), 
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             ) 
             self.appendproofdata(andstatement, 
@@ -3093,7 +3117,8 @@ class Proof:
                     self.reflines(*lineslist), 
                     '', 
                     newcomment,
-                    self.linetype_definition
+                    self.linetype_definition,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 
@@ -3275,7 +3300,8 @@ class Proof:
                                   right_implication_line),
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )    
             self.appendproofdata(statement, 
@@ -3451,7 +3477,8 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )    
             self.appendproofdata(disjunction, 
@@ -3609,7 +3636,8 @@ class Proof:
                     '', 
                     '',
                     newcomment,
-                    self.linetype_hypothesis
+                    self.linetype_hypothesis,
+                    self.subproof_status
                 ]
             )      
             self.appendproofdata(hypothesis, 
@@ -3753,7 +3781,8 @@ class Proof:
                     self.reflines(first, second), 
                     '', 
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(statement, 
@@ -3912,6 +3941,7 @@ class Proof:
         # If no errors, perform task
         if self.canproceed():
             proofid = self.currentproofid
+            subproof_status = self.subproof_status
             self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
             self.level -= 1
             antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
@@ -3925,9 +3955,15 @@ class Proof:
                 self.previousproofid = -1  
             implication = Implies(antecedent, 
                                   consequent)
-            self.logstep(self.log_implication_intro.format(self.implication_intro_name.upper(), 
-                                                           implication, 
-                                                           proofid))
+            if subproof_status == self.subproof_strict:
+                name = self.implication_intro_strict_name
+                message = self.log_implication_intro_strict
+            else:
+                name = self.implication_intro_name
+                message = self.log_implication_intro
+            self.logstep(message.format(name.upper(), 
+                                        implication, 
+                                        proofid))
             newcomment = self.iscomplete(implication, 
                                          comment)
             self.lines.append(
@@ -3935,15 +3971,16 @@ class Proof:
                     implication, 
                     self.level, 
                     self.currentproofid, 
-                    self.implication_intro_name, 
+                    name, 
                     '', 
                     self.refproof(proofid), 
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )   
             self.appendproofdata(implication, 
-                                 self.implication_intro_tag)     
+                                 self.implication_intro_strict_tag)     
 
     def necessary_elim(self, 
                        line: int, 
@@ -4000,7 +4037,8 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )      
             self.appendproofdata(statement.wff, 
@@ -4058,7 +4096,8 @@ class Proof:
             proofid = self.currentproofid
             self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
             self.level -= 1
-            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            #antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            previousproofid = self.getpreviousproofid(self.currentproofid)
             self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
             if len(self.previousproofchain) > 1:  
@@ -4084,7 +4123,8 @@ class Proof:
                         self.reflines(i), 
                         '',
                         newcomment,
-                        self.linetype_transformationrule
+                        self.linetype_transformationrule,
+                    self.subproof_status
                     ]
                 )      
                 self.appendproofdata(necessarystatement, 
@@ -4172,7 +4212,8 @@ class Proof:
                     self.reflines(first, second), 
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )      
             self.appendproofdata(falsehood, 
@@ -4266,14 +4307,14 @@ class Proof:
                     '', 
                     "", 
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )  
             self.appendproofdata(negation, 
                                  self.negation_intro_tag)
 
     def possibly_elim(self, 
-                      lines,
                       comment: str = ''):
         """Closes a strict subproof with a possibly consequence.
         
@@ -4289,22 +4330,23 @@ class Proof:
                              self.possibly_elim_name, 
                              self.possibly_elim_name, 
                              comment):
-                if len(lines) == 0:
-                    self.logstep(self.log_nolines.format(self.possibly_elim_name.upper(), 
-                                                         lines))
-                    self.stopproof(self.stopped_nolines, 
-                                   self.blankstatement, 
-                                   self.possibly_elim_name, 
-                               '', 
-                               '', 
-                               comment)
-                else:
-                    for i in lines:
-                        if not self.goodline(i,
-                                             self.possibly_elim_name,
-                                             self.possibly_elim_name,
-                                             comment):
-                            break
+                pass
+                # if len(lines) == 0:
+                #     self.logstep(self.log_nolines.format(self.possibly_elim_name.upper(), 
+                #                                          lines))
+                #     self.stopproof(self.stopped_nolines, 
+                #                    self.blankstatement, 
+                #                    self.possibly_elim_name, 
+                #                '', 
+                #                '', 
+                #                comment)
+                # else:
+                #     for i in lines:
+                #         if not self.goodline(i,
+                #                              self.possibly_elim_name,
+                #                              self.possibly_elim_name,
+                #                              comment):
+                #             break
 
         # Look for specific errors
         if self.canproceed():
@@ -4321,10 +4363,10 @@ class Proof:
                 
         # If no errors, perform task
         if self.canproceed():
-            proofid = self.currentproofid
-            self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
+            line = len(self.lines)-1
+            self.prooflist[self.currentproofid][1].append(line)
             self.level -= 1
-            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            previousproofid = self.getpreviousproofid(self.currentproofid)
             self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
             if len(self.previousproofchain) > 1:  
@@ -4333,28 +4375,28 @@ class Proof:
             else: 
                 self.previousproofchain = [] 
                 self.previousproofid = -1  
-            for i in lines:
-                statement = self.getstatement(i)
-                possiblystatement = Possibly(statement)
-                self.logstep(self.log_possibly_elim.format(self.possibly_elim_name.upper(), 
-                                                             possiblystatement,
-                                                             statement))
-                newcomment = self.iscomplete(possiblystatement, 
-                                             comment)
-                self.lines.append(
-                    [
-                        possiblystatement,
-                        self.level, 
-                        self.currentproofid, 
-                        self.possibly_elim_name, 
-                        self.reflines(i), 
-                        '',
-                        newcomment,
-                        self.linetype_transformationrule
-                    ]
-                )      
-                self.appendproofdata(possiblystatement, 
-                                     self.possibly_elim_tag) 
+            statement = self.getstatement(len(self.lines)-1)
+            possiblystatement = Possibly(statement)
+            self.logstep(self.log_possibly_elim.format(self.possibly_elim_name.upper(), 
+                                                       possiblystatement,
+                                                       statement))
+            newcomment = self.iscomplete(possiblystatement, 
+                                         comment)
+            self.lines.append(
+                [
+                    possiblystatement,
+                    self.level, 
+                    self.currentproofid, 
+                    self.possibly_elim_name, 
+                    self.reflines(line), 
+                    '',
+                    newcomment,
+                    self.linetype_transformationrule,
+                    self.subproof_status
+                ]
+            )      
+            self.appendproofdata(possiblystatement, 
+                                 self.possibly_elim_tag) 
 
     def possibly_intro(self, 
                        line: int, 
@@ -4402,7 +4444,8 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )      
             self.appendproofdata(possiblystatement, 
@@ -4485,7 +4528,8 @@ class Proof:
                     '', 
                     '', 
                     newcomment,
-                    self.linetype_premise
+                    self.linetype_premise,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(premise, 
@@ -4585,14 +4629,14 @@ class Proof:
             self.level += 1
             nextline = len(self.lines)
             self.currentproof = [nextline]
-            self.currenthypotheses = [nextline]
+            #self.currenthypotheses = [nextline]
             self.subproof_status = self.subproof_strict
             self.prooflist.append(
                 [
                     self.level, 
                     self.currentproof, 
                     self.currentproofid, 
-                    self.currenthypotheses,
+                    [],#self.currenthypotheses,
                     self.subproof_status
                 ]
             )  
@@ -4693,7 +4737,8 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    ''
+                    '',
+                    self.subproof_status
                 ]
             )  
             self.appendproofdata(statement, 
@@ -4881,7 +4926,8 @@ class Proof:
                     str(line), 
                     '',
                     newcomment,
-                    self.linetype_substitution
+                    self.linetype_substitution,
+                    self.subproof_status
                 ]
             )  
             self.appendproofdata(newstatement, 
@@ -4977,7 +5023,8 @@ class Proof:
                     self.reflines(*lineslist), 
                     '', 
                     newcomment,
-                    self.linetype_transformationrule
+                    self.linetype_transformationrule,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 
@@ -5080,7 +5127,8 @@ class Proof:
                     self.reflines(*lineslist), 
                     '', 
                     newcomment,
-                    self.linetype_savedproof
+                    self.linetype_savedproof,
+                    self.subproof_status
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 

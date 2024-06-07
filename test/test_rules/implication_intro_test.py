@@ -1,6 +1,5 @@
 """------------------------------------------------------------------------------
-                        Implication Introduction
-                                implication_intro
+                                IMPLICATION_INTRO
 ------------------------------------------------------------------------------"""
 
 import pytest
@@ -161,6 +160,51 @@ def test_implication_intro_clean_3(input_n, expected):
     prf.addhypothesis(A)
     prf.addhypothesis(C)
     prf.conjunction_intro(1,2)
+    prf.implication_intro()
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                Clean Run 4 Strict Subproof addhypothesis
+------------------------------------------------------------------------------"""
+# Clean test
+testdata = [
+    ('len(prf.lines)', 3),
+    #
+    ("str(prf.lines[0][prf.statementindex])", str(Implies(A, A))),
+    ("prf.lines[0][prf.levelindex]", 0),
+    ("prf.lines[0][prf.proofidindex]", 0),
+    ("prf.lines[0][prf.ruleindex]", t.goal_name),
+    ("prf.lines[0][prf.linesindex]", ""),
+    ("prf.lines[0][prf.proofsindex]", ""),
+    ("prf.lines[0][prf.commentindex]", "Strict Subproof"),
+    #
+    ("str(prf.lines[1][prf.statementindex])", str(A)),
+    ("prf.lines[1][prf.levelindex]", 1),
+    ("prf.lines[1][prf.proofidindex]", 1),
+    ("prf.lines[1][prf.ruleindex]", t.hypothesis_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", ""),
+    #
+    ("str(prf.lines[2][prf.statementindex])", str(Implies(A, A))),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.ruleindex]", t.implication_intro_strict_name),
+    ("prf.lines[2][prf.linesindex]", ""),
+    ("prf.lines[2][prf.proofsindex]", "1-1"),
+    ("prf.lines[2][prf.commentindex]", "COMPLETE"),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_implication_intro_strict_clean_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition('A')
+    B = prf.proposition('B')
+    C = prf.proposition('C')
+    D = prf.proposition('D')
+    E = prf.proposition('E')
+    prf.setlogic()
+    prf.goal(Implies(A, A), comment='Strict Subproof')
+    prf.startstrictsubproof(hypothesis=A)
     prf.implication_intro()
     assert eval(input_n) == expected
 

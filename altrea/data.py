@@ -220,14 +220,16 @@ def addlogic(logic: str,
     # Create the proofdetails table in the dbname database.
     try:
         c.execute("""CREATE TABLE proofdetails (
-                    name       TEXT NOT NULL,
-                    item       TEXT NOT NULL,
-                    level      INT  NOT NULL,
-                    proof      INT  NOT NULL,
-                    rule       TEXT NOT NULL,
-                    lines      TEXT NULL,
-                    usedproofs TEXT NULL,
-                    comment    TEXT NULL,
+                    name           TEXT NOT NULL,
+                    item           TEXT NOT NULL,
+                    level          INT  NOT NULL,
+                    proof          INT  NOT NULL,
+                    rule           TEXT NOT NULL,
+                    lines          TEXT NULL,
+                    usedproofs     TEXT NULL,
+                    comment        TEXT NULL,
+                    linetype       TEXT NULL,
+                    subproofstatus TEXT NULL,
                     FOREIGN KEY (name) 
                         REFERENCES proofs(name)
                     )"""
@@ -442,7 +444,7 @@ def addproof(proofdata: list):
         statement = 'INSERT INTO proofs (name, pattern, displayname, description) VALUES (?, ?, ?, ?)'
         c.execute(statement, row)
         #print(f'The proof "{name}" for logic "{logic}" has been added to {database}.')
-        statement = 'INSERT INTO proofdetails (name, item, level, proof, rule, lines, usedproofs, comment) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+        statement = 'INSERT INTO proofdetails (name, item, level, proof, rule, lines, usedproofs, comment, subproofstatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
         c.executemany(statement, proofdata[1:])
         #print(f'The proof details for "{name}" for logic "{logic}" have been added to {database}.')
         connection.commit()

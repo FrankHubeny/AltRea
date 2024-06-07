@@ -102,6 +102,7 @@ class Proof:
     reiterate_tag = 'R'
     substitution_tag = 'S'
     blankstatement = ''
+
     subproof_strict = 'STRICT'
     subproof_normal = ''
 
@@ -141,6 +142,7 @@ class Proof:
     removeproof_name = 'Remove Proof'
     saveaxiom_name = 'Save Axiom'
     savedefinition_name = 'Save Definition'
+    startstrictsubproof_name = 'Start Strict Subproof'
     substitution_name = 'Substitution'
     rule_name = 'Transformation Rule'
 
@@ -177,6 +179,8 @@ class Proof:
     log_nodefinitionmatch = '{0}: The referenced item "{1}" on line {2} does not match the definition "{3}".'
     stopped_nogoal = 'The proof does not yet have a goal.'
     log_nogoal = '{0}: The proof needs a goal before a line with the item "{1}" can be added to it.'
+    stopped_nolines = 'The list of lines is empty.'
+    log_nolines = '{0}: The list of lines "{1}" is empty.'
     stopped_nologic = 'No logic has been declared for the proof.'
     log_nologic = '{0}: No logic has been declared for the proof.'
     stopped_logicalreadydefined = 'A specified logic is already being used.'
@@ -241,6 +245,8 @@ class Proof:
     log_premisesdontmatch = '{0}: The premise "{1}" does not match a line from the current proof.'
     stopped_restrictednowff = 'In restricted mode objects cannot be used in disjunction introduction.'
     log_restrictednowff = '{0}: Only integers referencing statements can be used in restricted mode not "{1}" or "{2}".'
+    stopped_ruleclass = 'This inference rule is not part of the selected set of rules.'
+    log_ruleclass = '{0}: This inference rule "{1}" is part of the "{2}" set of rules not the selected "{3}" set of rules.'
     stopped_sidenotselected = 'A side, "left" or "right", must be selected.'
     log_sidenotselected = '{0}: The input "{1}" was used rather than "left" or "right".'
 
@@ -274,9 +280,12 @@ class Proof:
     log_logdisplayed = 'The log will be displayed.'
     log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
     log_necessary_elim = '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
+    log_necessary_intro = '{0}: Item "{1}" has been derived from item "{2}".'
     log_negation_elim = '{0}: A falsehood "{1}" has been derived from the contradiction between "{2}" on line {3} and "{4}" on line {5}.'
     log_negation_intro = '{0}: Item "{1}" has been derived as the negation of the antecedent of "{2}".'
     log_noproofs = 'There are no saved proofs for logic {0}'
+    log_possibly_elim = '{0}: Item "{1}" has been derived from item "{2}".'
+    log_possibly_intro = '{0}: Item "{1}" has been derived from the item "{2}" on line {3}.'
     log_premise = '{0}: Item "{1}" has been added to the premises.'
     log_proof = '{0}: A proof named "{1}" or "{2}" with description "{3}" has been started.'
     log_proofalreadyexists = '{0}: A proof name "{1}" already exists in the database.'
@@ -288,6 +297,7 @@ class Proof:
     log_partiallycomplete = 'The proof is partially complete.'
     log_proofsaved = '{0}: The proof "{1}" was saved as "{2}" to database "{3}" under logic "{4}".'
     log_proofdeleted = '{0}: The proof "{1}" was deleted form the database "{2}" under logic "{3}".'
+    log_strictsubproofstarted = '{0}: A strict subproof "{1}" has been started with either line {2} or hypothesis "{3}".'
     log_substitute = '{0}: The placeholder(s) in the string "{1}" have been replaced with "{2}" to become "{3}".'
     log_substitution = '{0}: The statement "{1}" on line "{2}" has been substituted with "{3}".'
     log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
@@ -298,6 +308,8 @@ class Proof:
 
     label_axiom = 'Axiom'
     label_axioms = 'Axioms'
+    label_checkmarklatex = '\\color{green}\\checkmark'
+    label_checkmark = 'ok'
     label_comment = 'Comment'
     label_connective = 'Connective'
     label_connectives = 'Connectors'
@@ -309,6 +321,8 @@ class Proof:
     label_description = 'Description'
     label_displayname = 'Display Name'
     label_empty = 'Empty'
+    label_errorlatex = '\\color{red}\\chi'
+    label_error = 'x'
     label_goal = 'Goal'
     label_goals = 'Goals'
     label_inprogress = 'In Progress'
@@ -370,6 +384,10 @@ class Proof:
     linetype_substitution = 'SUB'
     linetype_hypothesis = 'H'
     linetype_premise = 'PR'
+
+    rule_naturaldeduction = 'Natural Deducation'
+    rule_categorical = 'Categorical'
+    rule_axiomatic = 'Axiomatic'
 
     def __init__(self, 
                  name: str = '', 
@@ -476,6 +494,7 @@ class Proof:
         self.proofdata = [[self.name, self.displayname, self.description]]
         self.proofdatafinal = []
         self.prooflist = [[self.lowestlevel, self.currentproof, self.previousproofid, [], self.subproof_status]]  
+        self.proofrules = self.rule_naturaldeduction
         self.level = self.lowestlevel
         self.status = ''
         self.stoppedmessage = ''
@@ -798,26 +817,22 @@ class Proof:
         else:
             return True
 
-    def goodtransformationrule(self, 
-                               tag: str, 
-                               caller: str, 
-                               comment: str):
-        found = False
-        for i in self.logicintelimrules:
-            if i[0] == tag:
-                found = True
-                break
-        if not found:
-            self.logstep(self.log_notransformationrule.format(caller.upper()))
-            self.stopproof(self.stopped_notransformationrule, 
+    def goodrule(self,
+                 ruleclass: str,
+                 caller: str,
+                 displayname: str,
+                 comment: str):
+        if self.proofrules == ruleclass:
+            return True
+        else:
+            self.logstep(self.log_ruleclass.format(caller.upper(), displayname, ruleclass, self.proofrules))
+            self.stopproof(self.stopped_ruleclass, 
                            self.blankstatement, 
-                           tag, 
+                           displayname, 
                            '', 
                            '', 
                            comment)
             return False
-        else:
-            return True
         
     def iscomplete(self, 
                    statement:  Wff = None, 
@@ -1799,15 +1814,15 @@ class Proof:
                 row.append(goalvalue)
             if premisesvalue == True and goalvalue == False:
                 if latex:
-                    row.append('$\\color{red}\\times $')
+                    row.append(''.join(['$', self.label_errorlatex, '$']))
                 else:
-                    row.append('x')
-                status = self.label_valid
+                    row.append(self.label_error)
+                status = self.label_invalid
             elif premisesvalue == True and goalvalue == True:
                 if latex:
-                    row.append('$\\color{green}\\checkmark $')
+                    row.append(''.join(['$', self.label_checkmarklatex, '$']))
                 else:
-                    row.append('ok')
+                    row.append(self.label_checkmark)
             else:
                 row.append(' ')
             tt.append(row)
@@ -1832,9 +1847,9 @@ class Proof:
         if status == self.label_tautology:
             for i in range(len(self.premises)):
                 if latex:
-                    summaryrow.append('$\\color{red}\\times $')
+                    summaryrow.append(''.join(['$', self.label_errorlatex, '$']))
                 else:
-                    summaryrow.append('x')
+                    summaryrow.append(self.label_error)
         else:
             for i in range(len(self.premises)):
                 summaryrow.append(' ')
@@ -1853,13 +1868,16 @@ class Proof:
             
         """
 
-        def flip(v: bool):
-            if v:
-                return False
-            else:
-                return True
+        def flip(v):
+            if v == (True):
+                return (True, False)
+            elif v == (True, False):
+                return (False)
+            elif v == (False):
+                return (True)
             
         columns = []
+        values = 3
 
         # Letters
         for i in self.letters:
@@ -1912,69 +1930,69 @@ class Proof:
         letters = len(self.letters)
         countfalsegoal = 0
         counttruepremises = 0
-        ttrows = 2**letters
+        ttrows = values**letters
         status = 'Valid'
 
         for letter in self.letters:
-            letter[0].booleanvalue = True
+            letter[0].multivalue = (True)
         for total in range(ttrows):
             row = []
 
             # Display the letters
             for i in self.letters:
-                if i[0].booleanvalue == True:
-                    row.append(1)
-                else:
-                    row.append(0)
-                #row.append(i[0].booleanvalue)
+                # if i[0].booleanvalue == True:
+                #     row.append(1)
+                # else:
+                #     row.append(0)
+                row.append(i[0].multivalue)
             for i in self.truths:
-                row.append(1)
-                #row.append(True)
+                #row.append(1)
+                row.append((True))
             if latex:
                 row.append('$\\parallel $')
             else:
                 row.append('|')
 
             # Display the optional premises
-            premisesvalue = True
+            premisesvalue = (True)
             if len(self.premises) > 0:
                 for i in self.premises:
-                    if i.getvalue() == True:
-                        row.append(1)
-                    else:
-                        row.append(0)
-                    #row.append(i.getvalue())
-                    premisesvalue = premisesvalue and i.getvalue()
-                if premisesvalue == True:
+                    # if i.getvalue() == True:
+                    #     row.append(1)
+                    # else:
+                    #     row.append(0)
+                    row.append(i.getmultivalue())
+                    premisesvalue = premisesvalue and i.getmultivalue()
+                if premisesvalue == (True):
                     counttruepremises += 1
 
             # Display the goal and assessment of the interpretation on the line.
             row.append(' ')
-            goalvalue = goals.getvalue()
+            goalvalue = goals.getmultivalue()
             if not goalvalue:
                 countfalsegoal += 1
-            if goalvalue == True:
-                row.append(1)
-            else:
-                row.append(0)
-            #row.append(goalvalue)
-            if premisesvalue == True and goalvalue == False:
+            # if goalvalue == True:
+            #     row.append(1)
+            # else:
+            #     row.append(0)
+            row.append(goalvalue)
+            if premisesvalue == (True) and goalvalue == (False):
                 if latex:
-                    row.append('$\\color{red}\\times $')
+                    row.append(''.join(['$', self.label_errorlatex, '$']))
                 else:
-                    row.append('x')
-                status = self.label_valid
-            elif premisesvalue == True and goalvalue == True:
+                    row.append(self.label_error)
+                status = self.label_invalid
+            elif premisesvalue == (True) and goalvalue == (True):
                 if latex:
-                    row.append('$\\color{green}\\checkmark $')
+                    row.append(''.join(['$', self.label_checkmarklatex, '$']))
                 else:
-                    row.append('ok')
+                    row.append(self.label_checkmark)
             else:
                 row.append(' ')
             tt.append(row)
             for n in range(letters):
-                if (total + 1) % (2**(letters - 1 - n)) == 0:
-                    self.letters[n][0].booleanvalue = flip(self.letters[n][0].booleanvalue)
+                if (total + 1) % (values**(letters - 1 - n)) == 0:
+                    self.letters[n][0].multivalue = flip(self.letters[n][0].multivalue)
 
         if len(self.premises) > 0 and counttruepremises == 0:
             if self.restricted:
@@ -1986,16 +2004,16 @@ class Proof:
         index = []
         for i in range(len(tt)):
             index.append(i+1)
-        index.append(' ')
+        index.append(self.displayname)
         summaryrow = []
         for i in range(len(columns)-3-len(self.premises)):
             summaryrow.append(' ')
         if status == self.label_tautology:
             for i in range(len(self.premises)):
                 if latex:
-                    summaryrow.append('$\\color{red}\\times $')
+                    summaryrow.append(''.join(['$', self.label_errorlatex, '$']))
                 else:
-                    summaryrow.append('x')
+                    summaryrow.append(self.label_error)
         else:
             for i in range(len(self.premises)):
                 summaryrow.append(' ')
@@ -2387,19 +2405,23 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if self.goodobject(hypothesis, 
-                               self.addhypothesis_name, 
-                               self.addhypothesis_name, 
-                               comment):
-                if self.currentproofid == 0:
-                    self.logstep(self.log_nosubproof.format(self.addhypothesis_name.upper(), 
-                                                            hypothesis))
-                    self.stopproof(self.stopped_nosubproof, 
-                                   self.blankstatement, 
-                                   self.hypothesis_name, 
-                                   '', 
-                                   '', 
-                                   comment)
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.addhypothesis_name, 
+                             self.addhypothesis_name, 
+                             comment):
+                if self.goodobject(hypothesis, 
+                                self.addhypothesis_name, 
+                                self.addhypothesis_name, 
+                                comment):
+                    if self.currentproofid == 0:
+                        self.logstep(self.log_nosubproof.format(self.addhypothesis_name.upper(), 
+                                                                hypothesis))
+                        self.stopproof(self.stopped_nosubproof, 
+                                    self.blankstatement, 
+                                    self.hypothesis_name, 
+                                    '', 
+                                    '', 
+                                    comment)
 
         # If no errors, perform task
         if self.canproceed():
@@ -2550,9 +2572,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.coimplication_elim_tag, 
-                                           self.coimplication_elim_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.coimplication_elim_name, 
+                             self.coimplication_elim_name, 
+                             comment):
                 if self.goodline(first, 
                                  self.coimplication_elim_name, 
                                  self.coimplication_elim_name, 
@@ -2673,9 +2696,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.coimplication_intro_tag, 
-                                           self.coimplication_intro_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.coimplication_intro_name, 
+                             self.coimplication_intro_name, 
+                             comment):
                 if self.goodline(left, 
                                  self.coimplication_intro_name, 
                                  self.coimplication_intro_name, 
@@ -2816,9 +2840,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.conjunction_elim_tag, 
-                                           self.conjunction_elim_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.conjunction_elim_name, 
+                             self.conjunction_elim_name, 
+                             comment):
                 if self.goodline(line, 
                                  self.conjunction_elim_name, 
                                  self.conjunction_elim_name, 
@@ -2940,9 +2965,10 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if self.goodtransformationrule(self.conjunction_intro_tag, 
-                                           self.conjunction_intro_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.conjunction_intro_name, 
+                             self.conjunction_intro_name, 
+                             comment):
                 if self.goodline(left, 
                                  self.conjunction_intro_name, 
                                  self.conjunction_intro_name, 
@@ -3159,9 +3185,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.disjunction_elim_tag, 
-                                           self.disjunction_elim_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.disjunction_elim_name, 
+                             self.disjunction_elim_name, 
+                             comment):
                 if self.goodline(disjunction_line, 
                                  self.disjunction_elim_name, 
                                  self.disjunction_elim_name, 
@@ -3314,9 +3341,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.disjunction_intro_tag, 
-                                           self.disjunction_intro_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.disjunction_intro_name, 
+                             self.disjunction_intro_name, 
+                             comment):
                 if self.goodline(line, 
                                  self.disjunction_intro_name, 
                                  self.disjunction_intro_name, 
@@ -3530,19 +3558,23 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if self.goodobject(hypothesis, 
-                               self.hypothesis_name, 
-                               self.hypothesis_name, 
-                               comment):
-                if not self.checkhasgoal():
-                    self.logstep(self.log_nogoal.format(self.hypothesis_name.upper(), 
-                                                        hypothesis))
-                    self.stopproof(self.stopped_nogoal, 
-                                   self.blankstatement, 
-                                   self.hypothesis_name, 
-                                   '', 
-                                   '', 
-                                   comment)
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.hypothesis_name, 
+                             self.hypothesis_name, 
+                             comment):
+                if self.goodobject(hypothesis, 
+                                self.hypothesis_name, 
+                                self.hypothesis_name, 
+                                comment):
+                    if not self.checkhasgoal():
+                        self.logstep(self.log_nogoal.format(self.hypothesis_name.upper(), 
+                                                            hypothesis))
+                        self.stopproof(self.stopped_nogoal, 
+                                    self.blankstatement, 
+                                    self.hypothesis_name, 
+                                    '', 
+                                    '', 
+                                    comment)
 
         # If no errors, perform task
         if self.canproceed():
@@ -3550,12 +3582,14 @@ class Proof:
             nextline = len(self.lines)
             self.currentproof = [nextline]
             self.currenthypotheses = [nextline]
+            self.subproof_status = self.subproof_normal
             self.prooflist.append(
                 [
                     self.level, 
                     self.currentproof, 
                     self.currentproofid, 
-                    self.currenthypotheses
+                    self.currenthypotheses,
+                    self.subproof_status
                 ]
             )  
             self.previousproofid = self.currentproofid  
@@ -3616,9 +3650,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.implication_elim_tag, 
-                                           self.implication_elim_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.implication_elim_name, 
+                             self.implication_elim_name, 
+                             comment):
                 if self.goodline(first, 
                                  self.implication_elim_name, 
                                  self.implication_elim_name, 
@@ -3862,9 +3897,10 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if self.goodtransformationrule(self.implication_intro_tag, 
-                                           self.implication_intro_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.implication_intro_name, 
+                             self.implication_intro_name, 
+                             comment):
                 if self.currentproofid == 0:
                     self.logstep(self.log_closemainproof.format(self.implication_intro_name.upper()))
                     self.stopproof(self.stopped_closemainproof, 
@@ -3924,9 +3960,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.necessary_elim_tag, 
-                                           self.necessary_elim_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.necessary_elim_name, 
+                             self.necessary_elim_name, 
+                             comment):
                 if self.goodline(line, self.necessary_elim_name, 
                                  self.necessary_elim_name, 
                                  comment):
@@ -3949,14 +3986,14 @@ class Proof:
         # If no errors, perform task
         if self.canproceed():
             self.logstep(self.log_necessary_elim.format(self.necessary_elim_name.upper(), 
-                                                        statement.truefalse, 
+                                                        statement.wff, 
                                                         statement, 
                                                         line))
-            newcomment = self.iscomplete(statement.truefalse, 
+            newcomment = self.iscomplete(statement.wff, 
                                          comment)
             self.lines.append(
                 [
-                    statement.truefalse, 
+                    statement.wff, 
                     self.level, 
                     self.currentproofid, 
                     self.necessary_elim_name, 
@@ -3966,10 +4003,11 @@ class Proof:
                     self.linetype_transformationrule
                 ]
             )      
-            self.appendproofdata(statement.truefalse, 
+            self.appendproofdata(statement.wff, 
                                  self.necessary_elim_tag)  
 
     def necessary_intro(self, 
+                        lines,
                         comment: str = ''):
         """Closes a strict subproof with a necessary consequence.
         
@@ -3981,23 +4019,76 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.necessary_intro_tag, 
-                                           self.necessary_intro_name, 
-                                           comment):
-                pass
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.necessary_intro_name, 
+                             self.necessary_intro_name, 
+                             comment):
+                if len(lines) == 0:
+                    self.logstep(self.log_nolines.format(self.necessary_intro_name.upper(), 
+                                                         lines))
+                    self.stopproof(self.stopped_nolines, 
+                                   self.blankstatement, 
+                                   self.necessary_intro_name, 
+                               '', 
+                               '', 
+                               comment)
+                else:
+                    for i in lines:
+                        if not self.goodline(i,
+                                             self.necessary_intro_name,
+                                             self.necessary_intro_name,
+                                             comment):
+                            break
 
         # Look for specific errors
         if self.canproceed():
             if self.subproof_status != self.subproof_strict:
-                self.logstep(self.log_notstrictsubproof.format(self.necessary_elim_name.upper(), 
+                self.logstep(self.log_notstrictsubproof.format(self.necessary_intro_name.upper(), 
                                                                self.subproof_status, 
                                                                self.subproof_strict))
                 self.stopproof(self.stopped_notstrictsubproof, 
                                self.blankstatement, 
-                               self.necessary_elim_name, 
+                               self.necessary_intro_name, 
                                '', 
                                '', 
                                comment)
+                
+        # If no errors, perform task
+        if self.canproceed():
+            proofid = self.currentproofid
+            self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
+            self.level -= 1
+            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            self.currentproofid = previousproofid
+            self.currentproof = self.prooflist[previousproofid][1]
+            if len(self.previousproofchain) > 1:  
+                self.previousproofchain.pop(len(self.previousproofchain)-1)  
+                self.previousproofid = self.previousproofchain[len(self.previousproofchain)-1] 
+            else: 
+                self.previousproofchain = [] 
+                self.previousproofid = -1  
+            for i in lines:
+                statement = self.getstatement(i)
+                necessarystatement = Necessary(statement)
+                self.logstep(self.log_necessary_intro.format(self.negation_intro_name.upper(), 
+                                                             necessarystatement,
+                                                             statement))
+                newcomment = self.iscomplete(necessarystatement, 
+                                             comment)
+                self.lines.append(
+                    [
+                        necessarystatement,
+                        self.level, 
+                        self.currentproofid, 
+                        self.necessary_intro_name, 
+                        self.reflines(i), 
+                        '',
+                        newcomment,
+                        self.linetype_transformationrule
+                    ]
+                )      
+                self.appendproofdata(necessarystatement, 
+                                     self.necessary_intro_tag) 
 
     def negation_elim(self, 
                       first: int, 
@@ -4031,9 +4122,10 @@ class Proof:
         
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.negation_elim_tag, 
-                                           self.negation_elim_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.negation_elim_name, 
+                             self.negation_elim_name, 
+                             comment):
                 if self.goodline(first, self.negation_elim_name, 
                                  self.negation_elim_name, 
                                  comment):
@@ -4128,9 +4220,10 @@ class Proof:
 
         # Look for general errors
         if self.canproceed():
-            if self.goodtransformationrule(self.negation_intro_tag, 
-                                           self.negation_intro_name, 
-                                           comment):
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.negation_intro_name, 
+                             self.negation_intro_name, 
+                             comment):
                 previousstatement = self.lines[len(self.lines)-1][self.statementindex]
                 if type(previousstatement) == Implies:
                     if type(previousstatement.right) != Falsehood:
@@ -4179,6 +4272,142 @@ class Proof:
             self.appendproofdata(negation, 
                                  self.negation_intro_tag)
 
+    def possibly_elim(self, 
+                      lines,
+                      comment: str = ''):
+        """Closes a strict subproof with a possibly consequence.
+        
+        Parameters: 
+            comment: An optional comment the user may add to this line of the proof.
+        
+        Examples:
+        """ 
+
+        # Look for general errors
+        if self.canproceed():
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.possibly_elim_name, 
+                             self.possibly_elim_name, 
+                             comment):
+                if len(lines) == 0:
+                    self.logstep(self.log_nolines.format(self.possibly_elim_name.upper(), 
+                                                         lines))
+                    self.stopproof(self.stopped_nolines, 
+                                   self.blankstatement, 
+                                   self.possibly_elim_name, 
+                               '', 
+                               '', 
+                               comment)
+                else:
+                    for i in lines:
+                        if not self.goodline(i,
+                                             self.possibly_elim_name,
+                                             self.possibly_elim_name,
+                                             comment):
+                            break
+
+        # Look for specific errors
+        if self.canproceed():
+            if self.subproof_status != self.subproof_strict:
+                self.logstep(self.log_notstrictsubproof.format(self.possibly_elim_name.upper(), 
+                                                               self.subproof_status, 
+                                                               self.subproof_strict))
+                self.stopproof(self.stopped_notstrictsubproof, 
+                               self.blankstatement, 
+                               self.possibly_elim_name, 
+                               '', 
+                               '', 
+                               comment)
+                
+        # If no errors, perform task
+        if self.canproceed():
+            proofid = self.currentproofid
+            self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
+            self.level -= 1
+            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            self.currentproofid = previousproofid
+            self.currentproof = self.prooflist[previousproofid][1]
+            if len(self.previousproofchain) > 1:  
+                self.previousproofchain.pop(len(self.previousproofchain)-1)  
+                self.previousproofid = self.previousproofchain[len(self.previousproofchain)-1] 
+            else: 
+                self.previousproofchain = [] 
+                self.previousproofid = -1  
+            for i in lines:
+                statement = self.getstatement(i)
+                possiblystatement = Possibly(statement)
+                self.logstep(self.log_possibly_elim.format(self.possibly_elim_name.upper(), 
+                                                             possiblystatement,
+                                                             statement))
+                newcomment = self.iscomplete(possiblystatement, 
+                                             comment)
+                self.lines.append(
+                    [
+                        possiblystatement,
+                        self.level, 
+                        self.currentproofid, 
+                        self.possibly_elim_name, 
+                        self.reflines(i), 
+                        '',
+                        newcomment,
+                        self.linetype_transformationrule
+                    ]
+                )      
+                self.appendproofdata(possiblystatement, 
+                                     self.possibly_elim_tag) 
+
+    def possibly_intro(self, 
+                       line: int, 
+                       comment: str = ''):
+        """Adds the possibly connector to an item.
+        
+        Parameters:
+            line: The line on which the item appears.
+            comment: An optional comment the user may add to this line of the proof.
+            
+        Examples:
+        
+        """
+
+        # Look for general errors
+        if self.canproceed():
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.possibly_intro_name, 
+                             self.possibly_intro_name, 
+                             comment):
+                if self.goodline(line, self.possibly_intro_name, 
+                                 self.possibly_intro_name, 
+                                 comment):
+                    pass
+
+        # Look for specific errors
+        if self.canproceed():
+            statement = self.getstatement(line)
+            possiblystatement = Possibly(statement)
+
+        # If no errors, perform task
+        if self.canproceed():
+            self.logstep(self.log_possibly_intro.format(self.possibly_intro_name.upper(), 
+                                                        possiblystatement, 
+                                                        statement,
+                                                        line))
+            newcomment = self.iscomplete(possiblystatement, 
+                                         comment)
+            self.lines.append(
+                [
+                    possiblystatement, 
+                    self.level, 
+                    self.currentproofid, 
+                    self.possibly_intro_name, 
+                    str(line), 
+                    '',
+                    newcomment,
+                    self.linetype_transformationrule
+                ]
+            )      
+            self.appendproofdata(possiblystatement, 
+                                 self.possibly_intro_tag)  
+
     def premise(self, 
                 premise: Wff,
                 #premise: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth, 
@@ -4220,19 +4449,23 @@ class Proof:
 
         # Look for errors
         if self.canproceed():
-            if self.goodobject(premise, 
-                               self.premise_name, 
-                               self.premise_name, 
-                               comment):
-                if not self.checkhasgoal():
-                    self.logstep(self.log_nogoal.format(self.premise_name.upper(), 
-                                                        premise))
-                    self.stopproof(self.stopped_nogoal, 
-                                   self.blankstatement, 
-                                   self.premise_name, 
-                                   '', 
-                                   '', 
-                                   comment)
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.premise_name, 
+                             self.premise_name, 
+                             comment):
+                if self.goodobject(premise, 
+                                self.premise_name, 
+                                self.premise_name, 
+                                comment):
+                    if not self.checkhasgoal():
+                        self.logstep(self.log_nogoal.format(self.premise_name.upper(), 
+                                                            premise))
+                        self.stopproof(self.stopped_nogoal, 
+                                    self.blankstatement, 
+                                    self.premise_name, 
+                                    '', 
+                                    '', 
+                                    comment)
 
         # If no errors, perform task
         if self.canproceed():
@@ -4317,6 +4550,64 @@ class Proof:
                                                  howmany))
         return p
 
+    def startstrictsubproof(self, line: int = 0, hypothesis: Wff = None, comment: str = ''):
+        """Begin a strict subproof with either a reiterated line or an hypothesis."""
+        
+        # Look for errors
+        if self.canproceed():
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.startstrictsubproof_name, 
+                             self.startstrictsubproof_name, 
+                             comment):
+                if line > 0 and line < len(self.lines) and type(line) == int:
+                    statement = self.lines[line][self.statementindex]
+                    if type(statement) != Necessary:
+                        self.logstep(self.log_notnecessary.format(self.startstrictsubproof_name.upper(), 
+                                                                statement, 
+                                                                line))
+                        self.stopproof(self.stopped_notnecessary, 
+                                    self.blankstatement, 
+                                    self.startstrictsubproof_name, 
+                                    str(line), 
+                                    '', 
+                                    comment)
+                    else:
+                        pass
+                else:
+                    if self.goodobject(hypothesis,
+                                    self.startstrictsubproof_name,
+                                    self.startstrictsubproof_name,
+                                    comment):
+                        pass
+                
+        # If no errors, perform task
+        if self.canproceed():
+            self.level += 1
+            nextline = len(self.lines)
+            self.currentproof = [nextline]
+            self.currenthypotheses = [nextline]
+            self.subproof_status = self.subproof_strict
+            self.prooflist.append(
+                [
+                    self.level, 
+                    self.currentproof, 
+                    self.currentproofid, 
+                    self.currenthypotheses,
+                    self.subproof_status
+                ]
+            )  
+            self.previousproofid = self.currentproofid  
+            self.previousproofchain.append(self.currentproofid) 
+            self.currentproofid = len(self.prooflist) - 1
+            self.logstep(self.log_strictsubproofstarted.format(self.startstrictsubproof_name.upper(), 
+                                                               self.currentproofid, 
+                                                               line,
+                                                               hypothesis))
+            if line > 0:
+                self.reiterate(line)
+            else:
+                self.addhypothesis(hypothesis)
+
     def reiterate(self, 
                   line: int, 
                   comment: str = ''):
@@ -4346,16 +4637,20 @@ class Proof:
         
         # Look for general errors
         if self.canproceed():
-            # Only check that the line is in the proof, not the full goodline() checks
-            if not self.checkline(line):
-                self.logstep(self.log_nosuchline.format(self.reiterate_name.upper(), 
-                                                        line))
-                self.stopproof(self.stopped_nosuchline, 
-                               self.blankstatement, 
-                               self.reiterate_name, 
-                               str(line), 
-                               '', 
-                               comment)
+            if self.goodrule(self.rule_naturaldeduction, 
+                             self.reiterate_name, 
+                             self.reiterate_name, 
+                             comment):
+                # Only check that the line is in the proof, not the full goodline() checks
+                if not self.checkline(line):
+                    self.logstep(self.log_nosuchline.format(self.reiterate_name.upper(), 
+                                                            line))
+                    self.stopproof(self.stopped_nosuchline, 
+                                self.blankstatement, 
+                                self.reiterate_name, 
+                                str(line), 
+                                '', 
+                                comment)
 
         # Look for specific errors
         if self.canproceed():
@@ -4531,36 +4826,40 @@ class Proof:
 
         # Look for errors.
         if self.canproceed():
-            if self.goodline(line, 
+            if self.goodrule(self.rule_axiomatic, 
                              self.substitution_name, 
                              self.substitution_name, 
                              comment):
-                if self.goodlist(whattosubstitute, 
-                                 self.substitution_name, 
-                                 self.substitution_name, 
-                                 comment):
-                    if self.goodlist(substitutes, 
-                                     self.substitution_name, 
-                                     self.substitution_name, 
-                                     comment):
-                        if self.goodlistlength(whattosubstitute, 
-                                               substitutes, 
-                                               self.substitution_name, 
-                                               self.substitution_name, 
-                                               comment):
-                            for i in whattosubstitute:
-                                if not self.goodproposition(i, 
+                if self.goodline(line, 
+                                self.substitution_name, 
+                                self.substitution_name, 
+                                comment):
+                    if self.goodlist(whattosubstitute, 
+                                    self.substitution_name, 
+                                    self.substitution_name, 
+                                    comment):
+                        if self.goodlist(substitutes, 
+                                        self.substitution_name, 
+                                        self.substitution_name, 
+                                        comment):
+                            if self.goodlistlength(whattosubstitute, 
+                                                substitutes, 
+                                                self.substitution_name, 
+                                                self.substitution_name, 
+                                                comment):
+                                for i in whattosubstitute:
+                                    if not self.goodproposition(i, 
+                                                                self.substitution_name, 
+                                                                self.substitution_name, 
+                                                                comment):
+                                        break
+                                if self.canproceed():
+                                    for i in substitutes:
+                                        if not self.goodobject(i, 
                                                             self.substitution_name, 
                                                             self.substitution_name, 
                                                             comment):
-                                    break
-                            if self.canproceed():
-                                for i in substitutes:
-                                    if not self.goodobject(i, 
-                                                           self.substitution_name, 
-                                                           self.substitution_name, 
-                                                           comment):
-                                        break
+                                            break
 
         # If no errors, perform task.
         if self.canproceed():

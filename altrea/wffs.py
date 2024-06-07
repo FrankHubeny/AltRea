@@ -61,6 +61,7 @@ class Wff:
             self.name = name
             self.latexname = latexname
             self.booleanvalue = None
+            self.multivalue = (True)
             self.kind = kind
 
     def __str__(self):
@@ -101,6 +102,12 @@ class Wff:
     
     def getvalue(self):
         return self.booleanvalue   
+    
+    def getmultivalue(self):
+        return self.multivalue   
+    
+    def setmultivalue(self, value):
+        self.multivalue = value
 
 class And(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -115,6 +122,14 @@ class And(Wff):
         self.and_connector = and_connector
         self.and_latexconnector = and_latexconnector
         self.booleanvalue = left.booleanvalue and right.booleanvalue
+        leftmultivalue = left.getmultivalue()
+        rightmultivalue = right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (False):
+            self.multivalue = (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            self.multivalue = (True)
+        else:
+            self.multivalue = (True, False)
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
@@ -150,14 +165,23 @@ class And(Wff):
         
     def getvalue(self):
         return self.left.getvalue() and self.right.getvalue()
+    
+    def getmultivalue(self):
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue== (False) or rightmultivalue == (False):
+            return (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            return (True)
+        else:
+            return (True, False)
 
 class Falsehood(Wff):
     """This well formed formula is the result of a contradiction in a proof which may be useful for explosions.
     """
 
     is_variable = True
-    booleanvalue = False
-
+    
     def __init__(self, wff: Wff):
         # if name in self.reserved_names or latexname in self.reserved_names:
         #     raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
@@ -177,7 +201,8 @@ class Falsehood(Wff):
         #     else:
         #         self.latex = latexname
         self.wff = wff
-
+        self.booleanvalue = False
+        self.multivalue = (False)
 
     def __str__(self):
         return f'{self.f_name}{self.lb}{self.wff}{self.rb}'
@@ -203,6 +228,9 @@ class Falsehood(Wff):
     def setvalue(self, value: bool = False):
         self.booleanvalue = False
 
+    def getmultivalue(self):
+        return self.multivalue
+
 class Iff(Wff):
     """A well formed formula with two arguments which are also well formed formulas
     joined by if and only if.
@@ -216,6 +244,14 @@ class Iff(Wff):
         self.iff_connector = iff_connector
         self.iff_latexconnector = iff_latexconnector
         self.booleanvalue = ((not left.booleanvalue) or right.booleanvalue) and ((not right.booleanvalue) or left.booleanvalue)
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (False):
+            self.multivalue = (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            self.multivalue = (True)
+        else:
+            self.multivalue = (True, False) 
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
@@ -248,6 +284,16 @@ class Iff(Wff):
     
     def treetuple(self):
         return self.iff_treeconnector, self.lb, self.left.treetuple(), ',', self.right.treetuple(), self.rb
+    
+    def getmultivalue(self):
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (False):
+            return (False)
+        elif leftmultivalue == (True) and rightmultivalue == (True):
+            return (True)
+        else:
+            return (True, False) 
 
 class Implies(Wff):
     """A well formed formula with two arguments which are also well formed formulas joined
@@ -263,6 +309,14 @@ class Implies(Wff):
         self.implies_connector = implies_connector
         self.implies_latexconnector = implies_latexconnector
         self.booleanvalue = None
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (True):
+            self.multivalue = (True)
+        elif leftmultivalue == (True) and rightmultivalue == (False):
+            self.multivalue = (False)
+        else:
+            self.multivalue = (True, False)
     
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
@@ -298,43 +352,58 @@ class Implies(Wff):
         
     def getvalue(self):
         return (not self.left.getvalue()) or self.right.getvalue()
+    
+    def getmultivalue(self):
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) or rightmultivalue == (True):
+            return (True)
+        elif leftmultivalue == (True) and rightmultivalue == (False):
+            return (False)
+        else:
+            return (True, False)
+
 
 class Necessary(Wff):
     """A well-formed formula which is necessarily true."""
 
     is_variable = True
 
-    def __init__(self, wff, necessary_connector: str = 'Nec', necessary_latexconnector: str = '\\Box'):
-        self.truefalse = wff
+    def __init__(self, wff, necessary_connector: str = 'Nec', necessary_latexconnector: str = '\\Box~'):
+        self.wff = wff
         self.necessary_connector = necessary_connector
         self.necessary_latexconnector = necessary_latexconnector
+        self.multivalue = (True)
 
     def __str__(self):
         if self.is_variable:
-            return f'{self.necessary_connector} {self.truefalse}'
+            return f'{self.necessary_connector} {self.wff}'
         else:
-            return f'{self.necessary_connector}{self.lb}{self.truefalse}{self.rb}'
+            return f'{self.necessary_connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
         if self.is_variable:
-            return f'{self.necessary_latexconnector} {self.truefalse}'
+            return f'{self.necessary_latexconnector} {self.wff.latex()}'
         else:
-            return f'{self.necessary_latexconnector} {self.lb}{self.truefalse}{self.rb}'
+            return f'{self.necessary_latexconnector} {self.lb}{self.wff.latex()}{self.rb}'
         
     def tree(self):
-        return f'{self.necessary_treeconnector}{self.lb}{self.truefalse.tree()}{self.rb}'
+        return f'{self.necessary_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
     
     def pattern(self, wfflist: list):
-        return f'{self.necessary_treeconnector}{self.lb}{self.truefalse.pattern(wfflist)}{self.rb}'
+        return f'{self.necessary_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
     
     def makeschemafromlist(self, wfflist: list):
-        return f'{self.necessary_treeconnector}{self.lb}{self.truefalse.makeschemafromlist(wfflist)}{self.rb}'
+        return f'{self.necessary_treeconnector}{self.lb}{self.wff.makeschemafromlist(wfflist)}{self.rb}'
     
     def treetuple(self):
-        return self.necessary_treeconnector, self.lb, self.truefalse.treetuple(), self.rb
+        return self.necessary_treeconnector, self.lb, self.wff.treetuple(), self.rb
     
     def getvalue(self):
         return True
+    
+    def getmultivalue(self):
+        return self.multivalue
     
 class Not(Wff):
     """A well formed formula with one argument which is also a well formed formula joined
@@ -347,7 +416,14 @@ class Not(Wff):
         self.negated = negated
         self.booleanvalue = None
         self.not_connector = not_connector
-        self.not_latexconnector = not_latexconnector      
+        self.not_latexconnector = not_latexconnector   
+        negatedmultivalue = negated.getmultivalue() 
+        if negatedmultivalue == (True):
+            self.multivalue = (False)
+        elif negatedmultivalue == (False):
+            self.multivalue = (True)
+        else:
+            self.multivalue = (True, False)
 
     def __str__(self):
         if self.negated.is_variable:
@@ -375,6 +451,15 @@ class Not(Wff):
     
     def getvalue(self):
         return not self.negated.getvalue()
+    
+    def getmultivalue(self):
+        negatedmultivalue = self.negated.getmultivalue() 
+        if negatedmultivalue == (True):
+            return (False)
+        elif negatedmultivalue == (False):
+            return (True)
+        else:
+            return (True, False) 
 
 class Or(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected
@@ -389,6 +474,14 @@ class Or(Wff):
         self.or_connector = or_connector
         self.or_latexconnector = or_latexconnector
         self.booleanvalue = left.booleanvalue or right.booleanvalue
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) and rightmultivalue == (False):
+            self.multivalue = (False)
+        elif leftmultivalue == (True) or rightmultivalue == (True):
+            self.multivalue = (True)
+        else:
+            self.multivalue = (True, False)
 
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
@@ -424,6 +517,16 @@ class Or(Wff):
         
     def getvalue(self):
         return self.left.getvalue() or self.right.getvalue()
+    
+    def getmultivalue(self):
+        leftmultivalue = self.left.getmultivalue()
+        rightmultivalue = self.right.getmultivalue()
+        if leftmultivalue == (False) and rightmultivalue == (False):
+            return (False)
+        elif leftmultivalue == (True) or rightmultivalue == (True):
+            return (True)
+        else:
+            return (True, False)
 
 class Possibly(Wff):
     """A well-formed formula which is possibly true."""
@@ -431,36 +534,40 @@ class Possibly(Wff):
     is_variable = True
 
     def __init__(self, wff, possibly_connector: str = 'Pos', possibly_latexconnector: str = '\\Diamond'):
-        self.truefalse = wff
+        self.wff = wff
         self.possibly_connector = possibly_connector
         self.possibly_latexconnector = possibly_latexconnector
+        self.multivalue = (True)
 
     def __str__(self):
         if self.is_variable:
-            return f'{self.possibly_connector} {self.truefalse}'
+            return f'{self.possibly_connector} {self.wff}'
         else:
-            return f'{self.possibly_connector}{self.lb}{self.truefalse}{self.rb}'
+            return f'{self.possibly_connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
         if self.is_variable:
-            return f'{self.possibly_latexconnector} {self.truefalse}'
+            return f'{self.possibly_latexconnector} {self.wff}'
         else:
-            return f'{self.possibly_latexconnector} {self.lb}{self.truefalse}{self.rb}'
+            return f'{self.possibly_latexconnector} {self.lb}{self.wff}{self.rb}'
         
     def tree(self):
-        return f'{self.possible_treeconnector}{self.lb}{self.truefalse.tree()}{self.rb}'
+        return f'{self.possible_treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
     
     def pattern(self, wfflist):
-        return f'{self.possible_treeconnector}{self.lb}{self.truefalse.pattern(wfflist)}{self.rb}'
+        return f'{self.possible_treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
     
     def makeschemafromlist(self, wfflist: list):
-        return f'{self.possible_treeconnector}{self.lb}{self.truefalse.makeschemafromlist(wfflist)}{self.rb}'
+        return f'{self.possible_treeconnector}{self.lb}{self.wff.makeschemafromlist(wfflist)}{self.rb}'
     
     def treetuple(self):
-        return self.possible_treeconnector, self.lb, self.truefalse.treetuple(), self.rb
+        return self.possible_treeconnector, self.lb, self.wff.treetuple(), self.rb
     
     def getvalue(self):
         return True
+    
+    def getmultivalue(self):
+        return self.multivalue
     
 class Truth(Wff):
     """A well formed formula which is always true."""
@@ -484,6 +591,7 @@ class Truth(Wff):
                 self.latexname = self.name
             else:
                 self.latexname = latexname
+        self.multivalue = (True)
 
     def __str__(self):
         return f'{self.name}'
@@ -510,7 +618,6 @@ class Proposition(Wff):
     """A well formed formula which is can be either true or false, but not both and not neither."""
 
     is_variable = True
-    booleanvalue = True
 
     def __init__(self, name: str, latexname: str = '', kind: str = 'Proposition'):
         if name in self.reserved_names or latexname in self.reserved_names:
@@ -529,6 +636,8 @@ class Proposition(Wff):
             else:
                 self.latexname = latexname
         self.kind = kind
+        self.multivalue = (True)
+        self.booleanvalue = True
 
     def __str__(self):
         return self.name
@@ -551,14 +660,22 @@ class Proposition(Wff):
     def setvalue(self, value: bool):
         self.booleanvalue = value
 
+    def getmultivalue(self):
+        return self.multivalue
+    
+    def setmultivalue(self, value):
+        self.multivalue = value
+
 class Axiom(Wff):
     """This class holds axioms of the logical system."""
 
     is_variable = True
-    booleanvalue = True
+    
 
     def __init__(self, schema: Wff):
         self.schema = schema
+        self.booleanvalue = True
+        self.multivalue = (True)
 
     def __str__(self):
         return f'{str(self.schema)}'
@@ -584,6 +701,9 @@ class Axiom(Wff):
     def setvalue(self, val: bool):
         self.booleanvalue = True
 
+    # def getmultivalue(self):
+    #     return self.multivalue
+
 class Definition(Wff):
     """This class defines one wff expression to be the same as the other."""
 
@@ -598,6 +718,7 @@ class Definition(Wff):
         self.right = right
         self.connector = connector
         self.latexconnector = latexconnector
+        #self.multivalue = (True)
 
     def __str__(self):
         return f'{str(self.left)} {self.connector} {str(self.right)}'
@@ -623,11 +744,15 @@ class Definition(Wff):
     def setvalue(self):
         self.booleanvalue = None
 
+    # def getmultivalue(self):
+    #     return self.multivalue
+
 class ConclusionPremises(Wff):
     """A premises and conclusion pairing of Wff objects."""
 
     is_variable = True
     booleanvalue = None
+    multivalue = None
     lb = '{'
     rb = '}'
     tree_connector = '|-'
@@ -645,6 +770,7 @@ class ConclusionPremises(Wff):
         self.latexconnector = latexconnector
         self.derivedconnector = derivedconnector
         self.derivedlatexconnector = derivedlatexconnector
+        #self.multivalue = (True)
 
     def __str__(self):
         if len(self.premises) > 0:
@@ -713,3 +839,6 @@ class ConclusionPremises(Wff):
     
     def setvalue(self):
         self.booleanvalue = None
+
+    # def getmultivalue(self):
+    #     return self.multivalue

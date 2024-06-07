@@ -827,6 +827,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_database_substitution_clean_1(input_n, expected):
     prf = Proof()
+    prf.proofrules = prf.rule_axiomatic
     prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
@@ -835,7 +836,9 @@ def test_database_substitution_clean_1(input_n, expected):
     E = prf.proposition('E')
     prf.setlogic(logicname)
     prf.goal(A)
+    prf.proofrules = prf.rule_naturaldeduction
     prf.premise(B)
+    prf.proofrules = prf.rule_axiomatic
     prf.substitution(1, [B], [Not(B)])
     assert eval(input_n) == expected
     

@@ -498,6 +498,7 @@ class Proof:
         self.currentproof = [1]
         self.currentproofid = 0
         self.subproof_status = self.subproof_normal
+        self.subproofchain = ''
         self.proofdata = [[self.name, self.displayname, self.description]]
         self.proofdatafinal = []
         self.prooflist = [[self.lowestlevel, self.currentproof, self.previousproofid, [], self.subproof_status]]  
@@ -894,33 +895,37 @@ class Proof:
         if prooflines[i][0] != self.blankstatement:
             normalbase = ' \\hspace{0.35cm}|'
             strictbase = ' \\hspace{0.35cm}\\Vert'
-            if prooflines[i][self.subproofstatusindex] == self.subproof_strict:
-                base = strictbase
-            else:
-                base = normalbase
-            #base = ' \\hspace{0.35cm}|'
-            hypothesisbase = ''.join(['\\underline{', base, '}']) 
-            statement = ''
-            for j in range(1, prooflines[i][self.levelindex]):
-                # if prooflines[i][self.subproofstatusindex] == self.subproof_strict:
-                #     statement = strictbase + statement
-                # else:
-                statement = base + statement
-            if prooflines[i][self.statementindex] != '':
-                if prooflines[i][self.levelindex] > 0:
-                    if i < len(prooflines) - 1:
-                        if prooflines[i][self.ruleindex] == self.hypothesis_name:
-                            if prooflines[i+1][self.ruleindex] != self.hypothesis_name or prooflines[i][self.levelindex] < prooflines[i+1][self.levelindex]:
-                                statement = hypothesisbase + statement
-                            else:
-                                statement = base + statement
-                        else:
-                            statement = base + statement   
-                    else:
-                        if prooflines[i][self.ruleindex] == self.hypothesis_name:
-                            statement = hypothesisbase + statement
-                        else:
-                            statement = base + statement
+            hypothesisnormalbase = ''.join(['\\underline{', normalbase, '}'])
+            hypothesisstrictbase = ''.join(['\\underline{', strictbase, '}'])
+            subproofchain = prooflines[i][self.subproofstatusindex]
+            statement = subproofchain.format(normalbase, strictbase)
+            # if prooflines[i][self.subproofstatusindex] == self.subproof_strict:
+            #     base = strictbase
+            # else:
+            #     base = normalbase
+            # #base = ' \\hspace{0.35cm}|'
+            # hypothesisbase = ''.join(['\\underline{', base, '}']) 
+            # statement = ''
+            # for j in range(1, prooflines[i][self.levelindex]):
+            #     # if prooflines[i][self.subproofstatusindex] == self.subproof_strict:
+            #     #     statement = strictbase + statement
+            #     # else:
+            #     statement = base + statement
+            # if prooflines[i][self.statementindex] != '':
+            #     if prooflines[i][self.levelindex] > 0:
+            #         if i < len(prooflines) - 1:
+            #             if prooflines[i][self.ruleindex] == self.hypothesis_name:
+            #                 if prooflines[i+1][self.ruleindex] != self.hypothesis_name or prooflines[i][self.levelindex] < prooflines[i+1][self.levelindex]:
+            #                     statement = hypothesisbase + statement
+            #                 else:
+            #                     statement = base + statement
+            #             else:
+            #                 statement = base + statement   
+            #         else:
+            #             if prooflines[i][self.ruleindex] == self.hypothesis_name:
+            #                 statement = hypothesisbase + statement
+            #             else:
+            #                 statement = base + statement
 
             if i == 0:
                 if saved:
@@ -2462,7 +2467,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_hypothesis,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(hypothesis, 
@@ -2553,7 +2558,7 @@ class Proof:
                     '', 
                     newcomment,
                     self.linetype_axiom,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 
@@ -2678,7 +2683,7 @@ class Proof:
                     '', 
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(statement, 
@@ -2801,7 +2806,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )   
             self.appendproofdata(newstatement, 
@@ -2919,7 +2924,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )   
             self.appendproofdata(conjunct, 
@@ -3029,7 +3034,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             ) 
             self.appendproofdata(andstatement, 
@@ -3120,7 +3125,7 @@ class Proof:
                     '', 
                     newcomment,
                     self.linetype_definition,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 
@@ -3303,7 +3308,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )    
             self.appendproofdata(statement, 
@@ -3480,7 +3485,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )    
             self.appendproofdata(disjunction, 
@@ -3608,6 +3613,7 @@ class Proof:
         # If no errors, perform task
         if self.canproceed():
             self.level += 1
+            self.subproofchain = ''.join(['{0}', self.subproofchain])
             nextline = len(self.lines)
             self.currentproof = [nextline]
             self.currenthypotheses = [nextline]
@@ -3618,7 +3624,7 @@ class Proof:
                     self.currentproof, 
                     self.currentproofid, 
                     self.currenthypotheses,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )  
             self.previousproofid = self.currentproofid  
@@ -3639,7 +3645,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_hypothesis,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )      
             self.appendproofdata(hypothesis, 
@@ -3784,7 +3790,7 @@ class Proof:
                     '', 
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(statement, 
@@ -3946,6 +3952,7 @@ class Proof:
             subproof_status = self.subproof_status
             self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
             self.level -= 1
+            self.subproofchain = self.subproofchain[3:]
             antecedent, consequent, previousproofid, previoussubproofstatus = self.getproof(self.currentproofid)
             self.currentproofid = previousproofid
             self.subproof_status = previoussubproofstatus
@@ -3979,7 +3986,7 @@ class Proof:
                     self.refproof(proofid), 
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )   
             self.appendproofdata(implication, 
@@ -4041,7 +4048,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )      
             self.appendproofdata(statement.wff, 
@@ -4099,6 +4106,7 @@ class Proof:
             proofid = self.currentproofid
             self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
             self.level -= 1
+            self.subproofchain = self.subproofchain[3:]
             #antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
             previousproofid = self.getpreviousproofid(self.currentproofid)
             self.currentproofid = previousproofid
@@ -4127,7 +4135,7 @@ class Proof:
                         '',
                         newcomment,
                         self.linetype_transformationrule,
-                    self.subproof_status
+                        self.subproofchain
                     ]
                 )      
                 self.appendproofdata(necessarystatement, 
@@ -4216,7 +4224,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )      
             self.appendproofdata(falsehood, 
@@ -4369,6 +4377,7 @@ class Proof:
             line = len(self.lines)-1
             self.prooflist[self.currentproofid][1].append(line)
             self.level -= 1
+            self.subproofchain = self.subproofchain[3:]
             previousproofid = self.getpreviousproofid(self.currentproofid)
             self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
@@ -4395,7 +4404,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )      
             self.appendproofdata(possiblystatement, 
@@ -4448,7 +4457,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )      
             self.appendproofdata(possiblystatement, 
@@ -4532,7 +4541,7 @@ class Proof:
                     '', 
                     newcomment,
                     self.linetype_premise,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(premise, 
@@ -4662,6 +4671,7 @@ class Proof:
         # If no errors, perform task
         if self.canproceed():
             self.level += 1
+            self.subproofchain = ''.join(['{1}', self.subproofchain])
             nextline = len(self.lines)
             self.currentproof = [nextline]
             #self.currenthypotheses = [nextline]
@@ -4795,7 +4805,7 @@ class Proof:
                     '',
                     newcomment,
                     '',
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )  
             self.appendproofdata(statement, 
@@ -4984,7 +4994,7 @@ class Proof:
                     '',
                     newcomment,
                     self.linetype_substitution,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )  
             self.appendproofdata(newstatement, 
@@ -5081,7 +5091,7 @@ class Proof:
                     '', 
                     newcomment,
                     self.linetype_transformationrule,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 
@@ -5185,7 +5195,7 @@ class Proof:
                     '', 
                     newcomment,
                     self.linetype_savedproof,
-                    self.subproof_status
+                    self.subproofchain
                 ]
             )
             self.appendproofdata(conclusionpremises.conclusion, 

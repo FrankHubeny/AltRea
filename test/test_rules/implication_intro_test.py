@@ -204,7 +204,7 @@ def test_implication_intro_strict_clean_1(input_n, expected):
     E = prf.proposition('E')
     prf.setlogic()
     prf.goal(Implies(A, A), comment='Strict Subproof')
-    prf.startstrictsubproof(hypothesis=A)
+    prf.startstrictsubproof(addhypothesis=A)
     prf.implication_intro()
     assert eval(input_n) == expected
 

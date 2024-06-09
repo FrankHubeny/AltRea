@@ -59,7 +59,8 @@ Examples:
 
 import pandas
 
-from altrea.wffs import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, Proposition, Falsehood, Truth, ConclusionPremises, Definition
+# from altrea.wffs import And, Or, Not, Implies, Iff, Wff, Necessary, Possibly, Proposition, Falsehood, Truth, ConclusionPremises, Definition, ConsistentWith, StrictIff, StrictImplies
+from altrea.wffs import *
 import altrea.data
 
 class Proof:
@@ -146,6 +147,7 @@ class Proof:
     saveaxiom_name = 'Save Axiom'
     savedefinition_name = 'Save Definition'
     startstrictsubproof_name = 'Start Strict Subproof'
+    startemptystrictsubproof_name = 'Start Empty Strict Subproof'
     substitution_name = 'Substitution'
     rule_name = 'Transformation Rule'
 
@@ -276,6 +278,7 @@ class Proof:
     log_definitionsaved = '{0}: The definition named "{1}" has been saved.'
     log_disjunction_elim = '{0}: Item "{1}" has been derived as the conclusion of both disjuncts of the disjunction "{2}" on line {3}.'
     log_disjunction_intro = '{0}: Item "{1}" has been derived from item "{2}" on line {3} joined on the {4} with {5}.'
+    log_emptystrictsubproofstarted = '{0}: An empty strict subproof has been started.'
     log_goal = '{0}: The goal "{1}" has been added to the goals.'
     log_hypothesis = '{0}: A new subproof {1} has been started with item "{2}".'
     log_implication_elim = '{0}: Item "{1}" has been derived from the implication "{2}" and item "{3}".'
@@ -301,7 +304,7 @@ class Proof:
     log_partiallycomplete = 'The proof is partially complete.'
     log_proofsaved = '{0}: The proof "{1}" was saved as "{2}" to database "{3}" under logic "{4}".'
     log_proofdeleted = '{0}: The proof "{1}" was deleted form the database "{2}" under logic "{3}".'
-    log_strictsubproofstarted = '{0}: A strict subproof "{1}" has been started with either line {2} or hypothesis "{3}".'
+    log_strictsubproofstarted = '{0}: A strict subproof "{1}" has been started with either line {2}, additional hypothesis "{3}" or hypothesis "{4}".'
     log_substitute = '{0}: The placeholder(s) in the string "{1}" have been replaced with "{2}" to become "{3}".'
     log_substitution = '{0}: The statement "{1}" on line "{2}" has been substituted with "{3}".'
     log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
@@ -515,16 +518,20 @@ class Proof:
             'Necessary': Necessary, 
             'Possibly': Possibly, 
             'ConclusionPremises': ConclusionPremises,
+            'ConsistentWith': ConsistentWith,
+            'StrictImplies': StrictImplies,
+            'StrictIff': StrictIff,
+            'Definition': Definition,
             }
         self.log = []
         self.latexwrittenproof = ''
         self.writtenproof = ''
         self.showlogging = False
         self.restricted = False
-        self.logstep(self.log_proof.format(self.proof_name.upper(), 
-                                           name, 
-                                           displayname, 
-                                           description))
+        # self.logstep(self.log_proof.format(self.proof_name.upper(), 
+        #                                    name, 
+        #                                    displayname, 
+        #                                    description))
 
     """SUPPORT FUNCTIONS 
     
@@ -682,11 +689,6 @@ class Proof:
                 break
         return s
     
-    # def completedproof(self):
-    #     """Check if the proof is complete.  This is used to check if the current proof can be saved."""
-
-    #     return self.status == self.complete or self.status == self.vacuous
-    
     def getpreviousproofid(self, proofid: int) -> int:
         return self.prooflist[proofid][2]
 
@@ -702,10 +704,10 @@ class Proof:
                 if i > 0:
                     hypothesis = And(hypothesis, 
                                      self.lines[self.prooflist[proofid][3][i]][self.statementindex])
-
         conclusion = self.lines[self.prooflist[proofid][1][1]][self.statementindex]
         previousproofid = self.prooflist[proofid][2]
-        return hypothesis, conclusion, previousproofid
+        previoussubproofstatus = self.prooflist[previousproofid][4]
+        return hypothesis, conclusion, previousproofid, previoussubproofstatus
     
     def getstatement(self, line):
         """Returns the statement associated with the line number."""
@@ -891,7 +893,7 @@ class Proof:
 
         if prooflines[i][0] != self.blankstatement:
             normalbase = ' \\hspace{0.35cm}|'
-            strictbase = ' \\hspace{0.35cm}\\diamond'
+            strictbase = ' \\hspace{0.35cm}\\Vert'
             if prooflines[i][self.subproofstatusindex] == self.subproof_strict:
                 base = strictbase
             else:
@@ -3944,8 +3946,9 @@ class Proof:
             subproof_status = self.subproof_status
             self.prooflist[self.currentproofid][1].append(len(self.lines)-1)
             self.level -= 1
-            antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            antecedent, consequent, previousproofid, previoussubproofstatus = self.getproof(self.currentproofid)
             self.currentproofid = previousproofid
+            self.subproof_status = previoussubproofstatus
             self.currentproof = self.prooflist[previousproofid][1]
             if len(self.previousproofchain) > 1:  
                 self.previousproofchain.pop(len(self.previousproofchain)-1)  
@@ -4594,7 +4597,33 @@ class Proof:
                                                  howmany))
         return p
 
-    def startstrictsubproof(self, line: int = 0, hypothesis: Wff = None, comment: str = ''):
+    # def startemptystrictsubproof(self):
+    #     self.level += 1
+    #     nextline = len(self.lines)
+    #     self.currentproof = [nextline]
+    #     #self.currenthypotheses = [nextline]
+    #     self.subproof_status = self.subproof_strict
+    #     self.prooflist.append(
+    #         [
+    #             self.level, 
+    #             self.currentproof, 
+    #             self.currentproofid, 
+    #             [],#self.currenthypotheses,
+    #             self.subproof_status
+    #         ]
+    #     )  
+    #     self.previousproofid = self.currentproofid  
+    #     self.previousproofchain.append(self.currentproofid) 
+    #     self.currentproofid = len(self.prooflist) - 1
+    #     self.logstep(self.log_emptystrictsubproofstarted.format(self.startemptystrictsubproof_name.upper(), 
+    #                                                        self.currentproofid))
+
+
+    def startstrictsubproof(self, 
+                            reiterate: int = 0, 
+                            addhypothesis: Wff = None, 
+                            hypothesis: Wff = None, 
+                            comment: str = ''):
         """Begin a strict subproof with either a reiterated line or an hypothesis."""
         
         # Look for errors
@@ -4603,25 +4632,31 @@ class Proof:
                              self.startstrictsubproof_name, 
                              self.startstrictsubproof_name, 
                              comment):
-                if line > 0 and line < len(self.lines) and type(line) == int:
-                    statement = self.lines[line][self.statementindex]
+                if reiterate > 0 and reiterate < len(self.lines) and type(reiterate) == int:
+                    statement = self.lines[reiterate][self.statementindex]
                     if type(statement) != Necessary:
                         self.logstep(self.log_notnecessary.format(self.startstrictsubproof_name.upper(), 
                                                                 statement, 
-                                                                line))
+                                                                reiterate))
                         self.stopproof(self.stopped_notnecessary, 
                                     self.blankstatement, 
                                     self.startstrictsubproof_name, 
-                                    str(line), 
+                                    str(reiterate), 
                                     '', 
                                     comment)
                     else:
                         pass
-                else:
+                elif isinstance(addhypothesis, Wff):
+                    if self.goodobject(addhypothesis,
+                                       self.startstrictsubproof_name,
+                                       self.startstrictsubproof_name,
+                                       comment):
+                        pass
+                elif isinstance(hypothesis, Wff):
                     if self.goodobject(hypothesis,
-                                    self.startstrictsubproof_name,
-                                    self.startstrictsubproof_name,
-                                    comment):
+                                       self.startstrictsubproof_name,
+                                       self.startstrictsubproof_name,
+                                       comment):
                         pass
                 
         # If no errors, perform task
@@ -4645,12 +4680,34 @@ class Proof:
             self.currentproofid = len(self.prooflist) - 1
             self.logstep(self.log_strictsubproofstarted.format(self.startstrictsubproof_name.upper(), 
                                                                self.currentproofid, 
-                                                               line,
+                                                               reiterate,
+                                                               addhypothesis,
                                                                hypothesis))
-            if line > 0:
-                self.reiterate(line)
+            if reiterate > 0:
+                self.reiterate(reiterate)
+            elif isinstance(addhypothesis, Wff):
+                self.addhypothesis(addhypothesis)
             else:
-                self.addhypothesis(hypothesis)
+                self.hypothesis(hypothesis)
+            
+            # else:
+            #     newcomment = comment
+            #     self.lines.append(
+            #         [
+            #             self.blankstatement, 
+            #             self.level, 
+            #             self.currentproofid, 
+            #             self.reiterate_name, 
+            #             str(line), 
+            #             '',
+            #             newcomment,
+            #             '',
+            #             self.subproof_status
+            #         ]
+            #     )  
+            #     self.appendproofdata(self.blankstatement, 
+            #                          self.reiterate_tag)
+
 
     def reiterate(self, 
                   line: int, 

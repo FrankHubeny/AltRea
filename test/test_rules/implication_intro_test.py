@@ -4,21 +4,22 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import And, Implies
 from altrea.rules import Proof
+
 t = Proof()
-A = t.proposition('A')
-B = t.proposition('B')
-C = t.proposition('C')
-D = t.proposition('D')
-E = t.proposition('E')
+A = t.proposition("A")
+B = t.proposition("B")
+C = t.proposition("C")
+D = t.proposition("D")
+E = t.proposition("E")
 
 """------------------------------------------------------------------------------
                                 Clean Run 1
 ------------------------------------------------------------------------------"""
 # Clean test
 testdata = [
-    ('len(prf.lines)', 3),
+    ("len(prf.lines)", 3),
     #
     ("str(prf.lines[0][prf.statementindex])", str(Implies(A, A))),
     ("prf.lines[0][prf.levelindex]", 0),
@@ -44,16 +45,14 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", "1-1"),
     ("prf.lines[2][prf.commentindex]", "COMPLETE"),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
-    prf.goal(Implies(A, A), comment='Reflexivity of Implication')
+    prf.goal(Implies(A, A), comment="Reflexivity of Implication")
     prf.hypothesis(A)
     prf.implication_intro()
     assert eval(input_n) == expected
@@ -65,7 +64,7 @@ def test_implication_intro_clean_1(input_n, expected):
 
 # Clean test
 testdata = [
-    ('len(prf.lines)', 12),
+    ("len(prf.lines)", 12),
     #
     ("str(prf.lines[9][prf.statementindex])", str(Implies(C, And(A, B)))),
     ("prf.lines[9][prf.levelindex]", 2),
@@ -83,7 +82,10 @@ testdata = [
     ("prf.lines[10][prf.proofsindex]", "4-9"),
     ("prf.lines[10][prf.commentindex]", ""),
     #
-    ("str(prf.lines[11][prf.statementindex])", str(Implies(E, Implies(D, Implies(C, And(A, B)))))),
+    (
+        "str(prf.lines[11][prf.statementindex])",
+        str(Implies(E, Implies(D, Implies(C, And(A, B))))),
+    ),
     ("prf.lines[11][prf.levelindex]", 0),
     ("prf.lines[11][prf.proofidindex]", 0),
     ("prf.lines[11][prf.ruleindex]", t.implication_intro_name),
@@ -91,14 +93,16 @@ testdata = [
     ("prf.lines[11][prf.proofsindex]", "3-10"),
     ("prf.lines[11][prf.commentindex]", "COMPLETE"),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_clean_2(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    C = prf.proposition("C")
+    D = prf.proposition("D")
+    E = prf.proposition("E")
     prf.setlogic()
     prf.goal(Implies(E, Implies(D, Implies(C, And(A, B)))))
     prf.premise(A)
@@ -114,13 +118,14 @@ def test_implication_intro_clean_2(input_n, expected):
     prf.implication_intro()
     assert eval(input_n) == expected
 
+
 """------------------------------------------------------------------------------
                                 Clean Run 3 
 ------------------------------------------------------------------------------"""
 
 # Clean test: check that multiple hypotheses are included in the antecedent of the implication
 testdata = [
-    ('len(prf.lines)', 6),
+    ("len(prf.lines)", 6),
     #
     ("str(prf.lines[3][prf.statementindex])", str(C)),
     ("prf.lines[3][prf.levelindex]", 1),
@@ -138,7 +143,10 @@ testdata = [
     ("prf.lines[4][prf.proofsindex]", ""),
     ("prf.lines[4][prf.commentindex]", ""),
     #
-    ("str(prf.lines[5][prf.statementindex])", str(Implies(And(And(B, A), C), And(B, A)))),
+    (
+        "str(prf.lines[5][prf.statementindex])",
+        str(Implies(And(And(B, A), C), And(B, A))),
+    ),
     ("prf.lines[5][prf.levelindex]", 0),
     ("prf.lines[5][prf.proofidindex]", 0),
     ("prf.lines[5][prf.ruleindex]", t.implication_intro_name),
@@ -146,29 +154,30 @@ testdata = [
     ("prf.lines[5][prf.proofsindex]", "1-4"),
     ("prf.lines[5][prf.commentindex]", ""),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_clean_3(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    C = prf.proposition("C")
     prf.setlogic()
     prf.goal(Implies(A, A))
     prf.hypothesis(B)
     prf.addhypothesis(A)
     prf.addhypothesis(C)
-    prf.conjunction_intro(1,2)
+    prf.conjunction_intro(1, 2)
     prf.implication_intro()
     assert eval(input_n) == expected
+
 
 """------------------------------------------------------------------------------
                                 Clean Run 4 Strict Subproof addhypothesis
 ------------------------------------------------------------------------------"""
 # Clean test
 testdata = [
-    ('len(prf.lines)', 3),
+    ("len(prf.lines)", 3),
     #
     ("str(prf.lines[0][prf.statementindex])", str(Implies(A, A))),
     ("prf.lines[0][prf.levelindex]", 0),
@@ -194,16 +203,14 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", "1-1"),
     ("prf.lines[2][prf.commentindex]", "COMPLETE"),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_strict_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
-    prf.goal(Implies(A, A), comment='Strict Subproof')
+    prf.goal(Implies(A, A), comment="Strict Subproof")
     prf.startstrictsubproof(addhypothesis=A)
     prf.implication_intro()
     assert eval(input_n) == expected
@@ -216,7 +223,7 @@ def test_implication_intro_strict_clean_1(input_n, expected):
 
 # An attempt was made to close the main proof.  This can only be closed by completing the proof.
 testdata = [
-    ('len(prf.lines)', 3),
+    ("len(prf.lines)", 3),
     #
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
     ("prf.lines[2][prf.levelindex]", 0),
@@ -224,21 +231,20 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.implication_intro_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_closemainproof),
+    (
+        "prf.lines[2][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_closemainproof,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_notantecedent_2(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Implies(A, A))
     prf.premise(A)
     prf.implication_intro()
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
-    

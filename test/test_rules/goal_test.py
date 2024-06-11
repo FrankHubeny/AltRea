@@ -4,14 +4,14 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
 from altrea.rules import Proof
+
 t = Proof()
-A = t.proposition('A')
-B = t.proposition('B')
-C = t.proposition('C')
-D = t.proposition('D')
-E = t.proposition('E')
+A = t.proposition("A")
+B = t.proposition("B")
+C = t.proposition("C")
+D = t.proposition("D")
+E = t.proposition("E")
 
 """------------------------------------------------------------------------------
                                 Clean Run
@@ -19,7 +19,7 @@ E = t.proposition('E')
 
 # Clean test
 testdata = [
-    ('len(prf.lines)', 2),
+    ("len(prf.lines)", 2),
     #
     ("str(prf.lines[0][prf.statementindex])", str(A)),
     ("prf.lines[0][prf.levelindex]", 0),
@@ -37,18 +37,17 @@ testdata = [
     ("prf.lines[1][prf.proofsindex]", ""),
     ("prf.lines[1][prf.commentindex]", t.complete),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_goal_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(A)
     assert eval(input_n) == expected
+
 
 """------------------------------------------------------------------------------
                                   Stopped Run
@@ -57,7 +56,7 @@ def test_goal_clean_1(input_n, expected):
 
 # Input cannot be a string.
 testdata = [
-    ('len(prf.lines)', 1),
+    ("len(prf.lines)", 1),
     #
     ("str(prf.lines[0][prf.statementindex])", t.blankstatement),
     ("prf.lines[0][prf.levelindex]", 0),
@@ -65,21 +64,23 @@ testdata = [
     ("prf.lines[0][prf.ruleindex]", ""),
     ("prf.lines[0][prf.linesindex]", ""),
     ("prf.lines[0][prf.proofsindex]", ""),
-    ("prf.lines[0][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notwff),
+    (
+        "prf.lines[0][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notwff,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_goal_notwff_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
-    prf.goal('A')
+    prf.goal("A")
     prf.premise(A)
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                                 stopped_nologic
@@ -87,7 +88,7 @@ def test_goal_notwff_1(input_n, expected):
 
 # A logic needs to declared before the goal so the goal comes under the constraint of the logic.
 testdata = [
-    ('len(prf.lines)', 1),
+    ("len(prf.lines)", 1),
     #
     ("str(prf.lines[0][prf.statementindex])", t.blankstatement),
     ("prf.lines[0][prf.levelindex]", 0),
@@ -95,21 +96,23 @@ testdata = [
     ("prf.lines[0][prf.ruleindex]", ""),
     ("prf.lines[0][prf.linesindex]", ""),
     ("prf.lines[0][prf.proofsindex]", ""),
-    ("prf.lines[0][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nologic),
+    (
+        "prf.lines[0][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_nologic,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_goal_nologic_1(input_n, expected):
-    prf = Proof()   
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')    
+    prf = Proof()
+    A = prf.proposition("A")
     # prf.setlogic()
     prf.goal(A)
     prf.premise(A)
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                         
@@ -119,4 +122,3 @@ def test_goal_nologic_1(input_n, expected):
                                   Stopped Run
                         
 ------------------------------------------------------------------------------"""
-    

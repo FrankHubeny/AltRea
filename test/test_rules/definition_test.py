@@ -4,7 +4,7 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import And, Implies, Iff
 from altrea.rules import Proof
 t = Proof()
 A = t.proposition('A')
@@ -55,9 +55,6 @@ def test_definition_iff_1(input_n, expected):
     prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B)
     prf.premise(Implies(A, B))
@@ -92,9 +89,6 @@ def test_definition_restricted_1(input_n, expected):
     prf.setrestricted(True)
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B)
     prf.premise(Implies(A, B))
@@ -135,9 +129,6 @@ def test_definition_premisesdontmatch_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.setrestricted(False)
     prf.goal(B)
@@ -173,9 +164,6 @@ def test_definition_premisesdontmatch_2(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.setrestricted(False)
     prf.goal(B)
@@ -214,9 +202,6 @@ def test_definition_nosubs_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.setrestricted(False)
     prf.goal(B)
@@ -254,9 +239,6 @@ def test_definition_notwff_1(input_n, expected):
     prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B)
     prf.premise(Implies(A, B))
@@ -292,9 +274,6 @@ def test_definition_notinteger_1(input_n, expected):
     prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B)
     prf.premise(Implies(A, B))
@@ -331,9 +310,6 @@ def test_definition_nosuchline_1(input_n, expected):
     prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B)
     prf.premise(Implies(A, B))
@@ -369,9 +345,6 @@ def test_definition_linescope_1(input_n, expected):
     prf.setrestricted(False)
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B)
     prf.hypothesis(Implies(A, B))
@@ -382,9 +355,6 @@ def test_definition_linescope_1(input_n, expected):
     
     assert eval(input_n) == expected
 
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                        
-------------------------------------------------------------------------------"""
+
     
     

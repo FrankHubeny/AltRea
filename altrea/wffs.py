@@ -58,7 +58,7 @@ class Wff:
             raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
         elif name == '':
             raise ValueError(f'The name "{name}" is the empty string which cannot be used as a name.')
-        elif type(name) != str or type(latexname) != str:
+        elif not isinstance(name, str) or not isinstance(latexname, str):
             raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
         else:
             self.name = name
@@ -195,9 +195,9 @@ class ConsistentWith(Wff):
     def __init__(self, 
                  left: Wff, 
                  right: Wff, 
-                 connector: str = 'o', 
+                 connector: str = '∘', 
                  latexconnector: str = '\\circ',
-                 treeconnector: str = 'o'):
+                 treeconnector: str = 'ConsistentWith'):
         self.left = left
         self.right = right
         self.connector = connector
@@ -330,7 +330,7 @@ class Iff(Wff):
     def __init__(self, 
                  left: Wff, 
                  right: Wff, 
-                 connector: str = '<>', 
+                 connector: str = '≡', 
                  latexconnector: str = '\\equiv ',
                  treeconnector: str = 'Iff'):
         self.left = left
@@ -400,8 +400,8 @@ class StrictIff(Wff):
     def __init__(self, 
                  left: Wff, 
                  right: Wff, 
-                 connector: str = 'StrictIff', 
-                 latexconnector: str = '\\equiv ',
+                 connector: str = '≣', 
+                 latexconnector: str = '~≣~',
                  treeconnector: str = 'StrictIff'):
         self.left = left
         self.right = right
@@ -471,7 +471,7 @@ class Implies(Wff):
     def __init__(self, 
                  left: Wff, 
                  right: Wff, 
-                 connector: str = '>', 
+                 connector: str = '⊃', 
                  latexconnector: str = '\\supset ',
                  treeconnector: str = 'Implies'):
         self.left = left
@@ -545,8 +545,8 @@ class StrictImplies(Wff):
     def __init__(self, 
                  left: Wff, 
                  right: Wff, 
-                 connector: str = 'StrictImplies', 
-                 latexconnector: str = '\\prec ',
+                 connector: str = '⊰', 
+                 latexconnector: str = '\\prec~', #'\\prec ',
                  treeconnector: str = 'StrictImplies'):
         self.left = left
         self.right = right
@@ -616,7 +616,7 @@ class Necessary(Wff):
 
     def __init__(self, 
                  wff: Wff, 
-                 connector: str = 'Necessary', 
+                 connector: str = '☐', 
                  latexconnector: str = '\\Box~', 
                  treeconnector: str = 'Necessary'):
         self.wff = wff
@@ -626,10 +626,10 @@ class Necessary(Wff):
         self.multivalue = (True)
 
     def __str__(self):
-        if self.wff.is_variable:
-            return f'{self.connector} {self.wff}'
-        else:
-            return f'{self.connector}{self.lb}{self.wff}{self.rb}'
+        # if self.wff.is_variable:
+        #     return f'{self.connector} {self.wff}'
+        # else:
+        return f'{self.connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
         if self.wff.is_variable:
@@ -665,7 +665,7 @@ class Not(Wff):
     def __init__(self, 
                  negated: Wff, 
                  connector: str = '~', 
-                 latexconnector: str = '\\lnot ',
+                 latexconnector: str = '\\lnot~',
                  treeconnector: str = 'Not'):
         self.negated = negated
         self.booleanvalue = None
@@ -797,7 +797,7 @@ class Possibly(Wff):
 
     def __init__(self, 
                  wff: Wff, 
-                 connector: str = 'Possibly', 
+                 connector: str = '◇', 
                  latexconnector: str = '\\Diamond~', 
                  treeconnector: str = 'Possibly'):
         self.wff = wff
@@ -807,10 +807,10 @@ class Possibly(Wff):
         self.multivalue = (True)
 
     def __str__(self):
-        if self.wff.is_variable:
-            return f'{self.connector} {self.wff}'
-        else:
-            return f'{self.connector}{self.lb}{self.wff}{self.rb}'
+        # if self.wff.is_variable:
+        #     return f'{self.connector} {self.wff}'
+        # else:
+        return f'{self.connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
         if self.wff.is_variable:
@@ -849,7 +849,7 @@ class Truth(Wff):
             raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
         elif name == '':
             raise ValueError(f'The name "{name}" is the empty string which cannot be used as a name.')
-        elif type(name) != str or type(latexname) != str:
+        elif not isinstance(name, str) or not isinstance(latexname, str):
             raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
         else:
             if name == '':
@@ -896,7 +896,7 @@ class Proposition(Wff):
             raise ValueError(f'The name "{name}" or the latexname "{latexname}" is in the list of reserved words: {self.reserved_names} which cannot be used.')
         elif name == '':
             raise ValueError(f'The name "{name}" is the empty string which cannot be used as a name.')
-        elif type(name) != str or type(latexname) != str:
+        elif not isinstance(name, str) or not isinstance(latexname, str):
             raise TypeError(f' The name "{str(name)}" or the latexname "{str(latexname)}" was not a string.')
         else:
             if name == '':

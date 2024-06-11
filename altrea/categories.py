@@ -2,35 +2,44 @@
 """This module contains the classes for categorical propositions."""
 
 from altrea.terms import Term
-    
 
-class Categorical():
+
+class Categorical:
     """Parent class for categories."""
 
-    quantifier_all = 'All '
-    quantifier_some = 'Some '
-    quantifier_no = 'No '
-    copula_are = ' are '
-    copula_arenot = ' are not '
-    quality_affirmative = 'Affirmative'
-    quality_negative = 'Negative'
-    quantity_universal = 'Universal'
-    quantity_particular = 'Particular'
-    letter_a = 'A'
-    letter_e = 'E'
-    letter_i = 'I'
-    letter_o = 'O'
-    distributed = 'Distributed'
-    undistributed = 'Undistributed'
+    quantifier_all = "All "
+    quantifier_some = "Some "
+    quantifier_no = "No "
+    copula_are = " are "
+    copula_arenot = " are not "
+    quality_affirmative = "Affirmative"
+    quality_negative = "Negative"
+    quantity_universal = "Universal"
+    quantity_particular = "Particular"
+    letter_a = "A"
+    letter_e = "E"
+    letter_i = "I"
+    letter_o = "O"
+    distributed = "Distributed"
+    undistributed = "Undistributed"
 
     def __init__(self):
         self.subjectterm = None
         self.predicateterm = None
-        self.quantifier = ''
-        self.copula = ''
+        self.quantifier = ""
+        self.copula = ""
 
     def __str__(self):
-        return ''.join([self.quantifier, str(self.subjectterm), self.copula, str(self.predicateterm), '.'])
+        return "".join(
+            [
+                self.quantifier,
+                str(self.subjectterm),
+                self.copula,
+                str(self.predicateterm),
+                ".",
+            ]
+        )
+
 
 class All(Categorical):
     """A class for the categorical proposition 'All S are P'."""
@@ -45,7 +54,8 @@ class All(Categorical):
         self.letter = self.letter_a
         self.subjectterm.distributed = self.distributed
         self.predicateterm.distributed = self.undistributed
-    
+
+
 class Some(Categorical):
     """A class for the categorical proposition 'Some S are P'."""
 
@@ -62,7 +72,8 @@ class Some(Categorical):
 
     # def __str__(self):
     #     return ''.join([self.quantifier, self.subjectterm, self.copula, self.predicateterm, '.'])
-    
+
+
 class No(Categorical):
     """A class for the categorical proposition 'No S are P'."""
 
@@ -76,7 +87,8 @@ class No(Categorical):
         self.letter = self.letter_e
         self.subjectterm.distributed = self.distributed
         self.predicateterm.distributed = self.distributed
-    
+
+
 class SomeNot(Categorical):
     """A class for the categorical proposition 'Some S are P'."""
 

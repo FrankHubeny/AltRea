@@ -4,14 +4,15 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import Wff, Not
 from altrea.rules import Proof
+
 t = Proof()
-A = t.proposition('A')
-B = t.proposition('B')
-C = t.proposition('C')
-D = t.proposition('D')
-E = t.proposition('E')
+A = t.proposition("A")
+B = t.proposition("B")
+C = t.proposition("C")
+D = t.proposition("D")
+E = t.proposition("E")
 
 """------------------------------------------------------------------------------
                                 Clean Run
@@ -19,7 +20,7 @@ E = t.proposition('E')
 
 # Clean test
 testdata = [
-    ('len(prf.lines)', 4),
+    ("len(prf.lines)", 4),
     #
     ("str(prf.lines[1][prf.statementindex])", str(A)),
     ("prf.lines[1][prf.levelindex]", 0),
@@ -45,16 +46,19 @@ testdata = [
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", ""),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = Wff("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
     prf.hypothesis(Not(A))
     prf.reiterate(1)
     assert eval(input_n) == expected
+
 
 """------------------------------------------------------------------------------
                                   Stopped Run
@@ -69,12 +73,17 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[3][prf.linesindex]", "10"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
+    (
+        "prf.lines[3][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_nosuchline,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = Wff("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -96,19 +105,25 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
+    (
+        "prf.lines[3][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notreiteratescope,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = Wff("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.reiterate(1)
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                            stopped_notreiteratescope
@@ -122,18 +137,24 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
+    (
+        "prf.lines[2][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notreiteratescope,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_2(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = Wff("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.reiterate(1)
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                            stopped_notreiteratescope
@@ -147,18 +168,24 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
+    (
+        "prf.lines[2][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notreiteratescope,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_3(input_n, expected):
     prf = Proof()
-    A = Wff('A')
+    A = Wff("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
     prf.reiterate(1)
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                            stopped_notreiteratescope
@@ -172,14 +199,19 @@ testdata = [
     ("prf.lines[5][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[5][prf.linesindex]", "2"),
     ("prf.lines[5][prf.proofsindex]", ""),
-    ("prf.lines[5][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notreiteratescope),
+    (
+        "prf.lines[5][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notreiteratescope,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_4(input_n, expected):
     prf = Proof()
-    A = Wff('A')
-    B = Wff('B')
-    C = Wff('C')
+    A = Wff("A")
+    B = Wff("B")
+    C = Wff("C")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
@@ -188,4 +220,3 @@ def test_reiterate_notreiteratescope_4(input_n, expected):
     prf.hypothesis(C)
     prf.reiterate(2)
     assert eval(input_n) == expected
-

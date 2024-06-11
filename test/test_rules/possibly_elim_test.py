@@ -4,21 +4,22 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth, Necessary, Possibly
+from altrea.wffs import Possibly
 from altrea.rules import Proof
+
 t = Proof()
-A = t.proposition('A')
-B = t.proposition('B')
-C = t.proposition('C')
-D = t.proposition('D')
-E = t.proposition('E')
+A = t.proposition("A")
+B = t.proposition("B")
+C = t.proposition("C")
+D = t.proposition("D")
+E = t.proposition("E")
 
 """------------------------------------------------------------------------------
                                 Clean Run
 ------------------------------------------------------------------------------"""
 
 testdata = [
-    ('len(prf.lines)', 3),
+    ("len(prf.lines)", 3),
     #
     ("str(prf.lines[1][prf.statementindex])", str(A)),
     ("prf.lines[1][prf.levelindex]", 1),
@@ -37,27 +38,26 @@ testdata = [
     ("prf.lines[2][prf.commentindex]", t.complete),
     #
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_possibly_elim_clean_1(input_n, expected):
     prf = Proof()
     prf.setrestricted(True)
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Possibly(A))
     prf.startstrictsubproof(addhypothesis=A)
     prf.possibly_elim()
     assert eval(input_n) == expected
 
+
 """------------------------------------------------------------------------------
                                 Error: ruleclass
 ------------------------------------------------------------------------------"""
 
 testdata = [
-    ('len(prf.lines)', 3),
+    ("len(prf.lines)", 3),
     #
     ("str(prf.lines[1][prf.statementindex])", str(A)),
     ("prf.lines[1][prf.levelindex]", 1),
@@ -73,22 +73,22 @@ testdata = [
     ("prf.lines[2][prf.ruleindex]", t.possibly_elim_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_ruleclass),
+    (
+        "prf.lines[2][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_ruleclass,
+    ),
     #
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_possibly_elim_ruleclass_1(input_n, expected):
     prf = Proof()
     prf.setrestricted(True)
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Possibly(A))
     prf.startstrictsubproof(addhypothesis=A)
     prf.proofrules = prf.rule_axiomatic
     prf.possibly_elim()
     assert eval(input_n) == expected
-

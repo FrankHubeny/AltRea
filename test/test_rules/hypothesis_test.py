@@ -4,7 +4,7 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import Implies
 from altrea.rules import Proof
 t = Proof()
 A = t.proposition('A')
@@ -50,9 +50,6 @@ def test_hypothesis_clean_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(Implies(A, B))
     prf.premise(B)
@@ -80,11 +77,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_hypothesis_notwff_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
     B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis('A')  
@@ -109,10 +102,6 @@ testdata = [
 def test_hypothesis_nogoal_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     #prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis(A)  

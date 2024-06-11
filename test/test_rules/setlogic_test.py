@@ -4,7 +4,6 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
 from altrea.rules import Proof
 t = Proof()
 A = t.proposition('A')
@@ -32,7 +31,6 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_setlogic_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
     prf.setlogic()
     assert eval(input_n) == expected
 
@@ -57,7 +55,6 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_setlogic_logicnotfound_1(input_n, expected):
     prf = Proof()
-    A = Wff('A')
     prf.setlogic("_?_")
     assert eval(input_n) == expected
 

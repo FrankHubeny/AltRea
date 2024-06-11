@@ -4,14 +4,15 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import Not, And, Falsehood
 from altrea.rules import Proof
+
 t = Proof()
-A = t.proposition('A')
-B = t.proposition('B')
-C = t.proposition('C')
-D = t.proposition('D')
-E = t.proposition('E')
+A = t.proposition("A")
+B = t.proposition("B")
+C = t.proposition("C")
+D = t.proposition("D")
+E = t.proposition("E")
 
 """------------------------------------------------------------------------------
                                 Clean Run 1
@@ -19,7 +20,7 @@ E = t.proposition('E')
 
 # Clean test
 testdata = [
-    ('len(prf.lines)', 7),
+    ("len(prf.lines)", 7),
     #
     ("str(prf.lines[3][prf.statementindex])", str(A)),
     ("prf.lines[3][prf.levelindex]", 1),
@@ -45,14 +46,12 @@ testdata = [
     ("prf.lines[6][prf.proofsindex]", ""),
     ("prf.lines[6][prf.commentindex]", t.complete),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_intro_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -61,8 +60,9 @@ def test_negation_intro_clean_1(input_n, expected):
     prf.negation_elim(2, 3)
     prf.implication_intro()
     prf.negation_intro()
-    
+
     assert eval(input_n) == expected
+
 
 """------------------------------------------------------------------------------
                                 Clean Run 2
@@ -70,7 +70,7 @@ def test_negation_intro_clean_1(input_n, expected):
 
 # Clean test
 testdata = [
-    ('len(prf.lines)', 6),
+    ("len(prf.lines)", 6),
     #
     ("str(prf.lines[2][prf.statementindex])", str(Not(A))),
     ("prf.lines[2][prf.levelindex]", 1),
@@ -96,23 +96,22 @@ testdata = [
     ("prf.lines[5][prf.proofsindex]", ""),
     ("prf.lines[5][prf.commentindex]", t.complete),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_negation_intro_clean_2(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(And(A, Not(A))))
     prf.hypothesis(A)
     prf.addhypothesis(Not(A))
     prf.negation_elim(1, 2)
     prf.implication_intro()
-    prf.negation_intro()  
+    prf.negation_intro()
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                                 stopped_notfalse
@@ -126,30 +125,20 @@ testdata = [
     ("prf.lines[3][prf.ruleindex]", t.negation_intro_name),
     ("prf.lines[3][prf.linesindex]", "2"),
     ("prf.lines[3][prf.proofsindex]", ""),
-    ("prf.lines[3][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notfalse),
+    (
+        "prf.lines[3][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notfalse,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_intro_notfalse_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.negation_intro()
     assert eval(input_n) == expected
-    
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                        
-------------------------------------------------------------------------------"""
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                        
-------------------------------------------------------------------------------"""
-    

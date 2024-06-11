@@ -4,14 +4,15 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import And, Or, Implies
 from altrea.rules import Proof
+
 t = Proof()
-A = t.proposition('A')
-B = t.proposition('B')
-C = t.proposition('C')
-D = t.proposition('D')
-E = t.proposition('E')
+A = t.proposition("A")
+B = t.proposition("B")
+C = t.proposition("C")
+D = t.proposition("D")
+E = t.proposition("E")
 
 """------------------------------------------------------------------------------
                                 Clean Run 1
@@ -19,7 +20,7 @@ E = t.proposition('E')
 
 # Clean test
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[2][prf.statementindex])", str(A)),
     ("prf.lines[2][prf.levelindex]", 1),
@@ -45,14 +46,12 @@ testdata = [
     ("prf.lines[4][prf.proofsindex]", ""),
     ("prf.lines[4][prf.commentindex]", t.complete),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_elim_clean_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -61,13 +60,14 @@ def test_disjunction_elim_clean_1(input_n, expected):
     prf.disjunction_elim(1, 3, 3)
     assert eval(input_n) == expected
 
+
 """------------------------------------------------------------------------------
                                 Clean Run 2
 ------------------------------------------------------------------------------"""
 
 # Clean test
 testdata = [
-    ('len(prf.lines)', 13),
+    ("len(prf.lines)", 13),
     #
     ("str(prf.lines[10][prf.statementindex])", str(A)),
     ("prf.lines[10][prf.levelindex]", 1),
@@ -93,14 +93,14 @@ testdata = [
     ("prf.lines[12][prf.proofsindex]", ""),
     ("prf.lines[12][prf.commentindex]", t.complete),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_disjunction_elim_clean_2(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    C = prf.proposition("C")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Implies(B, A))
@@ -117,6 +117,7 @@ def test_disjunction_elim_clean_2(input_n, expected):
     prf.disjunction_elim(3, 7, 11)
     assert eval(input_n) == expected
 
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                               stopped_nosuchline
@@ -124,7 +125,7 @@ def test_disjunction_elim_clean_2(input_n, expected):
 
 # The first referenced line of the three does not exist in the proof.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -132,23 +133,24 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "10"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_nosuchline,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(10, 3, 3)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
 
 
@@ -159,7 +161,7 @@ def test_conjunction_intro_nosuchline_1(input_n, expected):
 
 # The second referenced line of the three does not exist in the proof.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -167,32 +169,34 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "-10"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_nosuchline),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_nosuchline,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nosuchline_2(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, -10, 3)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                               stopped_nointeger
 ------------------------------------------------------------------------------"""
 # The third referenced line of the three does not exist in the proof.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -200,25 +204,27 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "3.1416"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notinteger),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notinteger,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notinteger_3(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 3.1416)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                               stopped_linescope
@@ -226,7 +232,7 @@ def test_conjunction_intro_notinteger_3(input_n, expected):
 
 # The first line of the three is not accessible.
 testdata = [
-    ('len(prf.lines)', 6),
+    ("len(prf.lines)", 6),
     #
     ("str(prf.lines[5][prf.statementindex])", t.blankstatement),
     ("prf.lines[5][prf.levelindex]", 1),
@@ -234,16 +240,18 @@ testdata = [
     ("prf.lines[5][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[5][prf.linesindex]", "1"),
     ("prf.lines[5][prf.proofsindex]", ""),
-    ("prf.lines[5][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
+    (
+        "prf.lines[5][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_linescope,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
+    C = prf.proposition("C")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
@@ -251,9 +259,10 @@ def test_conjunction_elim_linescope_1(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 4, 4)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                               stopped_linescope
@@ -261,7 +270,7 @@ def test_conjunction_elim_linescope_1(input_n, expected):
 
 # The second line of the three is not accessible.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -269,25 +278,27 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_linescope,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_2(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 2, 3)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                               stopped_linescope
@@ -295,7 +306,7 @@ def test_conjunction_elim_linescope_2(input_n, expected):
 
 # The third line of the three is not accessible.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -303,25 +314,27 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_linescope),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_linescope,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_elim_linescope_3(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 2)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                               stopped_notdisjunction
@@ -329,7 +342,7 @@ def test_conjunction_elim_linescope_3(input_n, expected):
 
 # The first referenced line is not a disjunction.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -337,24 +350,26 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "1"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notdisjunction),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notdisjunction,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_nodisjunction_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(And(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 3)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
+
 
 """------------------------------------------------------------------------------
                                   Stopped Run
@@ -363,7 +378,7 @@ def test_conjunction_intro_nodisjunction_1(input_n, expected):
 
 # The second referenced line is not an implication.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -371,25 +386,27 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "1"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notimplication),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notimplication,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notimplication_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 1, 3)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                              stopped_notimplication
@@ -397,7 +414,7 @@ def test_conjunction_intro_notimplication_1(input_n, expected):
 
 # The third referenced line is not an implication.
 testdata = [
-    ('len(prf.lines)', 5),
+    ("len(prf.lines)", 5),
     #
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -405,25 +422,27 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "1"),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notimplication),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notimplication,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notimplication_2(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Or(A, A))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.disjunction_elim(1, 3, 1)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    
+
+
 """------------------------------------------------------------------------------
                                   Stopped Run
                             stopped_notsamestatement
@@ -431,7 +450,7 @@ def test_conjunction_intro_notimplication_2(input_n, expected):
 
 # The consequents of the two implications are not the same.
 testdata = [
-    ('len(prf.lines)', 13),
+    ("len(prf.lines)", 13),
     #
     ("str(prf.lines[12][prf.statementindex])", t.blankstatement),
     ("prf.lines[12][prf.levelindex]", 0),
@@ -439,16 +458,19 @@ testdata = [
     ("prf.lines[12][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[12][prf.linesindex]", "7, 11"),
     ("prf.lines[12][prf.proofsindex]", ""),
-    ("prf.lines[12][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_notsamestatement),
+    (
+        "prf.lines[12][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notsamestatement,
+    ),
 ]
+
+
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_conjunction_intro_notsameconclusion_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
-    B = prf.proposition('B')
-    C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    C = prf.proposition("C")
     prf.setlogic()
     prf.goal(A)
     prf.premise(Implies(B, A))
@@ -463,6 +485,5 @@ def test_conjunction_intro_notsameconclusion_1(input_n, expected):
     prf.implication_elim(8, 9)
     prf.implication_intro()
     prf.disjunction_elim(3, 7, 11)
-    prf.hypothesis(A, comment='Nothing can be added after the proof is stopped.')
+    prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
-    

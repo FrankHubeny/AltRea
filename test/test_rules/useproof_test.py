@@ -4,7 +4,7 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not, And, Or, Implies, Iff, Proposition, Falsehood, Truth
+from altrea.wffs import Not, And
 from altrea.rules import Proof
 t = Proof()
 A = t.proposition('A')
@@ -44,11 +44,8 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def _useproof_contradiction_explosion_1(input_n, expected):
     prf = Proof()
-    A = prf.proposition('A')
     B = prf.proposition('B')
     C = prf.proposition('C')
-    D = prf.proposition('D')
-    E = prf.proposition('E')
     prf.setlogic()
     prf.goal(B)
     prf.axiom('contradiction', [C])
@@ -57,38 +54,5 @@ def _useproof_contradiction_explosion_1(input_n, expected):
     prf.axiom('explosion', [C, B], [2, 3])
     assert eval(input_n) == expected
 
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                            stopped_nosuchsavedproof
-------------------------------------------------------------------------------"""
 
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                            stopped_premisesdontmatch
-------------------------------------------------------------------------------"""
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                                stopped_nosubs
-------------------------------------------------------------------------------"""
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                                stopped_notwff
-------------------------------------------------------------------------------"""
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                                stopped_notinteger
-------------------------------------------------------------------------------"""
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                               stopped_nosuchline
-------------------------------------------------------------------------------"""
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                               stopped_linescope
-------------------------------------------------------------------------------"""
 

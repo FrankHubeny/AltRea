@@ -131,6 +131,10 @@ class Proof:
     vacuous = "VACUOUS"
     contradicted = "GOAL CONTRADICTED"
 
+    color_available = '\\color{green}'
+    color_unavailable = '\\color{red}'
+    color_conclusion = '\\color{blue}'
+
     # The following names may be changed.  They are used for display purposes.
     # One could redefine them just after instantiating an instance of the Proof class.
 
@@ -1033,12 +1037,12 @@ class Proof:
                     if saved:
                         statement = "".join(
                             ["$\\color{blue}", prooflines[0][0].latex(), "$"]
-                        )  # , statement, ])
+                        )  
                     else:
                         if self.goals_latex != "":
                             statement = "".join(
-                                ["$\\color{blue}", self.goals_latex, "$"]
-                            )  # , statement, ])
+                                ["$",self.color_conclusion, self.goals_latex, "$"]
+                            )  
                         else:
                             statement = ""
                 else:
@@ -1047,35 +1051,49 @@ class Proof:
                         if self.currentproofid == prooflines[i][2]:
                             statement = "".join(
                                 [
-                                    "$\\color{green}",
+                                    "$",
+                                    self.color_available,
                                     prooflines[i][0].latex(),
                                     statement,
                                     "$",
                                 ]
                             )
                         elif prooflines[i][2] in self.previousproofchain:
-                            if self.label_subproofstrict in prooflines[i][8]:
-                                statement = "".join(
-                                    [
-                                        "$\\color{green}",
-                                        prooflines[i][0].latex(),
-                                        statement,
-                                        "$",
-                                    ]
-                                )
-                            elif i in self.necessarylines:
-                                statement = "".join(
-                                    [
-                                        "$\\color{green}",
-                                        prooflines[i][0].latex(),
-                                        statement,
-                                        "$",
-                                    ]
-                                )
+                            if self.subproof_status == self.subproof_strict:
+                                if self.label_subproofstrict in prooflines[i][8]:
+                                    statement = "".join(
+                                        [
+                                            "$",
+                                            self.color_available,
+                                            prooflines[i][0].latex(),
+                                            statement,
+                                            "$",
+                                        ]
+                                    )
+                                elif i in self.necessarylines:
+                                    statement = "".join(
+                                        [
+                                            "$",
+                                            self.color_available,
+                                            prooflines[i][0].latex(),
+                                            statement,
+                                            "$",
+                                        ]
+                                    )
+                                else:
+                                    statement = "".join(
+                                        [
+                                            "$",
+                                            prooflines[i][0].latex(),
+                                            statement,
+                                            "$",
+                                        ]
+                                    )
                             else:
                                 statement = "".join(
                                     [
-                                        "$\\color{red}",
+                                        "$",
+                                        self.color_available,
                                         prooflines[i][0].latex(),
                                         statement,
                                         "$",
@@ -1084,7 +1102,8 @@ class Proof:
                         else:
                             statement = "".join(
                                 [
-                                    "$\\color{red}",
+                                    "$",
+                                    self.color_unavailable,
                                     prooflines[i][0].latex(),
                                     statement,
                                     "$",
@@ -1092,15 +1111,15 @@ class Proof:
                             )
                     elif prooflines[i][6][0:8] == self.complete:
                         statement = "".join(
-                            ["$\\color{blue}", prooflines[i][0].latex(), statement, "$"]
+                            ["$", self.color_conclusion, prooflines[i][0].latex(), statement, "$"]
                         )
                     elif prooflines[i][6][0:18] == self.partialcompletion:
                         statement = "".join(
-                            ["$\\color{blue}", prooflines[i][0].latex(), statement, "$"]
+                            ["$", self.color_conclusion, prooflines[i][0].latex(), statement, "$"]
                         )
                     else:
                         statement = "".join(
-                            ["$\\color{red}", prooflines[i][0].latex(), statement, "$"]
+                            ["$", prooflines[i][0].latex(), statement, "$"]
                         )
             else:
                 if isinstance(prooflines[i][0], str):

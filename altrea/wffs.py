@@ -400,8 +400,8 @@ class StrictIff(Wff):
     def __init__(self, 
                  left: Wff, 
                  right: Wff, 
-                 connector: str = '≣', 
-                 latexconnector: str = '~≣~',
+                 connector: str = ' ≣ ', 
+                 latexconnector: str = '≣',
                  treeconnector: str = 'StrictIff'):
         self.left = left
         self.right = right
@@ -545,8 +545,8 @@ class StrictImplies(Wff):
     def __init__(self, 
                  left: Wff, 
                  right: Wff, 
-                 connector: str = '⊰', 
-                 latexconnector: str = '\\prec~', #'\\prec ',
+                 connector: str = ' ⊰ ', 
+                 latexconnector: str = '\\prec ', #'\\prec ',
                  treeconnector: str = 'StrictImplies'):
         self.left = left
         self.right = right
@@ -626,10 +626,10 @@ class Necessary(Wff):
         self.multivalue = (True)
 
     def __str__(self):
-        # if self.wff.is_variable:
-        #     return f'{self.connector} {self.wff}'
-        # else:
-        return f'{self.connector}{self.lb}{self.wff}{self.rb}'
+        if self.wff.is_variable:
+            return f'{self.connector}{self.wff}'
+        else:
+            return f'{self.connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
         if self.wff.is_variable:
@@ -807,10 +807,10 @@ class Possibly(Wff):
         self.multivalue = (True)
 
     def __str__(self):
-        # if self.wff.is_variable:
-        #     return f'{self.connector} {self.wff}'
-        # else:
-        return f'{self.connector}{self.lb}{self.wff}{self.rb}'
+        if self.wff.is_variable:
+            return f'{self.connector}{self.wff}'
+        else:
+            return f'{self.connector}{self.lb}{self.wff}{self.rb}'
     
     def latex(self):
         if self.wff.is_variable:
@@ -1030,15 +1030,17 @@ class ConclusionPremises(Wff):
     booleanvalue = None
     multivalue = None
     lb = '{'
+    latexlb = '\\{'
     rb = '}'
-    tree_connector = '|-'
+    latexrb = '\\}'
+    tree_connector = ' ⊢ '
 
     def __init__(self, 
                  conclusion: Wff, 
                  premises: list = [], 
-                 connector: str = '|=', 
-                 derivedconnector: str = '|-', 
-                 latexconnector: str = '\\models ',
+                 connector: str = ' ⊢ ', 
+                 derivedconnector: str = ' ⊢ ', 
+                 latexconnector: str = '~\\vdash~',
                  derivedlatexconnector: str = '\\vdash '):
         self.conclusion = conclusion
         self.premises = premises
@@ -1063,8 +1065,8 @@ class ConclusionPremises(Wff):
             prem = self.premises[0].latex()
             for i in range(len(self.premises)):
                 if i > 0:
-                    prem += ''.join([', ', self.premises[i].latex()])
-            return f'{self.lb}{prem}{self.rb} {self.latexconnector} {self.conclusion.latex()}'
+                    prem += ''.join([',~', self.premises[i].latex()])
+            return f'{self.latexlb}{prem}{self.latexrb} {self.latexconnector} {self.conclusion.latex()}'
         else:
             return f'{self.latexconnector} {self.conclusion.latex()}'
         

@@ -58,6 +58,9 @@ Examples:
 
 import pandas
 
+# from tabulate import tabulate
+# from IPython.display import display, Math, Markdown, Latex, display_markdown, HTML
+
 from altrea.wffs import (
     And,
     Or,
@@ -131,9 +134,9 @@ class Proof:
     vacuous = "VACUOUS"
     contradicted = "GOAL CONTRADICTED"
 
-    color_available = '\\color{green}'
-    color_unavailable = '\\color{red}'
-    color_conclusion = '\\color{blue}'
+    color_available = "\\color{green}"
+    color_unavailable = "\\color{red}"
+    color_conclusion = "\\color{blue}"
 
     # The following names may be changed.  They are used for display purposes.
     # One could redefine them just after instantiating an instance of the Proof class.
@@ -424,6 +427,7 @@ class Proof:
     label_logic = "Logic"
     label_logicdatabase = "Logic Database"
     label_logicdescription = "Logic Description"
+    label_metavariable = "Metavariable"
     label_name = "Name"
     label_noaxioms = "No Axioms"
     label_noconnectives = "No Connectives"
@@ -447,6 +451,7 @@ class Proof:
     label_proofname = "Proof Name"
     label_proofs = "Proofs"
     label_proofstatus = "Proof Status"
+    label_proposition = "Proposition"
     label_right = "right"
     label_rule = "Rule"
     label_savedproofs = "Saved Proofs"
@@ -668,8 +673,23 @@ class Proof:
         self.premises = []
         self.consequences = []
         self.letters = []
+        self.metaletters = []
         self.truths = []
         self.objectdictionary = {
+            "Implies": Implies,
+            "Iff": Iff,
+            "And": And,
+            "Or": Or,
+            "Not": Not,
+            "Necessary": Necessary,
+            "Possibly": Possibly,
+            "ConclusionPremises": ConclusionPremises,
+            "ConsistentWith": ConsistentWith,
+            "StrictImplies": StrictImplies,
+            "StrictIff": StrictIff,
+            "Definition": Definition,
+        }
+        self.metaobjectdictionary = {
             "Implies": Implies,
             "Iff": Iff,
             "And": And,
@@ -688,10 +708,29 @@ class Proof:
         self.writtenproof = ""
         self.showlogging = False
         self.restricted = False
-        # self.logstep(self.log_proof.format(self.proof_name.upper(),
-        #                                    name,
-        #                                    displayname,
-        #                                    description))
+        self.mvalpha = ""
+        self.mvbeta = ""
+        self.mvgamma = ""
+        self.mvdelta = ""
+        self.mvepsilon = ""
+        self.mvzeta = ""
+        self.mveta = ""
+        self.mvtheta = ""
+        self.mviota = ""
+        self.mvkappa = ""
+        self.mvlambda = ""
+        self.mvmu = ""
+        self.mvnu = ""
+        self.mvomicron = ""
+        self.mvpi = ""
+        self.mvrho = ""
+        self.mvsigma = ""
+        self.mvtau = ""
+        self.mvupsilon = ""
+        self.mvphi = ""
+        self.mvchi = ""
+        self.mvpsi = ""
+        self.mvomega = ""
 
     """SUPPORT FUNCTIONS 
     
@@ -1037,12 +1076,12 @@ class Proof:
                     if saved:
                         statement = "".join(
                             ["$\\color{blue}", prooflines[0][0].latex(), "$"]
-                        )  
+                        )
                     else:
                         if self.goals_latex != "":
                             statement = "".join(
-                                ["$",self.color_conclusion, self.goals_latex, "$"]
-                            )  
+                                ["$", self.color_conclusion, self.goals_latex, "$"]
+                            )
                         else:
                             statement = ""
                 else:
@@ -1111,11 +1150,23 @@ class Proof:
                             )
                     elif prooflines[i][6][0:8] == self.complete:
                         statement = "".join(
-                            ["$", self.color_conclusion, prooflines[i][0].latex(), statement, "$"]
+                            [
+                                "$",
+                                self.color_conclusion,
+                                prooflines[i][0].latex(),
+                                statement,
+                                "$",
+                            ]
                         )
                     elif prooflines[i][6][0:18] == self.partialcompletion:
                         statement = "".join(
-                            ["$", self.color_conclusion, prooflines[i][0].latex(), statement, "$"]
+                            [
+                                "$",
+                                self.color_conclusion,
+                                prooflines[i][0].latex(),
+                                statement,
+                                "$",
+                            ]
                         )
                     else:
                         statement = "".join(
@@ -1332,44 +1383,104 @@ class Proof:
     if he chooses to do so.
     """
 
-    def displaylogic(self):
-        """Display an identification of the axiom with its axioms and definitions."""
+    def axioms(self):
+        """display the axioms associated with the logic being used in the proof."""
 
-        # Display minimal information about the logic
-        # print('{: >22}'.format(self.label_logic))
-        print('LOGIC "{}" {}'.format(self.logic, self.logicdescription))
+        axiomcolumn = "".join([self.logic, " ", self.label_axioms])
+        headers = [axiomcolumn]
+        table = []
+        index = []
+        for i in self.logicaxioms:
+            index.append(i[0])
+            substitutedstring = i[1].format(*self.metaletters)
+            reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            table.append("".join(["$", reconstructedobject.latex(), "$"]))
+        df = pandas.DataFrame(table, index, headers)
+        return df
 
-        # Display axioms
-        if len(self.logicaxioms) == 0:
-            print("{}".format(self.label_noaxioms))
-        else:
-            print("{}".format(self.label_axioms.upper()))
-            for i in self.logicaxioms:
-                print(" {: <20} {: <50}".format(i[0], i[1]))
+    def definitions(self):
+        """display the definitions associated with the logic being used in the proof."""
 
-        # Display definitions
-        if len(self.logicdefinitions) == 0:
-            print("{}".format(self.label_nodefinitions))
-        else:
-            print("{}".format(self.label_definitions.upper()))
-            for i in self.logicdefinitions:
-                print(" {: <20} {: <50}".format(i[0], i[1]))
+        definitioncolumn = "".join([self.logic, " ", self.label_definitions])
+        headers = [definitioncolumn]
+        table = []
+        index = []
+        for i in self.logicdefinitions:
+            index.append(i[0])
+            substitutedstring = i[1].format(*self.metaletters)
+            reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            table.append("".join(["$", reconstructedobject.latex(), "$"]))
+        df = pandas.DataFrame(table, index, headers)
+        return df
 
-        # Display transformationrules
-        if len(self.logicrules) == 0:
-            print("{}".format(self.label_notransformationrules))
-        else:
-            print("{}".format(self.label_transformationrules.upper()))
-            for i in self.logicrules:
-                print(" {: <20} {: <50}".format(i[0], i[1]))
+    def rules(self):
+        """display the transformation rules associated with the logic being used in the proof."""
 
-        # Display saved proofs
-        if len(self.logicsavedproofs) == 0:
-            print("{}".format(self.label_nosavedproofs))
-        else:
-            print("{}".format(self.label_savedproofs.upper()))
-            for i in self.logicsavedproofs:
-                print(" {: <20} {: <50}".format(i[0], i[1]))
+        rulecolumn = "".join([self.logic, " ", self.label_transformationrules])
+        headers = [rulecolumn]
+        table = []
+        index = []
+        for i in self.logicrules:
+            index.append(i[0])
+            substitutedstring = i[1].format(*self.metaletters)
+            reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            table.append("".join(["$", reconstructedobject.latex(), "$"]))
+        df = pandas.DataFrame(table, index, headers)
+        return df
+
+    def proofs(self):
+        """display the saved proofs associated with the logic being used in the current proof."""
+
+        proofcolumn = "".join([self.logic, " ", self.label_savedproofs])
+        headers = [proofcolumn]
+        table = []
+        index = []
+        for i in self.logicsavedproofs:
+            index.append(i[0])
+            substitutedstring = i[1].format(*self.metaletters)
+            reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            table.append("".join(["$", reconstructedobject.latex(), "$"]))
+        df = pandas.DataFrame(table, index, headers)
+        return df
+
+    # def displaylogic(self):
+    #     """Display an identification of the axiom with its axioms and definitions."""
+
+    #     # Display minimal information about the logic
+    #     # print('{: >22}'.format(self.label_logic))
+    #     print('LOGIC "{}" {}'.format(self.logic, self.logicdescription))
+
+    #     # Display axioms
+    #     if len(self.logicaxioms) == 0:
+    #         print("{}".format(self.label_noaxioms))
+    #     else:
+    #         print("{}".format(self.label_axioms.upper()))
+    #         for i in self.logicaxioms:
+    #             print(" {: <20} {: <50}".format(i[0], i[1]))
+
+    #     # Display definitions
+    #     if len(self.logicdefinitions) == 0:
+    #         print("{}".format(self.label_nodefinitions))
+    #     else:
+    #         print("{}".format(self.label_definitions.upper()))
+    #         for i in self.logicdefinitions:
+    #             print(" {: <20} {: <50}".format(i[0], i[1]))
+
+    #     # Display transformationrules
+    #     if len(self.logicrules) == 0:
+    #         print("{}".format(self.label_notransformationrules))
+    #     else:
+    #         print("{}".format(self.label_transformationrules.upper()))
+    #         for i in self.logicrules:
+    #             print(" {: <20} {: <50}".format(i[0], i[1]))
+
+    #     # Display saved proofs
+    #     if len(self.logicsavedproofs) == 0:
+    #         print("{}".format(self.label_nosavedproofs))
+    #     else:
+    #         print("{}".format(self.label_savedproofs.upper()))
+    #         for i in self.logicsavedproofs:
+    #             print(" {: <20} {: <50}".format(i[0], i[1]))
 
     def displaylog(self):
         """Displays a log of the proof steps.  This will display the entire log that
@@ -1388,7 +1499,7 @@ class Proof:
             else:
                 print("{: >4} {}".format(i, self.log[i]))
 
-    def displayproof(self, short: int = 0, color: int = 1, latex: int = 1):
+    def thisproof(self, short: int = 0, color: int = 1, latex: int = 1):
         """This function displays the proof lines.
 
         Parameters:
@@ -2455,6 +2566,11 @@ class Proof:
                         self.saveaxiom_name.upper(), name
                     )
                 )
+                print(
+                    self.log_axiomalreadyexists.format(
+                        self.saveaxiom_name.upper(), name
+                    )
+                )
             else:
                 if self.logic != "":
                     altrea.data.addaxiom(
@@ -2464,6 +2580,7 @@ class Proof:
                 self.logstep(
                     self.log_axiomsaved.format(self.saveaxiom_name.upper(), name)
                 )
+                print(self.log_axiomsaved.format(self.saveaxiom_name.upper(), name))
 
     def savedefinition(
         self,
@@ -2626,6 +2743,48 @@ class Proof:
                 "",
                 comment,
             )
+
+    def viewentailment(self, conclusion: Wff, premises: list = []):
+        """View how the conclusion and any premises look as text and latex before actually
+        adding them as an axiom, definition or transformation rule.
+
+        There are propositional metavariables available to use representing the Greek letters.
+        These are also used to display the axioms, definitions and rules for the logic.
+        These can be referenced by referring to self.mvalpha through self.mvomega after one
+        has run `setlogic()` which defines these metavariables.
+
+        Parameters:
+            conclusion: The conclusion that follows from the premises (if any).
+            premises: A list of premises which entail the conclusion.
+
+        Example:
+            This is example is meant to be run in a Jupyter notebook.  It will display
+            a table with two rows.  The first row shows the string version of
+            the entailment.  The second row shows the LaTeX version of the entailment.
+
+            from IPython.display import display, Math
+            from altrea.wffs import And
+            from altrea.rules import Proof
+            p = Proof()
+            p.setlogic()
+            display(p.viewentailment(And(p.mvalpha, p.mvbeta)))
+
+            In this example, the premises are not empty.
+
+            from IPython.display import display, Math
+            from altrea.wffs import And
+            from altrea.rules import Proof
+            p = Proof()
+            p.setlogic()
+            display(p.viewentailment(And(p.mvalpha, p.mvbeta), [p.mvalpha, p.mvbeta]))
+        """
+
+        prop = ConclusionPremises(conclusion, premises)
+        latexprop = "".join(["$", prop.latex(), "$"])
+        df = pandas.DataFrame(
+            [[prop], [latexprop]], columns=["Display"], index=["Text", "LaTeX"]
+        )
+        return df
 
     """NATURAL DEDUCTION AND GENERAL PROOF CONSTRUCTION
     
@@ -5042,7 +5201,7 @@ class Proof:
             )
             self.appendproofdata(premise, self.premise_tag)
 
-    def proposition(self, name: str, latex: str = "", kind: str = "proposition"):
+    def proposition(self, name: str, latex: str = "", kind: str = "Proposition"):
         """This function creates an object which can be given a true or false value.
         The function puts the object in a dictionary that is used when a string
         representation saved into the database or a file is read by the user
@@ -5054,7 +5213,7 @@ class Proof:
             latex: The optional text name for the proposition when it is used
                 in a latex context.
             kind: A designation for the kind of object being created.  The default
-                is a proposition.
+                is a Proposition.  An alternative is Metavariable.
 
         Examples:
             The follow are some of the ways to define propositional variables.
@@ -5088,8 +5247,14 @@ class Proof:
 
         """
         p = Proposition(name, latex, kind)
+        # if kind == self.label_metavariable:
+        #     pass
+        # self.metaobjectdictionary.update({name: p})
+        # self.metaletters.append(name)
+        # else:
         self.objectdictionary.update({name: p})
         self.letters.append([p, name, latex])
+        # self.metaletters.append(name)
         howmany = len(self.letters)
         self.logstep(
             self.log_proposition.format(self.proposition_name.upper(), p, howmany)
@@ -5405,6 +5570,76 @@ class Proof:
 
         # If no errors, perform the task
         if self.canproceed():
+            # Create metavariables
+            self.mvalpha = Wff("α", "\\alpha")
+            self.metaletters.append(self.mvalpha.name)
+            self.metaobjectdictionary.update({self.mvalpha.name: self.mvalpha})
+            self.mvbeta = Wff("β", "\\beta")
+            self.metaletters.append(self.mvbeta.name)
+            self.metaobjectdictionary.update({self.mvbeta.name: self.mvbeta})
+            self.mvgamma = Wff("γ", "\\gamma")
+            self.metaletters.append(self.mvgamma.name)
+            self.metaobjectdictionary.update({self.mvgamma.name: self.mvgamma})
+            self.mvdelta = Wff("𝛿", "\\delta")
+            self.metaletters.append(self.mvdelta.name)
+            self.metaobjectdictionary.update({self.mvdelta.name: self.mvdelta})
+            self.mvepsilon = Wff("ε", "\\epsilon")
+            self.metaletters.append(self.mvepsilon.name)
+            self.metaobjectdictionary.update({self.mvepsilon.name: self.mvepsilon})
+            self.mvzeta = Wff("ζ", "\\zeta")
+            self.metaletters.append(self.mvzeta.name)
+            self.metaobjectdictionary.update({self.mvzeta.name: self.mvzeta})
+            self.mveta = Wff("η", "\\eta")
+            self.metaletters.append(self.mveta.name)
+            self.metaobjectdictionary.update({self.mveta.name: self.mveta})
+            self.mvtheta = Wff("θ", "\\theta")
+            self.metaletters.append(self.mvtheta.name)
+            self.metaobjectdictionary.update({self.mvtheta.name: self.mvtheta})
+            self.mviota = Wff("ι", "\\iota")
+            self.metaletters.append(self.mviota.name)
+            self.metaobjectdictionary.update({self.mviota.name: self.mviota})
+            self.mvkappa = Wff("κ", "\\kappa")
+            self.metaletters.append(self.mvkappa.name)
+            self.metaobjectdictionary.update({self.mvkappa.name: self.mvkappa})
+            self.mvlambda = Wff("λ", "\\lambda")
+            self.metaletters.append(self.mvlambda.name)
+            self.metaobjectdictionary.update({self.mvlambda.name: self.mvlambda})
+            self.mvmu = Wff("μ", "\\mu")
+            self.metaletters.append(self.mvmu.name)
+            self.metaobjectdictionary.update({self.mvmu.name: self.mvmu})
+            self.mvnu = Wff("ν", "\\nu")
+            self.metaletters.append(self.mvnu.name)
+            self.metaobjectdictionary.update({self.mvnu.name: self.mvnu})
+            self.mvomicron = Wff("ο", "\\omicron")
+            self.metaletters.append(self.mvomicron.name)
+            self.metaobjectdictionary.update({self.mvomicron.name: self.mvomicron})
+            self.mvpi = Wff("π", "\\pi")
+            self.metaletters.append(self.mvpi.name)
+            self.metaobjectdictionary.update({self.mvpi.name: self.mvpi})
+            self.mvrho = Wff("ρ", "\\rho")
+            self.metaletters.append(self.mvrho.name)
+            self.metaobjectdictionary.update({self.mvrho.name: self.mvrho})
+            self.mvsigma = Wff("σ", "\\sigma")
+            self.metaletters.append(self.mvsigma.name)
+            self.metaobjectdictionary.update({self.mvsigma.name: self.mvsigma})
+            self.mvtau = Wff("τ", "\\tau")
+            self.metaletters.append(self.mvtau.name)
+            self.metaobjectdictionary.update({self.mvtau.name: self.mvtau})
+            self.mvupsilon = Wff("υ", "\\upsilon")
+            self.metaletters.append(self.mvupsilon.name)
+            self.metaobjectdictionary.update({self.mvupsilon.name: self.mvupsilon})
+            self.mvphi = Wff("ϕ", "\\phi")
+            self.metaletters.append(self.mvphi.name)
+            self.metaobjectdictionary.update({self.mvphi.name: self.mvphi})
+            self.mvchi = Wff("χ", "\\chi")
+            self.metaletters.append(self.mvchi.name)
+            self.metaobjectdictionary.update({self.mvchi.name: self.mvchi})
+            self.mvpsi = Wff("ψ", "\\psi")
+            self.metaletters.append(self.mvpsi.name)
+            self.metaobjectdictionary.update({self.mvpsi.name: self.mvpsi})
+            self.mvomega = Wff("ω", "\\omega")
+            self.metaletters.append(self.mvomega.name)
+            self.metaobjectdictionary.update({self.mvomega.name: self.mvomega})
             self.logicdatabase = database
             self.logicdescription = description
             self.proofdata[0].append(logic)

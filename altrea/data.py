@@ -73,6 +73,7 @@ def createmetadatatables():
                 displayname TEXT NOT NULL,
                 description TEXT NOT NULL,
                 UNIQUE(logic, name) ON CONFLICT REPLACE,
+                UNIQUE(logic, displayname) ON CONFLICT REPLACE,
                 FOREIGN KEY (logic) REFERENCES logics(logic)
                 )""")
         print("The definitions table has been created.")
@@ -85,6 +86,7 @@ def createmetadatatables():
                 displayname TEXT NOT NULL,
                 description TEXT NOT NULL,
                 UNIQUE(logic, name) ON CONFLICT REPLACE,
+                UNIQUE(logic, displayname) ON CONFLICT REPLACE,
                 FOREIGN KEY (logic) REFERENCES logics(logic)
                 )""")
         print("The axioms table has been created.")
@@ -97,6 +99,7 @@ def createmetadatatables():
                 displayname TEXT NOT NULL,
                 description TEXT NOT NULL,
                 UNIQUE(logic, name) ON CONFLICT REPLACE,
+                UNIQUE(logic, displayname) ON CONFLICT REPLACE,
                 FOREIGN KEY (logic) REFERENCES logics(logic)
                 )""")
         print("The rules table has been created.")
@@ -215,10 +218,11 @@ def addlogic(
         c.execute("""CREATE TABLE proofs (
                     name         TEXT PRIMARY KEY,
                     pattern      TEXT NOT NULL,
-                    displayname  TEXT NULL,
+                    displayname  TEXT NOT NULL,
                     description  TEXT NULL,
                     textversion  TEXT NULL,
-                    latexversion TEXT NULL
+                    latexversion TEXT NULL.
+                    UNIQUE(displayname) ON CONFLICT REPLACE
                     )""")
         print(f"The proofs table has been created in {database}.")
     except sqlite3.OperationalError:

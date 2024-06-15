@@ -401,7 +401,7 @@ class StrictIff(Wff):
                  left: Wff, 
                  right: Wff, 
                  connector: str = ' ≣ ', 
-                 latexconnector: str = '≣',
+                 latexconnector: str = '~\\backsimeq~',
                  treeconnector: str = 'StrictIff'):
         self.left = left
         self.right = right
@@ -546,7 +546,7 @@ class StrictImplies(Wff):
                  left: Wff, 
                  right: Wff, 
                  connector: str = ' ⊰ ', 
-                 latexconnector: str = '\\prec ', #'\\prec ',
+                 latexconnector: str = '~\\prec~', #'\\prec ',
                  treeconnector: str = 'StrictImplies'):
         self.left = left
         self.right = right
@@ -983,7 +983,7 @@ class Definition(Wff):
     booleanvalue = None
     lb = '('
     rb = ')'
-    tree_connector = '|='
+    #tree_connector = '|='
 
     def __init__(self, 
                  left: Wff, 

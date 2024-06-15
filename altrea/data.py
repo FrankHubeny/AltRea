@@ -2,12 +2,14 @@
 
 import sqlite3
 import pandas
+import os
+
 
 # from altrea.wffs import And, Or, Not, Implies, Iff, Wff, Falsehood, Truth, ConclusionPremises
 
 metadata = "altrea/data/metadata.db"
 datafolder = "altrea/data/"
-# proofsfolder = 'altrea/proofs/'
+proofsfolder = 'altrea/proofs/research/contents/'
 
 
 def getreservedwords():
@@ -46,15 +48,6 @@ def createmetadatatables():
                     database    TEXT UNIQUE,
                     description TEXT NOT NULL)""")
         print("The logics table has been created.")
-
-        # Create the intelimrules table in the metadata database.
-        # c.execute("""CREATE TABLE intelimrules (
-        #           logic       TEXT NOT NULL,
-        #           name        TEXT NOT NULL,
-        #           description TEXT NOT NULL,
-        #           UNIQUE(logic, name) ON CONFLICT REPLACE,
-        #           FOREIGN KEY (logic) REFERENCES logics(logic))""")
-        # print('The intelimrules table has been created.')
 
         # Create the connectors table in the metadata database.
         c.execute("""CREATE TABLE connectors (
@@ -688,77 +681,75 @@ def getconnectors(logic: str):
         return rows
 
 
-def testlogic(logic: str):
-    spacer = "      "
-    print(f'Testing the "{logic}" logic setup in AltRea')
+# def testlogic(logic: str):
+#     spacer = "      "
+#     print(f'Testing the "{logic}" logic setup in AltRea')
 
-    # Test that the logic has been defined.
-    print(f"{spacer}")
-    print("Has the logic been defined with metadata and a database table?")
-    try:
-        database, description = getlogic(logic)
-        print(
-            f'The logic "{logic}" with description "{description}" will store proofs in "{database}".'
-        )
-    except TypeError:
-        print(f'The logics table does not have the logic "{logic}" in it.')
+#     # Test that the logic has been defined.
+#     print(f"{spacer}")
+#     print("Has the logic been defined with metadata and a database table?")
+#     try:
+#         database, description = getlogic(logic)
+#         print(
+#             f'The logic "{logic}" with description "{description}" will store proofs in "{database}".'
+#         )
+#     except TypeError:
+#         print(f'The logics table does not have the logic "{logic}" in it.')
 
-    # Test the axioms.
-    print(f"{spacer}")
-    print("What axioms have been defined?")
-    axioms = getaxioms(logic)
-    if len(axioms) == 0:
-        print(f'The logic "{logic}" has no axioms.')
+#     # Test the axioms.
+#     print(f"{spacer}")
+#     print("What axioms have been defined?")
+#     axioms = getaxioms(logic)
+#     if len(axioms) == 0:
+#         print(f'The logic "{logic}" has no axioms.')
+#     else:
+#         for i in axioms:
+#             print(i)
+
+#     # Test the connectors.
+#     # print(f'{spacer}')
+#     # print('What connectors are available?')
+#     # connectors = getconnectors(logic)
+#     # if len(connectors) == 0:
+#     #     print(f'The logic "{logic}" has no connectors.')
+#     # else:
+#     #     for i in connectors:
+#     #         print(i)
+
+#     # Test the transformation rules.
+#     print(f"{spacer}")
+#     print("What transformation rules are available?")
+#     intelimrules = getrules(logic)
+#     if len(intelimrules) == 0:
+#         print(f'The logic "{logic}" has no transformation rules.')
+#     else:
+#         for i in intelimrules:
+#             print(i)
+
+#     # Test the list of saved proofs.
+#     print(f"{spacer}")
+#     print("What proofs have been saved?")
+#     try:
+#         proofs = getproofs(logic)
+#     except sqlite3.OperationalError:
+#         print(f"The proofs and proofdetails tables are not available for {logic}.")
+#     except UnboundLocalError:
+#         print(f"The {logic} database is unavailable.")
+#     else:
+#         prooflen = len(proofs)
+#         if prooflen == 0:
+#             print(f'The logic "{logic}" has no saved proofs.')
+#         else:
+#             for i in proofs:
+#                 print(i)
+
+
+def savetofile(text: str, filename: str, directory: str = "./"):
+    fullfilename = ''.join([directory, filename])
+    if os.path.exists(fullfilename):
+        print(f"The file at {fullfilename} already exists.")
     else:
-        for i in axioms:
-            print(i)
-
-    # Test the connectors.
-    # print(f'{spacer}')
-    # print('What connectors are available?')
-    # connectors = getconnectors(logic)
-    # if len(connectors) == 0:
-    #     print(f'The logic "{logic}" has no connectors.')
-    # else:
-    #     for i in connectors:
-    #         print(i)
-
-    # Test the transformation rules.
-    print(f"{spacer}")
-    print("What transformation rules are available?")
-    intelimrules = getrules(logic)
-    if len(intelimrules) == 0:
-        print(f'The logic "{logic}" has no transformation rules.')
-    else:
-        for i in intelimrules:
-            print(i)
-
-    # Test the list of saved proofs.
-    print(f"{spacer}")
-    print("What proofs have been saved?")
-    try:
-        proofs = getproofs(logic)
-    except sqlite3.OperationalError:
-        print(f"The proofs and proofdetails tables are not available for {logic}.")
-    except UnboundLocalError:
-        print(f"The {logic} database is unavailable.")
-    else:
-        prooflen = len(proofs)
-        if prooflen == 0:
-            print(f'The logic "{logic}" has no saved proofs.')
-        else:
-            for i in proofs:
-                print(i)
-
-
-def saveprooftofile(filename: str, proof: str):
-    import os
-
-    # fullfilename = ''.join([proofsfolder, filename, '.txt'])
-    if os.path.exists(filename):
-        print(f"The file at {filename} already exists.")
-    else:
-        f = open(filename, "w")
-        f.write(proof)
+        f = open(fullfilename, "w")
+        f.write(text)
         f.close()
-        print(f'The file named "{filename}" has been written.')
+        print(f'The file named "{fullfilename}" has been written.')

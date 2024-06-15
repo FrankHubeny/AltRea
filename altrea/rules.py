@@ -57,6 +57,7 @@ Examples:
 """
 
 import pandas
+from datetime import date
 
 # from tabulate import tabulate
 # from IPython.display import display, Math, Markdown, Latex, display_markdown, HTML
@@ -402,7 +403,7 @@ class Proof:
     label_checkmark = "ok"
     label_comment = "Comment"
     label_connective = "Connective"
-    label_connectives = "Connectors"
+    label_connectives = "Connectives"
     label_contradicted = "GOAL CONTRADICTED"
     label_currentproofid = "Current Proof ID"
     label_definitions = "Definitions"
@@ -458,6 +459,7 @@ class Proof:
     label_stoppedstatus = "Stopped Status"
     label_subproofnormal = "{0}"
     label_subproofstrict = "{1}"
+    label_symbols = "Symbols"
     label_tautology = "Tautology"
     label_transformationrules = "Rules"
     label_vacuous = "Vacuous"
@@ -468,13 +470,17 @@ class Proof:
 
     left = "left"
     right = "right"
+    section = "section"
+    chapter = "chapter"
+    document = "document"
 
     """The following tags are used to differentiate between lines of a proof."""
 
     linetype_savedproof = "SP"
-    linetype_axiom = "AX"
+    linetype_axiom = "AXIOM"
     linetype_definition = "DEF"
     linetype_transformationrule = "TR"
+    linetype_rule = "RULE"
     linetype_substitution = "SUB"
     linetype_hypothesis = "H"
     linetype_premise = "PR"
@@ -516,7 +522,26 @@ class Proof:
         self.logic = ""
         self.logicdescription = ""
         self.logicdatabase = ""
-        self.logicalconnectives = []
+        self.logicsymbols = [
+            ("(", "Left Parentheses"),
+            (")", "Right Parentheses"),
+            ("\\models", "Semantic Consequence"),
+            ("\\vdash", "Logical Consequence"),
+            ("\\bot", "Contradiction"),
+            ("\\top", "Tautology"),
+        ]
+        self.logicconnectives = [
+            ("\\wedge ", "Logical And"),
+            ("\\vee ", "Logical Or"),
+            ("\\lnot ", "Logical Not"),
+            ("\\supset ", "Logical (Material) Implication"),
+            ("\\equiv ", "Logical Coimplication (IFF)"),
+            ("\\Box ", "Modal Necessity"),
+            ("\\Diamond ", "Modal Possibility"),
+            ("\\prec ", "Modal Strict Implication"),
+            ("\\backsimeq ", "Modal Strict Coimplication"),
+            ("\\circ ", "Modal Consistent With"),
+        ]
         self.logicrules = [
             (
                 "modusponens",
@@ -705,6 +730,7 @@ class Proof:
         }
         self.log = []
         self.latexwrittenproof = ""
+        self.writtenlogicdescription = ""
         self.writtenproof = ""
         self.showlogging = False
         self.restricted = False
@@ -1173,9 +1199,17 @@ class Proof:
                             ["$", prooflines[i][0].latex(), statement, "$"]
                         )
             else:
-                if isinstance(prooflines[i][0], str):
-                    statement = "".join([prooflines[i][0], statement])
+                if i == 0:
+                    if self.goals_latex != "":
+                        statement = "".join(
+                            ["$", self.goals_latex, "$"]
+                        )
+                    else:
+                        statement = ""
                 else:
+                # if isinstance(prooflines[i][0], str):
+                #     statement = "".join([prooflines[i][0], statement])
+                # else:
                     statement = "".join(["$", prooflines[i][0].latex(), statement, "$"])
         else:
             statement = self.blankstatement
@@ -1398,6 +1432,21 @@ class Proof:
         df = pandas.DataFrame(table, index, headers)
         return df
 
+    def connectives(self):
+        """display the connectives associated with the logic being used in the proof."""
+
+        connectivecolumn = "".join([self.logic, " ", self.label_connectives])
+        headers = [connectivecolumn]
+        table = []
+        index = []
+        for i in self.logicconnectives:
+            index.append("".join(["$", i[0], "$"]))
+            # substitutedstring = i[1].format(*self.metaletters)
+            # reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            table.append(i[1])
+        df = pandas.DataFrame(table, index, headers)
+        return df
+    
     def definitions(self):
         """display the definitions associated with the logic being used in the proof."""
 
@@ -1442,45 +1491,21 @@ class Proof:
             table.append("".join(["$", reconstructedobject.latex(), "$"]))
         df = pandas.DataFrame(table, index, headers)
         return df
+    
+    def symbols(self):
+        """display the symbols associated with the logic being used in the proof."""
 
-    # def displaylogic(self):
-    #     """Display an identification of the axiom with its axioms and definitions."""
-
-    #     # Display minimal information about the logic
-    #     # print('{: >22}'.format(self.label_logic))
-    #     print('LOGIC "{}" {}'.format(self.logic, self.logicdescription))
-
-    #     # Display axioms
-    #     if len(self.logicaxioms) == 0:
-    #         print("{}".format(self.label_noaxioms))
-    #     else:
-    #         print("{}".format(self.label_axioms.upper()))
-    #         for i in self.logicaxioms:
-    #             print(" {: <20} {: <50}".format(i[0], i[1]))
-
-    #     # Display definitions
-    #     if len(self.logicdefinitions) == 0:
-    #         print("{}".format(self.label_nodefinitions))
-    #     else:
-    #         print("{}".format(self.label_definitions.upper()))
-    #         for i in self.logicdefinitions:
-    #             print(" {: <20} {: <50}".format(i[0], i[1]))
-
-    #     # Display transformationrules
-    #     if len(self.logicrules) == 0:
-    #         print("{}".format(self.label_notransformationrules))
-    #     else:
-    #         print("{}".format(self.label_transformationrules.upper()))
-    #         for i in self.logicrules:
-    #             print(" {: <20} {: <50}".format(i[0], i[1]))
-
-    #     # Display saved proofs
-    #     if len(self.logicsavedproofs) == 0:
-    #         print("{}".format(self.label_nosavedproofs))
-    #     else:
-    #         print("{}".format(self.label_savedproofs.upper()))
-    #         for i in self.logicsavedproofs:
-    #             print(" {: <20} {: <50}".format(i[0], i[1]))
+        symbolcolumn = "".join([self.logic, " ", self.label_symbols])
+        headers = [symbolcolumn]
+        table = []
+        index = []
+        for i in self.logicsymbols:
+            index.append("".join(["$", i[0], "$"]))
+            # substitutedstring = i[1].format(*self.metaletters)
+            # reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            table.append(i[1])
+        df = pandas.DataFrame(table, index, headers)
+        return df
 
     def displaylog(self):
         """Displays a log of the proof steps.  This will display the entire log that
@@ -1793,7 +1818,7 @@ class Proof:
                 print("{: >25} {: <25}".format(i[0], i[1]))
 
         # Display connectives.
-        if len(self.logicalconnectives) == 0:
+        if len(self.logicconnectives) == 0:
             print(
                 "{: <25} {: <25}".format(
                     self.label_connectives, self.label_noconnectives
@@ -1801,7 +1826,7 @@ class Proof:
             )
         else:
             print("{}".format(self.label_connectives))
-            for i in self.logicalconnectives:
+            for i in self.logicconnectives:
                 print("{: >25} {: <25}".format(i[1], i[2]))
 
         # Display intelim rules.
@@ -1950,10 +1975,10 @@ class Proof:
                 data.append([self.label_axiom, axiomslist[i]])
 
         # Display connectors.
-        if len(self.logicalconnectives) == 0:
+        if len(self.logicconnectives) == 0:
             data.append([self.label_connectives, self.label_noconnectives])
         else:
-            for i in self.logicalconnectives:
+            for i in self.logicconnectives:
                 data.append([self.label_connective, i[1]])
 
         # Display intelim rules.
@@ -2361,66 +2386,428 @@ class Proof:
         df = pandas.DataFrame(tt, index=index, columns=columns)
         return df
 
-    def writeproof(self, latex: int = 0):
-        """Constructs an English version of the proof."""
-
-        proofvariables = ""
-        variables = len(self.letters)
-        premises = len(self.premises)
-        if variables > 0:
-            proofvariables = "".join(
+    def writelatexbegin(self, sectioning: str = "", name: str = ""):
+        if sectioning == self.document:
+            return "".join(
                 [
-                    "    Let ",
-                    str(self.letters[0][0]),
-                    " be an arbitrary ",
-                    self.letters[0][0].kind,
+                    "\\documentclass{",
+                    "article}\n\n",
+                    "\\usepackage{",
+                    "booktabs, csquotes, amsthm, amssymb}\n",
+                    "\\newtheorem*{",
+                    "theorem*}{",
+                    "Theorem}\n",
+                    "\\newtheorem{",
+                    "theorem}{Theorem",
+                    "}\n\n",
+                    "\\begin{",
+                    "document}\n\n"
+                ])
+        elif sectioning == self.section:
+            if name == "":
+                name = self.logicdescription
+            return "".join(
+                [
+                    "\\section{",
+                    name,
+                    "}\n\n"
+                ])
+        elif sectioning == self.chapter:
+            if name == "":
+                name = self.logicdescription
+            return "".join(
+                [
+                    "\\chapter{",
+                    name,
+                    "}\n\n"
+                ])
+        else:
+            print(f"The sectioning style '{sectioning}' has not been defined.")
+
+    
+    def writelatexend(self, sectioning: str = ""):
+        if sectioning == self.document:
+            return "\\end{document}"
+        else:
+            return ""
+        
+    
+    def writecenter(self, text: str):
+        return "".join(
+            [
+                "\\begin{center}\n",
+                text,
+                "\\end{center}\n"
+            ]
+        )
+    
+    def writethanks(self, sectioning: str = "document"):
+        return "".join(
+                [
+                    "AltRea\\footnote{This ",
+                    sectioning,
+                    " was generated by AltRea on ",
+                    str(date.today()),
+                    ".}"
                 ]
             )
-            if variables > 1:
+
+    def writelogic(self, sectioning: str = "", name: str = ""):
+        """Constructs an English description of the logic used in the proof."""
+
+        # Report general information about the logic.
+        logicdescription = "".join(
+            [
+                "The \\enquote{",
+                self.logic,
+                "} logic, as defined in ",
+                self.writethanks(sectioning),
+                ", is described as \\enquote{",
+                self.logicdescription,
+                "}.\n\n"
+            ]
+        )
+
+        # Report on the symbols used by the logic.
+        dfsymbols = self.symbols()
+        if len(self.logicsymbols) > 0:
+            symbols = "".join(
+                [
+                    "The following table shows the symbols of the logic.\n\n",
+                    self.writecenter(dfsymbols.to_latex()),
+                    "\n"
+                ]
+            )
+        else:
+            symbols = "The logic contains no symbols.\n\n"
+
+        # Report on the connectives used by the logic.
+        dfconnectives = self.connectives()
+        if len(self.logicconnectives) > 0:
+            connectives = "".join(
+                [
+                    "The following table shows the connectives of the logic.\n\n",
+                    self.writecenter(dfconnectives.to_latex()),
+                    "\n"
+                ]
+            )
+        else:
+            connectives = "The logic contains no connectives.\n\n"
+
+        # Report any axioms the logic might have
+        dfaxioms = self.axioms()
+        if len(self.logicaxioms) > 0:
+            axioms = "".join(
+                [
+                    "The following table shows the axioms of the logic.\n\n",
+                    self.writecenter(dfaxioms.to_latex()),
+                    "\n"
+                ]
+            )
+        else:
+            axioms = "The logic contains no axioms.\n\n"
+
+        # Report any definitions the logic might have.
+        dfdefinitions = self.definitions()
+        if len(self.logicdefinitions) > 0:
+            definitions = "".join(
+                [
+                    "The following table shows the definitions of the logic.\n\n",
+                    self.writecenter(dfdefinitions.to_latex()),
+                ]
+            )
+        else:
+            definitions = "The logic contains no definitions.\n\n"
+
+        # Report any rules the logic might have.
+        dfrules = self.rules()
+        if len(self.logicrules) > 0:
+            rules = "".join(
+                [
+                    "The following table shows the transformation rules of the logic.\n\n",
+                    self.writecenter(dfrules.to_latex()),
+                ]
+            )
+        else:
+            rules = "The logic contains no rules.\n\n"
+        
+        # Write the report to a variable.
+        self.writtenlogicdescription = "".join(
+            [
+                self.writelatexbegin(sectioning, name), 
+                logicdescription, 
+                symbols,
+                connectives,
+                axioms, 
+                definitions,
+                rules,
+                self.writelatexend(sectioning)
+            ]
+        )
+        
+
+    def writeproof(self, sectioning: str, name: str = ""):
+        """Constructs an English version of the proof."""
+
+        begintheorem = "".join(
+            [
+                "\\begin{theorem*}[",
+                self.name,
+                "]\n"
+            ]
+        )
+        # conclusionpremises = self.buildconclusionpremises()
+        # premises = conclusionpremises.premises.latex()
+        # conclusion = conclusionpremises.conclusion.latex()
+        goal = self.buildconclusionpremises().latex()
+        theoremstatement = "".join(
+            [
+                "The entailment $",
+                goal,
+                "$ can be derived. "
+            ]
+        )
+        endtheorem = "\n\\end{theorem*}\n\n"
+        beginproof = "\\begin{proof}\n"
+        endproof = "\\end{proof}"
+        proofvariables = ""
+        variables = len(self.letters)
+       # premises = len(self.premises)
+        if variables > 0:
+            if variables == 1:
+                proofvariables = "".join(
+                    [
+                        "    Let $",
+                        self.letters[0][0].latex(),
+                        "$ be an arbitrary proposition.\n\n"
+                    ]
+                )
+            elif variables > 1:
+                proofvariables = "".join(
+                    [
+                        "let $",
+                        self.letters[0][0].latex(),
+                        "$"
+                    ]
+                )
                 for i in range(len(self.letters)):
                     if i > 0 and i < variables - 1:
                         proofvariables += "".join(
                             [
-                                ", let ",
-                                str(self.letters[i][0]),
-                                " be an arbitrary ",
-                                self.letters[i][0].kind,
+                                ", $",
+                                self.letters[i][0].latex(),
+                                "$ "
                             ]
                         )
                     elif i == variables - 1:
                         proofvariables += "".join(
                             [
-                                " and let ",
-                                str(self.letters[i][0]),
-                                " be an arbitrary ",
-                                self.letters[i][0].kind,
+                                " and $",
+                                self.letters[i][0].latex(),
+                                "$ be arbitrary propositions.\n\n"
                             ]
                         )
-            proofvariables = "".join([proofvariables, "."])
-            print(proofvariables)
-        proofpremises = ""
-        if premises > 0:
-            proofpremises = "".join(["    We are given ", str(self.premises[0])])
-            if premises > 1:
-                for i in range(len(self.premises)):
-                    if i > 0 and i < premises - 1:
-                        proofpremises = "".join(
-                            [proofpremises, ", ", str(self.premises[i])]
-                        )
-                    elif i == premises - 1:
-                        proofpremises = "".join(
-                            [proofpremises, " and ", str(self.premises[i])]
-                        )
-            proofpremises = "".join([proofpremises, " as premises."])
-            print(proofpremises)
+            #proofvariables = "".join([proofvariables, "."])
+            #print(proofvariables)
+        # proofpremises = ""
+        # if premises > 0:
+        #     proofpremises = "".join(["    We are given $", self.premises[0].latex()])
+        #     if premises > 1:
+        #         for i in range(len(self.premises)):
+        #             if i > 0 and i < premises - 1:
+        #                 proofpremises = "".join(
+        #                     [proofpremises, "$, $", self.premises[i].latex()]
+        #                 )
+        #             elif i == premises - 1:
+        #                 proofpremises = "".join(
+        #                     [proofpremises, "$ and $", self.premises[i].latex()]
+        #                 )
+        #     proofpremises = "".join([proofpremises, "$ as premises.\n\n"])
+            #print(proofpremises)
         proofconclusion = ""
         if self.status == self.complete:
             proofconclusion = (
-                f"    Therefore, {self.goals_string} which completes the proof."
+                f"We can derive ${self.goals_latex}$.  Hence, we have ${goal}$.\n\n"
             )
+        df = self.thisproof(short=1, color=0)
+        proof = "".join(
+                [
+                    "The following table shows the lines of the proof presented through ",
+                    self.writethanks(sectioning),
+                    ".\n\n",
+                    self.writecenter(df.to_latex(column_format="lrll")),
+                ]
+            )
+        linebyline = ""
+        for i in range(1,len(self.lines)):
+            if self.lines[i][self.linesindex] != "":
+                referencedlines = self.lines[i][self.linesindex].split(", ")
+            else:
+                referencedlines = []
+            referenceditems = ""
+            referencedlineslength = len(referencedlines)
+            if referencedlineslength > 0:
+                referenceditems = "".join(
+                    [
+                        "item $",
+                        self.lines[int(referencedlines[0])][self.statementindex].latex(),
+                        "$ on line ",
+                        referencedlines[0]
+                    ]
+                )
+                for j in range(1, referencedlineslength):
+                    if j < referencedlineslength - 1:
+                        referenceditems = "".join(
+                            [
+                                referenceditems,
+                                ", the item $",
+                                self.lines[int(referencedlines[j])][self.statementindex].latex(),
+                                "$ on line ",
+                                referencedlines[j]
+                            ]
+                        )
+                    else:
+                        referenceditems = "".join(
+                                [
+                                    referenceditems,
+                                    " and the item $",
+                                    self.lines[int(referencedlines[referencedlineslength - 1])][self.statementindex].latex(),
+                                    "$ on line ",
+                                    referencedlines[referencedlineslength - 1]
+                                ]
+                            )
+            if self.lines[i][self.typeindex] == self.linetype_axiom:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "From the ",
+                        self.lines[i][self.ruleindex],
+                        " axiom we can assert the item $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        ".\n"
+                    ]
+                )
+            elif self.lines[i][self.typeindex] == self.linetype_premise:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "We are given the premise $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        ".\n\n"
+                    ]
+                )
+            elif self.lines[i][self.typeindex] == self.linetype_definition:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "The ",
+                        referenceditems,
+                        # "The item $",
+                        # self.lines[referencedlines[0]][self.statementindex],
+                        # "$ on line ",
+                        # referencedlines[0],
+                        " can be rewritten as $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        " by the ",
+                        self.lines[i][self.ruleindex],
+                        " definition.\n\n"
+                    ]
+                )
+            elif self.lines[i][self.typeindex] == self.linetype_rule:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "From the ",
+                        referenceditems,
+                        " using the ",
+                        self.lines[i][self.ruleindex],
+                        " rule we can derive the item $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        ".\n\n"
+                    ]
+                )
+            elif self.lines[i][self.typeindex] == self.linetype_transformationrule:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "From the ",
+                        referenceditems,
+                        " using the ",
+                        self.lines[i][self.ruleindex],
+                        " rule we can derive the item $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        ".\n\n"
+                    ]
+                )
+            elif self.lines[i][self.typeindex] == self.linetype_substitution:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "From ",
+                        referenceditems,
+                        " using substitution we can derive the item $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        ".\n\n"
+                    ]
+                )
+            elif self.lines[i][self.typeindex] == self.linetype_hypothesis:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "As an hypothesis we assert item $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        ".\n\n"
+                    ]
+                )
+            elif self.lines[i][self.typeindex] == self.linetype_savedproof:
+                linebyline = "".join(
+                    [
+                        linebyline,
+                        "From ",
+                        referenceditems,
+                        " using ",
+                        self.lines[i][self.ruleindex],
+                        " we can assert the item $",
+                        self.lines[i][self.statementindex].latex(),
+                        "$ on line ",
+                        str(i),
+                        ".\n\n"
+                    ]
+                )
+            else:
+                pass
         self.writtenproof = "".join(
-            [proofvariables, "\n", proofpremises, "\n", proofconclusion, "\n"]
+            [
+                self.writelatexbegin(sectioning, name), 
+                begintheorem,
+                theoremstatement,
+                endtheorem,
+                proof,
+                beginproof,
+                #proofgoal,
+                proofvariables, 
+                linebyline, 
+                #proofpremises, 
+                proofconclusion, 
+                endproof,
+                self.writelatexend(sectioning)
+            ]
         )
+        
 
     """DATABASE FUNCTIONS 
     
@@ -5692,9 +6079,9 @@ class Proof:
                 #             self.connectors = []
                 #             for i in connectors:
                 #                 if i[0] != '':
-                #                     self.logicalconnectives.append((eval(i[0], self.objectdictionary), i[0], i[1]))
+                #                     self.logicconnectives.append((eval(i[0], self.objectdictionary), i[0], i[1]))
                 #                 else:
-                #                     self.logicalconnectives.append(i)
+                #                     self.logicconnectives.append(i)
 
     def substitution(
         self, line: int, whattosubstitute: list, substitutes: list, comment: str = ""
@@ -5874,7 +6261,7 @@ class Proof:
                     self.reflines(*lineslist),
                     "",
                     newcomment,
-                    self.linetype_transformationrule,
+                    self.linetype_rule,
                     self.subproofchain,
                 ]
             )

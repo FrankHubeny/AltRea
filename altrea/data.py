@@ -396,7 +396,7 @@ def getproofdetails(logic: str, name: str):
     database = getdatabase(logic)
     connection = sqlite3.connect(database)
     c = connection.cursor()
-    statement = "SELECT item, level, proof, rule, lines, usedproofs, comment FROM proofdetails WHERE name=?"
+    statement = "SELECT item, level, proof, rule, lines, usedproofs, comment, subproofstatus FROM proofdetails WHERE name=?"
     try:
         c.execute(statement, (name,))
     except Exception:

@@ -476,14 +476,15 @@ class Proof:
 
     """The following tags are used to differentiate between lines of a proof."""
 
-    linetype_savedproof = "SP"
     linetype_axiom = "AXIOM"
     linetype_definition = "DEF"
-    linetype_transformationrule = "TR"
-    linetype_rule = "RULE"
-    linetype_substitution = "SUB"
     linetype_hypothesis = "H"
     linetype_premise = "PR"
+    linetype_reiterate = "REIT"
+    linetype_rule = "RULE"
+    linetype_savedproof = "SP"
+    linetype_substitution = "SUB"
+    linetype_transformationrule = "TR"
 
     rule_naturaldeduction = "Natural Deducation"
     rule_categorical = "Categorical"
@@ -2397,6 +2398,9 @@ class Proof:
                     "\\newtheorem*{",
                     "theorem*}{",
                     "Theorem}\n",
+                    "\\newtheorem*{",
+                    "lemma*}{",
+                    "Lemma}\n",
                     "\\newtheorem{",
                     "theorem}{Theorem",
                     "}\n\n",
@@ -2545,6 +2549,34 @@ class Proof:
             ]
         )
         
+    def writesavedproof(self, name: str):
+        """Construct proof details for subproofs used in the current proof.  
+        These are called `lemmas`."""
+        beginlemma = "".join(
+            [
+                "\\begin{lemma*}[",
+                name,
+                "]\n"
+            ]
+        )
+        displayname, description, pattern = altrea.data.getsavedproof(self.logic, name)
+        proofdetails = altrea.data.getproofdetails(self.logic, name)
+
+        lemmastatement = "".join(
+            [
+                "The entailment $",
+                # goal,
+                "$ can be derived. "
+            ]
+        )
+        endlemma = "\n\\end{lemma*}\n\n"
+        return "".join(
+            [
+                beginlemma,
+                lemmastatement,
+                endlemma
+            ]
+        )
 
     def writeproof(self, sectioning: str, name: str = ""):
         """Constructs an English version of the proof."""
@@ -2572,6 +2604,22 @@ class Proof:
         endproof = "\\end{proof}"
         proofvariables = ""
         variables = len(self.letters)
+        savedproofslist = []
+        for i in range(len(self.lines)):
+            if self.lines[i][self.typeindex] == self.linetype_savedproof:
+                savedproofslist.append(self.lines[i][self.linetype_rule])
+        if len(savedproofslist) == 0:
+            savedproofs = "The proof is self contained without referencing other saved proofs.\n\n"
+        else:
+            savedproofs = "The proof depends upon other saved proofs which will be presented first.\n\n"
+            for sp in savedproofslist:
+                savedproofs = "".join(
+                    [
+                        savedproofs,
+                        self.writesavedproof(self, sp)
+                    ]
+                )
+
        # premises = len(self.premises)
         if variables > 0:
             if variables == 1:
@@ -2796,6 +2844,7 @@ class Proof:
                 begintheorem,
                 theoremstatement,
                 endtheorem,
+                savedproofs,
                 proof,
                 beginproof,
                 #proofgoal,
@@ -5884,7 +5933,7 @@ class Proof:
                     str(line),
                     "",
                     newcomment,
-                    "",
+                    self.linetype_reiterate,
                     self.subproofchain,
                 ]
             )

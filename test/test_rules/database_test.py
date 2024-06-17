@@ -379,7 +379,7 @@ def test_database_saveproof_notcomplete_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                USEPROOF
+                                LEMMA
 ------------------------------------------------------------------------------"""
 
 # Clean run using the proof saved above.
@@ -394,7 +394,7 @@ testdata = [
     ("prf.lines[1][prf.linesindex]", ""),
     ("prf.lines[1][prf.proofsindex]", ""),
     ("prf.lines[1][prf.commentindex]", "test comment"),
-    ("prf.lines[1][prf.typeindex]", t.linetype_savedproof),
+    ("prf.lines[1][prf.typeindex]", t.linetype_lemma),
 ]
 
 
@@ -405,12 +405,12 @@ def test_database_useproof_clean_1(input_n, expected):
     B = prf.proposition("B")
     prf.setlogic(logicname)
     prf.goal(And(A, B))
-    prf.useproof("testproof", [B], comment="test comment")
+    prf.lemma("testproof", [B], comment="test comment")
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                USEPROOF
+                                LEMMA
 ------------------------------------------------------------------------------"""
 
 # Clean run using the proof saved above with premises.
@@ -425,7 +425,7 @@ testdata = [
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", t.complete),
-    ("prf.lines[3][prf.typeindex]", t.linetype_savedproof),
+    ("prf.lines[3][prf.typeindex]", t.linetype_lemma),
 ]
 
 
@@ -438,12 +438,12 @@ def test_database_useproof_withpremises_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.useproof("modusponens", [A, B], [1, 2])
+    prf.lemma("modusponens", [A, B], [1, 2])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                USEPROOF
+                                LEMMA
                                 stopped_notenoughsubs
 ------------------------------------------------------------------------------"""
 
@@ -475,7 +475,7 @@ def test_database_useproof_notenoughsubs_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.useproof("modusponens", [A], [1, 2])
+    prf.lemma("modusponens", [A], [1, 2])
     assert eval(input_n) == expected
 
 
@@ -510,7 +510,7 @@ def test_database_useproof_nosuchproof_1(input_n, expected):
     B = prf.proposition("B")
     prf.setlogic(logicname)
     prf.goal(And(A, B))
-    prf.useproof("testpro", [B])
+    prf.lemma("testpro", [B])
     assert eval(input_n) == expected
 
 
@@ -547,7 +547,7 @@ def test_database_useproof_premisesdontmatch_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.useproof(
+    prf.lemma(
         "modusponens",
         [A, B],
         [
@@ -588,7 +588,7 @@ def test_database_useproof_nosubs_1(input_n, expected):
     B = prf.proposition("B")
     prf.setlogic(logicname)
     prf.goal(And(A, B))
-    prf.useproof("testproof", [])
+    prf.lemma("testproof", [])
     assert eval(input_n) == expected
 
 
@@ -623,7 +623,7 @@ def test_database_useproof_nosubs_2(input_n, expected):
     B = prf.proposition("B")
     prf.setlogic(logicname)
     prf.goal(And(A, B))
-    prf.useproof("testproof", [1])
+    prf.lemma("testproof", [1])
     assert eval(input_n) == expected
 
 
@@ -660,7 +660,7 @@ def test_database_saveproof_notinteger_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.useproof("modusponens", [A, B], [1, 1.3])
+    prf.lemma("modusponens", [A, B], [1, 1.3])
     assert eval(input_n) == expected
 
 
@@ -697,7 +697,7 @@ def test_database_saveproof_nosuchline_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.useproof("modusponens", [A, B], [1, 4])
+    prf.lemma("modusponens", [A, B], [1, 4])
     assert eval(input_n) == expected
 
 
@@ -735,7 +735,7 @@ def test_database_saveproof_linescope_1(input_n, expected):
     prf.hypothesis(A)
     prf.implication_intro()
     prf.premise(Implies(A, B))
-    prf.useproof("modusponens", [A, B], [1, 4])
+    prf.lemma("modusponens", [A, B], [1, 4])
     assert eval(input_n) == expected
 
 
@@ -770,7 +770,7 @@ def test_database_saveproof_removeproof_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.useproof("modusponens", [A, B], [1, 2])
+    prf.lemma("modusponens", [A, B], [1, 2])
     assert eval(input_n) == expected
 
 
@@ -790,7 +790,7 @@ testdata = [
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", "Testing"),
-    ("prf.lines[3][prf.typeindex]", t.linetype_transformationrule),
+    ("prf.lines[3][prf.typeindex]", t.linetype_rule),
 ]
 
 

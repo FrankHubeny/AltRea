@@ -440,7 +440,7 @@ class Proof:
     label_nogoals = "No Goals"
     label_nointelimrules = "No IntElim Rules"
     label_nopremises = "No Premises"
-    label_nosavedproofs = "No Saved Proofs"
+    label_nolemmas = "No Saved Proofs"
     label_notransformationrules = "No Rules"
     label_notstopped = "Not Stopped"
     label_premise = "Premise"
@@ -455,7 +455,7 @@ class Proof:
     label_proposition = "Proposition"
     label_right = "right"
     label_rule = "Rule"
-    label_savedproofs = "Saved Proofs"
+    label_lemmas = "Saved Proofs"
     label_stoppedstatus = "Stopped Status"
     label_subproofnormal = "{0}"
     label_subproofstrict = "{1}"
@@ -478,11 +478,11 @@ class Proof:
 
     linetype_axiom = "AXIOM"
     linetype_definition = "DEF"
-    linetype_hypothesis = "H"
-    linetype_premise = "PR"
+    linetype_hypothesis = "HYPO"
+    linetype_premise = "PREM"
     linetype_reiterate = "REIT"
     linetype_rule = "RULE"
-    linetype_savedproof = "SP"
+    linetype_lemma = "LEMMA"
     linetype_substitution = "SUB"
     linetype_transformationrule = "TR"
 
@@ -635,7 +635,7 @@ class Proof:
             ),
         ]
         self.logicdefinitions = []
-        self.logicsavedproofs = []
+        self.logiclemmas = []
         self.logicintelimrules = [
             (self.coimplication_elim_tag, self.coimplication_elim_name),
             (self.coimplication_intro_tag, self.coimplication_intro_name),
@@ -776,7 +776,8 @@ class Proof:
                 statement,
                 self.lines[length][1],
                 self.lines[length][2],
-                "".join(["*", rule, "*"]),
+                #"".join(["*", rule, "*"]),
+                self.lines[length][3],
                 self.lines[length][4],
                 self.lines[length][5],
                 self.lines[length][6],
@@ -811,6 +812,7 @@ class Proof:
                             self.proofdata[i][6],
                             self.proofdata[i][7],
                             self.proofdata[i][8],
+                            self.proofdata[i][9],
                         ]
                     )
 
@@ -1201,7 +1203,11 @@ class Proof:
                         )
             else:
                 if i == 0:
-                    if self.goals_latex != "":
+                    if saved:
+                        statement = "".join(
+                            ["$", prooflines[0][0].latex(), "$"]
+                        )
+                    elif self.goals_latex != "":
                         statement = "".join(
                             ["$", self.goals_latex, "$"]
                         )
@@ -1418,6 +1424,11 @@ class Proof:
     if he chooses to do so.
     """
 
+    def metasubstitute(self, pattern: str):
+        substitutedstring = pattern.format(*self.metaletters)
+        reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+        return reconstructedobject
+
     def axioms(self):
         """display the axioms associated with the logic being used in the proof."""
 
@@ -1427,8 +1438,9 @@ class Proof:
         index = []
         for i in self.logicaxioms:
             index.append(i[0])
-            substitutedstring = i[1].format(*self.metaletters)
-            reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            # substitutedstring = i[1].format(*self.metaletters)
+            # reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            reconstructedobject = self.metasubstitute(i[1])
             table.append("".join(["$", reconstructedobject.latex(), "$"]))
         df = pandas.DataFrame(table, index, headers)
         return df
@@ -1457,8 +1469,9 @@ class Proof:
         index = []
         for i in self.logicdefinitions:
             index.append(i[0])
-            substitutedstring = i[1].format(*self.metaletters)
-            reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            # substitutedstring = i[1].format(*self.metaletters)
+            # reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            reconstructedobject = self.metasubstitute(i[1])
             table.append("".join(["$", reconstructedobject.latex(), "$"]))
         df = pandas.DataFrame(table, index, headers)
         return df
@@ -1472,23 +1485,25 @@ class Proof:
         index = []
         for i in self.logicrules:
             index.append(i[0])
-            substitutedstring = i[1].format(*self.metaletters)
-            reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            # substitutedstring = i[1].format(*self.metaletters)
+            # reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            reconstructedobject = self.metasubstitute(i[1])
             table.append("".join(["$", reconstructedobject.latex(), "$"]))
         df = pandas.DataFrame(table, index, headers)
         return df
 
-    def proofs(self):
+    def lemmas(self):
         """display the saved proofs associated with the logic being used in the current proof."""
 
-        proofcolumn = "".join([self.logic, " ", self.label_savedproofs])
+        proofcolumn = "".join([self.logic, " ", self.label_lemmas])
         headers = [proofcolumn]
         table = []
         index = []
-        for i in self.logicsavedproofs:
+        for i in self.logiclemmas:
             index.append(i[0])
             substitutedstring = i[1].format(*self.metaletters)
             reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
+            reconstructedobject = self.metasubstitute(i[1])
             table.append("".join(["$", reconstructedobject.latex(), "$"]))
         df = pandas.DataFrame(table, index, headers)
         return df
@@ -1525,19 +1540,20 @@ class Proof:
             else:
                 print("{: >4} {}".format(i, self.log[i]))
 
-    def thisproof(self, short: int = 0, color: int = 1, latex: int = 1):
-        """This function displays the proof lines.
+    def thislemma(self, name: str, prooflines: list, short: int = 1, latex: int = 1):
+        """This function displays the proof lines of a saved proof called here a lemma.
 
         Parameters:
             short: Display a three column proof with the item, combined rule and lines referenced and comments.  Using the
                 default presents all lines of the proof.
-            color: Displays the latex version with color.  This helps if one is using natural deduction with Fitch-style subordinate proofs.
             latex: This sets the display for the statement to use latex rather than text.
         """
 
         # Create the column.
         if short == 1:
             columns = [self.label_item, self.label_rule, self.label_comment]
+        elif short == 2:
+            columns = [self.label_item, self.label_rule]
         else:
             columns = [
                 self.label_item,
@@ -1551,7 +1567,106 @@ class Proof:
             ]
 
         # Create the index.
-        indx = [self.displayname]
+        indx = [" "]
+        for i in range(len(prooflines) - 1):
+            indx.append(i + 1)
+
+        # Create the rows of data.
+        newp = []
+        for i in range(len(prooflines)):
+            if latex == 1:
+                statement = self.latexitem(
+                    prooflines=prooflines,
+                    i=i,
+                    status=self.complete,
+                    saved=True,
+                    color=False,
+                )
+            else:
+                statement = self.stringitem(prooflines=prooflines, i=i)
+            if short == 1 or short == 2:
+                if prooflines[i][self.linesindex] != "":
+                    rule = "".join(
+                        [
+                            prooflines[i][self.linesindex],
+                            ", ",
+                            prooflines[i][self.ruleindex],
+                        ]
+                    )
+                elif prooflines[i][self.proofsindex] != "":
+                    rule = "".join(
+                        [
+                            prooflines[i][self.proofsindex],
+                            ", ",
+                            prooflines[i][self.ruleindex],
+                        ]
+                    )
+                else:
+                    rule = prooflines[i][self.ruleindex]
+                if short == 1:
+                    newp.append(
+                        [
+                            statement,
+                            rule,
+                            prooflines[i][self.commentindex],
+                        ]
+                    )
+                elif short == 2:
+                    newp.append(
+                        [
+                            statement,
+                            rule
+                        ]
+                    )
+                else:
+                    print("Should not reach this line in thislemma.")
+            else:
+                newp.append(
+                    [
+                        statement,
+                        prooflines[i][self.levelindex],
+                        prooflines[i][self.proofidindex],
+                        prooflines[i][self.ruleindex],
+                        prooflines[i][self.typeindex],
+                        prooflines[i][self.linesindex],
+                        prooflines[i][self.proofsindex],
+                        prooflines[i][self.commentindex],
+                    ]
+                )
+
+        # Use pandas to display the proof lines.
+        df = pandas.DataFrame(newp, index=indx, columns=columns)
+        return df
+
+    def thisproof(self, short: int = 0, color: int = 1, latex: int = 1):
+        """This function displays the proof lines.
+
+        Parameters:
+            short: Display a three column proof with the item, combined rule and lines referenced and comments.  Using the
+                default presents all lines of the proof.
+            color: Displays the latex version with color.  This helps if one is using natural deduction with Fitch-style subordinate proofs.
+            latex: This sets the display for the statement to use latex rather than text.
+        """
+
+        # Create the column.
+        if short == 1:
+            columns = [self.label_item, self.label_rule, self.label_comment]
+        elif short == 2:
+            columns = [self.label_item, self.label_rule]
+        else:
+            columns = [
+                self.label_item,
+                self.label_level,
+                self.label_proof,
+                self.label_rule,
+                self.label_linetype,
+                self.label_lines,
+                self.label_proofs,
+                self.label_comment,
+            ]
+
+        # Create the index.
+        indx = [" "]
         for i in range(len(self.lines) - 1):
             indx.append(i + 1)
 
@@ -1568,7 +1683,7 @@ class Proof:
                 )
             else:
                 statement = self.stringitem(prooflines=self.lines, i=i)
-            if short == 1:
+            if short == 1 or short == 2:
                 if self.lines[i][self.linesindex] != "":
                     rule = "".join(
                         [
@@ -1587,13 +1702,23 @@ class Proof:
                     )
                 else:
                     rule = self.lines[i][self.ruleindex]
-                newp.append(
-                    [
-                        statement,
-                        rule,
-                        self.lines[i][self.commentindex],
-                    ]
-                )
+                if short == 1:
+                    newp.append(
+                        [
+                            statement,
+                            rule,
+                            self.lines[i][self.commentindex],
+                        ]
+                    )
+                elif short == 2:
+                    newp.append(
+                        [
+                            statement,
+                            rule
+                        ]
+                    )
+                else:
+                    print("Should not reach this line in thisproof. A case needs to be defined.")
             else:
                 newp.append(
                     [
@@ -1905,24 +2030,24 @@ class Proof:
                 )
             )
 
-    def savedproofs(self):
-        """Display a list of saved proofs for the logic being used."""
+    # def lemmas(self):
+    #     """Display a list of saved proofs for the logic being used."""
 
-        rows = altrea.data.getproofs(self.logic)
-        if len(rows) > 0:
-            columns = [
-                self.label_name,
-                self.label_item,
-                self.label_displayname,
-                self.label_description,
-            ]
-            index = []
-            for i in range(len(rows)):
-                index.append(i)
-            df = pandas.DataFrame(rows, index=index, columns=columns)
-            return df
-        else:
-            print(self.log_noproofs.format(self.logic))
+    #     rows = altrea.data.getproofs(self.logic)
+    #     if len(rows) > 0:
+    #         columns = [
+    #             self.label_name,
+    #             self.label_item,
+    #             self.label_displayname,
+    #             self.label_description,
+    #         ]
+    #         index = []
+    #         for i in range(len(rows)):
+    #             index.append(i)
+    #         df = pandas.DataFrame(rows, index=index, columns=columns)
+    #         return df
+    #     else:
+    #         print(self.log_noproofs.format(self.logic))
 
     def showlog(self, show: bool = True):
         """This function turns logging on if it is turned off.
@@ -2405,7 +2530,10 @@ class Proof:
                     "theorem}{Theorem",
                     "}\n\n",
                     "\\begin{",
-                    "document}\n\n"
+                    "document}\n\n",
+                    "This document was generated by AltRea",
+                    self.writethanks(),
+                    ".\n\n"
                 ])
         elif sectioning == self.section:
             if name == "":
@@ -2414,7 +2542,9 @@ class Proof:
                 [
                     "\\section{",
                     name,
-                    "}\n\n"
+                    "}\n\n This proof was generated by AltRea",
+                    self.writethanks(),
+                    ".\n\n"
                 ])
         elif sectioning == self.chapter:
             if name == "":
@@ -2423,7 +2553,9 @@ class Proof:
                 [
                     "\\chapter{",
                     name,
-                    "}\n\n"
+                    "}\n\n This proof was generated by AltRea",
+                    self.writethanks(),
+                    ".\n\n"
                 ])
         else:
             print(f"The sectioning style '{sectioning}' has not been defined.")
@@ -2448,9 +2580,9 @@ class Proof:
     def writethanks(self, sectioning: str = "document"):
         return "".join(
                 [
-                    "AltRea\\footnote{This ",
+                    "\\footnote{This ",
                     sectioning,
-                    " was generated by AltRea on ",
+                    " was generated on ",
                     str(date.today()),
                     ".}"
                 ]
@@ -2549,36 +2681,54 @@ class Proof:
             ]
         )
         
-    def writesavedproof(self, name: str):
-        """Construct proof details for subproofs used in the current proof.  
-        These are called `lemmas`."""
+    
+
+    def writelemma(self, displayname: str, short: int = 1):
+        """Construct proof details for saved proofs called `lemmas` used in the current proof.  """
         beginlemma = "".join(
             [
                 "\\begin{lemma*}[",
-                name,
+                displayname,
                 "]\n"
             ]
         )
-        displayname, description, pattern = altrea.data.getsavedproof(self.logic, name)
-        proofdetails = altrea.data.getproofdetails(self.logic, name)
+        name, description, pattern = altrea.data.getlemma(self.logic, displayname)
+        lemmaintro = "".join(
+            [
+                "Description: ",
+                description,
+                "\n\n"
+            ]
+        )
+        lemmaresult = self.metasubstitute(pattern).latex()
+        pd = altrea.data.getproofdetails(self.logic, name)
+        proofdetails = [[pattern, 0, 0, self.goal_name, "", "", "", "", "", ""]]
+        for i in pd:
+            proofdetails.append(list(i))
+        for i in proofdetails:
+            i[self.statementindex] = self.metasubstitute(i[self.statementindex])
+        df = self.thislemma(name, proofdetails, short)
 
         lemmastatement = "".join(
             [
                 "The entailment $",
-                # goal,
+                lemmaresult,
                 "$ can be derived. "
             ]
         )
         endlemma = "\n\\end{lemma*}\n\n"
         return "".join(
             [
+                lemmaintro,
                 beginlemma,
                 lemmastatement,
-                endlemma
+                endlemma,
+                self.writecenter(df.to_latex(column_format="lrll")),
+                "\n\n"
             ]
         )
 
-    def writeproof(self, sectioning: str, name: str = ""):
+    def writeproof(self, sectioning: str, name: str = "", short: int = 1):
         """Constructs an English version of the proof."""
 
         begintheorem = "".join(
@@ -2604,19 +2754,19 @@ class Proof:
         endproof = "\\end{proof}"
         proofvariables = ""
         variables = len(self.letters)
-        savedproofslist = []
+        lemmalist = []
         for i in range(len(self.lines)):
-            if self.lines[i][self.typeindex] == self.linetype_savedproof:
-                savedproofslist.append(self.lines[i][self.linetype_rule])
-        if len(savedproofslist) == 0:
-            savedproofs = "The proof is self contained without referencing other saved proofs.\n\n"
+            if self.lines[i][self.typeindex] == self.linetype_lemma:
+                lemmalist.append(self.lines[i][self.ruleindex])
+        if len(lemmalist) == 0:
+            lemmas = "The proof is self contained without referencing other saved proofs.\n\n"
         else:
-            savedproofs = "The proof depends upon other saved proofs which will be presented first.\n\n"
-            for sp in savedproofslist:
-                savedproofs = "".join(
+            lemmas = "The proof depends upon other saved proofs which will be presented first.\n\n"
+            for sp in lemmalist:
+                lemmas = "".join(
                     [
-                        savedproofs,
-                        self.writesavedproof(self, sp)
+                        lemmas,
+                        self.writelemma(sp, short)
                     ]
                 )
 
@@ -2655,29 +2805,13 @@ class Proof:
                                 "$ be arbitrary propositions.\n\n"
                             ]
                         )
-            #proofvariables = "".join([proofvariables, "."])
-            #print(proofvariables)
-        # proofpremises = ""
-        # if premises > 0:
-        #     proofpremises = "".join(["    We are given $", self.premises[0].latex()])
-        #     if premises > 1:
-        #         for i in range(len(self.premises)):
-        #             if i > 0 and i < premises - 1:
-        #                 proofpremises = "".join(
-        #                     [proofpremises, "$, $", self.premises[i].latex()]
-        #                 )
-        #             elif i == premises - 1:
-        #                 proofpremises = "".join(
-        #                     [proofpremises, "$ and $", self.premises[i].latex()]
-        #                 )
-        #     proofpremises = "".join([proofpremises, "$ as premises.\n\n"])
-            #print(proofpremises)
+
         proofconclusion = ""
         if self.status == self.complete:
             proofconclusion = (
                 f"We can derive ${self.goals_latex}$.  Hence, we have ${goal}$.\n\n"
             )
-        df = self.thisproof(short=1, color=0)
+        df = self.thisproof(short=short, color=0)
         proof = "".join(
                 [
                     "The following table shows the lines of the proof presented through ",
@@ -2821,7 +2955,7 @@ class Proof:
                         ".\n\n"
                     ]
                 )
-            elif self.lines[i][self.typeindex] == self.linetype_savedproof:
+            elif self.lines[i][self.typeindex] == self.linetype_lemma:
                 linebyline = "".join(
                     [
                         linebyline,
@@ -2841,10 +2975,10 @@ class Proof:
         self.writtenproof = "".join(
             [
                 self.writelatexbegin(sectioning, name), 
+                lemmas,
                 begintheorem,
                 theoremstatement,
                 endtheorem,
-                savedproofs,
                 proof,
                 beginproof,
                 #proofgoal,
@@ -3151,7 +3285,7 @@ class Proof:
                         self.displayname,
                         self.description,
                     ]
-                    self.logicsavedproofs.append(proof)
+                    self.logiclemmas.append(proof)
                     self.logstep(
                         self.log_proofsaved.format(
                             self.saveproof_name.upper(),
@@ -6097,7 +6231,7 @@ class Proof:
                 except TypeError:
                     self.logicdefinitions = []
                 try:
-                    self.logicsavedproofs = altrea.data.getproofs(logic)
+                    self.logiclemmas = altrea.data.getproofs(logic)
                 except TypeError:
                     self.logicsavedoriifs = []
                 try:
@@ -6326,7 +6460,7 @@ class Proof:
         )
         return newtruth
 
-    def useproof(
+    def lemma(
         self, name: str, subslist: list, premiselist: list = [], comment: str = ""
     ):
         """Use a proof that was stored in the database associated with the logic.
@@ -6417,7 +6551,7 @@ class Proof:
                     self.reflines(*lineslist),
                     "",
                     newcomment,
-                    self.linetype_savedproof,
+                    self.linetype_lemma,
                     self.subproofchain,
                 ]
             )

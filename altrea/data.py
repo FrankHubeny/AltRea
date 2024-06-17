@@ -396,7 +396,7 @@ def getproofdetails(logic: str, name: str):
     database = getdatabase(logic)
     connection = sqlite3.connect(database)
     c = connection.cursor()
-    statement = "SELECT item, level, proof, rule, lines, usedproofs, comment, subproofstatus FROM proofdetails WHERE name=?"
+    statement = "SELECT item, level, proof, rule, lines, usedproofs, comment, linetype, subproofstatus FROM proofdetails WHERE name=?"
     try:
         c.execute(statement, (name,))
     except Exception:
@@ -451,7 +451,7 @@ def addproof(proofdata: list):
     name = proofdata[0][0]
     displayname = proofdata[0][1]
     description = proofdata[0][2]
-    # logic = proofdata[0][3]
+    logic = proofdata[0][3]
     pattern = proofdata[0][4]
     statement = "SELECT COUNT(*) FROM proofs where name=?"
     c.execute(statement, (name,))
@@ -460,12 +460,20 @@ def addproof(proofdata: list):
         row = (name, pattern, displayname, description)
         statement = "INSERT INTO proofs (name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
         c.execute(statement, row)
-        # print(f'The proof "{name}" for logic "{logic}" has been added to {database}.')
-        statement = "INSERT INTO proofdetails (name, item, level, proof, rule, lines, usedproofs, comment, subproofstatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        print(
+            f'The proof "{name}" has been added to "{logic}".'
+        )
+        statement = "INSERT INTO proofdetails (name, item, level, proof, rule, lines, usedproofs, comment, linetype, subproofstatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
         c.executemany(statement, proofdata[1:])
-        # print(f'The proof details for "{name}" for logic "{logic}" have been added to {database}.')
+        print(
+            f'The proof details for "{name}" have been added to "{logic}".'
+        )
         connection.commit()
         connection.close()
+    else:
+        print(
+            f'Details for a proof named "{name}" already exist for "{logic}".'
+        )
     return howmany[0]
 
 
@@ -615,6 +623,16 @@ def deleteintelimrule(logic: str, name: str):
     connection.commit()
     connection.close()
 
+def getlemma(logic: str, displayname: str):
+    database = getdatabase(logic)
+    connection = sqlite3.connect(database)
+    c = connection.cursor()
+    statement = "SELECT name, description, pattern FROM proofs WHERE displayname=?"
+    c.execute(statement, (displayname,))
+    name, description, pattern = c.fetchone()
+    connection.commit()
+    connection.close()
+    return name, description, pattern
 
 def getsavedproof(logic: str, name: str):
     database = getdatabase(logic)

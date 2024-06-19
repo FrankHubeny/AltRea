@@ -714,6 +714,7 @@ class Proof:
             "StrictImplies": StrictImplies,
             "StrictIff": StrictIff,
             "Definition": Definition,
+            "Falsehood": Falsehood,
         }
         self.metaobjectdictionary = {
             "Implies": Implies,
@@ -728,6 +729,7 @@ class Proof:
             "StrictImplies": StrictImplies,
             "StrictIff": StrictIff,
             "Definition": Definition,
+            "Falsehood": Falsehood,
         }
         self.log = []
         self.latexwrittenproof = ""
@@ -910,6 +912,10 @@ class Proof:
 
     def getpreviousproofid(self, proofid: int) -> int:
         return self.prooflist[proofid][2]
+    
+    def getprevioussubproofstatus(self, proofid: int) -> int:
+        return self.prooflist[proofid][4]
+
 
     def getproof(self, proofid: int) -> tuple:
         """Returns one or more hypothesis statements conjoined together, the conclusion statement
@@ -1152,6 +1158,7 @@ class Proof:
                                     statement = "".join(
                                         [
                                             "$",
+                                            self.color_unavailable,
                                             prooflines[i][0].latex(),
                                             statement,
                                             "$",
@@ -5291,12 +5298,42 @@ class Proof:
         # If no errors, perform task
         if self.canproceed():
             # proofid = self.currentproofid
+            # subproof_status = self.subproof_status
+            # self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
+            # self.level -= 1
+            # self.subproofchain = self.subproofchain[3:]
+            # antecedent, consequent, previousproofid, previoussubproofstatus = (
+            #     self.getproof(self.currentproofid)
+            # )
+            # self.currentproofid = previousproofid
+            # self.subproof_status = previoussubproofstatus
+            # self.currentproof = self.prooflist[previousproofid][1]
+            # if len(self.previousproofchain) > 1:
+            #     self.previousproofchain.pop(len(self.previousproofchain) - 1)
+            #     self.previousproofid = self.previousproofchain[
+            #         len(self.previousproofchain) - 1
+            #     ]
+            # else:
+            #     self.previousproofchain = []
+            #     self.previousproofid = -1
+
+            # proofid = self.currentproofid
             self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
             self.level -= 1
+            
             self.subproofchain = self.subproofchain[3:]
-            # antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            # antecedent, consequent, previousproofid, previoussubproofstatus = (
+            #     self.getproof(self.currentproofid)
+            # )
             previousproofid = self.getpreviousproofid(self.currentproofid)
+            #previoussubproofstatus = self.getprevioussubproofstatus(self.currentproofid)
             self.currentproofid = previousproofid
+
+            #self.subproof_status = previoussubproofstatus
+            self.subproof_status = self.prooflist[self.currentproofid][4]  #new
+            # antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            #
+            #self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
             if len(self.previousproofchain) > 1:
                 self.previousproofchain.pop(len(self.previousproofchain) - 1)
@@ -6150,7 +6187,7 @@ class Proof:
             self.mvgamma = Wff("γ", "\\gamma")
             self.metaletters.append(self.mvgamma.name)
             self.metaobjectdictionary.update({self.mvgamma.name: self.mvgamma})
-            self.mvdelta = Wff("𝛿", "\\delta")
+            self.mvdelta = Wff("δ", "\\delta")
             self.metaletters.append(self.mvdelta.name)
             self.metaobjectdictionary.update({self.mvdelta.name: self.mvdelta})
             self.mvepsilon = Wff("ε", "\\epsilon")
@@ -6198,7 +6235,7 @@ class Proof:
             self.mvupsilon = Wff("υ", "\\upsilon")
             self.metaletters.append(self.mvupsilon.name)
             self.metaobjectdictionary.update({self.mvupsilon.name: self.mvupsilon})
-            self.mvphi = Wff("ϕ", "\\phi")
+            self.mvphi = Wff("φ", "\\phi")
             self.metaletters.append(self.mvphi.name)
             self.metaobjectdictionary.update({self.mvphi.name: self.mvphi})
             self.mvchi = Wff("χ", "\\chi")

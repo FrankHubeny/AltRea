@@ -153,6 +153,7 @@ class Proof:
     conjunction_elim_name = "Conjunction Elim"
     disjunction_intro_name = "Disjunction Intro"
     disjunction_elim_name = "Disjunction Elim"
+    entailment_name = "Entailment"
     goal_name = "GOAL"
     hypothesis_name = "Hypothesis"
     implication_intro_name = "Implication Intro"
@@ -168,8 +169,10 @@ class Proof:
     removeaxiom_name = "Remove Axiom"
     removedefinition_name = "Remove Definition"
     removeproof_name = "Remove Proof"
+    removerule_name = "Remove Rule"
     saveaxiom_name = "Save Axiom"
     savedefinition_name = "Save Definition"
+    saverule_name = "Save Rule"
     startstrictsubproof_name = "Start Strict Subproof"
     startemptystrictsubproof_name = "Start Empty Strict Subproof"
     substitution_name = "Substitution"
@@ -319,8 +322,8 @@ class Proof:
     log_axiomnotfound = '{0}: An axiom with the name "{1}" was not found.'
     log_axiomremoved = '{0}: The axiom named "{1}" has been removed.'
     log_axiomsaved = '{0}: The axiom named "{1}" has been saved.'
-    log_badpremise = 'The premise "{0}" is not an instance of altrea.wffs.Wff.'
-    log_badconclusion = 'The conclusion "{0}" is not an instance of altrea.wffs.Wff.'
+    # log_badpremise = 'The premise "{0}" is not an instance of altrea.wffs.Wff.'
+    # log_badconclusion = 'The conclusion "{0}" is not an instance of altrea.wffs.Wff.'
     log_coimplication_elim = (
         '{0}: Item "{1}" has been derived from the coimplication "{2}".'
     )
@@ -351,6 +354,9 @@ class Proof:
     )
     log_implication_intro_strict = (
         '{0}: Item "{1}" has been derived upon closing the strict subproof {2}.'
+    )
+    log_kindnotrecognized = (
+        '{0}: The kind "{2}" for "{1}" is not recognized.'
     )
     log_logdisplayed = "The log will be displayed."
     log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
@@ -384,6 +390,12 @@ class Proof:
     log_proofdeleted = (
         '{0}: The proof "{1}" was deleted form the database "{2}" under logic "{3}".'
     )
+    log_rulereadyexists = (
+        '{0}: A rule with the name "{1}" already exists.'
+    )
+    
+    log_ruleremoved = '{0}: The rule named "{1}" has been removed.'
+    log_rulesaved = '{0}: The rule named "{1}" has been saved.'
     log_strictsubproofstarted = '{0}: A strict subproof "{1}" has been started with either line {2}, additional hypothesis "{3}" or hypothesis "{4}".'
     log_substitute = '{0}: The placeholder(s) in the string "{1}" have been replaced with "{2}" to become "{3}".'
     log_substitution = (
@@ -406,6 +418,7 @@ class Proof:
     label_connectives = "Connectives"
     label_contradicted = "GOAL CONTRADICTED"
     label_currentproofid = "Current Proof ID"
+    label_definition = "Definition"
     label_definitions = "Definitions"
     label_derivedgoal = "Derived Goal"
     label_derivedgoals = "Derived Goals"
@@ -465,6 +478,12 @@ class Proof:
     label_vacuous = "Vacuous"
     label_valid = "Valid"
     label_value = "Value"
+
+    valueerror_badpremise = 'The premise "{0}" is not an instance of altrea.wffs.Wff.'
+    valueerror_badconclusion = 'The conclusion "{0}" is not an instance of altrea.wffs.Wff.'
+    
+    valueerror_kind = "The kind '{0}' is not recognized."
+    valueerror_rulenotfound = '{0}: A rule with the name "{1}" was not found.'
 
     """Convenience strings for the user when entering string values."""
 
@@ -545,10 +564,111 @@ class Proof:
         ]
         self.logicrules = [
             (
+                "coimp elim", 
+                "ConclusionPremises(And(Implies({0}, {1}), Implies({1}, {0})), [Iff({0}, {1})])", 
+                "Coimplication Elim", 
+                "Coimplication Elimination"
+            ),
+            (
+                "coimp intro", 
+                "ConclusionPremises(Iff({0}, {1}), [And(Implies({0}, {1}), Implies({1}, {0}))])", 
+                "Coimplication Intro", 
+                "Coimplication Introduction"
+            ),
+            (
+                "conj elim l", 
+                "ConclusionPremises({0}, [And({0}, {1})])", 
+                "Conjunction Elim Left", 
+                "Conjunction Elimination Left Side"
+            ),
+            (
+                "conj elim r", 
+                "ConclusionPremises({1}, [And({0}, {1})])", 
+                "Conjunction Elim Right", 
+                "Conjunction Elimination Right Side"
+            ),
+            (
+                "conj intro", 
+                "ConclusionPremises(And({0}, {1}), [{0}, {1}])", 
+                "Conjunction Intro", 
+                "Conjunction Introduction"
+            ),
+            (
+                "consistent intro", 
+                "ConclusionPremises(ConsistentWith({0}, {1}), [Possibly(And({0}, {1}))])", 
+                "Consistent With Intro", 
+                "Consistent With Introduction"
+            ),
+            (
+                "consistent elim", 
+                "ConclusionPremises(Possibly(And({0}, {1})), [ConsistentWith({0}, {1})])", 
+                "Consistent With Elim", 
+                "Consistent With Elimination"
+            ),
+            (
+                "disj elim", 
+                "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, {2}), Implies({1}, {2})])", 
+                "Disjunction Elim", 
+                "Disjunction Elimination"
+            ),
+            (
+                "disj elim l", 
+                "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, {2}), Implies({1}, Falsehood(And({3}, Not({3}))))])", 
+                "Disjunction Elim Left", 
+                "Disjunction Elimination Left"
+            ),
+            (
+                "disj elim r", 
+                "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, Falsehood(And({3}, Not({3})))), Implies({1}, {2})])", 
+                "Disjunction Elim Right", 
+                "Disjunction Elimination Right"
+            ),
+            (
+                "imp elim", 
+                "ConclusionPremises({1}, [{0}, Implies({0}, {1})])", 
+                "Implication Elim", 
+                "Implication Elimination"),
+            (
                 "modusponens",
                 "ConclusionPremises({1}, [{0}, Implies({0}, {1})])",
                 "Modus Ponens",
                 "Modus Ponens",
+            ),
+            (
+                "nec elim", 
+                "ConclusionPremises({0}, [Necessary({0})])", 
+                "Necessary Elim", 
+                "Necessary Elimination"
+            ),
+            (
+                "neg elim", 
+                "ConclusionPremises(Falsehood(And({0}, Not({0}))), [{0}, Not({0})])", 
+                "Negation Elim", 
+                "Nenegation Elimination"
+            ),
+            (
+                "s coimp elim", 
+                "ConclusionPremises(Necessary(Iff({0}, {1})), [StrictIff({0}, {1})])", 
+                "Strict Coimplication Elim", 
+                "Strict Coimplication Elimination"
+            ),
+            (
+                "s coimp intro", 
+                "ConclusionPremises(StrictIff({0}, {1}), [Necessary(Iff({0}, {1}))])", 
+                "Strict Coimplication Intro", 
+                "Strict Coimplication Introduction"
+            ),
+            (
+                "s imp elim", 
+                "ConclusionPremises(Necessary(Implies({0}, {1})), [StrictImplies({0}, {1})])", 
+                "Strict Implication Elim", 
+                "Strict Implication Elimination"
+            ),
+            (
+                "s imp intro", 
+                "ConclusionPremises(StrictImplies({0}, {1}), [Necessary(Implies({0}, {1}))])", 
+                "Strict Implication Intro", 
+                "Strict Implication Introduction"
             ),
         ]
         self.logicaxiomsunrestricted = [
@@ -1529,6 +1649,10 @@ class Proof:
             table.append(i[1])
         df = pandas.DataFrame(table, index, headers)
         return df
+    
+    def item(self, n: int):
+        """Retrieve the item in the nth line of the proof."""
+        return self.lines[n][self.statementindex]
 
     def displaylog(self):
         """Displays a log of the proof steps.  This will display the entire log that
@@ -3056,6 +3180,9 @@ class Proof:
                 indexfound = i
                 break
         if indexfound == -1:
+            # raise ValueError(self.valueerror_definitionnotfound.format(
+            #         self.removedefinition_name.upper(), name
+            #     ))
             self.logstep(
                 self.log_definitionnotfound.format(
                     self.removedefinition_name.upper(), name
@@ -3093,6 +3220,40 @@ class Proof:
                 self.log_nosavedproof.format(self.removeproof_name.upper(), name)
             )
 
+    def removerule(self, name: str):
+        """Remove a rule from the current proof as well as the logic's database if one has been identified.
+
+        Parameters:
+            name: The name of the rule to be removed.
+
+        """
+
+        # Look for errors
+
+        # If no errors, perform the task
+        indexfound = -1
+        for i in range(len(self.logicrules)):
+            if self.logicrules[i][0] == name:
+                indexfound = i
+                break
+        if indexfound == -1:
+            raise ValueError(self.valueerror_rulenotfound.format(self.removerule_name.upper(), name))
+            #     )))
+            # self.logstep(
+            #     self.log_rulenotfound.format(
+            #         self.removerule_name.upper(), name
+            #     )
+            # )
+        else:
+            self.logicrules.pop(i)
+            if self.logicdatabase != self.label_nodatabase:
+                altrea.data.deleterule(self.logic, name)
+                self.logstep(
+                    self.log_ruleremoved.format(
+                        self.removerule_name.upper(), name
+                    )
+                )
+
     def saveaxiom(
         self,
         name: str,
@@ -3118,12 +3279,14 @@ class Proof:
         if isinstance(conclusion, altrea.wffs.Wff):
             for i in premise:
                 if not isinstance(i, altrea.wffs.Wff):
-                    print(self.log_badpremise.format(i))
-                    noerrors = False
-                    break
+                    raise ValueError(self.valueerror_badpremise.format(i))
+                    # print(self.log_badpremise.format(i))
+                    # noerrors = False
+                    # break
         else:
-            print(self.log_badconclusion.format(conclusion))
-            noerrors = False
+            raise ValueError(self.valueerror_badconclusion.format(conclusion))
+            # print(self.log_badconclusion.format(conclusion))
+            # noerrors = False
 
         # If no errors, perform the task
         if noerrors:
@@ -3184,12 +3347,14 @@ class Proof:
         if isinstance(conclusion, altrea.wffs.Wff):
             for i in premise:
                 if not isinstance(i, altrea.wffs.Wff):
-                    print(self.log_badpremise.format(i))
-                    noerrors = False
-                    break
+                    raise ValueError(self.valueerror_badpremise.format(i))
+                    # print(self.log_badpremise.format(i))
+                    # noerrors = False
+                    # break
         else:
-            print(self.log_badconclusion.format(conclusion))
-            noerrors = False
+            raise ValueError(self.valueerror_badconclusion.format(conclusion))
+            # print(self.log_badconclusion.format(conclusion))
+            # noerrors = False
 
         # If no errors, perform the task
         if noerrors:
@@ -3220,6 +3385,7 @@ class Proof:
                         self.savedefinition_name.upper(), name
                     )
                 )
+                print(self.log_definitionsaved.format(self.savedefinition_name.upper(), name))
 
     def saveproof(self, comment: str = ""):
         """Save the proof to a database file associated with the logic.
@@ -3321,7 +3487,80 @@ class Proof:
                 comment,
             )
 
-    def viewentailment(self, conclusion: Wff, premises: list = []):
+    def saverule(
+        self,
+        name: str,
+        displayname: str,
+        description: str,
+        conclusion: Wff,
+        premise: list = [],
+    ):
+        """Save a rule for the current proof and in the logic's database if one has been identified.
+
+        Parameters:
+            name: The name of the axiom by which it will be accessed when one needs to use it.
+            displayname: The way the axiom will be displayed in a proof.
+            description: The description of the axiom to help understand it.
+            conclusion: An object, not a string, that represents the conclusion that will be placed in the proof
+                when the axiom is referenced.
+            premise: A list of objects, not strings, that need to be matched in proof lines before the
+                axiom can be used.
+        """
+
+        # Look for errors
+        #noerrors = True
+        if isinstance(conclusion, altrea.wffs.Wff):
+            for i in premise:
+                if not isinstance(i, altrea.wffs.Wff):
+                    raise ValueError(self.valueerror_badpremise.format(i))
+                    # print(self.log_badpremise.format(i))
+                    # noerrors = False
+                    # break
+        else:
+            raise ValueError(self.valueerror_badconclusion.format(conclusion))
+            # print(self.log_badconclusion.format(conclusion))
+            # noerrors = False
+
+        # If no errors, perform the task
+        #if noerrors:
+        propositionlist = []
+        conclusionpremise = ConclusionPremises(conclusion, premise).pattern(
+            propositionlist
+        )
+        rule = [name, conclusionpremise, displayname, description]
+        found = False
+        for i in self.logicrules:
+            if i[0] == name:
+                found = True
+                break
+        if found:
+            self.logstep(
+                self.log_rulereadyexists.format(
+                    self.saverule_name.upper(), name
+                )
+            )
+        else:
+            if self.logic != "":
+                altrea.data.addrule(
+                    self.logic, name, conclusionpremise, displayname, description
+                )
+            self.logicrules.append(rule)
+            self.logstep(
+                self.log_rulesaved.format(
+                    self.saverule_name.upper(), name
+                )
+            )
+            print(self.log_rulesaved.format(self.saverule_name.upper(), name))
+
+    def entailment(
+            self, 
+            conclusion: Wff, 
+            premises: list = [], 
+            name: str = "", 
+            displayname: str = "", 
+            description: str = "", 
+            kind: str = ""
+        ):
         """View how the conclusion and any premises look as text and latex before actually
         adding them as an axiom, definition or transformation rule.
 
@@ -3357,11 +3596,27 @@ class Proof:
         """
 
         prop = ConclusionPremises(conclusion, premises)
-        latexprop = "".join(["$", prop.latex(), "$"])
-        df = pandas.DataFrame(
-            [[prop], [latexprop]], columns=["Display"], index=["Text", "LaTeX"]
-        )
-        return df
+        if kind == "":
+            latexprop = "".join(["$", prop.latex(), "$"])
+            expandedprop = prop.tree()
+            wfflist = []
+            pattern = prop.pattern(wfflist)
+            df = pandas.DataFrame(
+                [[name], [displayname], [description], [prop], [latexprop], [expandedprop], [pattern]], 
+                columns=["Display"], 
+                index=["Name", "Display Name", "Description", "Text", "LaTeX", "Expanded", "Pattern"]
+            )
+            return df
+        else:
+            if kind == self.label_axiom:
+                self.saveaxiom(name, displayname, description, conclusion, premises)
+            elif kind == self.label_definition:
+                self.savedefinition(name, displayname, description, conclusion, premises)
+            elif kind == self.label_rule:
+                self.saverule(name, displayname, description, conclusion, premises)
+            else:
+                raise ValueError(self.valueerror_kind.format(kind))
+        
 
     """NATURAL DEDUCTION AND GENERAL PROOF CONSTRUCTION
     
@@ -4679,7 +4934,8 @@ class Proof:
                 self.goals_latex = goal.latex()
             else:
                 self.goals_latex += "".join([", ", goal.latex()])
-            self.lines[0][self.statementindex] = self.goals_string
+            #self.lines[0][self.statementindex] = self.goals_string
+            self.lines[0][self.statementindex] = goal
             self.lines[0][self.ruleindex] = self.goal_name
             if self.lines[0][self.commentindex] == "":
                 self.lines[0][self.commentindex] = comment

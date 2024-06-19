@@ -513,7 +513,7 @@ def adddefinition(
 
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    statement = "SELECT COUNT(*) FROM axioms WHERE logic=? AND name=?"
+    statement = "SELECT COUNT(*) FROM definitions WHERE logic=? AND name=?"
     c.execute(
         statement,
         (
@@ -536,6 +536,35 @@ def adddefinition(
         )
     connection.close()
 
+def addrule(
+    logic: str, name: str, pattern: str, displayname: str, description: str
+):
+    """Add a rule to a logic."""
+
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = "SELECT COUNT(*) FROM rules WHERE logic=? AND name=?"
+    c.execute(
+        statement,
+        (
+            logic,
+            name,
+        ),
+    )
+    howmany = c.fetchone()
+    if howmany[0] == 0:
+        row = (logic, name, pattern, displayname, description)
+        statement = "INSERT INTO rules (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        c.execute(statement, row)
+        connection.commit()
+        print(
+            f'The rule "{name}" defined as "{pattern}" has been loaded to the "{logic}" database.'
+        )
+    else:
+        print(
+            f'There is already a rule by the name "{name}" in the "{logic}" database.'
+        )
+    connection.close()
 
 def deleteaxiom(logic: str, name: str):
     """Delete an axiom from a logic."""
@@ -596,6 +625,34 @@ def deletedefinition(logic: str, name: str):
         print(f'There is no definition by the name "{name}" in the "{logic}" database.')
     connection.close()
 
+def deleterule(logic: str, name: str):
+    """Delete an rule from a logic."""
+
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = "SELECT COUNT(*) FROM rules WHERE logic=? AND name=?"
+    c.execute(
+        statement,
+        (
+            logic,
+            name,
+        ),
+    )
+    howmany = c.fetchone()
+    if howmany[0] > 0:
+        statement = "DELETE FROM rules WHERE logic=? and name=?"
+        c.execute(
+            statement,
+            (
+                logic,
+                name,
+            ),
+        )
+        connection.commit()
+        print(f'The rule "{name}" has been deleted from the "{logic}" database.')
+    else:
+        print(f'There is no rule by the name "{name}" in the "{logic}" database.')
+    connection.close()
 
 def addintelimrule(logic: str, name: str, description: str):
     """Add a single operator to a logic."""

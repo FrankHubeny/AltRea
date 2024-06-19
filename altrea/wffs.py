@@ -668,6 +668,7 @@ class Not(Wff):
                  latexconnector: str = '\\lnot~',
                  treeconnector: str = 'Not'):
         self.negated = negated
+        self.wff = negated
         self.booleanvalue = None
         self.connector = connector
         self.latexconnector = latexconnector 

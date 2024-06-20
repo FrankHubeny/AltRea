@@ -98,7 +98,7 @@ def test_axiom_dn_intro_elim_1(input_n, expected):
     prf.setlogic()
     prf.goal(B)
     prf.premise(C)
-    prf.axiom("dneg intro", [C], [1])
+    prf.axiom("dneg intro", [prf.item(1)], [1])
     prf.axiom("dneg elim", [C], [2])
     assert eval(input_n) == expected
 
@@ -134,7 +134,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_axiom_dn_intro_elim_2(input_n, expected):
+def test_axiom_lem_wlem_2(input_n, expected):
     prf = Proof()
     prf.setrestricted(False)
     B = prf.proposition("B")
@@ -142,7 +142,7 @@ def test_axiom_dn_intro_elim_2(input_n, expected):
     prf.setlogic()
     prf.goal(B)
     prf.premise(C)
-    prf.axiom("lem", [C])
+    prf.axiom("lem", [prf.item(1)])
     prf.axiom("wlem", [C])
     assert eval(input_n) == expected
 
@@ -274,11 +274,10 @@ def test_axiom_demorgan_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                Stopped
                         restricted mode with no default axioms
 ------------------------------------------------------------------------------"""
 
-# Clean test of double negation intro and elim
+# Restricted mode with no default axioms
 
 testdata = [
     ("len(prf.lines)", 3),
@@ -313,7 +312,6 @@ def test_axiom_restricted_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_nosuchaxiom
 ------------------------------------------------------------------------------"""
 
@@ -350,7 +348,6 @@ def test_axiom_nosuchaxiom_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                              stopped_nosubs
 ------------------------------------------------------------------------------"""
 
@@ -387,7 +384,6 @@ def test_axiom_nosubs_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_premisesdontmatch
 ------------------------------------------------------------------------------"""
 
@@ -434,7 +430,6 @@ def test_axiom_premisesdontmatch_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_notwff
 ------------------------------------------------------------------------------"""
 
@@ -482,7 +477,6 @@ def test_axiom_notwff_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_notinteger
 ------------------------------------------------------------------------------"""
 
@@ -530,7 +524,6 @@ def test_axiom_notinteger_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
@@ -578,7 +571,6 @@ def test_axiom_nosuchline_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_linescope
 ------------------------------------------------------------------------------"""
 

@@ -101,11 +101,6 @@ def test_definition_restricted_1(input_n, expected):
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                            stopped_nosuchdefinition
-------------------------------------------------------------------------------"""
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_premisesdontmatch
 ------------------------------------------------------------------------------"""
 
@@ -141,7 +136,7 @@ def test_definition_premisesdontmatch_1(input_n, expected):
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                            stopped_premisesdontmatch
+                            stopped_premiseslengthsdontmatch
 ------------------------------------------------------------------------------"""
 
 # Error: The premises do not match the identified lines.
@@ -155,12 +150,12 @@ testdata = [
     ("prf.lines[4][prf.ruleindex]", "Iff Intro"),
     ("prf.lines[4][prf.linesindex]", ""),
     ("prf.lines[4][prf.proofsindex]", ""),
-    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_premisesdontmatch),
+    ("prf.lines[4][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_premiseslengthsdontmatch),
     ("prf.lines[4][prf.typeindex]", ""),
     #
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_definition_premisesdontmatch_2(input_n, expected):
+def test_definition_premiseslengthsdontmatch_2(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     B = prf.proposition('B')
@@ -177,7 +172,6 @@ def test_definition_premisesdontmatch_2(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_nosubs
 ------------------------------------------------------------------------------"""
 
@@ -214,7 +208,6 @@ def test_definition_nosubs_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_notwff
 ------------------------------------------------------------------------------"""
 
@@ -249,7 +242,6 @@ def test_definition_notwff_1(input_n, expected):
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_notinteger
 ------------------------------------------------------------------------------"""
 
@@ -285,7 +277,6 @@ def test_definition_notinteger_1(input_n, expected):
 
     
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
@@ -320,7 +311,6 @@ def test_definition_nosuchline_1(input_n, expected):
     assert eval(input_n) == expected
     
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_linescope
 ------------------------------------------------------------------------------"""
 

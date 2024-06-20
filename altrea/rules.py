@@ -62,6 +62,7 @@ from datetime import date
 # from tabulate import tabulate
 # from IPython.display import display, Math, Markdown, Latex, display_markdown, HTML
 
+from altrea import __version__
 from altrea.wffs import (
     And,
     Or,
@@ -176,7 +177,7 @@ class Proof:
     startstrictsubproof_name = "Start Strict Subproof"
     startemptystrictsubproof_name = "Start Empty Strict Subproof"
     substitution_name = "Substitution"
-    rule_name = "Transformation Rule"
+    rule_name = "Rule"
 
     # This set of strings provide names for proof structures which need not be used with natural deduction.
 
@@ -302,6 +303,12 @@ class Proof:
     )
     log_premisesdontmatch = (
         '{0}: The premise "{1}" does not match a line from the current proof.'
+    )
+    stopped_premiseslengthsdontmatch = (
+        "The number of premises do not match the pattern."
+    )
+    log_premiseslengthsdontmatch = (
+        '{0}: The number of premises "{1}" does not match the number in the pattern {2}.'
     )
     stopped_restrictednowff = (
         "In restricted mode objects cannot be used in disjunction introduction."
@@ -997,18 +1004,42 @@ class Proof:
     ):
         if len(premiselist) > 0:
             premises = [i.tree() for i in premiselist]
-            for i in premises:
-                if i not in matchpremiselist:
-                    self.logstep(self.log_premisesdontmatch.format(caller.upper(), i))
-                    self.stopproof(
-                        self.stopped_premisesdontmatch,
-                        self.blankstatement,
-                        displayname,
-                        "",
-                        "",
-                        comment,
-                    )
-                    break
+            if len(premises) != len(matchpremiselist):
+                self.logstep(self.log_premiseslengthsdontmatch.format(caller.upper(), len(premises), len(matchpremiselist)))
+                self.stopproof(
+                    self.stopped_premiseslengthsdontmatch,
+                    self.blankstatement,
+                    displayname,
+                    "",
+                    "",
+                    comment,
+                )
+            else:
+                for i in range(len(premises)):
+                    if premises[i] != matchpremiselist[i]:
+                        self.logstep(self.log_premisesdontmatch.format(caller.upper(), premises[i]))
+                        self.stopproof(
+                            self.stopped_premisesdontmatch,
+                            self.blankstatement,
+                            displayname,
+                            "",
+                            "",
+                            comment,
+                        )
+                        break
+            # premises = [i.tree() for i in premiselist]
+            # for i in premises:
+            #     if i not in matchpremiselist:
+            #         self.logstep(self.log_premisesdontmatch.format(caller.upper(), i))
+            #         self.stopproof(
+            #             self.stopped_premisesdontmatch,
+            #             self.blankstatement,
+            #             displayname,
+            #             "",
+            #             "",
+            #             comment,
+            #         )
+            #         break
 
     def checksubs(self, caller: str, displayname: str, comment: str, subslist: list):
         s = []
@@ -2708,13 +2739,15 @@ class Proof:
             ]
         )
     
-    def writethanks(self, sectioning: str = "document"):
+    def writethanks(self, sectioning: str):
         return "".join(
                 [
                     "\\footnote{This ",
                     sectioning,
-                    " was generated on ",
+                    " was generated from the author's proof on ",
                     str(date.today()),
+                    " by AltRea ",
+                    __version__,
                     ".}"
                 ]
             )

@@ -532,7 +532,7 @@ testdata = [
     ("prf.lines[3][prf.proofsindex]", ""),
     (
         "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
+        t.stopped + t.colon_connector + t.stopped_premiseslengthsdontmatch,
     ),
     ("prf.lines[3][prf.typeindex]", ""),
 ]
@@ -825,7 +825,7 @@ testdata = [
     ("prf.lines[3][prf.proofsindex]", ""),
     (
         "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
+        t.stopped + t.colon_connector + t.stopped_premiseslengthsdontmatch,
     ),
     ("prf.lines[3][prf.typeindex]", ""),
 ]
@@ -1059,7 +1059,7 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", ""),
     (
         "prf.lines[2][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
+        t.stopped + t.colon_connector + t.stopped_premiseslengthsdontmatch,
     ),
     ("prf.lines[2][prf.typeindex]", ""),
 ]

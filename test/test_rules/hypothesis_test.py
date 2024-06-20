@@ -59,7 +59,6 @@ def test_hypothesis_clean_1(input_n, expected):
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_string
 ------------------------------------------------------------------------------"""
 
@@ -81,6 +80,7 @@ def test_hypothesis_notwff_1(input_n, expected):
     prf.setlogic()
     prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis('A')  
+    assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
                                   Stopped Run
@@ -90,7 +90,7 @@ def test_hypothesis_notwff_1(input_n, expected):
 testdata = [
     ('len(prf.lines)', 2),
     #
-    ("str(prf.lines[1][prf.statementindex])", str(B)),
+    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
     ("prf.lines[1][prf.levelindex]", 0),
     ("prf.lines[1][prf.proofidindex]", 0),
     ("prf.lines[1][prf.ruleindex]", t.hypothesis_name),
@@ -105,4 +105,5 @@ def test_hypothesis_nogoal_1(input_n, expected):
     prf.setlogic()
     #prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
     prf.hypothesis(A)  
+    assert eval(input_n) == expected
     

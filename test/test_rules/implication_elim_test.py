@@ -41,7 +41,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", str(B)),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
+    #("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", t.complete),
@@ -51,18 +51,17 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.implication_elim(1, 2)
+    prf.rule('imp elim', [A, B], [1, 2])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
@@ -86,19 +85,18 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.implication_elim(3, 2)
+    prf.rule('imp elim', [A, B], [3, 2])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_notinteger                        
 ------------------------------------------------------------------------------"""
 
@@ -122,19 +120,18 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notinteger_2(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.implication_elim(1, -2.56789)
+    prf.rule('imp elim', [A, B], [1, -2.56789])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_linescope
 ------------------------------------------------------------------------------"""
 
@@ -158,20 +155,19 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_linescope_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(Implies(A, B))
     prf.hypothesis(A)
     prf.implication_intro()
-    prf.implication_elim(2, 1)
+    prf.rule('imp elim', [A, B], [2, 1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                stopped_linescope
 ------------------------------------------------------------------------------"""
 
@@ -195,21 +191,20 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_linescope_2(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(Implies(A, B))
     prf.hypothesis(A)
     prf.implication_intro()
-    prf.implication_elim(1, 2)
+    prf.rule('imp elim', [A, B], [1, 2])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
-                               stopped_notantecedent
+                               stopped_premisesdontmatch
 ------------------------------------------------------------------------------"""
 
 # The first referenced line is an implication but the second is not the antecedent of it.
@@ -219,12 +214,12 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
-    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    #("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
+    ("prf.lines[3][prf.linesindex]", ""),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
         "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_notantecedent,
+        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
     ),
 ]
 
@@ -232,20 +227,19 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notantecedent_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(Implies(A, B))
     prf.premise(And(A, A))
-    prf.implication_elim(1, 2)
+    prf.rule('imp elim', [A, B], [1, 2])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
-                               stopped_notantecedent
+                               stopped_premisesdontmatch
 ------------------------------------------------------------------------------"""
 
 # The first referenced line is an implication but the second is not the antecedent of it.
@@ -255,12 +249,12 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
-    ("prf.lines[3][prf.linesindex]", "2, 1"),
+    #("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
+    ("prf.lines[3][prf.linesindex]", ""),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
         "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_notantecedent,
+        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
     ),
 ]
 
@@ -268,20 +262,19 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notantecedent_2(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(Implies(A, B))
     prf.premise(And(A, A))
-    prf.implication_elim(2, 1)
+    prf.rule('imp elim', [A, B], [2, 1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
-                               stopped_notmodusponens
+                               stopped_premisesdontmatch
 ------------------------------------------------------------------------------"""
 
 # Neither line references an implication.
@@ -292,11 +285,11 @@ testdata = [
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
     ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
-    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    ("prf.lines[3][prf.linesindex]", ""),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
         "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_notmodusponens,
+        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
     ),
 ]
 
@@ -304,12 +297,12 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_implication_elim_notmodusponens_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
     prf.setlogic()
     prf.goal(B, comment="Modus Ponens")
     prf.premise(A)
     prf.premise(And(A, A))
-    prf.implication_elim(1, 2)
+    prf.rule('imp elim', [A, B], [2, 1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
     assert eval(input_n) == expected

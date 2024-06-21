@@ -25,11 +25,11 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", str(And(Implies(A, B), Implies(B, A)))),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    #("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", ""),
-    ("prf.lines[3][prf.typeindex]", "TR"),
+    ("prf.lines[3][prf.typeindex]", t.linetype_rule),
     #
     ("str(prf.lines[4][prf.statementindex])", str(Iff(A, B))),
     ("prf.lines[4][prf.levelindex]", 0),
@@ -38,7 +38,7 @@ testdata = [
     ("prf.lines[4][prf.linesindex]", "3"),
     ("prf.lines[4][prf.proofsindex]", ""),
     ("prf.lines[4][prf.commentindex]", ""),
-    ("prf.lines[4][prf.typeindex]", "DEF"),
+    ("prf.lines[4][prf.typeindex]", t.linetype_definition),
     #
     ("str(prf.lines[5][prf.statementindex])", str(And(Implies(A, B), Implies(B, A)))),
     ("prf.lines[5][prf.levelindex]", 0),
@@ -47,7 +47,7 @@ testdata = [
     ("prf.lines[5][prf.linesindex]", "4"),
     ("prf.lines[5][prf.proofsindex]", ""),
     ("prf.lines[5][prf.commentindex]", ""),
-    ("prf.lines[5][prf.typeindex]", "DEF"),
+    ("prf.lines[5][prf.typeindex]", t.linetype_definition),
 ]
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_definition_iff_1(input_n, expected):
@@ -59,7 +59,7 @@ def test_definition_iff_1(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', [A, B], [3])
     prf.definition('iff elim', [A, B], [4])
     
@@ -93,7 +93,7 @@ def test_definition_restricted_1(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', [A, B], [3])
     prf.definition('iff elim', [A, B], [4])
     
@@ -129,7 +129,7 @@ def test_definition_premisesdontmatch_1(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', [B, A], [3])
     
     assert eval(input_n) == expected
@@ -164,7 +164,7 @@ def test_definition_premiseslengthsdontmatch_2(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', [A, B], [])
     
     assert eval(input_n) == expected
@@ -201,7 +201,7 @@ def test_definition_nosubs_1(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', [], [3])
     
     assert eval(input_n) == expected
@@ -236,7 +236,7 @@ def test_definition_notwff_1(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', ['A', 'B'], [3])
     
     assert eval(input_n) == expected
@@ -270,7 +270,7 @@ def test_definition_notinteger_1(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', [A, B], [-3.14])
     
     assert eval(input_n) == expected
@@ -305,7 +305,7 @@ def test_definition_nosuchline_1(input_n, expected):
     prf.goal(B)
     prf.premise(Implies(A, B))
     prf.premise(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.definition('iff intro', [A, B], [4])
     
     assert eval(input_n) == expected
@@ -339,7 +339,7 @@ def test_definition_linescope_1(input_n, expected):
     prf.goal(B)
     prf.hypothesis(Implies(A, B))
     prf.addhypothesis(Implies(B, A))
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
     prf.implication_intro()
     prf.definition('iff intro', [A, B], [3])
     

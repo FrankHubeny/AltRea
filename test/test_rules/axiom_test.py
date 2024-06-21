@@ -53,8 +53,8 @@ def test_axiom_contradiction_explosion_1(input_n, expected):
     prf.setlogic()
     prf.goal(B)
     prf.axiom("contradiction", [C])
-    prf.conjunction_elim(1, prf.left)
-    prf.conjunction_elim(1, prf.right)
+    prf.rule("conj elim l", [C, Not(C)], [1])
+    prf.rule("conj elim r", [C, Not(C)], [1])
     prf.axiom("explosion", [C, B], [2, 3])
     assert eval(input_n) == expected
 

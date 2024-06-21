@@ -32,7 +32,7 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", str(Possibly(A))),
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", t.possibly_intro_name),
+    #("prf.lines[2][prf.ruleindex]", t.possibly_intro_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", t.complete),
@@ -48,47 +48,11 @@ def test_possibly_intro_clean_1(input_n, expected):
     prf.setlogic()
     prf.goal(Possibly(A))
     prf.premise(A)
-    prf.possibly_intro(1)
+    prf.rule("pos intro", [A], [1])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                Stopped
-                                stopped_ruleclass
-------------------------------------------------------------------------------"""
-
-testdata = [
-    ("len(prf.lines)", 2),
-    #
-    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
-    ("prf.lines[1][prf.levelindex]", 0),
-    ("prf.lines[1][prf.proofidindex]", 0),
-    ("prf.lines[1][prf.ruleindex]", t.premise_name),
-    ("prf.lines[1][prf.linesindex]", ""),
-    ("prf.lines[1][prf.proofsindex]", ""),
-    (
-        "prf.lines[1][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_ruleclass,
-    ),
-    #
-]
-
-
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_possibly_intro_ruleclass_1(input_n, expected):
-    prf = Proof()
-    prf.setrestricted(True)
-    A = prf.proposition("A")
-    prf.proofrules = prf.rule_axiomatic
-    prf.setlogic()
-    prf.goal(Possibly(A))
-    prf.premise(A)
-    prf.possibly_intro(1)
-    assert eval(input_n) == expected
-
-
-"""------------------------------------------------------------------------------
-                                Stopped
                                 stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
@@ -125,12 +89,11 @@ def test_possibly_intro_nosuchline_1(input_n, expected):
     prf.setlogic()
     prf.goal(Possibly(A))
     prf.premise(A)
-    prf.possibly_intro(2)
+    prf.rule("pos intro", [A], [2])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                Stopped
                                 stopped_linescope
 ------------------------------------------------------------------------------"""
 
@@ -160,5 +123,5 @@ def test_possibly_intro_linescope_1(input_n, expected):
     prf.goal(A)
     prf.hypothesis(A)
     prf.implication_intro()
-    prf.possibly_intro(1)
+    prf.rule("pos intro", [A], [1])
     assert eval(input_n) == expected

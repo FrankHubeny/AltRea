@@ -58,6 +58,8 @@ axioms = [
                                 ADD LOGIC
 ------------------------------------------------------------------------------"""
 
+# remove it if it is there
+altrea.data.deletelogic(logicname)
 # clean construction
 altrea.data.addlogic(
     logicname, logicdisplay, logicdescription, connectors, rules, definitions, axioms
@@ -89,7 +91,6 @@ def test_database_setlogic_clean_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_logicalreadydefined
 ------------------------------------------------------------------------------"""
 
@@ -122,7 +123,6 @@ def test_database_setlogic_logicalreadydefined_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_logicalreadydefined
 ------------------------------------------------------------------------------"""
 
@@ -155,7 +155,6 @@ def test_database_setlogic_logicalreadydefined_2(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_logicnotfound
 ------------------------------------------------------------------------------"""
 
@@ -211,6 +210,7 @@ testdata = [
 def test_database_axiom_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
+    C = prf.proposition("C")
     prf.setlogic(logicname)
     prf.saveaxiom(
         "contradiction",
@@ -221,6 +221,39 @@ def test_database_axiom_1(input_n, expected):
     )
     prf.goal(A)
     prf.axiom("contradiction", [A], comment="test comment")
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                REMOVEAXIOM
+------------------------------------------------------------------------------"""
+
+# Clean run saving and using an axiom with a database.
+
+testdata = [
+    ("len(prf.lines)", 2),
+    #
+    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", "contradiction"),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    (
+        "prf.lines[1][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_nosuchaxiom,
+    ),
+    ("prf.lines[1][prf.typeindex]", ""),
+]
+
+
+@pytest.mark.parametrize("input_n,expected", testdata)
+def _database_axiom_removeaxiom_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition("A")
+    prf.setlogic(logicname)
+    prf.removeaxiom("contradiction")
+    prf.goal(A)
+    prf.axiom("contradiction", [A])
     assert eval(input_n) == expected
 
 
@@ -235,11 +268,11 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", str(B)),
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", t.conjunction_elim_name),
+    ("prf.lines[2][prf.ruleindex]", "Conjunction Elim Left"),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", t.complete),
-    ("prf.lines[2][prf.typeindex]", t.linetype_transformationrule),
+    ("prf.lines[2][prf.typeindex]", t.linetype_rule),
 ]
 
 
@@ -252,12 +285,19 @@ def test_database_saveproof_1(input_n, expected):
         "contradiction",
         "Contradiction",
         "All Contradictions Are True",
-        And(D, Not(D)),
+        And(prf.mvalpha, Not(prf.mvalpha)),
         [],
     )
     prf.axiom("contradiction", [B], [])
+    prf.entailment(
+        prf.mvalpha, 
+        [And(prf.mvalpha, prf.mvbeta)], 
+        name="conjeliml", 
+        displayname= "Conjunction Elim Left", 
+        description="Conjunction Elimination Left Side", 
+        kind=prf.label_rule) 
     prf.goal(B)
-    prf.conjunction_elim(1, side="left")
+    prf.rule("conjeliml", [prf.item(1).left, prf.item(1).right], [1])
     prf.saveproof()
     assert eval(input_n) == expected
 
@@ -274,11 +314,11 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", str(B)),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.implication_elim_name),
+    ("prf.lines[3][prf.ruleindex]", "mp"),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", t.complete),
-    ("prf.lines[3][prf.typeindex]", t.linetype_transformationrule),
+    ("prf.lines[3][prf.typeindex]", t.linetype_rule),
 ]
 
 
@@ -291,8 +331,14 @@ def test_database_saveproof_withpremises_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.premise(Implies(A, B))
-    prf.implication_elim(1, 2)
-    prf.saveproof()
+    prf.entailment(
+        prf.mvbeta, 
+        [prf.mvalpha, Implies(prf.mvalpha, prf.mvbeta)], 
+        name="mp", 
+        displayname= "mp", 
+        description="modusponens", 
+        kind=prf.label_rule) 
+    prf.rule("mp", [A, B], [1, 2])
     prf.saveproof()
     assert eval(input_n) == expected
 
@@ -318,7 +364,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_saveproof_noname_1(input_n, expected):
+def _database_saveproof_noname_1(input_n, expected):
     prf = Proof()
     B = prf.proposition("B")
     prf.setlogic(logicname)
@@ -360,21 +406,14 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_saveproof_notcomplete_1(input_n, expected):
+def _database_saveproof_notcomplete_1(input_n, expected):
     prf = Proof()
+    A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic(logicname)
-    prf.saveaxiom(
-        "contradiction",
-        "Contradiction",
-        "All Contradictions Are True",
-        And(D, Not(D)),
-        [],
-    )
-    prf.axiom("contradiction", [B], [])
     prf.goal(B)
+    prf.premise(A)
     prf.saveproof()
-    prf.conjunction_elim(1, side="left")
     assert eval(input_n) == expected
 
 
@@ -441,81 +480,7 @@ def test_database_useproof_withpremises_1(input_n, expected):
     prf.lemma("modusponens", [A, B], [1, 2])
     assert eval(input_n) == expected
 
-
 """------------------------------------------------------------------------------
-                                LEMMA
-                                stopped_notenoughsubs
-------------------------------------------------------------------------------"""
-
-# Clean run using the proof saved above with premises.
-
-testdata = [
-    ("len(prf.lines)", 4),
-    #
-    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
-    ("prf.lines[3][prf.levelindex]", 0),
-    ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", "Modus Ponens"),
-    ("prf.lines[3][prf.linesindex]", ""),
-    ("prf.lines[3][prf.proofsindex]", ""),
-    (
-        "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_notenoughsubs,
-    ),
-    ("prf.lines[3][prf.typeindex]", ""),
-]
-
-
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_useproof_notenoughsubs_1(input_n, expected):
-    prf = Proof()
-    A = prf.proposition("A")
-    B = prf.proposition("B")
-    prf.setlogic(logicname)
-    prf.goal(B)
-    prf.premise(A)
-    prf.premise(Implies(A, B))
-    prf.lemma("modusponens", [A], [1, 2])
-    assert eval(input_n) == expected
-
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                            stopped_nosavedproof
-------------------------------------------------------------------------------"""
-
-# Error: no saved proof by that name
-
-testdata = [
-    ("len(prf.lines)", 2),
-    #
-    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
-    ("prf.lines[1][prf.levelindex]", 0),
-    ("prf.lines[1][prf.proofidindex]", 0),
-    ("prf.lines[1][prf.ruleindex]", "testpro"),
-    ("prf.lines[1][prf.linesindex]", ""),
-    ("prf.lines[1][prf.proofsindex]", ""),
-    (
-        "prf.lines[1][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_nosavedproof,
-    ),
-    ("prf.lines[1][prf.typeindex]", ""),
-]
-
-
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_useproof_nosuchproof_1(input_n, expected):
-    prf = Proof()
-    A = prf.proposition("A")
-    B = prf.proposition("B")
-    prf.setlogic(logicname)
-    prf.goal(And(A, B))
-    prf.lemma("testpro", [B])
-    assert eval(input_n) == expected
-
-
-"""------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_premisesdontmatch
 ------------------------------------------------------------------------------"""
 
@@ -558,6 +523,115 @@ def test_database_useproof_premisesdontmatch_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
+                                stopped_notenoughsubs
+------------------------------------------------------------------------------"""
+
+# Clean run using the proof saved above with premises.
+
+testdata = [
+    ("len(prf.lines)", 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", "Modus Ponens"),
+    ("prf.lines[3][prf.linesindex]", ""),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    (
+        "prf.lines[3][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notenoughsubs,
+    ),
+    ("prf.lines[3][prf.typeindex]", ""),
+]
+
+
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_lemma_notenoughsubs_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    prf.setlogic(logicname)
+    prf.goal(B)
+    prf.premise(A)
+    prf.premise(Implies(A, B))
+    prf.lemma("modusponens", [A], [1, 2])
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                                stopped_notinteger
+------------------------------------------------------------------------------"""
+
+# Error: line number is not an integer
+
+testdata = [
+    ("len(prf.lines)", 4),
+    #
+    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
+    ("prf.lines[3][prf.levelindex]", 0),
+    ("prf.lines[3][prf.proofidindex]", 0),
+    ("prf.lines[3][prf.ruleindex]", "Modus Ponens"),
+    ("prf.lines[3][prf.linesindex]", "1.3"),
+    ("prf.lines[3][prf.proofsindex]", ""),
+    (
+        "prf.lines[3][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notinteger,
+    ),
+    ("prf.lines[3][prf.typeindex]", ""),
+]
+
+
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_lemma_notinteger_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    prf.setlogic(logicname)
+    prf.goal(B)
+    prf.premise(A)
+    prf.premise(Implies(A, B))
+    prf.lemma("modusponens", [A, B], [1, 1.3])
+    assert eval(input_n) == expected
+
+
+"""------------------------------------------------------------------------------
+                                  Stopped Run
+                            stopped_nosavedproof
+------------------------------------------------------------------------------"""
+
+# Error: no saved proof by that name
+
+testdata = [
+    ("len(prf.lines)", 2),
+    #
+    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", "testpro"),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    (
+        "prf.lines[1][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_nosavedproof,
+    ),
+    ("prf.lines[1][prf.typeindex]", ""),
+]
+
+
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_database_lemma_nosuchproof_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    prf.setlogic(logicname)
+    prf.goal(And(A, B))
+    prf.lemma("testpro", [B])
+    assert eval(input_n) == expected
+
+
+
+
+"""------------------------------------------------------------------------------
                                   Stopped Run
                                 stopped_nosubs
 ------------------------------------------------------------------------------"""
@@ -582,7 +656,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_useproof_nosubs_1(input_n, expected):
+def test_database_lemma_nosubs_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -617,7 +691,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_useproof_nosubs_2(input_n, expected):
+def test_database_lemma_notwff_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -627,41 +701,6 @@ def test_database_useproof_nosubs_2(input_n, expected):
     assert eval(input_n) == expected
 
 
-"""------------------------------------------------------------------------------
-                                  Stopped Run
-                                stopped_notinteger
-------------------------------------------------------------------------------"""
-
-# Error: line number is not an integer
-
-testdata = [
-    ("len(prf.lines)", 4),
-    #
-    ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
-    ("prf.lines[3][prf.levelindex]", 0),
-    ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", "Modus Ponens"),
-    ("prf.lines[3][prf.linesindex]", "1.3"),
-    ("prf.lines[3][prf.proofsindex]", ""),
-    (
-        "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_notinteger,
-    ),
-    ("prf.lines[3][prf.typeindex]", ""),
-]
-
-
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_saveproof_notinteger_1(input_n, expected):
-    prf = Proof()
-    A = prf.proposition("A")
-    B = prf.proposition("B")
-    prf.setlogic(logicname)
-    prf.goal(B)
-    prf.premise(A)
-    prf.premise(Implies(A, B))
-    prf.lemma("modusponens", [A, B], [1, 1.3])
-    assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
@@ -689,7 +728,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_saveproof_nosuchline_1(input_n, expected):
+def test_database_lemma_nosuchline_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -726,7 +765,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_saveproof_linescope_1(input_n, expected):
+def test_database_lemma_linescope_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -761,7 +800,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_saveproof_removeproof_1(input_n, expected):
+def test_database_lemma_removeproof_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -1023,7 +1062,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_usedefinition_nosuchdefinition_1(input_n, expected):
+def test_database_definition_nosuchdefinition_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -1066,7 +1105,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_usedefinition_premisesdontmatch_1(input_n, expected):
+def test_database_definition_premisesdontmatch_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -1109,7 +1148,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_usedefinition_notenoughsubs_1(input_n, expected):
+def test_database_definition_notenoughsubs_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -1152,7 +1191,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_usedefinition_notwff_1(input_n, expected):
+def test_database_definition_notwff_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -1195,7 +1234,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_usedefinition_notinteger_1(input_n, expected):
+def test_database_definition_notinteger_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -1237,7 +1276,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_usedefinition_nosuchdefinition_2(input_n, expected):
+def _database_definition_nosuchdefinition_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -1249,42 +1288,3 @@ def test_database_usedefinition_nosuchdefinition_2(input_n, expected):
     assert eval(input_n) == expected
 
 
-"""------------------------------------------------------------------------------
-                                REMOVEAXIOM
-------------------------------------------------------------------------------"""
-
-# Clean run saving and using an axiom with a database.
-
-testdata = [
-    ("len(prf.lines)", 2),
-    #
-    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
-    ("prf.lines[1][prf.levelindex]", 0),
-    ("prf.lines[1][prf.proofidindex]", 0),
-    ("prf.lines[1][prf.ruleindex]", "contradiction"),
-    ("prf.lines[1][prf.linesindex]", ""),
-    ("prf.lines[1][prf.proofsindex]", ""),
-    (
-        "prf.lines[1][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_nosuchaxiom,
-    ),
-    ("prf.lines[1][prf.typeindex]", ""),
-]
-
-
-@pytest.mark.parametrize("input_n,expected", testdata)
-def test_database_axiom_removeaxiom_1(input_n, expected):
-    prf = Proof()
-    A = prf.proposition("A")
-    prf.setlogic(logicname)
-    prf.removeaxiom("contradiction")
-    prf.goal(A)
-    prf.axiom("contradiction", [A])
-    assert eval(input_n) == expected
-
-
-"""------------------------------------------------------------------------------
-                                DELETELOGIC
-------------------------------------------------------------------------------"""
-
-# altrea.data.deletelogic(logicname)

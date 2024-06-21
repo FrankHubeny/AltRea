@@ -151,51 +151,35 @@ def addlogic(
 
     # Load the connectors table.
     if len(connectors) > 0:
-        try:
-            statement = (
-                "INSERT INTO connectors (logic, name, description) VALUES (?, ?, ?)"
-            )
-            c.executemany(statement, connectors)
-            print(f"The connectors table for logic {logic} has been loaded.")
-        except sqlite3.OperationalError:
-            print(
-                f"The connectors table received an operational error for logic {logic}."
-            )
+        statement = (
+            "INSERT INTO connectors (logic, name, description) VALUES (?, ?, ?)"
+        )
+        c.executemany(statement, connectors)
+        print(f"The connectors table for logic {logic} has been loaded.")
     else:
         print("There were no connectors to load.")
 
     # Load the rules table.
     if len(rules) > 0:
-        try:
-            statement = "INSERT INTO rules (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
-            c.executemany(statement, rules)
-            print(f"The rules table for logic {logic} has been loaded.")
-        except sqlite3.OperationalError:
-            print(f"The rules table received an operational error for logic {logic}.")
+        statement = "INSERT INTO rules (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        c.executemany(statement, rules)
+        print(f"The rules table for logic {logic} has been loaded.")
     else:
         print("There were no rules to load.")
 
     # Load the definitions table.
     if len(definitions) > 0:
-        try:
-            statement = "INSERT INTO definitions (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
-            c.executemany(statement, definitions)
-            print(f"The definitions table for logic {logic} has been loaded.")
-        except sqlite3.OperationalError:
-            print(
-                f"The definitions table received an operational error for logic {logic}."
-            )
+        statement = "INSERT INTO definitions (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        c.executemany(statement, definitions)
+        print(f"The definitions table for logic {logic} has been loaded.")
     else:
         print("There were no definitions to load.")
 
     # Load the axioms table.
     if len(axioms) > 0:
-        try:
-            statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
-            c.executemany(statement, axioms)
-            print(f"The axioms table for logic {logic} has been loaded.")
-        except sqlite3.OperationalError:
-            print(f"The axioms table received an operational error for logic {logic}.")
+        statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        c.executemany(statement, axioms)
+        print(f"The axioms table for logic {logic} has been loaded.")
     else:
         print("There were no axiomss to load.")
 
@@ -207,39 +191,33 @@ def addlogic(
     database = getdatabase(logic)
     connection = sqlite3.connect(database)
     c = connection.cursor()
-    try:
-        c.execute("""CREATE TABLE proofs (
-                    name         TEXT PRIMARY KEY,
-                    pattern      TEXT NOT NULL,
-                    displayname  TEXT NOT NULL,
-                    description  TEXT NULL,
-                    textversion  TEXT NULL,
-                    latexversion TEXT NULL.
-                    UNIQUE(displayname) ON CONFLICT REPLACE
-                    )""")
-        print(f"The proofs table has been created in {database}.")
-    except sqlite3.OperationalError:
-        print("The proof table already exists.")
+    c.execute("""CREATE TABLE proofs (
+                name         TEXT PRIMARY KEY,
+                pattern      TEXT NOT NULL,
+                displayname  TEXT NOT NULL,
+                description  TEXT NULL,
+                textversion  TEXT NULL,
+                latexversion TEXT NULL,
+                UNIQUE(displayname) ON CONFLICT REPLACE
+                )""")
+    print(f"The proofs table has been created in {database}.")
 
     # Create the proofdetails table in the dbname database.
-    try:
-        c.execute("""CREATE TABLE proofdetails (
-                    name           TEXT NOT NULL,
-                    item           TEXT NOT NULL,
-                    level          INT  NOT NULL,
-                    proof          INT  NOT NULL,
-                    rule           TEXT NOT NULL,
-                    lines          TEXT NULL,
-                    usedproofs     TEXT NULL,
-                    comment        TEXT NULL,
-                    linetype       TEXT NULL,
-                    subproofstatus TEXT NULL,
-                    FOREIGN KEY (name) 
-                        REFERENCES proofs(name)
-                    )""")
-        print(f"The proofdetails table has been created in {database}.")
-    except sqlite3.OperationalError:
-        print("The proofdetails table already exists.")
+    c.execute("""CREATE TABLE proofdetails (
+                name           TEXT NOT NULL,
+                item           TEXT NOT NULL,
+                level          INT  NOT NULL,
+                proof          INT  NOT NULL,
+                rule           TEXT NOT NULL,
+                lines          TEXT NULL,
+                usedproofs     TEXT NULL,
+                comment        TEXT NULL,
+                linetype       TEXT NULL,
+                subproofstatus TEXT NULL,
+                FOREIGN KEY (name) 
+                    REFERENCES proofs(name)
+                )""")
+    print(f"The proofdetails table has been created in {database}.")
 
     # Commit and close the connection.
     connection.commit()
@@ -260,21 +238,13 @@ def deletelogic(logic: str):
 
         # Drop the proofdetails table.
         statement = "DROP TABLE proofdetails"
-        try:
-            c.execute(statement)
-        except sqlite3.OperationalError:
-            print(f"The proofdetails table for logic {logic} does not exist.")
-        else:
-            print(f"The proofdetails table for logic {logic} has been dropped.")
+        c.execute(statement)
+        print(f"The proofdetails table for logic {logic} has been dropped.")
 
         # Drop the proofs table.
         statement = "DROP TABLE proofs"
-        try:
-            c.execute(statement)
-        except sqlite3.OperationalError:
-            print(f"The proofs table for logic {logic} does not exist.")
-        else:
-            print(f"The proofs table for logic {logic} has been dropped.")
+        c.execute(statement)
+        print(f"The proofs table for logic {logic} has been dropped.")
 
         # Commit and disconnect.
         connection.commit()
@@ -319,7 +289,11 @@ def getlogic(logic: str):
 
     connection = sqlite3.connect(metadata)
     c = connection.cursor()
-    statement = "SELECT database, description FROM logics WHERE logic=?"
+    statement = """SELECT 
+        database, 
+        description 
+    FROM logics 
+    WHERE logic=?"""
     c.execute(statement, (logic,))
     row = c.fetchone()
     connection.commit()
@@ -333,49 +307,91 @@ def getlogic(logic: str):
 def getdefinitions(logic: str):
     """Retrieve the axioms of this logic."""
 
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = """SELECT 
+        name, 
+        pattern, 
+        displayname, 
+        description 
+    FROM definitions 
+    WHERE logic=? 
+    ORDER BY name"""
     try:
-        connection = sqlite3.connect(metadata)
-        c = connection.cursor()
-        statement = "SELECT name, pattern, displayname, description FROM definitions WHERE logic=? ORDER BY name"
         c.execute(statement, (logic,))
+    except TypeError:
+        return []
+    else:
         rows = c.fetchall()
         connection.commit()
         connection.close()
         return rows
-    except TypeError:
-        return ()
+    
 
 
 def getrules(logic: str):
     """Retrieve the transformation rules of this logic."""
 
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = """SELECT 
+        name, 
+        pattern, 
+        displayname, 
+        description 
+    FROM rules 
+    WHERE logic=? 
+    ORDER BY name"""
     try:
-        connection = sqlite3.connect(metadata)
-        c = connection.cursor()
-        statement = "SELECT name, pattern, displayname, description FROM rules WHERE logic=? ORDER BY name"
         c.execute(statement, (logic,))
+    except TypeError:
+        return []
+    else:
         rows = c.fetchall()
         connection.commit()
         connection.close()
         return rows
-    except TypeError:
-        return ()
-
 
 def getaxioms(logic: str):
     """Retrieve the axioms of this logic."""
-
+    
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = """SELECT 
+        name, 
+        pattern, 
+        displayname, 
+        description 
+    FROM axioms 
+    WHERE logic=? 
+    ORDER BY name"""
     try:
-        connection = sqlite3.connect(metadata)
-        c = connection.cursor()
-        statement = "SELECT name, pattern, displayname, description FROM axioms WHERE logic=? ORDER BY name"
         c.execute(statement, (logic,))
+    except TypeError:
+        return []
+    else:
         rows = c.fetchall()
         connection.commit()
         connection.close()
         return rows
-    except TypeError:
-        return ()
+    
+    
+def getproofs(logic: str):
+    database = getdatabase(logic)
+    connection = sqlite3.connect(database)
+    c = connection.cursor()
+    statement = (
+        "SELECT name, pattern, displayname, description FROM proofs ORDER BY name"
+    )
+    try:
+        c.execute(statement)
+    except sqlite3.OperationalError:
+        return []
+    else:
+        rows = c.fetchall()
+        connection.commit()
+        connection.close()
+        return rows
 
 
 def getdefinedlogics():
@@ -396,7 +412,18 @@ def getproofdetails(logic: str, name: str):
     database = getdatabase(logic)
     connection = sqlite3.connect(database)
     c = connection.cursor()
-    statement = "SELECT item, level, proof, rule, lines, usedproofs, comment, linetype, subproofstatus FROM proofdetails WHERE name=?"
+    statement = """SELECT 
+        item, 
+        level, 
+        proof, 
+        rule, 
+        lines, 
+        usedproofs, 
+        comment, 
+        linetype, 
+        subproofstatus 
+    FROM proofdetails 
+    WHERE name=?"""
     try:
         c.execute(statement, (name,))
     except Exception:
@@ -406,25 +433,6 @@ def getproofdetails(logic: str, name: str):
         connection.commit()
         connection.close()
         return rows
-
-
-def getproofs(logic: str):
-    database = getdatabase(logic)
-    connection = sqlite3.connect(database)
-    c = connection.cursor()
-    statement = (
-        "SELECT name, pattern, displayname, description FROM proofs ORDER BY name"
-    )
-    try:
-        c.execute(statement)
-    except sqlite3.OperationalError:
-        print(f"The proofs table is not available for logic {logic}.")
-    else:
-        rows = c.fetchall()
-        connection.commit()
-        connection.close()
-        return rows
-
 
 def deleteproof(logic: str, name: str):
     database = getdatabase(logic)
@@ -445,25 +453,42 @@ def deleteproof(logic: str, name: str):
 def addproof(proofdata: list):
     """Add a proof to a logic."""
 
-    database = getdatabase(proofdata[0][3])
-    connection = sqlite3.connect(database)
-    c = connection.cursor()
     name = proofdata[0][0]
     displayname = proofdata[0][1]
     description = proofdata[0][2]
     logic = proofdata[0][3]
     pattern = proofdata[0][4]
+    database = getdatabase(logic)
+    print(f"Connecting to {logic} using {database} to store proof {name}.")
+    connection = sqlite3.connect(database)
+    c = connection.cursor()
     statement = "SELECT COUNT(*) FROM proofs where name=?"
     c.execute(statement, (name,))
     howmany = c.fetchone()
     if howmany[0] == 0:
         row = (name, pattern, displayname, description)
-        statement = "INSERT INTO proofs (name, pattern, displayname, description) VALUES (?, ?, ?, ?)"
+        statement = """INSERT INTO proofs (
+            name, 
+            pattern, 
+            displayname, 
+            description
+        ) VALUES (?, ?, ?, ?)"""
         c.execute(statement, row)
         print(
             f'The proof "{name}" has been added to "{logic}".'
         )
-        statement = "INSERT INTO proofdetails (name, item, level, proof, rule, lines, usedproofs, comment, linetype, subproofstatus) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+        statement = """INSERT INTO proofdetails (
+            name, 
+            item, 
+            level, 
+            proof, 
+            rule, 
+            lines, 
+            usedproofs, 
+            comment, 
+            linetype, 
+            subproofstatus
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"""
         c.executemany(statement, proofdata[1:])
         print(
             f'The proof details for "{name}" have been added to "{logic}".'
@@ -493,7 +518,13 @@ def addaxiom(logic: str, name: str, pattern: str, displayname: str, description:
     howmany = c.fetchone()
     if howmany[0] == 0:
         row = (logic, name, pattern, displayname, description)
-        statement = "INSERT INTO axioms (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        statement = """INSERT INTO axioms (
+            logic, 
+            name, 
+            pattern, 
+            displayname, 
+            description
+        ) VALUES (?, ?, ?, ?, ?)"""
         c.execute(statement, row)
         connection.commit()
         print(
@@ -524,7 +555,13 @@ def adddefinition(
     howmany = c.fetchone()
     if howmany[0] == 0:
         row = (logic, name, pattern, displayname, description)
-        statement = "INSERT INTO definitions (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        statement = """INSERT INTO definitions (
+            logic, 
+            name, 
+            pattern, 
+            displayname, 
+            description
+        ) VALUES (?, ?, ?, ?, ?)"""
         c.execute(statement, row)
         connection.commit()
         print(
@@ -554,7 +591,13 @@ def addrule(
     howmany = c.fetchone()
     if howmany[0] == 0:
         row = (logic, name, pattern, displayname, description)
-        statement = "INSERT INTO rules (logic, name, pattern, displayname, description) VALUES (?, ?, ?, ?, ?)"
+        statement = """INSERT INTO rules (
+            logic, 
+            name, 
+            pattern, 
+            displayname, 
+            description
+        ) VALUES (?, ?, ?, ?, ?)"""
         c.execute(statement, row)
         connection.commit()
         print(

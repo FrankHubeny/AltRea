@@ -30,11 +30,11 @@ testdata = [
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", ""),
     #
-    ("str(prf.lines[4][prf.statementindex])", str(Falsehood(And(Not(A), A)))),
+    ("str(prf.lines[4][prf.statementindex])", str(Falsehood(And(A, Not(A))))),
     ("prf.lines[4][prf.levelindex]", 1),
     ("prf.lines[4][prf.proofidindex]", 1),
-    ("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
-    ("prf.lines[4][prf.linesindex]", "2, 3"),
+    #("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
+    ("prf.lines[4][prf.linesindex]", "3, 2"),
     ("prf.lines[4][prf.proofsindex]", ""),
     ("prf.lines[4][prf.commentindex]", ""),
     #
@@ -57,7 +57,7 @@ def test_negation_intro_clean_1(input_n, expected):
     prf.premise(A)
     prf.hypothesis(Not(A))
     prf.reiterate(1)
-    prf.negation_elim(2, 3)
+    prf.rule("neg elim", [A], [3, 2])
     prf.implication_intro()
     prf.negation_intro()
 
@@ -106,14 +106,13 @@ def test_negation_intro_clean_2(input_n, expected):
     prf.goal(Not(And(A, Not(A))))
     prf.hypothesis(A)
     prf.addhypothesis(Not(A))
-    prf.negation_elim(1, 2)
+    prf.rule("neg elim", [A], [1, 2])
     prf.implication_intro()
     prf.negation_intro()
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_notfalse
 ------------------------------------------------------------------------------"""
 

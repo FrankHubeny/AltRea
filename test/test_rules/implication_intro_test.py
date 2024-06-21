@@ -112,7 +112,7 @@ def test_implication_intro_clean_2(input_n, expected):
     prf.hypothesis(C)
     prf.reiterate(1)
     prf.reiterate(2)
-    prf.conjunction_intro(6, 7)
+    prf.rule("conj intro", [A, B], [6, 7])
     prf.implication_intro()
     prf.implication_intro()
     prf.implication_intro()
@@ -167,7 +167,7 @@ def test_implication_intro_clean_3(input_n, expected):
     prf.hypothesis(B)
     prf.addhypothesis(A)
     prf.addhypothesis(C)
-    prf.conjunction_intro(1, 2)
+    prf.rule("conj intro", [B, A], [1, 2])
     prf.implication_intro()
     assert eval(input_n) == expected
 

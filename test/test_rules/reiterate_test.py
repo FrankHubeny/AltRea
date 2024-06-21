@@ -4,7 +4,7 @@
 
 import pytest
 
-from altrea.wffs import Wff, Not
+from altrea.wffs import Wff, Not, Necessary
 from altrea.rules import Proof
 
 t = Proof()
@@ -51,7 +51,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_clean_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -61,7 +61,6 @@ def test_reiterate_clean_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                               stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
@@ -83,7 +82,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_nosuchline_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -93,7 +92,6 @@ def test_reiterate_nosuchline_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                             stopped_notreiteratescope
 ------------------------------------------------------------------------------"""
 
@@ -115,7 +113,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_1(input_n, expected):
     prf = Proof()
-    A = Wff("A")
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
@@ -125,7 +123,6 @@ def test_reiterate_notreiteratescope_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                            stopped_notreiteratescope
 ------------------------------------------------------------------------------"""
 
@@ -147,7 +144,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_2(input_n, expected):
     prf = Proof()
-    A = Wff("A")
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
@@ -156,7 +153,6 @@ def test_reiterate_notreiteratescope_2(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                            stopped_notreiteratescope
 ------------------------------------------------------------------------------"""
 
@@ -178,7 +174,7 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_3(input_n, expected):
     prf = Proof()
-    A = Wff("A")
+    A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
@@ -187,7 +183,6 @@ def test_reiterate_notreiteratescope_3(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                            stopped_notreiteratescope
 ------------------------------------------------------------------------------"""
 
@@ -209,14 +204,75 @@ testdata = [
 @pytest.mark.parametrize("input_n,expected", testdata)
 def test_reiterate_notreiteratescope_4(input_n, expected):
     prf = Proof()
-    A = Wff("A")
-    B = Wff("B")
-    C = Wff("C")
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    C = prf.proposition("C")
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.hypothesis(B)
     prf.implication_intro()
     prf.hypothesis(C)
+    prf.reiterate(2)
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                           stopped_notnecessary
+------------------------------------------------------------------------------"""
+
+# The line is not accessible because it is not in a proof from the previous proof chain.
+testdata = [
+    ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
+    ("prf.lines[2][prf.levelindex]", 0),
+    ("prf.lines[2][prf.proofidindex]", 0),
+    #("prf.lines[2][prf.ruleindex]", t.reiterate_name),
+    ("prf.lines[2][prf.linesindex]", "1"),
+    ("prf.lines[2][prf.proofsindex]", ""),
+    (
+        "prf.lines[2][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notnecessary,
+    ),
+]
+
+
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_reiterate_strict_notreiteratescope_5(input_n, expected):
+    prf = Proof()
+    A = prf.proposition("A")
+    prf.setlogic()
+    prf.goal(Not(Not(A)))
+    prf.premise(A)
+    prf.startstrictsubproof(1)
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                           stopped_notnecessary
+------------------------------------------------------------------------------"""
+
+# The line is not accessible because it is not in a proof from the previous proof chain.
+testdata = [
+    ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
+    ("prf.lines[4][prf.levelindex]", 1),
+    ("prf.lines[4][prf.proofidindex]", 1),
+    ("prf.lines[4][prf.ruleindex]", t.reiterate_name),
+    ("prf.lines[4][prf.linesindex]", "2"),
+    ("prf.lines[4][prf.proofsindex]", ""),
+    (
+        "prf.lines[4][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_notnecessary,
+    ),
+]
+
+
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_reiterate_strict_notreiteratescope_6(input_n, expected):
+    prf = Proof()
+    A = prf.proposition("A")
+    B = prf.proposition("B")
+    prf.setlogic()
+    prf.goal(Not(Not(A)))
+    prf.premise(Necessary(A))
+    prf.premise(B)
+    prf.startstrictsubproof(1)
     prf.reiterate(2)
     assert eval(input_n) == expected

@@ -88,7 +88,7 @@ def test_necessary_intro_clean_2(input_n, expected):
     prf.goal(A)
     prf.premise(Necessary(A))
     prf.startstrictsubproof(1)
-    prf.necessary_elim(2)
+    prf.rule("nec elim", [A], [2])
     prf.necessary_intro([2, 3])
     assert eval(input_n) == expected
 

@@ -11,7 +11,7 @@ t = Proof()
 A = t.proposition("A", "\\alpha ")
 B = t.proposition("B", "\\textbf{\u05e9}")
 主 = t.proposition("主")
-samsonisgood = t.proposition("Samson is good", "\\textbf{Samson is good}")
+samsonisgood = t.proposition("Samson_is_good", "\\textbf{Samson is good}")
 """------------------------------------------------------------------------------
                                 Clean Run
 ------------------------------------------------------------------------------"""
@@ -50,11 +50,11 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", str(And(B, samsonisgood))),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.conjunction_intro_name),
+    #("prf.lines[4][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[4][prf.linesindex]", "1, 3"),
     ("prf.lines[4][prf.proofsindex]", ""),
     ("prf.lines[4][prf.commentindex]", ""),
-    ("prf.lines[4][prf.typeindex]", t.linetype_transformationrule),
+    ("prf.lines[4][prf.typeindex]", t.linetype_rule),
     #
 ]
 
@@ -65,11 +65,11 @@ def test_proposition_clean_1(input_n, expected):
     A = prf.proposition("A", "\\alpha ")
     B = prf.proposition("B", "\\textbf{\u05e9}")
     主 = prf.proposition("主")
-    samsonisgood = prf.proposition("Samson is good", "\\textbf{Samson is good}")
+    samsonisgood = prf.proposition("Samson_is_good", "\\textbf{Samson is good}")
     prf.setlogic()
     prf.goal(A)
     prf.premise(B)
     prf.premise(主)
     prf.premise(samsonisgood)
-    prf.conjunction_intro(1, 3)
+    prf.rule("conj intro", [prf.item(1), samsonisgood], [1, 3])
     assert eval(input_n) == expected

@@ -4,7 +4,7 @@
 
 import pytest
 
-from altrea.wffs import Not
+from altrea.wffs import Not, Possibly
 from altrea.rules import Proof
 
 t = Proof()
@@ -91,7 +91,6 @@ def test_premise_notwff_1(input_n, expected):
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_nogoal
 ------------------------------------------------------------------------------"""
 
@@ -119,3 +118,37 @@ def test_premise_nogoal_1(input_n, expected):
     # prf.goal(Not(Not(A)))
     prf.premise(A)
     assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                stopped_ruleclass
+------------------------------------------------------------------------------"""
+
+testdata = [
+    ("len(prf.lines)", 2),
+    #
+    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    (
+        "prf.lines[1][prf.commentindex]",
+        t.stopped + t.colon_connector + t.stopped_ruleclass,
+    ),
+    #
+]
+
+
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_premise_ruleclass_1(input_n, expected):
+    prf = Proof()
+    prf.setrestricted(True)
+    A = prf.proposition("A")
+    prf.proofrules = prf.rule_axiomatic
+    prf.setlogic()
+    prf.goal(Possibly(A))
+    prf.premise(A)
+    prf.rule("pos intro", [A], [1])
+    assert eval(input_n) == expected
+

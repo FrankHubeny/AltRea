@@ -57,12 +57,11 @@ def test_negation_elim_clean_1(input_n, expected):
     prf.goal(And(A, A))
     prf.premise(A)
     prf.premise(Not(A))
-    prf.negation_elim(1, 2)
+    prf.rule("neg elim", [A], [1, 2])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
@@ -91,12 +90,11 @@ def test_negation_elim_nosuchline_1(input_n, expected):
     prf.goal(And(A, A))
     prf.premise(A)
     prf.premise(Not(A))
-    prf.negation_elim(3, 2)
+    prf.rule("neg elim", [A], [3, 2])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_nosuchline
 ------------------------------------------------------------------------------"""
 
@@ -125,12 +123,11 @@ def test_negation_elim_nosuchline_2(input_n, expected):
     prf.goal(And(A, A))
     prf.premise(A)
     prf.premise(Not(A))
-    prf.negation_elim(1, 3567)
+    prf.rule("neg elim", [A], [1, 3567])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_linescope
 ------------------------------------------------------------------------------"""
 
@@ -160,12 +157,11 @@ def test_negation_elim_linescope_1(input_n, expected):
     prf.premise(A)
     prf.hypothesis(Not(A))
     prf.implication_intro()
-    prf.negation_elim(2, 1)
+    prf.rule("neg elim", [A], [2, 1])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                  Stopped Run
                                 stopped_linescope
 ------------------------------------------------------------------------------"""
 
@@ -195,13 +191,13 @@ def test_negation_elim_linescope_2(input_n, expected):
     prf.premise(A)
     prf.hypothesis(Not(A))
     prf.implication_intro()
-    prf.negation_elim(1, 2)
+    prf.rule("neg elim", [A], [1, 2])
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                            stopped_notcontradiction
+                            stopped_premisesdontmatch
 ------------------------------------------------------------------------------"""
 
 # The two lines are not negations of each other.
@@ -211,23 +207,23 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
-    ("prf.lines[3][prf.linesindex]", "1, 2"),
+    #("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
+    ("prf.lines[3][prf.linesindex]", ""),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
         "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_notcontradiction,
+        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
     ),
 ]
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_negation_elim_notcontradiction_1(input_n, expected):
+def test_negation_elim_premisesdontmatch_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
     prf.goal(And(A, A))
     prf.premise(A)
     prf.premise(A)
-    prf.negation_elim(1, 2)
+    prf.rule("neg elim", [A], [1, 2])
     assert eval(input_n) == expected

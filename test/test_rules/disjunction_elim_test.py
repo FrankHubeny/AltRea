@@ -164,7 +164,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
+    #("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "-10"),
     ("prf.lines[4][prf.proofsindex]", ""),
     (
@@ -271,7 +271,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
+    #("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
     (
@@ -306,7 +306,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
+    #("prf.lines[4][prf.ruleindex]", t.disjunction_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
     (

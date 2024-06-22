@@ -138,7 +138,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", str(And(B, A))),
     ("prf.lines[4][prf.levelindex]", 1),
     ("prf.lines[4][prf.proofidindex]", 1),
-    ("prf.lines[4][prf.ruleindex]", t.conjunction_intro_name),
+    #("prf.lines[4][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[4][prf.linesindex]", "1, 2"),
     ("prf.lines[4][prf.proofsindex]", ""),
     ("prf.lines[4][prf.commentindex]", ""),

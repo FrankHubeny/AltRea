@@ -111,7 +111,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    #("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "3"),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
@@ -147,7 +147,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    #("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "3"),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
@@ -183,7 +183,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 2),
     ("prf.lines[3][prf.proofidindex]", 2),
-    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    #("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
@@ -219,7 +219,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 2),
     ("prf.lines[3][prf.proofidindex]", 2),
-    ("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
+    #("prf.lines[3][prf.ruleindex]", t.conjunction_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
     (

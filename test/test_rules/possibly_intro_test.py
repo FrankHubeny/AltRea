@@ -70,7 +70,7 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", t.possibly_intro_name),
+    #("prf.lines[2][prf.ruleindex]", t.possibly_intro_name),
     ("prf.lines[2][prf.linesindex]", "2"),
     ("prf.lines[2][prf.proofsindex]", ""),
     (
@@ -103,7 +103,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.possibly_intro_name),
+    #("prf.lines[3][prf.ruleindex]", t.possibly_intro_name),
     ("prf.lines[3][prf.linesindex]", "1"),
     ("prf.lines[3][prf.proofsindex]", ""),
     (

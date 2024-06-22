@@ -52,10 +52,25 @@ def test_axiom_contradiction_explosion_1(input_n, expected):
     C = prf.proposition("C")
     prf.setlogic()
     prf.goal(B)
-    prf.axiom("contradiction", [C])
+    prf.entailment(
+        And(prf.mvalpha, Not(prf.mvalpha)),
+        [], 
+        name="contradicting", 
+        displayname= "Contradiction", 
+        description="Contradiction", 
+        kind=prf.label_axiom) 
+    prf.axiom("contradicting", [C])
     prf.rule("conj elim l", [C, Not(C)], [1])
     prf.rule("conj elim r", [C, Not(C)], [1])
-    prf.axiom("explosion", [C, B], [2, 3])
+    prf.entailment(
+        prf.mvbeta,
+        [prf.mvalpha, Not(prf.mvalpha)], 
+        name="exploding", 
+        displayname= "Explosion", 
+        description="Explosion", 
+        kind=prf.label_axiom) 
+    prf.axiom("exploding", [C, B], [2, 3])
+
     assert eval(input_n) == expected
 
 

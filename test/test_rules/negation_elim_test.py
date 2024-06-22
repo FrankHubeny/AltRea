@@ -41,7 +41,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", str(Falsehood(And(A, Not(A))))),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
+    #("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[3][prf.linesindex]", "1, 2"),
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", t.vacuous),
@@ -72,7 +72,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
+    #("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[3][prf.linesindex]", "3"),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
@@ -105,7 +105,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
+    #("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[3][prf.linesindex]", "3567"),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
@@ -138,7 +138,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
+    #("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
     (
@@ -172,7 +172,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", t.blankstatement),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
+    #("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
     ("prf.lines[4][prf.linesindex]", "2"),
     ("prf.lines[4][prf.proofsindex]", ""),
     (

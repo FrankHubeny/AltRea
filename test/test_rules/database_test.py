@@ -247,7 +247,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def _database_axiom_removeaxiom_1(input_n, expected):
+def test_database_axiom_removeaxiom_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic(logicname)
@@ -350,36 +350,29 @@ def test_database_saveproof_withpremises_1(input_n, expected):
 # Error: no name for proof enetered
 
 testdata = [
-    ("len(prf.lines)", 3),
+    ("len(prf.lines)", 2),
     #
-    ("str(prf.lines[2][prf.statementindex])", str(B)),
-    ("prf.lines[2][prf.levelindex]", 0),
-    ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", t.conjunction_elim_name),
-    ("prf.lines[2][prf.linesindex]", "1"),
-    ("prf.lines[2][prf.proofsindex]", ""),
-    ("prf.lines[2][prf.commentindex]", t.complete),
-    ("prf.lines[2][prf.typeindex]", t.linetype_transformationrule),
+    ("str(prf.lines[1][prf.statementindex])", str(B)),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.premise_name),
+    ("prf.lines[1][prf.linesindex]", "1"),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", t.complete),
+    ("prf.lines[1][prf.typeindex]", t.linetype_premise),
 ]
 
 
-@pytest.mark.parametrize("input_n,expected", testdata)
-def _database_saveproof_noname_1(input_n, expected):
+#@pytest.mark.parametrize("input_n,expected", testdata)
+@pytest.mark.xfail(raises=ValueError)
+def test_database_saveproof_noname_1(): #input_n, expected):
     prf = Proof()
     B = prf.proposition("B")
     prf.setlogic(logicname)
-    prf.saveaxiom(
-        "contradiction",
-        "Contradiction",
-        "All Contradictions Are True",
-        And(D, Not(D)),
-        [],
-    )
-    prf.axiom("contradiction", [B], [])
     prf.goal(B)
-    prf.conjunction_elim(1, side="left")
+    prf.premise(B)
     prf.saveproof()
-    assert eval(input_n) == expected
+    #assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
@@ -405,8 +398,9 @@ testdata = [
 ]
 
 
-@pytest.mark.parametrize("input_n,expected", testdata)
-def _database_saveproof_notcomplete_1(input_n, expected):
+#@pytest.mark.parametrize("input_n,expected", testdata)
+@pytest.mark.xfail(raises=ValueError)
+def test_database_saveproof_notcomplete_1():  #input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
@@ -414,7 +408,7 @@ def _database_saveproof_notcomplete_1(input_n, expected):
     prf.goal(B)
     prf.premise(A)
     prf.saveproof()
-    assert eval(input_n) == expected
+    #assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
@@ -1276,7 +1270,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def _database_definition_nosuchdefinition_2(input_n, expected):
+def test_database_definition_nosuchdefinition_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")

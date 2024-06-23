@@ -47,7 +47,7 @@ def test_possibly_elim_clean_1(input_n, expected):
     A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Possibly(A))
-    prf.startstrictsubproof(addhypothesis=A)
+    prf.openstrictsubproof(addhypothesis=A)
     prf.possibly_elim()
     assert eval(input_n) == expected
 
@@ -88,7 +88,7 @@ def test_possibly_elim_ruleclass_1(input_n, expected):
     A = prf.proposition("A")
     prf.setlogic()
     prf.goal(Possibly(A))
-    prf.startstrictsubproof(addhypothesis=A)
+    prf.openstrictsubproof(addhypothesis=A)
     prf.proofrules = prf.rule_axiomatic
     prf.possibly_elim()
     assert eval(input_n) == expected

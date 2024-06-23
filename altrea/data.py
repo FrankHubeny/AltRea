@@ -215,33 +215,41 @@ def addlogic(
     database = getdatabase(logic)
     connection = sqlite3.connect(database)
     c = connection.cursor()
-    c.execute("""CREATE TABLE proofs (
-                name         TEXT PRIMARY KEY,
-                pattern      TEXT NOT NULL,
-                displayname  TEXT NOT NULL,
-                description  TEXT NULL,
-                textversion  TEXT NULL,
-                latexversion TEXT NULL,
-                UNIQUE(displayname) ON CONFLICT REPLACE
-                )""")
-    print(f"The proofs table has been created in {database}.")
+    statement = "SELECT COUNT(*) FROM proofs"
+    
+    try:
+        c.execute(statement)
+        howmany = c.fetchone()
+    except sqlite3.OperationalError:
+        c.execute("""CREATE TABLE proofs (
+                    name         TEXT PRIMARY KEY,
+                    pattern      TEXT NOT NULL,
+                    displayname  TEXT NOT NULL,
+                    description  TEXT NULL,
+                    textversion  TEXT NULL,
+                    latexversion TEXT NULL,
+                    UNIQUE(displayname) ON CONFLICT REPLACE
+                    )""")
+        print(f"The proofs table has been created in {database}.")
 
-    # Create the proofdetails table in the dbname database.
-    c.execute("""CREATE TABLE proofdetails (
-                name           TEXT NOT NULL,
-                item           TEXT NOT NULL,
-                level          INT  NOT NULL,
-                proof          INT  NOT NULL,
-                rule           TEXT NOT NULL,
-                lines          TEXT NULL,
-                usedproofs     TEXT NULL,
-                comment        TEXT NULL,
-                linetype       TEXT NULL,
-                subproofstatus TEXT NULL,
-                FOREIGN KEY (name) 
-                    REFERENCES proofs(name)
-                )""")
-    print(f"The proofdetails table has been created in {database}.")
+        # Create the proofdetails table in the dbname database.
+        c.execute("""CREATE TABLE proofdetails (
+                    name           TEXT NOT NULL,
+                    item           TEXT NOT NULL,
+                    level          INT  NOT NULL,
+                    proof          INT  NOT NULL,
+                    rule           TEXT NOT NULL,
+                    lines          TEXT NULL,
+                    usedproofs     TEXT NULL,
+                    comment        TEXT NULL,
+                    linetype       TEXT NULL,
+                    subproofstatus TEXT NULL,
+                    FOREIGN KEY (name) 
+                        REFERENCES proofs(name)
+                    )""")
+        print(f"The proofdetails table has been created in {database}.")
+    else:
+        print(f"The proof table already contains {howmany[0]} rows.")
 
     # Commit and close the connection.
     connection.commit()

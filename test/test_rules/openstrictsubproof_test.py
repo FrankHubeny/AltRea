@@ -1,5 +1,5 @@
 """------------------------------------------------------------------------------
-                                    STARTSTRICTSUBPROOF
+                                    OPENSTRICTSUBPROOF
 ------------------------------------------------------------------------------"""
 
 import pytest
@@ -41,7 +41,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_startstrictsubproof_clean_1(input_n, expected):
+def test_openstrictsubproof_clean_1(input_n, expected):
     prf = Proof()
     prf.setrestricted(True)
     A = prf.proposition("A")
@@ -49,7 +49,7 @@ def test_startstrictsubproof_clean_1(input_n, expected):
     prf.setlogic()
     prf.goal(B)
     prf.premise(Necessary(A))
-    prf.startstrictsubproof(1)
+    prf.openstrictsubproof(1)
     assert eval(input_n) == expected
 
 
@@ -80,15 +80,16 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_startstrictsubproof_clean_2(input_n, expected):
+def test_openstrictsubproof_clean_2(input_n, expected):
     prf = Proof()
     prf.setrestricted(True)
     A = prf.proposition("A")
     B = prf.proposition("B")
+    C = prf.proposition("C")
     prf.setlogic()
     prf.goal(B)
     prf.premise(Necessary(A))
-    prf.startstrictsubproof(addhypothesis=C)
+    prf.openstrictsubproof(addhypothesis=C)
     assert eval(input_n) == expected
 
 
@@ -119,7 +120,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_startstrictsubproof_clean_3(input_n, expected):
+def test_openstrictsubproof_clean_3(input_n, expected):
     prf = Proof()
     prf.setrestricted(True)
     A = prf.proposition("A")
@@ -127,7 +128,7 @@ def test_startstrictsubproof_clean_3(input_n, expected):
     prf.setlogic()
     prf.goal(B)
     prf.premise(Necessary(A))
-    prf.startstrictsubproof(1)
+    prf.openstrictsubproof(1)
     assert eval(input_n) == expected
 
 
@@ -161,7 +162,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_startstrictsubproof_notwff_1(input_n, expected):
+def test_openstrictsubproof_notwff_1(input_n, expected):
     prf = Proof()
     prf.setrestricted(True)
     A = prf.proposition("A")
@@ -169,7 +170,7 @@ def test_startstrictsubproof_notwff_1(input_n, expected):
     prf.setlogic()
     prf.goal(B)
     prf.premise(Necessary(A))
-    prf.startstrictsubproof()
+    prf.openstrictsubproof()
     assert eval(input_n) == expected
 
 
@@ -191,7 +192,7 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", t.startstrictsubproof_name),
+    ("prf.lines[2][prf.ruleindex]", t.openstrictsubproof_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
     (
@@ -203,7 +204,7 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_startstrictsubproof_notnecessary_1(input_n, expected):
+def test_openstrictsubproof_notnecessary_1(input_n, expected):
     prf = Proof()
     prf.setrestricted(True)
     A = prf.proposition("A")
@@ -211,5 +212,5 @@ def test_startstrictsubproof_notnecessary_1(input_n, expected):
     prf.setlogic()
     prf.goal(B)
     prf.premise(A)
-    prf.startstrictsubproof(1)
+    prf.openstrictsubproof(1)
     assert eval(input_n) == expected

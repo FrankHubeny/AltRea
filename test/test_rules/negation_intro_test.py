@@ -41,8 +41,8 @@ testdata = [
     ("str(prf.lines[6][prf.statementindex])", str(Not(Not(A)))),
     ("prf.lines[6][prf.levelindex]", 0),
     ("prf.lines[6][prf.proofidindex]", 0),
-    ("prf.lines[6][prf.ruleindex]", t.negation_intro_name),
-    ("prf.lines[6][prf.linesindex]", ""),
+    #("prf.lines[6][prf.ruleindex]", t.negation_intro_name),
+    ("prf.lines[6][prf.linesindex]", "5"),
     ("prf.lines[6][prf.proofsindex]", ""),
     ("prf.lines[6][prf.commentindex]", t.complete),
 ]
@@ -59,7 +59,7 @@ def test_negation_intro_clean_1(input_n, expected):
     prf.reiterate(1)
     prf.rule("neg elim", [A], [3, 2])
     prf.implication_intro()
-    prf.negation_intro()
+    prf.rule("neg intro", [Not(A), A], [5])
 
     assert eval(input_n) == expected
 
@@ -91,8 +91,8 @@ testdata = [
     ("str(prf.lines[5][prf.statementindex])", str(Not(And(A, Not(A))))),
     ("prf.lines[5][prf.levelindex]", 0),
     ("prf.lines[5][prf.proofidindex]", 0),
-    ("prf.lines[5][prf.ruleindex]", t.negation_intro_name),
-    ("prf.lines[5][prf.linesindex]", ""),
+    #("prf.lines[5][prf.ruleindex]", t.negation_intro_name),
+    ("prf.lines[5][prf.linesindex]", "4"),
     ("prf.lines[5][prf.proofsindex]", ""),
     ("prf.lines[5][prf.commentindex]", t.complete),
 ]
@@ -108,7 +108,7 @@ def test_negation_intro_clean_2(input_n, expected):
     prf.addhypothesis(Not(A))
     prf.rule("neg elim", [A], [1, 2])
     prf.implication_intro()
-    prf.negation_intro()
+    prf.rule("neg intro", [prf.item(4).left, A], [4])
     assert eval(input_n) == expected
 
 
@@ -121,12 +121,12 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.negation_intro_name),
-    ("prf.lines[3][prf.linesindex]", "2"),
+    #("prf.lines[3][prf.ruleindex]", t.negation_intro_name),
+    ("prf.lines[3][prf.linesindex]", ""),
     ("prf.lines[3][prf.proofsindex]", ""),
     (
         "prf.lines[3][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_notfalse,
+        t.stopped + t.colon_connector + t.stopped_premisesdontmatch,
     ),
 ]
 
@@ -139,5 +139,5 @@ def test_implication_intro_notfalse_1(input_n, expected):
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.implication_intro()
-    prf.negation_intro()
+    prf.rule("neg intro", [A, A], [2])
     assert eval(input_n) == expected

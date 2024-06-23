@@ -128,7 +128,7 @@ class Proof:
     blankstatement = ""
 
     subproof_strict = "STRICT"
-    subproof_normal = ""
+    subproof_normal = "NORMAL"
 
     complete = "COMPLETE"
     partialcompletion = "PARTIAL COMPLETION"
@@ -147,6 +147,9 @@ class Proof:
 
     addhypothesis_name = "Add Hypothesis"
     axiom_name = "Axiom"
+    closenecessary_name = "Close Necessary"
+    closepossibly_name = "Close Possibly"
+    closesubproof_name = "Close Subproof"
     definition_name = "Definition"
     # coimplication_intro_name = "Coimplication Intro"
     # coimplication_elim_name = "Coimplication Elim"
@@ -163,6 +166,7 @@ class Proof:
     necessary_intro_name = "Necessary Intro"
     #necessary_elim_name = "Necessary Elim"
     negation_intro_name = "Negation Intro"
+    opensubproof_name = "Open Subproof"
     #negation_elim_name = "Negation Elim"
     #possibly_intro_name = "Possibly Intro"
     possibly_elim_name = "Possibly Elim"
@@ -174,7 +178,7 @@ class Proof:
     saveaxiom_name = "Save Axiom"
     savedefinition_name = "Save Definition"
     saverule_name = "Save Rule"
-    startstrictsubproof_name = "Start Strict Subproof"
+    openstrictsubproof_name = "Open Strict Subproof"
     startemptystrictsubproof_name = "Start Empty Strict Subproof"
     substitution_name = "Substitution"
     rule_name = "Rule"
@@ -341,6 +345,9 @@ class Proof:
     # log_conjunction_intro = '{0}: The conjunction "{1}" has been derived from "{2}" on line {3} and "{4}" on line {5}.'
     # log_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
     # log_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
+    log_closenecessary = "{0}: The current subproof was closed deriving a Necessary item."
+    log_closepossibly = "{0}: The current subproof was closed deriving a Possibly item."
+    log_closesubproof = "{0}: The current subproof was closed deriving an implication."
     log_definition = '{0}: Item "{1}" has been added using the "{2}" definition.'
     log_definitionalreadyexists = (
         '{0}: A definition with the name "{1}" already exists.'
@@ -376,6 +383,7 @@ class Proof:
         '{0}: Item "{1}" has been derived as the negation of the antecedent of "{2}".'
     )
     log_noproofs = "There are no saved proofs for logic {0}"
+    log_opensubproof = '{0}: A subproof was opened with the hypothesis "{1}".'
     log_possibly_elim = '{0}: Item "{1}" has been derived from item "{2}".'
     # log_possibly_intro = (
     #     '{0}: Item "{1}" has been derived from the item "{2}" on line {3}.'
@@ -665,6 +673,12 @@ class Proof:
                 "ConclusionPremises(Falsehood(And({0}, Not({0}))), [{0}, Not({0})])", 
                 "Negation Elim", 
                 "Nenegation Elimination"
+            ),
+            (
+                "neg intro", 
+                "ConclusionPremises(Not({0}), [Implies({0}, Falsehood(And({1}, Not({1}))))])", 
+                "Negation Intro", 
+                "Negation Introduction"
             ),
             (   
                 "pos intro", 
@@ -1061,6 +1075,35 @@ class Proof:
                 break
         return s
 
+    def closenecessary(self, comment: str = ""):
+        """Call necessary_intro to close a subproof rather than viewing
+        subproofs as part of intelim rules.
+        """
+
+        self.logstep(self.log_closenecessary.format(self.closenecessary_name.upper()))
+
+        self.necessary_intro(comment)
+
+    def closepossibly(self, comment: str = ""):
+        """Call possibly_elim to close a subproof rather than viewing
+        subproofs as part of intelim rules.
+        """
+
+        self.logstep(self.log_closepossibly.format(self.closepossibly_name.upper()))
+
+        self.possibly_elim(comment)
+
+
+    def closesubproof(self, comment: str = ""):
+        """Call implication_intro to close a subproof rather than viewing
+        subproofs as part of intelim rules.
+        """
+
+        self.logstep(self.log_closesubproof.format(self.closesubproof_name.upper()))
+
+        self.implication_intro(comment)
+
+
     def getpreviousproofid(self, proofid: int) -> int:
         return self.prooflist[proofid][2]
     
@@ -1087,10 +1130,7 @@ class Proof:
         previoussubproofstatus = self.prooflist[previousproofid][4]
         return hypothesis, conclusion, previousproofid, previoussubproofstatus
 
-    def item(self, line):
-        """Returns the statement associated with the line number."""
-
-        return self.lines[line][self.statementindex]
+    
 
     def goodline(self, line: int, caller: str, displayname: str, comment: str):
         if not isinstance(line, int):
@@ -1244,6 +1284,13 @@ class Proof:
             else:
                 return "".join([newcomment, self.dash_connector, comment])
 
+
+    def item(self, line):
+        """Returns the statement associated with the line number."""
+
+        return self.lines[line][self.statementindex]
+
+
     def latexitem(
         self, prooflines: list, i: int, status: str, saved: bool = False, color: int = 1
     ):
@@ -1382,6 +1429,12 @@ class Proof:
         self.log.append([message, len(self.lines)])
         if self.showlogging:
             print(message)
+
+    def opensubproof(self, item: Wff):
+        """Open a subproof with an hypothesis."""
+
+        self.logstep(self.log_opensubproof.format(self.opensubproof_name.upper(), item))
+        self.hypothesis(item)
 
     def reflines(self, *lines):
         """Convert integers to strings and join separated by commas."""
@@ -5412,7 +5465,8 @@ class Proof:
         #     )
         #     self.appendproofdata(statement.wff, self.necessary_elim_tag)
 
-    def necessary_intro(self, lines, comment: str = ""):
+    #def necessary_intro(self, lines, comment: str = ""):
+    def necessary_intro(self, comment: str = ""):
         """Closes a strict subproof with a necessary consequence.
 
         Parameters:
@@ -5429,48 +5483,48 @@ class Proof:
                 self.necessary_intro_name,
                 comment,
             ):
-                if len(lines) == 0:
+                # if len(lines) == 0:
+                #     self.logstep(
+                #         self.log_nolines.format(
+                #             self.necessary_intro_name.upper(), lines
+                #         )
+                #     )
+                #     self.stopproof(
+                #         self.stopped_nolines,
+                #         self.blankstatement,
+                #         self.necessary_intro_name,
+                #         "",
+                #         "",
+                #         comment,
+                #     )
+                # else:
+                #     for i in lines:
+                #         if not self.goodline(
+                #             i,
+                #             self.necessary_intro_name,
+                #             self.necessary_intro_name,
+                #             comment,
+                #         ):
+                #             break
+
+        # Look for specific errors
+        #if self.canproceed():
+                if self.subproof_status != self.subproof_strict:
                     self.logstep(
-                        self.log_nolines.format(
-                            self.necessary_intro_name.upper(), lines
+                        self.log_notstrictsubproof.format(
+                            self.necessary_intro_name.upper(),
+                            self.subproof_status,
+                            self.subproof_strict,
                         )
                     )
                     self.stopproof(
-                        self.stopped_nolines,
+                        self.stopped_notstrictsubproof,
                         self.blankstatement,
                         self.necessary_intro_name,
                         "",
                         "",
                         comment,
                     )
-                else:
-                    for i in lines:
-                        if not self.goodline(
-                            i,
-                            self.necessary_intro_name,
-                            self.necessary_intro_name,
-                            comment,
-                        ):
-                            break
-
-        # Look for specific errors
-        if self.canproceed():
-            if self.subproof_status != self.subproof_strict:
-                self.logstep(
-                    self.log_notstrictsubproof.format(
-                        self.necessary_intro_name.upper(),
-                        self.subproof_status,
-                        self.subproof_strict,
-                    )
-                )
-                self.stopproof(
-                    self.stopped_notstrictsubproof,
-                    self.blankstatement,
-                    self.necessary_intro_name,
-                    "",
-                    "",
-                    comment,
-                )
 
         # If no errors, perform task
         if self.canproceed():
@@ -5520,29 +5574,30 @@ class Proof:
             else:
                 self.previousproofchain = []
                 self.previousproofid = -1
-            for i in lines:
-                statement = self.item(i)
-                necessarystatement = Necessary(statement)
-                self.logstep(
-                    self.log_necessary_intro.format(
-                        self.negation_intro_name.upper(), necessarystatement, statement
-                    )
+            #for i in lines:
+            index = len(self.lines) - 1
+            statement = self.item(index)
+            necessarystatement = Necessary(statement)
+            self.logstep(
+                self.log_necessary_intro.format(
+                    self.negation_intro_name.upper(), necessarystatement, statement
                 )
-                newcomment = self.iscomplete(necessarystatement, comment)
-                self.lines.append(
-                    [
-                        necessarystatement,
-                        self.level,
-                        self.currentproofid,
-                        self.necessary_intro_name,
-                        self.reflines(i),
-                        "",
-                        newcomment,
-                        self.linetype_transformationrule,
-                        self.subproofchain,
-                    ]
-                )
-                self.appendproofdata(necessarystatement)
+            )
+            newcomment = self.iscomplete(necessarystatement, comment)
+            self.lines.append(
+                [
+                    necessarystatement,
+                    self.level,
+                    self.currentproofid,
+                    self.necessary_intro_name,
+                    str(index), #self.reflines(i),
+                    "",
+                    newcomment,
+                    self.linetype_transformationrule,
+                    self.subproofchain,
+                ]
+            )
+            self.appendproofdata(necessarystatement)
 
     # def negation_elim(self, first: int, second: int, comment: str = ""):
     #     """When two statements are contradictory a false line can be derived.
@@ -5644,113 +5699,113 @@ class Proof:
         #     )
         #     self.appendproofdata(falsehood, self.negation_elim_tag)
 
-    def negation_intro(self, comment: str = ""):
-        """This rule closes a subordinate proof that ends in a contradiction by negating the hypotheses of
-        the subordinate proof.
+    # def negation_intro(self, comment: str = ""):
+    #     """This rule closes a subordinate proof that ends in a contradiction by negating the hypotheses of
+    #     the subordinate proof.
 
-        Parameters:
-            comment: An optional comment the user may add to this line of the proof.
+    #     Parameters:
+    #         comment: An optional comment the user may add to this line of the proof.
 
-        Examples:
-            The following example is known as modus tollens.
+    #     Examples:
+    #         The following example is known as modus tollens.
 
-            >>> from altrea.wffs import Implies, Not, Wff
-            >>> from altrea.rules import Proof
-            >>> from altrea.display import showproof
-            >>> A = Wff('A')
-            >>> B = Wff('B')
-            >>> prf = Proof()
-            >>> prf.setlogic()
-            >>> prf.goal(Not(A), comment='Modus Tollens')
-            >>> prf.premise(Implies(A, B))
-            >>> prf.premise(Not(B))
-            >>> prf.hypothesis(A)
-            >>> prf.reiterate(1)
-            >>> prf.implication_elim(3, 4)
-            >>> prf.reiterate(2)
-            >>> prf.negation_elim(5, 6)
-            >>> prf.negation_intro()
-            >>> showproof(prFalsehood, latex=0)
-                    Item                  Reason        Comment
-            0         ~A                    GOAL  Modus Tollens
-            1      A > B                 Premise
-            2         ~B                 Premise
-            3      A __|              Hypothesis
-            4  A > B   |          1, Reiteration
-            5      B   |  3, 4, Implication Elim
-            6     ~B   |          2, Reiteration
-            7      X   |     5, 6, Negation Elim
-            8         ~A     3-7, Negation Intro       COMPLETE
-        """
+    #         >>> from altrea.wffs import Implies, Not, Wff
+    #         >>> from altrea.rules import Proof
+    #         >>> from altrea.display import showproof
+    #         >>> A = Wff('A')
+    #         >>> B = Wff('B')
+    #         >>> prf = Proof()
+    #         >>> prf.setlogic()
+    #         >>> prf.goal(Not(A), comment='Modus Tollens')
+    #         >>> prf.premise(Implies(A, B))
+    #         >>> prf.premise(Not(B))
+    #         >>> prf.hypothesis(A)
+    #         >>> prf.reiterate(1)
+    #         >>> prf.implication_elim(3, 4)
+    #         >>> prf.reiterate(2)
+    #         >>> prf.negation_elim(5, 6)
+    #         >>> prf.negation_intro()
+    #         >>> showproof(prFalsehood, latex=0)
+    #                 Item                  Reason        Comment
+    #         0         ~A                    GOAL  Modus Tollens
+    #         1      A > B                 Premise
+    #         2         ~B                 Premise
+    #         3      A __|              Hypothesis
+    #         4  A > B   |          1, Reiteration
+    #         5      B   |  3, 4, Implication Elim
+    #         6     ~B   |          2, Reiteration
+    #         7      X   |     5, 6, Negation Elim
+    #         8         ~A     3-7, Negation Intro       COMPLETE
+    #     """
 
-        # Look for general errors
-        if self.canproceed():
-            if self.goodrule(
-                self.rule_naturaldeduction,
-                self.negation_intro_name,
-                self.negation_intro_name,
-                comment,
-            ):
-                previousstatement = self.lines[len(self.lines) - 1][self.statementindex]
-                if type(previousstatement) == Implies:
-                    if type(previousstatement.right) != Falsehood:
-                        #     pass
-                        # else:
-                        self.logstep(
-                            self.log_notfalse.format(
-                                self.negation_intro_name.upper(),
-                                previousstatement,
-                                len(self.lines) - 1,
-                            )
-                        )
-                        self.stopproof(
-                            self.stopped_notfalse,
-                            self.blankstatement,
-                            self.negation_intro_name,
-                            str(len(self.lines) - 1),
-                            "",
-                            comment,
-                        )
-                else:
-                    self.logstep(
-                        self.log_notimplication.format(
-                            self.negation_intro_name.upper(),
-                            previousstatement,
-                            len(self.lines) - 1,
-                        )
-                    )
-                    self.stopproof(
-                        self.stopped_notimplication,
-                        self.blankstatement,
-                        self.negation_intro_name,
-                        str(len(self.lines) - 1),
-                        "",
-                        comment,
-                    )
+    #     # Look for general errors
+    #     if self.canproceed():
+    #         if self.goodrule(
+    #             self.rule_naturaldeduction,
+    #             self.negation_intro_name,
+    #             self.negation_intro_name,
+    #             comment,
+    #         ):
+    #             previousstatement = self.lines[len(self.lines) - 1][self.statementindex]
+    #             if type(previousstatement) == Implies:
+    #                 if type(previousstatement.right) != Falsehood:
+    #                     #     pass
+    #                     # else:
+    #                     self.logstep(
+    #                         self.log_notfalse.format(
+    #                             self.negation_intro_name.upper(),
+    #                             previousstatement,
+    #                             len(self.lines) - 1,
+    #                         )
+    #                     )
+    #                     self.stopproof(
+    #                         self.stopped_notfalse,
+    #                         self.blankstatement,
+    #                         self.negation_intro_name,
+    #                         str(len(self.lines) - 1),
+    #                         "",
+    #                         comment,
+    #                     )
+    #             else:
+    #                 self.logstep(
+    #                     self.log_notimplication.format(
+    #                         self.negation_intro_name.upper(),
+    #                         previousstatement,
+    #                         len(self.lines) - 1,
+    #                     )
+    #                 )
+    #                 self.stopproof(
+    #                     self.stopped_notimplication,
+    #                     self.blankstatement,
+    #                     self.negation_intro_name,
+    #                     str(len(self.lines) - 1),
+    #                     "",
+    #                     comment,
+    #                 )
 
-        # If no errors, perform task
-        if self.canproceed():
-            negation = Not(previousstatement.left)
-            self.logstep(
-                self.log_negation_intro.format(
-                    self.negation_intro_name.upper(), negation, previousstatement.left
-                )
-            )
-            newcomment = self.iscomplete(negation, comment)
-            self.lines.append(
-                [
-                    negation,
-                    self.level,
-                    self.currentproofid,
-                    self.negation_intro_name,
-                    "",
-                    "",
-                    newcomment,
-                    self.linetype_transformationrule,
-                    self.subproof_status,
-                ]
-            )
-            self.appendproofdata(negation)
+    #     # If no errors, perform task
+    #     if self.canproceed():
+    #         negation = Not(previousstatement.left)
+    #         self.logstep(
+    #             self.log_negation_intro.format(
+    #                 self.negation_intro_name.upper(), negation, previousstatement.left
+    #             )
+    #         )
+    #         newcomment = self.iscomplete(negation, comment)
+    #         self.lines.append(
+    #             [
+    #                 negation,
+    #                 self.level,
+    #                 self.currentproofid,
+    #                 self.negation_intro_name,
+    #                 "",
+    #                 "",
+    #                 newcomment,
+    #                 self.linetype_transformationrule,
+    #                 self.subproof_status,
+    #             ]
+    #         )
+    #         self.appendproofdata(negation)
 
     def possibly_elim(self, comment: str = ""):
         """Closes a strict subproof with a possibly consequence.
@@ -6066,7 +6121,7 @@ class Proof:
     #     self.logstep(self.log_emptystrictsubproofstarted.format(self.startemptystrictsubproof_name.upper(),
     #                                                        self.currentproofid))
 
-    def startstrictsubproof(
+    def openstrictsubproof(
         self,
         reiterate: int = 0,
         addhypothesis: Wff = None,
@@ -6079,8 +6134,8 @@ class Proof:
         if self.canproceed():
             if self.goodrule(
                 self.rule_naturaldeduction,
-                self.startstrictsubproof_name,
-                self.startstrictsubproof_name,
+                self.openstrictsubproof_name,
+                self.openstrictsubproof_name,
                 comment,
             ):
                 if (
@@ -6092,7 +6147,7 @@ class Proof:
                     if type(statement) != Necessary:
                         self.logstep(
                             self.log_notnecessary.format(
-                                self.startstrictsubproof_name.upper(),
+                                self.openstrictsubproof_name.upper(),
                                 statement,
                                 reiterate,
                             )
@@ -6100,7 +6155,7 @@ class Proof:
                         self.stopproof(
                             self.stopped_notnecessary,
                             self.blankstatement,
-                            self.startstrictsubproof_name,
+                            self.openstrictsubproof_name,
                             str(reiterate),
                             "",
                             comment,
@@ -6110,16 +6165,16 @@ class Proof:
                 elif isinstance(addhypothesis, Wff):
                     if self.goodobject(
                         addhypothesis,
-                        self.startstrictsubproof_name,
-                        self.startstrictsubproof_name,
+                        self.openstrictsubproof_name,
+                        self.openstrictsubproof_name,
                         comment,
                     ):
                         pass
                 elif isinstance(hypothesis, Wff):
                     if self.goodobject(
                         hypothesis,
-                        self.startstrictsubproof_name,
-                        self.startstrictsubproof_name,
+                        self.openstrictsubproof_name,
+                        self.openstrictsubproof_name,
                         comment,
                     ):
                         pass
@@ -6148,7 +6203,7 @@ class Proof:
             self.currentproofid = len(self.prooflist) - 1
             self.logstep(
                 self.log_strictsubproofstarted.format(
-                    self.startstrictsubproof_name.upper(),
+                    self.openstrictsubproof_name.upper(),
                     self.currentproofid,
                     reiterate,
                     addhypothesis,
@@ -6156,11 +6211,11 @@ class Proof:
                 )
             )
             if reiterate > 0:
-                self.reiterate(reiterate)
+                self.reiterate(reiterate, comment)
             elif isinstance(addhypothesis, Wff):
-                self.addhypothesis(addhypothesis)
+                self.addhypothesis(addhypothesis, comment)
             else:
-                self.hypothesis(hypothesis)
+                self.hypothesis(hypothesis, comment)
 
             # else:
             #     newcomment = comment

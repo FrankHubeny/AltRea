@@ -242,7 +242,7 @@ def test_reiterate_strict_notreiteratescope_5(input_n, expected):
     prf.setlogic()
     prf.goal(Not(Not(A)))
     prf.premise(A)
-    prf.startstrictsubproof(1)
+    prf.openstrictsubproof(1)
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -273,6 +273,6 @@ def test_reiterate_strict_notreiteratescope_6(input_n, expected):
     prf.goal(Not(Not(A)))
     prf.premise(Necessary(A))
     prf.premise(B)
-    prf.startstrictsubproof(1)
+    prf.openstrictsubproof(1)
     prf.reiterate(2)
     assert eval(input_n) == expected

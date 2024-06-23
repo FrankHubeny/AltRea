@@ -265,7 +265,7 @@ class Falsehood(Wff):
     is_variable = True
     
     def __init__(self, 
-                 wff: Wff,
+                 #wff: Wff,
                  connector = 'Falsehood',
                  latexconnector = '\\bot~',
                  treeconnector = 'Falsehood'):
@@ -286,7 +286,7 @@ class Falsehood(Wff):
         #             self.latex = self.name
         #     else:
         #         self.latex = latexname
-        self.wff = wff
+        #self.wff = wff
         self.connector = connector
         self.latexconnector = latexconnector
         self.treeconnector = treeconnector
@@ -294,22 +294,28 @@ class Falsehood(Wff):
         self.multivalue = (False)
 
     def __str__(self):
-        return f'{self.connector}{self.lb}{self.wff}{self.rb}'
+        #return f'{self.connector}{self.lb}{self.wff}{self.rb}'
+        return f'{self.connector}'
     
     def latex(self):
-        return f'{self.latexconnector}{self.lb}{self.wff.latex()}{self.rb}'
+        #return f'{self.latexconnector}{self.lb}{self.wff.latex()}{self.rb}'
+        return f'{self.latexconnector}'
     
     def tree(self):
-        return f'{self.treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
+        #return f'{self.treeconnector}{self.lb}{self.wff.tree()}{self.rb}'
+        return f'{self.treeconnector}'
     
     def pattern(self, wfflist: list):
-        return f'{self.treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
+        #return f'{self.treeconnector}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
+        return f'{self.treeconnector}'
     
     def makeschemafromlist(self, wfflist: list):
-        return f'{self.treeconnector}{self.lb}{self.wff.makeschemafromlist(wfflist)}{self.rb}'
+        #return f'{self.treeconnector}{self.lb}{self.wff.makeschemafromlist(wfflist)}{self.rb}'
+        return f'{self.treeconnector}'
     
     def treetuple(self):
-        return self.treeconnector, self.lb, self.wff.treetuple(), self.rb
+        #return self.treeconnector, self.lb, self.wff.treetuple(), self.rb
+        return self.treeconnector
     
     def getvalue(self):
         return self.booleanvalue

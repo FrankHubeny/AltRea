@@ -30,7 +30,7 @@ testdata = [
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", ""),
     #
-    ("str(prf.lines[4][prf.statementindex])", str(Falsehood(And(A, Not(A))))),
+    ("str(prf.lines[4][prf.statementindex])", str(Falsehood())),
     ("prf.lines[4][prf.levelindex]", 1),
     ("prf.lines[4][prf.proofidindex]", 1),
     #("prf.lines[4][prf.ruleindex]", t.negation_elim_name),
@@ -53,8 +53,10 @@ def test_negation_intro_clean_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
     prf.premise(A)
+    
     prf.hypothesis(Not(A))
     prf.reiterate(1)
     prf.rule("neg elim", [A], [3, 2])
@@ -80,7 +82,7 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(prf.lines[3][prf.statementindex])", str(Falsehood(And(A, Not(A))))),
+    ("str(prf.lines[3][prf.statementindex])", str(Falsehood())),
     ("prf.lines[3][prf.levelindex]", 1),
     ("prf.lines[3][prf.proofidindex]", 1),
     #("prf.lines[3][prf.ruleindex]", t.negation_elim_name),
@@ -103,12 +105,15 @@ def test_negation_intro_clean_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(And(A, Not(A))))
+    
     prf.hypothesis(A)
     prf.addhypothesis(Not(A))
     prf.rule("neg elim", [A], [1, 2])
     prf.implication_intro()
     prf.rule("neg intro", [prf.item(4).left, A], [4])
+
     assert eval(input_n) == expected
 
 
@@ -136,8 +141,10 @@ def test_implication_intro_notfalse_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule("neg intro", [A, A], [2])
+
     assert eval(input_n) == expected

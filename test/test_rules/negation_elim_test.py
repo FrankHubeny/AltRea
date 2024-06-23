@@ -38,7 +38,7 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", ""),
     #
-    ("str(prf.lines[3][prf.statementindex])", str(Falsehood(And(A, Not(A))))),
+    ("str(prf.lines[3][prf.statementindex])", str(Falsehood())),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
     #("prf.lines[3][prf.ruleindex]", t.negation_elim_name),

@@ -103,28 +103,19 @@ class Proof:
     commentindex = 6
     typeindex = 7
     subproofstatusindex = 8
+
+    proofdata_nameindex = 0
+    proofdata_statementindex = 1
+    proofdata_levelindex = 2
+    proofdata_proofidindex = 3
+    proofdata_ruleindex = 4
+    proofdata_linesindex = 5
+    proofdata_proofsindex = 6
+    proofdata_commentindex = 7
+    proofdata_typeindex = 8
+    proofdata_subproofstatusindex = 9
+
     lowestlevel = 0
-    #acceptedtypes = ([And, Or, Not, Implies, Iff, Wff, Falsehood, Truth],)
-    # coimplication_intro_tag = "COI"
-    # coimplication_elim_tag = "COE"
-    # conjunction_intro_tag = "CI"
-    # conjunction_elim_tag = "CE"
-    # disjunction_intro_tag = "DI"
-    # disjunction_elim_tag = "DE"
-    # explosion_tag = "X"
-    # hypothesis_tag = "H"
-    # implication_intro_tag = "II"
-    # implication_intro_strict_tag = "IIS"
-    # implication_elim_tag = "IE"
-    #necessary_intro_tag = "NEI"
-    # necessary_elim_tag = "NEE"
-    #negation_intro_tag = "NI"
-    # negation_elim_tag = "NE"
-    # possibly_intro_tag = "POI"
-    # possibly_elim_tag = "POE"
-    # premise_tag = "P"
-    # reiterate_tag = "R"
-    # substitution_tag = "S"
     blankstatement = ""
 
     subproof_strict = "STRICT"
@@ -140,35 +131,20 @@ class Proof:
     color_unavailable = "\\color{red}"
     color_conclusion = "\\color{blue}"
 
-    # The following names may be changed.  They are used for display purposes.
-    # One could redefine them just after instantiating an instance of the Proof class.
-
-    # The first set of strings provide names of natural deduction function  calls that are displayed in reports.
-
     addhypothesis_name = "Add Hypothesis"
     axiom_name = "Axiom"
     closenecessary_name = "Close Necessary"
     closepossibly_name = "Close Possibly"
     closesubproof_name = "Close Subproof"
     definition_name = "Definition"
-    # coimplication_intro_name = "Coimplication Intro"
-    # coimplication_elim_name = "Coimplication Elim"
-    # conjunction_intro_name = "Conjunction Intro"
-    # conjunction_elim_name = "Conjunction Elim"
-    # disjunction_intro_name = "Disjunction Intro"
-    # disjunction_elim_name = "Disjunction Elim"
     entailment_name = "Entailment"
     goal_name = "GOAL"
     hypothesis_name = "Hypothesis"
     implication_intro_name = "Implication Intro"
     implication_intro_strict_name = "Strict Implication Intro"
-    #implication_elim_name = "Implication Elim"
     necessary_intro_name = "Necessary Intro"
-    #necessary_elim_name = "Necessary Elim"
     negation_intro_name = "Negation Intro"
     opensubproof_name = "Open Subproof"
-    #negation_elim_name = "Negation Elim"
-    #possibly_intro_name = "Possibly Intro"
     possibly_elim_name = "Possibly Elim"
     reiterate_name = "Reiteration"
     removeaxiom_name = "Remove Axiom"
@@ -179,7 +155,6 @@ class Proof:
     savedefinition_name = "Save Definition"
     saverule_name = "Save Rule"
     openstrictsubproof_name = "Open Strict Subproof"
-    startemptystrictsubproof_name = "Start Empty Strict Subproof"
     substitution_name = "Substitution"
     rule_name = "Rule"
 
@@ -242,26 +217,12 @@ class Proof:
     log_nosuchline = "{0}: The line {1} is not a previous line of the proof."
     stopped_nosuchproof = "The referenced name is not in the saved proof database."
     log_nosuchproof = '{0}: The name "{1}" does not reference a saved proof.'
-    #stopped_notantecedent = "One item is not the antecedent of the other."
-    #log_notantecedent = '{0}: Item "{1}" is not the antecedent of the other "{2}".'
-    #stopped_notcoimplicationelim = (
-    #    "The refernced items cannot be used in coimplication elimination."
-    #)
-    #log_notcoimplicationelim = '{0}: The referenced items "{1}" on line {2} and "{3}" on line {4} cannot be used in coimplication elimination.'
     stopped_notcomplete = "The proof needs to be completed before it can be saved."
     log_notcomplete = (
         '{0}: The proof named "{1}" cannot be saved because it is not yet complete.'
     )
-    #stopped_notconjunction = "The referenced item is not a conjunction."
-    # log_notconjunction = (
-    #     '{0}: The referenced item "{1}" on line {2} is not a conjunction.'
-    # )
     stopped_notcontradiction = "The referenced items are not negations of each other."
     log_notcontradiction = '{0}: The reference items "{1}" on line {2} and "{3}" on line {4} are not negations of each other.'
-    # stopped_notdisjunction = "The referenced item is not a disjunction."
-    # log_notdisjunction = (
-    #     '{0}: The referenced item "{1}" on line {2} is not a disjunction.'
-    # )
     stopped_notenoughsubs = (
         "There are not enough substitution values for the metavariables."
     )
@@ -276,10 +237,6 @@ class Proof:
     log_notinteger = "{0}: The line number {1} is not an integer."
     stopped_notlist = "The input is not a list."
     log_notlist = '{0}: The input "{1}" is not a list.'
-    # stopped_notmodusponens = (
-    #     "The referenced items can not be used in implication elimination."
-    # )
-    # log_notmodusponens = '{0}: The referenced items "{1}" on line {2} and "{3}" on line {4} cannot be used in implication elimination.'
     stopped_notnecessary = "The referenced item is not necessary."
     log_notnecessary = '{0}: The referenced item "{1}" on line {2} is not necessary.'
     stopped_notproposition = "The object is not a Proposition."
@@ -294,8 +251,6 @@ class Proof:
     log_notreiteratescope = (
         "{0}: The referenced item on line {1} is not in the reiterate scope."
     )
-    # stopped_notsamestatement = "The referenced items are not the same."
-    # log_notsamestatement = '{0}: The referenced items "{1}" and "{2}" are not the same.'
     stopped_notstrictsubproof = "The subproof is not strict."
     log_notstrictsubproof = '{0}: The subproof is "{1}" rather than "{2}".'
     stopped_notwff = "The input is not an instance of the Wff object."
@@ -320,8 +275,6 @@ class Proof:
     log_restrictednowff = '{0}: Only integers referencing statements can be used in restricted mode not "{1}" or "{2}".'
     stopped_ruleclass = "This inference rule is not part of the selected set of rules."
     log_ruleclass = '{0}: This inference rule "{1}" is part of the "{2}" set of rules not the selected "{3}" set of rules.'
-    # stopped_sidenotselected = 'A side, "left" or "right", must be selected.'
-    # log_sidenotselected = '{0}: The input "{1}" was used rather than "left" or "right".'
 
     """Strings to log messages upon successful completion of tasks."""
 
@@ -333,18 +286,6 @@ class Proof:
     log_axiomnotfound = '{0}: An axiom with the name "{1}" was not found.'
     log_axiomremoved = '{0}: The axiom named "{1}" has been removed.'
     log_axiomsaved = '{0}: The axiom named "{1}" has been saved.'
-    # log_badpremise = 'The premise "{0}" is not an instance of altrea.wffs.Wff.'
-    # log_badconclusion = 'The conclusion "{0}" is not an instance of altrea.wffs.Wff.'
-    # log_coimplication_elim = (
-    #     '{0}: Item "{1}" has been derived from the coimplication "{2}".'
-    # )
-    # log_coimplication_intro = '{0}: Item "{1}" has been derived from "{2}" and "{3}".'
-    # log_conjunction_elim = (
-    #     '{0}: Item "{1}" has been derived from the conjunction "{2}" on line {3}.'
-    # )
-    # log_conjunction_intro = '{0}: The conjunction "{1}" has been derived from "{2}" on line {3} and "{4}" on line {5}.'
-    # log_couldnotgetconnectors = '{0}: "{1}" could not retrieve its connector permissions.'
-    # log_couldnotgettransformationrules = '{0}: "{1}" could not retrieve its transformation rule permissions.'
     log_closenecessary = "{0}: The current subproof was closed deriving a Necessary item."
     log_closepossibly = "{0}: The current subproof was closed deriving a Possibly item."
     log_closesubproof = "{0}: The current subproof was closed deriving an implication."
@@ -355,14 +296,9 @@ class Proof:
     log_definitionnotfound = '{0}: A definition with the name "{1}" was not found.'
     log_definitionremoved = '{0}: The definition named "{1}" has been removed.'
     log_definitionsaved = '{0}: The definition named "{1}" has been saved.'
-    # log_disjunction_elim = '{0}: Item "{1}" has been derived as the conclusion of both disjuncts of the disjunction "{2}" on line {3}.'
-    # log_disjunction_intro = '{0}: Item "{1}" has been derived from item "{2}" on line {3} joined on the {4} with {5}.'
     log_emptystrictsubproofstarted = "{0}: An empty strict subproof has been started."
     log_goal = '{0}: The goal "{1}" has been added to the goals.'
     log_hypothesis = '{0}: A new subproof {1} has been started with item "{2}".'
-    # log_implication_elim = (
-    #     '{0}: Item "{1}" has been derived from the implication "{2}" and item "{3}".'
-    # )
     log_implication_intro = (
         '{0}: Item "{1}" has been derived upon closing subproof {2}.'
     )
@@ -374,20 +310,13 @@ class Proof:
     )
     log_logdisplayed = "The log will be displayed."
     log_logicdescription = '{0}: "{1}" has been selected as the logic described as "{2}" and stored in database "{3}".'
-    # log_necessary_elim = (
-    #     '{0}: Item "{1}" has been derived from the necessary item "{2}" on line {3}.'
-    # )
     log_necessary_intro = '{0}: Item "{1}" has been derived from item "{2}".'
-    #log_negation_elim = '{0}: A falsehood "{1}" has been derived from the contradiction between "{2}" on line {3} and "{4}" on line {5}.'
     log_negation_intro = (
         '{0}: Item "{1}" has been derived as the negation of the antecedent of "{2}".'
     )
     log_noproofs = "There are no saved proofs for logic {0}"
     log_opensubproof = '{0}: A subproof was opened with the hypothesis "{1}".'
     log_possibly_elim = '{0}: Item "{1}" has been derived from item "{2}".'
-    # log_possibly_intro = (
-    #     '{0}: Item "{1}" has been derived from the item "{2}" on line {3}.'
-    # )
     log_premise = '{0}: Item "{1}" has been added to the premises.'
     log_proof = (
         '{0}: A proof named "{1}" or "{2}" with description "{3}" has been started.'
@@ -446,8 +375,6 @@ class Proof:
     label_goals = "Goals"
     label_inprogress = "In Progress"
     label_invalid = "Invalid"
-    # label_intelimrule = "IntElim Rule"
-    # label_intelimrules = "IntElim Rules"
     label_item = "Item"
     label_left = "left"
     label_level = "Level"
@@ -466,7 +393,6 @@ class Proof:
     label_noderivedgoals = "No Derived Goals"
     label_nodescription = "No Description"
     label_nogoals = "No Goals"
-    #label_nointelimrules = "No IntElim Rules"
     label_nopremises = "No Premises"
     label_nolemmas = "No Saved Proofs"
     label_notransformationrules = "No Rules"
@@ -496,7 +422,6 @@ class Proof:
 
     valueerror_badpremise = 'The premise "{0}" is not an instance of altrea.wffs.Wff.'
     valueerror_badconclusion = 'The conclusion "{0}" is not an instance of altrea.wffs.Wff.'
-    
     valueerror_kind = "The kind '{0}' is not recognized."
     valueerror_names = "Either the name '{0}' or the displayname '{1}' or the description '{2}' is not defined."
     valueerror_rulenotfound = '{0}: A rule with the name "{1}" was not found.'
@@ -629,13 +554,13 @@ class Proof:
             ),
             (
                 "disj elim l", 
-                "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, {2}), Implies({1}, Falsehood(And({3}, Not({3}))))])", 
+                "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, {2}), Implies({1}, Falsehood())])", 
                 "Disjunction Elim Left", 
                 "Disjunction Elimination Left"
             ),
             (
                 "disj elim r", 
-                "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, Falsehood(And({3}, Not({3})))), Implies({1}, {2})])", 
+                "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, Falsehood()), Implies({1}, {2})])", 
                 "Disjunction Elim Right", 
                 "Disjunction Elimination Right"
             ),
@@ -670,13 +595,13 @@ class Proof:
             ),
             (
                 "neg elim", 
-                "ConclusionPremises(Falsehood(And({0}, Not({0}))), [{0}, Not({0})])", 
+                "ConclusionPremises(Falsehood(), [{0}, Not({0})])", 
                 "Negation Elim", 
                 "Nenegation Elimination"
             ),
             (
                 "neg intro", 
-                "ConclusionPremises(Not({0}), [Implies({0}, Falsehood(And({1}, Not({1}))))])", 
+                "ConclusionPremises(Not({0}), [Implies({0}, Falsehood())])", 
                 "Negation Intro", 
                 "Negation Introduction"
             ),
@@ -790,49 +715,13 @@ class Proof:
         ]
         self.logicdefinitions = []
         self.logiclemmas = []
-        # self.logicintelimrules = [
-        #     (self.coimplication_elim_tag, self.coimplication_elim_name),
-        #     (self.coimplication_intro_tag, self.coimplication_intro_name),
-        #     (self.conjunction_elim_tag, self.conjunction_elim_name),
-        #     (self.conjunction_intro_tag, self.conjunction_intro_name),
-        #     (self.disjunction_elim_tag, self.disjunction_elim_name),
-        #     (self.disjunction_intro_tag, self.disjunction_intro_name),
-        #     (self.implication_elim_tag, self.implication_elim_name),
-        #     (self.implication_intro_tag, self.implication_intro_name),
-        #     (self.necessary_elim_tag, self.necessary_elim_name),
-        #     (self.necessary_intro_tag, self.necessary_intro_name),
-        #     (self.negation_elim_tag, self.negation_elim_name),
-        #     (self.negation_intro_tag, self.negation_intro_name),
-        #     (self.possibly_elim_tag, self.possibly_elim_name),
-        #     (self.possibly_intro_tag, self.possibly_intro_name),
-        # ]
-        # self.logicoperators = [
-        #     (self.coimplication_elim_tag, self.coimplication_elim_name),
-        #     (self.coimplication_intro_tag, self.coimplication_intro_name),
-        #     (self.conjunction_elim_tag, self.conjunction_elim_name),
-        #     (self.conjunction_intro_tag, self.conjunction_intro_name),
-        #     (self.disjunction_elim_tag, self.disjunction_elim_name),
-        #     (self.disjunction_intro_tag, self.disjunction_intro_name),
-        #     (self.implication_elim_tag, self.implication_elim_name),
-        #     (self.implication_intro_tag, self.implication_intro_name),
-        #     (self.necessary_elim_tag, self.necessary_elim_name),
-        #     (self.necessary_intro_tag, self.necessary_intro_name),
-        #     (self.negation_elim_tag, self.negation_elim_name),
-        #     (self.negation_intro_tag, self.negation_intro_name),
-        #     (self.possibly_elim_tag, self.possibly_elim_name),
-        #     (self.possibly_intro_tag, self.possibly_intro_name),
-        # ]
-        # self.basicoperators = [
-        #     (self.hypothesis_tag, self.hypothesis_name),
-        #     (self.premise_tag, self.premise_name),
-        #     (self.reiterate_tag, self.reiterate_name),
-        # ]
         self.lines = [["", 0, 0, "", "", "", "", "", ""]]
         self.previousproofchain = []
         self.previousproofid = -1
         self.currentproof = [1]
         self.currentproofid = 0
         self.subproof_status = self.subproof_normal
+        self.subproofavailable = []
         self.subproofchain = ""
         self.proofdata = [[self.name, self.displayname, self.description]]
         self.proofdatafinal = []
@@ -930,15 +819,14 @@ class Proof:
             [
                 self.name,
                 statement,
-                self.lines[length][1],
-                self.lines[length][2],
-                #"".join(["*", rule, "*"]),
-                self.lines[length][3],
-                self.lines[length][4],
-                self.lines[length][5],
-                self.lines[length][6],
-                self.lines[length][7],
-                self.lines[length][8],
+                self.lines[length][self.levelindex],
+                self.lines[length][self.proofidindex],
+                self.lines[length][self.ruleindex],
+                self.lines[length][self.linesindex],
+                self.lines[length][self.proofsindex],
+                self.lines[length][self.commentindex],
+                self.lines[length][self.typeindex],
+                self.lines[length][self.subproofstatusindex],
             ]
         )
         if type(statement) == Necessary:
@@ -948,10 +836,10 @@ class Proof:
             propositionlist = []
             self.proofdatafinal.append(
                 [
-                    self.proofdata[0][0],
-                    self.proofdata[0][1],
-                    self.proofdata[0][2],
-                    self.proofdata[0][3],
+                    self.proofdata[0][self.proofdata_nameindex],
+                    self.proofdata[0][self.proofdata_statementindex],
+                    self.proofdata[0][self.proofdata_levelindex],
+                    self.proofdata[0][self.proofdata_proofidindex],
                     finalresult.pattern(propositionlist),
                 ]
             )
@@ -959,18 +847,19 @@ class Proof:
                 if i > 0:
                     self.proofdatafinal.append(
                         [
-                            self.proofdata[i][0],
-                            self.proofdata[i][1].pattern(propositionlist),
-                            self.proofdata[i][2],
-                            self.proofdata[i][3],
-                            self.proofdata[i][4],
-                            self.proofdata[i][5],
-                            self.proofdata[i][6],
-                            self.proofdata[i][7],
-                            self.proofdata[i][8],
-                            self.proofdata[i][9],
+                            self.proofdata[i][self.proofdata_nameindex],
+                            self.proofdata[i][self.proofdata_statementindex].pattern(propositionlist),
+                            self.proofdata[i][self.proofdata_levelindex],
+                            self.proofdata[i][self.proofdata_proofidindex],
+                            self.proofdata[i][self.proofdata_ruleindex],
+                            self.proofdata[i][self.proofdata_linesindex],
+                            self.proofdata[i][self.proofdata_proofsindex],
+                            self.proofdata[i][self.proofdata_commentindex],
+                            self.proofdata[i][self.proofdata_typeindex],
+                            self.proofdata[i][self.proofdata_subproofstatusindex],
                         ]
                     )
+
 
     def buildconclusionpremises(self):
         """Saved proofs, definitions and axioms are used as ConclusionPremises objects.
@@ -1106,9 +995,6 @@ class Proof:
 
     def getpreviousproofid(self, proofid: int) -> int:
         return self.prooflist[proofid][2]
-    
-    # def getprevioussubproofstatus(self, proofid: int) -> int:
-    #     return self.prooflist[proofid][4]
 
 
     def getproof(self, proofid: int) -> tuple:
@@ -1129,7 +1015,6 @@ class Proof:
         previousproofid = self.prooflist[proofid][2]
         previoussubproofstatus = self.prooflist[previousproofid][4]
         return hypothesis, conclusion, previousproofid, previoussubproofstatus
-
     
 
     def goodline(self, line: int, caller: str, displayname: str, comment: str):
@@ -1811,7 +1696,7 @@ class Proof:
         df = pandas.DataFrame(newp, index=indx, columns=columns)
         return df
 
-    def thisproof(self, short: int = 0, color: int = 1, latex: int = 1):
+    def thisproof(self, short: int = 0, flip: bool = True, color: int = 1, latex: int = 1):
         """This function displays the proof lines.
 
         Parameters:
@@ -1858,21 +1743,39 @@ class Proof:
                 statement = self.stringitem(prooflines=self.lines, i=i)
             if short == 1 or short == 2:
                 if self.lines[i][self.linesindex] != "":
-                    rule = "".join(
-                        [
-                            self.lines[i][self.linesindex],
-                            ", ",
-                            self.lines[i][self.ruleindex],
-                        ]
-                    )
+                    if flip:
+                        rule = "".join(
+                            [
+                                self.lines[i][self.linesindex],
+                                ", ",
+                                self.lines[i][self.ruleindex],
+                            ]
+                        )
+                    else:
+                        rule = "".join(
+                            [
+                                self.lines[i][self.ruleindex],
+                                " ",
+                                self.lines[i][self.linesindex]
+                            ]
+                        )
                 elif self.lines[i][self.proofsindex] != "":
-                    rule = "".join(
-                        [
-                            self.lines[i][self.proofsindex],
-                            ", ",
-                            self.lines[i][self.ruleindex],
-                        ]
-                    )
+                    if flip:
+                        rule = "".join(
+                            [
+                                self.lines[i][self.proofsindex],
+                                ", ",
+                                self.lines[i][self.ruleindex],
+                            ]
+                        )
+                    else:
+                        rule = "".join(
+                            [
+                                self.lines[i][self.ruleindex],
+                                " ",
+                                self.lines[i][self.linesindex]
+                            ]
+                        )
                 else:
                     rule = self.lines[i][self.ruleindex]
                 if short == 1:
@@ -1925,17 +1828,6 @@ class Proof:
         newrows.append([statement, 0, 0, self.goal_name, "", "", ""])
         for i in rows:
             newrows.append(list(i))
-
-        # Format the rules column using the names from the proofs logic operators.
-        for i in newrows:
-            for k in self.logicoperators:
-                i[3] = i[3].replace("".join(["*", k[0], "*"]), k[1])
-        for i in newrows:
-            for k in self.basicoperators:
-                i[3] = i[3].replace("".join(["*", k[0], "*"]), k[1])
-        for i in newrows:
-            for k in self.basicoperators:
-                i[3] = i[3].replace("*", "")
 
         # Display the proof.
         newp = []
@@ -2114,18 +2006,6 @@ class Proof:
             for i in self.logicconnectives:
                 print("{: >25} {: <25}".format(i[1], i[2]))
 
-        # Display intelim rules.
-        # if len(self.logicintelimrules) == 0:
-        #     print(
-        #         "{: <25} {: <25}".format(
-        #             self.label_intelimrules, self.label_nointelimrules
-        #         )
-        #     )
-        # else:
-        #     print("{}".format(self.label_intelimrules))
-        #     for i in self.logicintelimrules:
-        #         print("{: <25} {: <25}".format(" ", i[1]))
-
         # Display goals.
         if len(self.goals) == 0:
             print("{: <25} {: <25}".format(self.label_goals, self.label_nogoals))
@@ -2249,13 +2129,6 @@ class Proof:
             for i in self.logicconnectives:
                 data.append([self.label_connective, i[1]])
 
-        # Display intelim rules.
-        # if len(self.logicintelimrules) == 0:
-        #     data.append([self.label_intelimrules, self.label_nointelimrules])
-        # else:
-        #     for i in self.logicintelimrules:
-        #         data.append([self.label_intelimrule, i[1]])
-
         # Display goals.
         if len(self.goalswff) == 0:
             data.append([self.label_goals, self.label_nogoals])
@@ -2310,6 +2183,7 @@ class Proof:
         df = pandas.DataFrame(data, index=index, columns=columns)
         return df
 
+
     def setrestricted(self, booleanvalue: bool = True):
         """Set the logic to accept or reject explosion and unrestricted disjunction introduction."""
 
@@ -2323,6 +2197,7 @@ class Proof:
         self.logstep(
             self.log_restricted.format(self.restricted_name.upper(), booleanvalue)
         )
+
 
     def truthtable(self, latex: bool = True, useint: bool = False):
         """Display a truth table built from the premises and goal of the proof.
@@ -2569,10 +2444,6 @@ class Proof:
 
             # Display the letters
             for i in self.letters:
-                # if i[0].booleanvalue == True:
-                #     row.append(1)
-                # else:
-                #     row.append(0)
                 row.append(i[0].multivalue)
             for i in self.truths:
                 # row.append(1)
@@ -3473,7 +3344,6 @@ class Proof:
         """
 
         # Look for errors
-        #noerrors = True
         if isinstance(conclusion, altrea.wffs.Wff):
             for i in premise:
                 if not isinstance(i, altrea.wffs.Wff):
@@ -3780,538 +3650,6 @@ class Proof:
             )
             self.appendproofdata(conclusionpremises.conclusion)
 
-    # def coimplication_elim(self, first: int, second: int, comment: str = ""):
-    #     """Given an if and only if (coimplication or iff) statement and a proposition on one side of
-    #     the iff statement, one can derive the proposition the other side.
-
-    #     Parameters:
-    #         first: A statement containing either a proposition or an iff statement.
-    #         second: A second statement containing either a proposition or an iff statement.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-    #         The following is a simple example of how the coimplication elimination rule works.
-
-    #         >>> from altrea.wffs import Iff
-    #         >>> from altrea.rules import Proof
-    #         >>> prf = Proof()
-    #         >>> A = prf.proposition('A')
-    #         >>> B = prf.proposition('B')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(B)
-    #         >>> prf.premise(Iff(A, B))
-    #         >>> prf.premise(A)
-    #         >>> prf.coimplication_elim(1, 2)
-    #         >>> prf.displayproof(short=1, latex=0)
-    #              Item                      Rule   Comment
-    #                 B                      GOAL
-    #         1  A <> B                   Premise
-    #         2       A                   Premise
-    #         3       B  1, 2, Coimplication Elim  COMPLETE
-    #     """
-
-        # # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.coimplication_elim_name,
-        #         self.coimplication_elim_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             first,
-        #             self.coimplication_elim_name,
-        #             self.coimplication_elim_name,
-        #             comment,
-        #         ):
-        #             if self.goodline(
-        #                 second,
-        #                 self.coimplication_elim_name,
-        #                 self.coimplication_elim_name,
-        #                 comment,
-        #             ):
-        #                 pass
-
-        # Look for specific errors
-        # lines = self.reflines(first, second)
-        # if self.canproceed():
-        #     firststatement = self.item(first)
-        #     secondstatement = self.item(second)
-        #     if type(firststatement) != Iff and type(secondstatement) != Iff:
-        #         self.logstep(
-        #             self.log_notcoimplicationelim.format(
-        #                 self.coimplication_elim_name.upper(),
-        #                 firststatement,
-        #                 first,
-        #                 secondstatement,
-        #                 second,
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notcoimplicationelim,
-        #             self.blankstatement,
-        #             self.coimplication_elim_name,
-        #             lines,
-        #             "",
-        #             comment,
-        #         )
-        #     elif (
-        #         type(firststatement) == Iff
-        #         and not secondstatement.equals(firststatement.left)
-        #         and not secondstatement.equals(firststatement.right)
-        #     ):
-            #     self.logstep(
-            #         self.log_notcoimplicationelim.format(
-            #             self.coimplication_elim_name.upper(),
-            #             firststatement,
-            #             first,
-            #             secondstatement,
-            #             second,
-            #         )
-            #     )
-            #     self.stopproof(
-            #         self.stopped_notcoimplicationelim,
-            #         self.blankstatement,
-            #         self.coimplication_elim_name,
-            #         lines,
-            #         "",
-            #         comment,
-            #     )
-            # elif (
-            #     type(secondstatement) == Iff
-            #     and not firststatement.equals(secondstatement.left)
-            #     and not firststatement.equals(secondstatement.right)
-            # ):
-            #     self.logstep(
-            #         self.log_notcoimplicationelim.format(
-            #             self.coimplication_elim_name.upper(),
-            #             firststatement,
-            #             first,
-            #             secondstatement,
-            #             second,
-            #         )
-            #     )
-        #         self.stopproof(
-        #             self.stopped_notcoimplicationelim,
-        #             self.blankstatement,
-        #             self.coimplication_elim_name,
-        #             lines,
-        #             "",
-        #             comment,
-        #         )
-
-        # # If no errors, perform task
-        # if self.canproceed():
-        #     if type(firststatement) == Iff:
-        #         statement = firststatement.right
-        #         fullstatement = firststatement
-        #     else:
-        #         statement = secondstatement.right
-        #         fullstatement = secondstatement
-        #     self.logstep(
-        #         self.log_coimplication_elim.format(
-        #             self.coimplication_elim_name.upper(), statement, fullstatement
-        #         )
-        #     )
-            # newcomment = self.iscomplete(statement, comment)
-            # self.lines.append(
-            #     [
-            #         statement,
-            #         self.level,
-            #         self.currentproofid,
-            #         self.coimplication_elim_name,
-            #         lines,
-            #         "",
-            #         newcomment,
-            #         self.linetype_transformationrule,
-            #         self.subproofchain,
-            #     ]
-            # )
-            # self.appendproofdata(statement, self.coimplication_elim_tag)
-
-    # def coimplication_intro(self, left: int, right: int, comment: str = ""):
-    #     """Derive a item in a proof using the if and only if symbol.
-
-    #     Parameters:
-    #         left: The first item number references an implication going in one direction.
-    #         right: The second item number references an implication going in the other direction.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-    #         The following is a simple example of how the coimplication introduction rule works.
-
-    #         >>> from altrea. import Implies, Wff, Iff
-    #         >>> from altrea.rules import Proof
-    #         >>> from altrea.display import showproof
-    #         >>> p = Proof()
-    #         >>> A = Wff('A')
-    #         >>> B = Wff('B')
-    #         >>> p.setlogic()
-    #         >>> p.goal(Iff(A, B))
-    #         >>> p.premise(Implies(A, B))
-    #         >>> p.premise(Implies(B, A))
-    #         >>> p.coimplication_intro(1, 2)
-    #         >>> showproof(p, latex=0)
-    #              Item                     Reason   Comment
-    #         0  A <> B                       GOAL
-    #         1   A > B                    Premise
-    #         2   B > A                    Premise
-    #         3  A <> B  1, 2, Coimplication Intro  COMPLETE
-    #     """
-
-        # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.coimplication_intro_name,
-        #         self.coimplication_intro_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             left,
-        #             self.coimplication_intro_name,
-        #             self.coimplication_intro_name,
-        #             comment,
-        #         ):
-        #             if self.goodline(
-        #                 right,
-        #                 self.coimplication_intro_name,
-        #                 self.coimplication_intro_name,
-        #                 comment,
-        #             ):
-        #                 pass
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     firststatement = self.item(left)
-        #     secondstatement = self.item(right)
-        #     if type(firststatement) != Implies:
-        #         self.logstep(
-        #             self.log_notimplication.format(
-        #                 self.coimplication_intro_name.upper(), firststatement, left
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notimplication,
-        #             self.blankstatement,
-        #             self.coimplication_intro_name,
-        #             str(left),
-        #             "",
-        #             comment,
-        #         )
-        #     elif type(secondstatement) != Implies:
-        #         self.logstep(
-        #             self.log_notimplication.format(
-        #                 self.coimplication_intro_name.upper(), secondstatement, right
-        #             )
-        #         )
-            #     self.stopproof(
-            #         self.stopped_notimplication,
-            #         self.blankstatement,
-            #         self.coimplication_intro_name,
-            #         str(right),
-            #         "",
-            #         comment,
-            #     )
-            # elif not firststatement.left.equals(secondstatement.right):
-            #     self.logstep(
-            #         self.log_notsamestatement.format(
-            #             self.coimplication_intro_name.upper(),
-            #             firststatement.left,
-            #             secondstatement.right,
-            #         )
-            #     )
-            #     self.stopproof(
-            #         self.stopped_notsamestatement,
-            #         self.blankstatement,
-            #         self.coimplication_intro_name,
-            #         self.reflines(left, right),
-            #         "",
-            #         comment,
-            #     )
-            # elif not firststatement.right.equals(secondstatement.left):
-            #     self.logstep(
-            #         self.log_notsamestatement.format(
-            #             self.coimplication_intro_name.upper(),
-            #             firststatement.right,
-            #             secondstatement.left,
-            #         )
-            #     )
-            #     self.stopproof(
-            #         self.stopped_notsamestatement,
-            #         self.blankstatement,
-            #         self.coimplication_intro_name,
-            #         self.reflines(right, left),
-            #         "",
-            #         comment,
-            #     )
-
-        # # If no errors, perform task
-        # if self.canproceed():
-        #     newstatement = Iff(firststatement.left, firststatement.right)
-        #     self.logstep(
-        #         self.log_coimplication_intro.format(
-        #             self.coimplication_intro_name.upper(),
-        #             newstatement,
-        #             firststatement.left,
-        #             firststatement.right,
-        #         )
-        #     )
-        #     newcomment = self.iscomplete(newstatement, comment)
-        #     self.lines.append(
-        #         [
-        #             newstatement,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.coimplication_intro_name,
-        #             self.reflines(left, right),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-        #     self.appendproofdata(newstatement, self.coimplication_intro_tag)
-
-    # def conjunction_elim(self, line: int, side: str, comment: str = ""):
-    #     """One of the conjuncts, either the left side or the right side, is derived from a conjunction.
-
-    #     Parameters:
-    #         line: The line number of the conjunction to be split.
-    #         side: The side, either left or right, from which the conjunct will be derived.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-    #         The first example shows not only conjunction elimination, but also
-    #         conjunction introduction and coimplication introduction.  For `conjunction_elim`
-    #         not the use of `prf.left` and `prf.right`.  These values are defined
-    #         in the Proof object so you don't have to remember what the strings are.
-
-    #         >>> from altrea.wffs import And, Implies, Iff, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> prf = Proof()
-    #         >>> A = prf.proposition('A')
-    #         >>> B = prf.proposition('B')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(Iff(And(A, B), And(B, A)))
-    #         >>> prf.hypothesis(And(A, B))
-    #         >>> prf.conjunction_elim(1, prf.left)
-    #         >>> prf.conjunction_elim(1, prf.right)
-    #         >>> prf.conjunction_intro(3, 2, comment='Reverse the order of the conjuncts.')
-    #         >>> prf.implication_intro(comment='This gives us the first implication.')
-    #         >>> prf.hypothesis(And(B, A))
-    #         >>> prf.conjunction_elim(6, prf.left)
-    #         >>> prf.conjunction_elim(6, prf.right)
-    #         >>> prf.conjunction_intro(8, 7, comment='The order is reversed.')
-    #         >>> prf.implication_intro(comment='This gives us the second implication.')
-    #         >>> prf.coimplication_intro(5, 10)
-    #         >>> prf.displayproof(short=1, latex=0)
-    #                           Item  ...                                Comment
-    #             (A & B) <> (B & A)  ...
-    #         1            A & B __|  ...
-    #         2                A   |  ...
-    #         3                B   |  ...
-    #         4            B & A   |  ...    Reverse the order of the conjuncts.
-    #         5    (A & B) > (B & A)  ...   This gives us the first implication.
-    #         6            B & A __|  ...
-    #         7                B   |  ...
-    #         8                A   |  ...
-    #         9            A & B   |  ...                 The order is reversed.
-    #         10   (B & A) > (A & B)  ...  This gives us the second implication.
-    #         11  (A & B) <> (B & A)  ...                               COMPLETE
-
-    #     See Also:
-    #         - `conjunction_intro`
-    #         - `coimplication_intro`
-    #     """
-
-        # # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.conjunction_elim_name,
-        #         self.conjunction_elim_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             line,
-        #             self.conjunction_elim_name,
-        #             self.conjunction_elim_name,
-        #             comment,
-        #         ):
-        #             pass
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     statement = self.item(line)
-        #     if type(statement) != And:
-        #         self.logstep(
-        #             self.log_notconjunction.format(
-        #                 self.conjunction_elim_name.upper(), statement, line
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notconjunction,
-        #             self.blankstatement,
-        #             self.conjunction_elim_name,
-        #             str(line),
-        #             "",
-        #             comment,
-        #         )
-        #     elif side not in [self.label_left, self.label_right]:
-        #         self.logstep(
-        #             self.log_sidenotselected.format(
-        #                 self.conjunction_elim_name.upper(), side
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_sidenotselected,
-        #             self.blankstatement,
-        #             self.conjunction_elim_name,
-        #             str(line),
-        #             "",
-        #             comment,
-        #         )
-
-        # If no errors, perform the task
-        # if self.canproceed():
-        #     if side == self.label_left:
-        #         conjunct = statement.left
-        #     else:
-        #         conjunct = statement.right
-        #     self.logstep(
-        #         self.log_conjunction_elim.format(
-        #             self.conjunction_elim_name.upper(), conjunct, statement, line
-        #         )
-        #     )
-        #     newcomment = self.iscomplete(conjunct, comment)
-        #     self.lines.append(
-        #         [
-        #             conjunct,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.conjunction_elim_name,
-        #             str(line),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-        #     self.appendproofdata(conjunct, self.conjunction_elim_tag)
-
-    # def conjunction_intro(self, left: int, right: int, comment: str = ""):
-    #     """The statement referenced by the first line number (left) is joined as a conjunct
-    #     to the statement referenced by the second line number (right).
-
-    #     There are two conjuncts for a conjunction.  The statement referenced by the
-    #     first line number will go on the left side of the conjunction.  The statement
-    #     referenced by the second line number will go on the right side of the conjunction.
-
-    #     Parameters:
-    #         left: The line number of the first conjunct which will appear on the left side
-    #             of the conjunction.
-    #         right: The line number of the second conjunct which will appear on the right side
-    #             of the conjunction.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-
-    #         The goal is "B & A".  Since "B" is on line 2, put 2 as the first input value.
-    #         Since "A" is on line 1, put 1 as the second input value.  The `displayproof` function
-    #         shows which lines these are.  It is helpful as one rights the proofs to have that at the
-    #         bottom of the proof.  In a Jupyter Notebook where latex can be used it may be
-    #         helpful to set latex=1.
-
-    #         >>> from altrea. import And
-    #         >>> from altrea.rules import Proof
-    #         >>> prf = Proof()
-    #         >>> A = prf.proposition('A')
-    #         >>> B = prf.proposition('B')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(And(B, A))
-    #         >>> prf.premise(A)
-    #         >>> prf.premise(B)
-    #         >>> prf.conjunction_intro(2, 1)
-    #         >>> prf.displayproof(short=1, latex=0)
-    #             Item                     Rule   Comment
-    #            B & A                     GOAL
-    #         1      A                  Premise
-    #         2      B                  Premise
-    #         3  B & A  2, 1, Conjunction Intro  COMPLETE
-
-    #         This example shows that an obvious result can be derived by letting the first and second lines be the same.
-
-    #         >>> from altrea.wffs import And, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> prf = Proof()
-    #         >>> A = prf.proposition('A')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(And(A, A))
-    #         >>> prf.premise(A)
-    #         >>> prf.conjunction_intro(1, 1)
-    #         >>> prf.displayproof(short=1, latex=0)
-    #             Item                     Rule   Comment
-    #            A & A                     GOAL
-    #         1      A                  Premise
-    #         2  A & A  1, 1, Conjunction Intro  COMPLETE
-
-    #     See Also:
-    #         - `conjunction_elim`
-    #     """
-
-        # # Look for errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.conjunction_intro_name,
-        #         self.conjunction_intro_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             left,
-        #             self.conjunction_intro_name,
-        #             self.conjunction_intro_name,
-        #             comment,
-        #         ):
-        #             if self.goodline(
-        #                 right,
-        #                 self.conjunction_intro_name,
-        #                 self.conjunction_intro_name,
-        #                 comment,
-        #             ):
-        #                 pass
-
-        # If no errors, perform task
-        # if self.canproceed():
-        #     leftconjunct = self.item(left)
-        #     rightconjunct = self.item(right)
-        #     andstatement = And(leftconjunct, rightconjunct)
-        #     self.logstep(
-        #         self.log_conjunction_intro.format(
-        #             self.conjunction_intro_name.upper(),
-        #             andstatement,
-        #             leftconjunct,
-        #             left,
-        #             rightconjunct,
-        #             right,
-        #         )
-        #     )
-        #     newcomment = self.iscomplete(andstatement, comment)
-        #     self.lines.append(
-        #         [
-        #             andstatement,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.conjunction_intro_name,
-        #             self.reflines(left, right),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-        #    self.appendproofdata(andstatement, self.conjunction_intro_tag)
 
     def definition(
         self, name: str, subslist: list, premiselist: list, comment: str = ""
@@ -4405,445 +3743,7 @@ class Proof:
             )
             self.appendproofdata(conclusionpremises.conclusion)
 
-    # def disjunction_elim(
-    #     self,
-    #     disjunction_line: int,
-    #     left_implication_line: int,
-    #     right_implication_line: int,
-    #     comment: str = "",
-    # ):
-    #     """This rule take a disjunction and two implications with antecedents on each side of the disjunction.
-    #     If the two implications reach the same conclusion, then that conclusion may be derived.
-
-    #     Parameters:
-    #         disjunction_line: The line number where the disjunction is an item.
-    #         left_implication_line: The line number of the implication starting with the left side of the disjunction.
-    #         right_implication_line: The line number of the implication starting with the right side of the disjunction.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-    #         The first example shows that a trivial result can be derived.  If we have A or A and we want to derive just A,
-    #         we can generate an implication by starting a subordinate proof with A as the hypothesis.  We can then
-    #         close that proof with an implication introduction.  Since A is on both sides of the disjunction,
-    #         we can refer to the same subordinate proof twice in the use of disjunction elimination.
-
-    #         >>> from altrea.wffs import Or, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> from altrea.display import showproof, showlines
-    #         >>> prf = Proof()
-    #         >>> A = Wff('A')
-    #         >>> B = Wff('B')
-    #         >>> C = Wff('C')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(A)
-    #         >>> prf.premise(Or(A, A))
-    #         >>> prf.hypothesis(A)
-    #         >>> prf.implication_intro()
-    #         >>> prf.disjunction_elim(1, 3, 3)
-    #         >>> showproof(prFalsehood, latex=0)
-    #             Item                     Reason   Comment
-    #         0      A                       GOAL
-    #         1  A | A                    Premise
-    #         2  A __|                 Hypothesis
-    #         3  A > A     2-2, Implication Intro
-    #         4      A  1, 3, 3, Disjunction Elim  COMPLETE
-
-    #         The next example sets up a more typical situation for disjunction elimination.
-
-    #         It also illustrates the `showlines` display.  This display shows what is in the lines of a proof.
-    #         The `showproof` display illustrated in the above example uses a natural deduction display style.
-
-    #         >>> from altrea.wffs import Or, Implies, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> from altrea.display import showproof, showlines
-    #         >>> prf = Proof()
-    #         >>> A = Wff('A')
-    #         >>> B = Wff('B')
-    #         >>> C = Wff('C')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(A)
-    #         >>> prf.premise(Implies(B, A))
-    #         >>> prf.premise(Implies(C, A))
-    #         >>> prf.premise(Or(B, C))
-    #         >>> prf.hypothesis(B)
-    #         >>> prf.reiterate(1)
-    #         >>> prf.implication_elim(4, 5)
-    #         >>> prf.implication_intro()
-    #         >>> prf.hypothesis(C)
-    #         >>> prf.reiterate(2)
-    #         >>> prf.implication_elim(8, 9)
-    #         >>> prf.implication_intro()
-    #         >>> prf.disjunction_elim(3, 7, 11)
-    #         >>> showlines(prFalsehood, latex=0)
-    #            Statement  Level  Proof               Rule     Lines Proofs   Comment
-    #         C          A      0      0               GOAL
-    #         1      B > A      0      0            Premise
-    #         2      C > A      0      0            Premise
-    #         3      B | C      0      0            Premise
-    #         4          B      1      1         Hypothesis
-    #         5      B > A      1      1        Reiteration         1
-    #         6          A      1      1   Implication Elim      4, 5
-    #         7      B > A      0      0  Implication Intro              4-6
-    #         8          C      1      2         Hypothesis
-    #         9      C > A      1      2        Reiteration         2
-    #         10         A      1      2   Implication Elim      8, 9
-    #         11     C > A      0      0  Implication Intro             8-10
-    #         12         A      0      0   Disjunction Elim  3, 7, 11         COMPLETE
-    #     """
-
-        # # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.disjunction_elim_name,
-        #         self.disjunction_elim_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             disjunction_line,
-        #             self.disjunction_elim_name,
-        #             self.disjunction_elim_name,
-        #             comment,
-        #         ):
-        #             if self.goodline(
-        #                 left_implication_line,
-        #                 self.disjunction_elim_name,
-        #                 self.disjunction_elim_name,
-        #                 comment,
-        #             ):
-        #                 if self.goodline(
-        #                     right_implication_line,
-        #                     self.disjunction_elim_name,
-        #                     self.disjunction_elim_name,
-        #                     comment,
-        #                 ):
-        #                     pass
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     disjunction = self.item(disjunction_line)
-        #     left_implication = self.item(left_implication_line)
-        #     right_implication = self.item(right_implication_line)
-        #     if type(disjunction) != Or:
-        #         self.logstep(
-        #             self.log_notdisjunction.format(
-        #                 self.disjunction_elim_name.upper(),
-        #                 disjunction,
-        #                 disjunction_line,
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notdisjunction,
-        #             self.blankstatement,
-        #             self.disjunction_elim_name,
-        #             str(disjunction_line),
-        #             "",
-        #             comment,
-        #         )
-        #     elif type(left_implication) != Implies:
-        #         self.logstep(
-        #             self.log_notimplication.format(
-        #                 self.disjunction_elim_name.upper(),
-        #                 left_implication,
-        #                 left_implication_line,
-        #             )
-        #         )
-            #     self.stopproof(
-            #         self.stopped_notimplication,
-            #         self.blankstatement,
-            #         self.disjunction_elim_name,
-            #         str(left_implication_line),
-            #         "",
-            #         comment,
-            #     )
-            # elif type(right_implication) != Implies:
-            #     self.logstep(
-            #         self.log_notimplication.format(
-            #             self.disjunction_elim_name.upper(),
-            #             right_implication,
-            #             right_implication_line,
-            #         )
-            #     )
-            #     self.stopproof(
-            #         self.stopped_notimplication,
-            #         self.blankstatement,
-            #         self.disjunction_elim_name,
-            #         str(right_implication_line),
-            #         "",
-            #         comment,
-            #     )
-            # elif (
-            #     not right_implication.right.equals(left_implication.right)
-            #     and type(right_implication.right) != Falsehood
-            #     and type(left_implication.right) != Falsehood
-            # ):
-                # self.logstep(
-                #     self.log_notsamestatement.format(
-                #         self.disjunction_elim_name.upper(),
-                #         left_implication.right,
-                #         right_implication.right,
-                #     )
-                # )
-                # self.stopproof(
-                #     self.stopped_notsamestatement,
-                #     self.blankstatement,
-                #     self.disjunction_elim_name,
-                #     self.reflines(left_implication_line, right_implication_line),
-                #     "",
-                #     comment,
-                # )
-
-        # With no errors, perform task
-        # if self.canproceed():
-        #     if type(right_implication.right) != Falsehood:
-        #         statement = right_implication.right
-        #     else:
-        #         statement = left_implication.right
-        #     self.logstep(
-        #         self.log_disjunction_elim.format(
-        #             self.disjunction_elim_name.upper(),
-        #             statement,
-        #             disjunction,
-        #             disjunction_line,
-        #         )
-        #     )
-        #     newcomment = self.iscomplete(statement, comment)
-        #     self.lines.append(
-        #         [
-        #             statement,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.disjunction_elim_name,
-        #             self.reflines(
-        #                 disjunction_line, left_implication_line, right_implication_line
-        #             ),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-         #   self.appendproofdata(statement, self.disjunction_elim_tag)
-
-    # def disjunction_intro(
-    #     self,
-    #     line: int,
-    #     left: Wff | int = None,
-    #     right: Wff | int = None,
-    #     negated: bool = True,
-    #     comment: str = "",
-    # ):
-    #     """The newdisjunct statement and the statement at the line number become a disjunction.
-
-    #     Parameters:
-    #         line: The line number of the statement that will be the other disjunct.
-    #         left: A statement that will be used in the disjunction on the left side of the one
-    #             referenced by the line.
-    #         right: A state that will be used in the disjunction on the right side of the one
-    #             referenced by the line.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-
-    #     Examples:
-    #         One can place the new statement on either the left side or the right side of the
-    #         referenced statement.  The first example shows how this is done for the right side.
-
-    #         >>> from altrea.wffs import Or, Implies, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> from altrea.display import showproof, showlines
-    #         >>> prf = Proof()
-    #         >>> A = Wff('A')
-    #         >>> B = Wff('B')
-    #         >>> C = Wff('C')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(Or(A, B))
-    #         >>> prf.premise(A)
-    #         >>> prf.disjunction_intro(1, right=B)
-    #         >>> showproof(prFalsehood, latex=0)
-    #             Item                Reason   Comment
-    #         0  A | B                  GOAL
-    #         1      A               Premise
-    #         2  A | B  1, Disjunction Intro  COMPLETE
-
-    #         The second example shows how this is done for the left side.
-
-    #         >>> from altrea.wffs import Or, Implies, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> from altrea.display import showproof, showlines
-    #         >>> prf = Proof()
-    #         >>> A = Wff('A')
-    #         >>> B = Wff('B')
-    #         >>> C = Wff('C')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(Or(A, B))
-    #         >>> prf.premise(B)
-    #         >>> prf.disjunction_intro(1, left=A)
-    #         >>> showproof(prFalsehood, latex=0)
-    #             Item                Reason   Comment
-    #         0  A | B                  GOAL
-    #         1      B               Premise
-    #         2  A | B  1, Disjunction Intro  COMPLETE
-    #     """
-
-        # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.disjunction_intro_name,
-        #         self.disjunction_intro_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             line,
-        #             self.disjunction_intro_name,
-        #             self.disjunction_intro_name,
-        #             comment,
-        #         ):
-        #             if self.restricted:
-        #                 if isinstance(left, int):
-        #                     if self.goodline(
-        #                         left,
-        #                         self.disjunction_intro_name,
-        #                         self.disjunction_intro_name,
-        #                         comment,
-        #                     ):
-        #                         pass
-        #                 elif isinstance(right, int):
-        #                     if self.goodline(
-        #                         right,
-        #                         self.disjunction_intro_name,
-        #                         self.disjunction_intro_name,
-        #                         comment,
-        #                     ):
-        #                         pass
-        #                 elif isinstance(left, Wff) or isinstance(right, Wff):
-        #                     self.logstep(
-        #                         self.log_restrictednowff.format(
-        #                             self.disjunction_intro_name, left, right
-        #                         )
-        #                     )
-        #                     self.stopproof(
-        #                         self.stopped_restrictednowff,
-        #                         self.blankstatement,
-        #                         self.disjunction_intro_name,
-        #                         str(line),
-        #                         "",
-        #                         comment,
-        #                     )
-
-        #             else:
-        #                 if left is not None and self.goodobject(
-        #                     left,
-        #                     self.disjunction_intro_name,
-        #                     self.disjunction_intro_name,
-        #                     comment,
-        #                 ):
-        #                     pass
-        #                 elif right is not None and self.goodobject(
-        #                     right,
-        #                     self.disjunction_intro_name,
-        #                     self.disjunction_intro_name,
-        #                     comment,
-        #                 ):
-        #                     pass
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     statement = self.item(line)
-        #     if left is None and right is None:
-        #         self.logstep(
-        #             self.log_novaluepassed.format(self.disjunction_intro_name.upper())
-        #         )
-        #         self.stopproof(
-        #             self.stopped_novaluepassed,
-        #             self.blankstatement,
-        #             self.disjunction_intro_name,
-        #             str(line),
-        #             "",
-        #             comment,
-        #         )
-
-        # If no errors, perform task
-        # if self.canproceed():
-        #     if isinstance(left, int):
-        #         if negated:
-        #             disjunction = Or(Not(self.item(left)), statement)
-        #         else:
-        #             disjunction = Or(self.item(left), statement)
-        #         self.logstep(
-        #             self.log_disjunction_intro.format(
-        #                 self.disjunction_intro_name.upper(),
-        #                 disjunction,
-        #                 statement,
-        #                 line,
-        #                 self.label_left,
-        #                 left,
-        #             )
-        #         )
-        #     elif isinstance(right, int):
-        #         if negated:
-        #             disjunction = Or(statement, Not(self.item(right)))
-        #         else:
-        #             disjunction = Or(statement, self.item(right))
-        #         self.logstep(
-        #             self.log_disjunction_intro.format(
-        #                 self.disjunction_intro_name.upper(),
-        #                 disjunction,
-        #                 statement,
-        #                 line,
-        #                 self.label_left,
-        #                 left,
-        #             )
-        #         )
-        #     elif not self.restricted:
-        #         if left is None:
-        #             disjunction = Or(statement, right)
-        #             self.logstep(
-        #                 self.log_disjunction_intro.format(
-        #                     self.disjunction_intro_name.upper(),
-        #                     disjunction,
-        #                     statement,
-        #                     line,
-        #                     self.label_right,
-        #                     left,
-        #                 )
-        #             )
-        #         else:
-        #             disjunction = Or(left, statement)
-        #             self.logstep(
-        #                 self.log_disjunction_intro.format(
-        #                     self.disjunction_intro_name.upper(),
-        #                     disjunction,
-        #                     statement,
-        #                     line,
-        #                     self.label_left,
-        #                     left,
-        #                 )
-        #             )
-        #     newcomment = self.iscomplete(disjunction, comment)
-        #     self.lines.append(
-        #         [
-        #             disjunction,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.disjunction_intro_name,
-        #             str(line),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-        #     self.appendproofdata(disjunction, self.disjunction_intro_tag)
-
-    # def falsehood(self, name: str, latex: str = ''):
-    #     newfalsehood = Falsehood(name, latex)
-    #     self.objectdictionary.update({name: newfalsehood})
-    #     self.falsehoods.append([newfalsehood, name])
-    #     howmany = len(self.falsehoods)
-    #     self.logstep(f'TRUTH: The letter "{newfalsehood.name}" (latex: "{newfalsehood.latexname}") for a generic falsehood formula has been defined making {howmany} so far.')
-    #     return newfalsehood
-
+ 
     def goal(self, goal: Wff, comment: str = ""):
         """Add a goal to the proof.  More than one goal can be assigned although generally
         only one goal is used and only one is needed.  Think of multiple goals as the
@@ -5002,201 +3902,6 @@ class Proof:
             )
             self.appendproofdata(hypothesis)
 
-    # def implication_elim(self, first: int, second: int, comment: str = ""):
-    #     """From an implication and its antecedent derive the consequent.
-
-    #     Parameters:
-    #         first: The line number of the first statement. This is either the implication or the antecedent.
-    #         second: The line number of the second statement.  This is either the implication or the antecedent.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-    #         Implication elimination is also called "Modus Ponens".  If you have "A" and "A > B" then from both of them
-    #         you can derive "B".
-
-    #         >>> from altrea.wffs import Implies
-    #         >>> from altrea.rules import Proof
-    #         >>> pr = Proof()
-    #         >>> A = pr.proposition('A')
-    #         >>> B = pr.proposition('B')
-    #         >>> pr.setlogic()
-    #         >>> pr.goal(B)
-    #         >>> pr.premise(A)
-    #         >>> pr.premise(Implies(A, B))
-    #         >>> pr.implication_elim(1, 2)
-    #         >>> pr.displayproof(short=1, latex=0)
-    #             Item                    Rule   Comment
-    #             B                    GOAL
-    #         1      A                 Premise
-    #         2  A > B                 Premise
-    #         3      B  1, 2, Implication Elim  COMPLETE
-    #     """
-
-        # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.implication_elim_name,
-        #         self.implication_elim_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             first,
-        #             self.implication_elim_name,
-        #             self.implication_elim_name,
-        #             comment,
-        #         ):
-        #             if self.goodline(
-        #                 second,
-        #                 self.implication_elim_name,
-        #                 self.implication_elim_name,
-        #                 comment,
-        #             ):
-        #                 pass
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     firststatement = self.item(first)
-        #     secondstatement = self.item(second)
-        #     if type(firststatement) == Implies and type(secondstatement) == Implies:
-        #         if not firststatement.left.equals(
-        #             secondstatement
-        #         ) and not secondstatement.left.equals(firststatement):
-        #             self.logstep(
-        #                 self.log_notantecedent.format(
-        #                     self.implication_elim_name.upper(),
-        #                     firststatement,
-        #                     secondstatement,
-        #                 )
-        #             )
-        #             self.logstep(
-        #                 self.log_notantecedent.format(
-        #                     self.implication_elim_name.upper(),
-        #                     secondstatement,
-        #                     firststatement,
-        #                 )
-        #             )
-        #             self.stopproof(
-        #                 self.stopped_notantecedent,
-        #                 self.blankstatement,
-        #                 self.implication_elim_name,
-        #                 self.reflines(first, second),
-        #                 "",
-        #                 comment,
-        #             )
-            # elif type(firststatement) == Implies and not secondstatement.equals(
-            #     firststatement.left
-            # ):
-            #     self.logstep(
-            #         self.log_notantecedent.format(
-            #             self.implication_elim_name.upper(),
-            #             firststatement,
-            #             secondstatement,
-            #         )
-            #     )
-            #     self.stopproof(
-            #         self.stopped_notantecedent,
-            #         self.blankstatement,
-            #         self.implication_elim_name,
-            #         self.reflines(first, second),
-            #         "",
-            #         comment,
-            #     )
-            # elif type(secondstatement) == Implies and not firststatement.equals(
-            #     secondstatement.left
-            # ):
-            #     self.logstep(
-            #         self.log_notantecedent.format(
-            #             self.implication_elim_name.upper(),
-            #             secondstatement,
-            #             firststatement,
-            #         )
-            #     )
-            #     self.stopproof(
-            #         self.stopped_notantecedent,
-            #         self.blankstatement,
-            #         self.implication_elim_name,
-            #         self.reflines(first, second),
-            #         "",
-            #         comment,
-            #     )
-            # elif type(firststatement) != Implies and type(secondstatement) != Implies:
-            #     self.logstep(
-            #         self.log_notmodusponens.format(
-            #             self.implication_elim_name.upper(),
-            #             firststatement,
-            #             first,
-            #             secondstatement,
-            #             second,
-            #         )
-            #     )
-            #     self.stopproof(
-            #         self.stopped_notmodusponens,
-            #         self.blankstatement,
-            #         self.implication_elim_name,
-            #         self.reflines(first, second),
-            #         "",
-            #         comment,
-            #     )
-
-        # If no errors, perform task
-        # if self.canproceed():
-        #     if type(firststatement) == Implies and type(secondstatement) == Implies:
-        #         if str(firststatement) == str(secondstatement.left):
-        #             statement = secondstatement.right
-        #             self.logstep(
-        #                 self.log_implication_elim.format(
-        #                     self.implication_elim_name.upper(),
-        #                     secondstatement.right,
-        #                     secondstatement,
-        #                     firststatement,
-        #                 )
-        #             )
-        #         else:
-        #             statement = firststatement.right
-        #             self.logstep(
-        #                 self.log_implication_elim.format(
-        #                     self.implication_elim_name.upper(),
-        #                     firststatement.right,
-        #                     firststatement,
-        #                     secondstatement,
-        #                 )
-        #             )
-        #     elif type(firststatement) == Implies:
-        #         statement = firststatement.right
-        #         self.logstep(
-        #             self.log_implication_elim.format(
-        #                 self.implication_elim_name.upper(),
-        #                 firststatement.right,
-        #                 firststatement,
-        #                 secondstatement,
-        #             )
-        #         )
-            # else:
-            #     statement = secondstatement.right
-            #     self.logstep(
-            #         self.log_implication_elim.format(
-            #             self.implication_elim_name.upper(),
-            #             secondstatement.right,
-            #             secondstatement,
-            #             firststatement,
-            #         )
-            #     )
-            # newcomment = self.iscomplete(statement, comment)
-            # self.lines.append(
-            #     [
-            #         statement,
-            #         self.level,
-            #         self.currentproofid,
-            #         self.implication_elim_name,
-            #         self.reflines(first, second),
-            #         "",
-            #         newcomment,
-            #         self.linetype_transformationrule,
-            #         self.subproofchain,
-            #     ]
-            # )
-            # self.appendproofdata(statement, self.implication_elim_tag)
 
     def implication_intro(self, comment: str = ""):
         """From a subproof derive the implication where the antecendent is the hypotheses of subproof joined as conjuncts and the
@@ -5400,72 +4105,7 @@ class Proof:
             )
             self.appendproofdata(implication)
 
-    # def necessary_elim(self, line: int, comment: str = ""):
-    #     """Removes the necessary connector from an item.
 
-    #     Parameters:
-    #         line: The line on which the item appears.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-
-    #     """
-
-        # # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.necessary_elim_name,
-        #         self.necessary_elim_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             line, self.necessary_elim_name, self.necessary_elim_name, comment
-        #         ):
-        #             pass
-
-        # # Look for specific errors
-        # if self.canproceed():
-        #     statement = self.item(line)
-        #     if type(statement) != Necessary:
-        #         self.logstep(
-        #             self.log_notnecessary.format(
-        #                 self.necessary_elim_name.upper(), statement, line
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notnecessary,
-        #             self.blankstatement,
-        #             self.necessary_elim_name,
-        #             str(line),
-        #             "",
-        #             comment,
-        #         )
-
-        # If no errors, perform task
-        # if self.canproceed():
-        #     self.logstep(
-        #         self.log_necessary_elim.format(
-        #             self.necessary_elim_name.upper(), statement.wff, statement, line
-        #         )
-        #     )
-        #     newcomment = self.iscomplete(statement.wff, comment)
-        #     self.lines.append(
-        #         [
-        #             statement.wff,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.necessary_elim_name,
-        #             str(line),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-        #     self.appendproofdata(statement.wff, self.necessary_elim_tag)
-
-    #def necessary_intro(self, lines, comment: str = ""):
     def necessary_intro(self, comment: str = ""):
         """Closes a strict subproof with a necessary consequence.
 
@@ -5599,213 +4239,6 @@ class Proof:
             )
             self.appendproofdata(necessarystatement)
 
-    # def negation_elim(self, first: int, second: int, comment: str = ""):
-    #     """When two statements are contradictory a false line can be derived.
-
-    #     Parameters:
-    #         first: The line number of the first statement.
-    #         second: The line number of the second statement.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-    #         >>> from altrea. import And, Not, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> from altrea.display import showproof
-    #         >>> prf = Proof()
-    #         >>> A = Wff('A')
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(And(A, A))
-    #         >>> prf.premise(A)
-    #         >>> prf.premise(Not(A))
-    #         >>> prf.negation_elim(1, 2)
-    #         >>> showproof(prFalsehood, latex=0)
-    #             Item               Reason Comment
-    #         0  A & A                 GOAL
-    #         1      A              Premise
-    #         2     ~A              Premise
-    #         3      X  1, 2, Negation Elim
-    #     """
-
-        # Look for general errors
-        # if self.canproceed():
-        #     if self.goodrule(
-        #         self.rule_naturaldeduction,
-        #         self.negation_elim_name,
-        #         self.negation_elim_name,
-        #         comment,
-        #     ):
-        #         if self.goodline(
-        #             first, self.negation_elim_name, self.negation_elim_name, comment
-        #         ):
-        #             if self.goodline(
-        #                 second,
-        #                 self.negation_elim_name,
-        #                 self.negation_elim_name,
-        #                 comment,
-        #             ):
-        #                 pass
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     firststatement = self.item(first)
-        #     secondstatement = self.item(second)
-        #     if not Not(firststatement).equals(secondstatement) and not Not(
-        #         secondstatement
-        #     ).equals(firststatement):
-        #         self.logstep(
-        #             self.log_notcontradiction.format(
-        #                 self.negation_elim_name.upper(),
-        #                 firststatement,
-        #                 first,
-        #                 secondstatement,
-        #                 second,
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notcontradiction,
-        #             self.blankstatement,
-        #             self.negation_elim_name,
-        #             self.reflines(first, second),
-        #             "",
-        #             comment,
-        #         )
-
-        # If no errors, perform task
-        # if self.canproceed():
-        #     falsehood = Falsehood(And(firststatement, secondstatement))
-        #     self.logstep(
-        #         self.log_negation_elim.format(
-        #             self.negation_elim_name.upper(),
-        #             falsehood,
-        #             firststatement,
-        #             first,
-        #             secondstatement,
-        #             second,
-        #         )
-        #     )
-        #     newcomment = self.iscomplete(falsehood, comment)
-        #     self.lines.append(
-        #         [
-        #             falsehood,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.negation_elim_name,
-        #             self.reflines(first, second),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-        #     self.appendproofdata(falsehood, self.negation_elim_tag)
-
-    # def negation_intro(self, comment: str = ""):
-    #     """This rule closes a subordinate proof that ends in a contradiction by negating the hypotheses of
-    #     the subordinate proof.
-
-    #     Parameters:
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-    #         The following example is known as modus tollens.
-
-    #         >>> from altrea.wffs import Implies, Not, Wff
-    #         >>> from altrea.rules import Proof
-    #         >>> from altrea.display import showproof
-    #         >>> A = Wff('A')
-    #         >>> B = Wff('B')
-    #         >>> prf = Proof()
-    #         >>> prf.setlogic()
-    #         >>> prf.goal(Not(A), comment='Modus Tollens')
-    #         >>> prf.premise(Implies(A, B))
-    #         >>> prf.premise(Not(B))
-    #         >>> prf.hypothesis(A)
-    #         >>> prf.reiterate(1)
-    #         >>> prf.implication_elim(3, 4)
-    #         >>> prf.reiterate(2)
-    #         >>> prf.negation_elim(5, 6)
-    #         >>> prf.negation_intro()
-    #         >>> showproof(prFalsehood, latex=0)
-    #                 Item                  Reason        Comment
-    #         0         ~A                    GOAL  Modus Tollens
-    #         1      A > B                 Premise
-    #         2         ~B                 Premise
-    #         3      A __|              Hypothesis
-    #         4  A > B   |          1, Reiteration
-    #         5      B   |  3, 4, Implication Elim
-    #         6     ~B   |          2, Reiteration
-    #         7      X   |     5, 6, Negation Elim
-    #         8         ~A     3-7, Negation Intro       COMPLETE
-    #     """
-
-    #     # Look for general errors
-    #     if self.canproceed():
-    #         if self.goodrule(
-    #             self.rule_naturaldeduction,
-    #             self.negation_intro_name,
-    #             self.negation_intro_name,
-    #             comment,
-    #         ):
-    #             previousstatement = self.lines[len(self.lines) - 1][self.statementindex]
-    #             if type(previousstatement) == Implies:
-    #                 if type(previousstatement.right) != Falsehood:
-    #                     #     pass
-    #                     # else:
-    #                     self.logstep(
-    #                         self.log_notfalse.format(
-    #                             self.negation_intro_name.upper(),
-    #                             previousstatement,
-    #                             len(self.lines) - 1,
-    #                         )
-    #                     )
-    #                     self.stopproof(
-    #                         self.stopped_notfalse,
-    #                         self.blankstatement,
-    #                         self.negation_intro_name,
-    #                         str(len(self.lines) - 1),
-    #                         "",
-    #                         comment,
-    #                     )
-    #             else:
-    #                 self.logstep(
-    #                     self.log_notimplication.format(
-    #                         self.negation_intro_name.upper(),
-    #                         previousstatement,
-    #                         len(self.lines) - 1,
-    #                     )
-    #                 )
-    #                 self.stopproof(
-    #                     self.stopped_notimplication,
-    #                     self.blankstatement,
-    #                     self.negation_intro_name,
-    #                     str(len(self.lines) - 1),
-    #                     "",
-    #                     comment,
-    #                 )
-
-    #     # If no errors, perform task
-    #     if self.canproceed():
-    #         negation = Not(previousstatement.left)
-    #         self.logstep(
-    #             self.log_negation_intro.format(
-    #                 self.negation_intro_name.upper(), negation, previousstatement.left
-    #             )
-    #         )
-    #         newcomment = self.iscomplete(negation, comment)
-    #         self.lines.append(
-    #             [
-    #                 negation,
-    #                 self.level,
-    #                 self.currentproofid,
-    #                 self.negation_intro_name,
-    #                 "",
-    #                 "",
-    #                 newcomment,
-    #                 self.linetype_transformationrule,
-    #                 self.subproof_status,
-    #             ]
-    #         )
-    #         self.appendproofdata(negation)
 
     def possibly_elim(self, comment: str = ""):
         """Closes a strict subproof with a possibly consequence.
@@ -5901,57 +4334,6 @@ class Proof:
             )
             self.appendproofdata(possiblystatement)
 
-    # def possibly_intro(self, line: int, comment: str = ""):
-    #     """Adds the possibly connector to an item.
-
-    #     Parameters:
-    #         line: The line on which the item appears.
-    #         comment: An optional comment the user may add to this line of the proof.
-
-    #     Examples:
-
-    #     """
-
-    #     # Look for general errors
-    #     if self.canproceed():
-    #         if self.goodrule(
-    #             self.rule_naturaldeduction,
-    #             self.possibly_intro_name,
-    #             self.possibly_intro_name,
-    #             comment,
-    #         ):
-    #             if self.goodline(
-    #                 line, self.possibly_intro_name, self.possibly_intro_name, comment
-    #             ):
-    #                 pass
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     statement = self.item(line)
-        #     possiblystatement = Possibly(statement)
-
-        # # If no errors, perform task
-        # if self.canproceed():
-        #     self.logstep(
-        #         self.log_possibly_intro.format(
-        #             self.possibly_intro_name.upper(), possiblystatement, statement, line
-        #         )
-        #     )
-        #     newcomment = self.iscomplete(possiblystatement, comment)
-        #     self.lines.append(
-        #         [
-        #             possiblystatement,
-        #             self.level,
-        #             self.currentproofid,
-        #             self.possibly_intro_name,
-        #             str(line),
-        #             "",
-        #             newcomment,
-        #             self.linetype_transformationrule,
-        #             self.subproofchain,
-        #         ]
-        #     )
-        #     self.appendproofdata(possiblystatement, self.possibly_intro_tag)
 
     def premise(
         self,
@@ -6086,40 +4468,14 @@ class Proof:
 
         """
         p = Proposition(name, latex, kind)
-        # if kind == self.label_metavariable:
-        #     pass
-        # self.metaobjectdictionary.update({name: p})
-        # self.metaletters.append(name)
-        # else:
         self.objectdictionary.update({name: p})
         self.letters.append([p, name, latex])
-        # self.metaletters.append(name)
         howmany = len(self.letters)
         self.logstep(
             self.log_proposition.format(self.proposition_name.upper(), p, howmany)
         )
         return p
 
-    # def startemptystrictsubproof(self):
-    #     self.level += 1
-    #     nextline = len(self.lines)
-    #     self.currentproof = [nextline]
-    #     #self.currenthypotheses = [nextline]
-    #     self.subproof_status = self.subproof_strict
-    #     self.prooflist.append(
-    #         [
-    #             self.level,
-    #             self.currentproof,
-    #             self.currentproofid,
-    #             [],#self.currenthypotheses,
-    #             self.subproof_status
-    #         ]
-    #     )
-    #     self.previousproofid = self.currentproofid
-    #     self.previousproofchain.append(self.currentproofid)
-    #     self.currentproofid = len(self.prooflist) - 1
-    #     self.logstep(self.log_emptystrictsubproofstarted.format(self.startemptystrictsubproof_name.upper(),
-    #                                                        self.currentproofid))
 
     def openstrictsubproof(
         self,
@@ -6509,31 +4865,7 @@ class Proof:
                     self.logicrules = []
             else:
                 self.setrestricted(self.restricted)
-                # if database != 'No Database':
-                #     try:
-                #         intelimrules = altrea.data.getintelimrules(logic)
-                #     except:
-                #         self.logstep(self.log_couldnotgettransformationrules.format(self.setlogic_name.upper(), self.logic))
-                #     else:
-                #         if len(intelimrules) > 0:
-                #             self.logicintelimrules = []
-                #             for i in intelimrules:
-                #                 if i[0] != '':
-                #                     self.logicintelimrules.append((i[0], eval(i[1])))
-                #                 else:
-                #                     self.logicintelimrules.append(i)
-                #     try:
-                #         connectors = altrea.data.getconnectors(logic)
-                #     except:
-                #         self.logstep(self.log_couldnotgetconnectors.format(self.setlogic_name.upper(), self.logic))
-                #     else:
-                #         if len(connectors) > 0:
-                #             self.connectors = []
-                #             for i in connectors:
-                #                 if i[0] != '':
-                #                     self.logicconnectives.append((eval(i[0], self.objectdictionary), i[0], i[1]))
-                #                 else:
-                #                     self.logicconnectives.append(i)
+                
 
     def substitution(
         self, line: int, whattosubstitute: list, substitutes: list, comment: str = ""

@@ -58,6 +58,7 @@ Examples:
 
 import pandas
 from datetime import date
+import IPython.display
 
 # from tabulate import tabulate
 # from IPython.display import display, Math, Markdown, Latex, display_markdown, HTML
@@ -449,6 +450,34 @@ class Proof:
     rule_naturaldeduction = "Natural Deducation"
     rule_categorical = "Categorical"
     rule_axiomatic = "Axiomatic"
+
+    write_axiom = "{0}From the {1} axiom we can assert item ${2}$ on line {3}.\n\n"
+    write_definition = "{0}The {1} can be rewritten as ${2}$ on line {3} by the {4} definition.\n\n"
+    write_hypothesis = "{0}As an hypothesis we assert item ${1}$ on line {2}.\n\n"
+    write_lemma = "{0}From {1} using {2} we can assert item ${3}$ on line {4}.\n\n"
+    write_lemmalist = "{0}{1}"
+    write_premises_none = "The proof uses no premises.\n\n"
+    write_premises_one = "As a premise we are given ${0}$."
+    write_premises_first = "As premises we are given ${0}"
+    write_premises_many = ", ${0}"
+    write_premises_last = " and ${}$."
+    write_premise = "{0}We are given the premise ${1}$ on line {2}.\n\n"
+    write_premises = "We are given {0} premises. "
+    write_proofconclusion = "We can derive ${0}$.  Hence, we have ${1}$.\n\n"
+    write_proofintro = "The following table shows the lines of the proof.\n\n"
+    write_referenceditems_first = "item ${0}$ on line {1}"
+    write_referenceditems_many = "{0}, item ${1}$ on line {2}"
+    write_referenceditems_last = "{0} and item ${1}$ on line {2}"
+    write_rule = "{0}From {1} using the {2} rule we can derive item ${3}$ on line {4}.\n\n"
+    write_substitution = "{0}From {1} using substitution we can derive item ${2}$ on line {3}.\n\n"
+    write_theoremstatement = "\\begin{{theorem*}}[{0}]\n The entailment ${1}$ can be derived. \n\\end{{theorem*}}\n\n"
+    write_transformationrule = "{0}From the {1} using the {2} rule we can derive item ${3}$ on line {4}.\n\n"
+    write_variable_one = "Let ${0}$ be an arbitrary proposition.\n\n"
+    write_variable_first = "Let ${0}$"
+    write_variable_many = ", ${0}$"
+    write_variable_last = " and ${0}$ be arbitrary propositions.\n\n"
+    write_withoutlemmas = "The proof is self contained without referencing other saved proofs.\n\n"
+    write_withlemmas = "The proof references other saved proofs.\n\n"
 
     def __init__(self, name: str = "", displayname: str = "", description: str = ""):
         """Create a Proof object with an optional name.
@@ -1177,15 +1206,33 @@ class Proof:
 
 
     def latexitem(
-        self, prooflines: list, i: int, status: str, saved: bool = False, color: int = 1
+        self, 
+        prooflines: list, 
+        i: int, 
+        status: str, 
+        saved: bool = False, 
+        color: int = 1
     ):
         """Formats a statement or item in a proof line for display as latex."""
 
         if prooflines[i][0] != self.blankstatement:
-            normalbase = " \\hspace{0.35cm}|"
-            strictbase = " \\hspace{0.35cm}\\Vert"
-            subproofchain = prooflines[i][self.subproofstatusindex]
-            statement = subproofchain.format(normalbase, strictbase)
+            # normalbase = "$ \\hspace{0.35cm}|$"
+            # strictbase = "$ \\hspace{0.35cm}\\Vert$"
+            # if leftright:
+            #     normalbase = "$|\\hspace{0.35cm} $"
+            #     strictbase = "$\\Vert\\hspace{0.35cm} $"
+            #     chain = prooflines[i][self.subproofstatusindex]
+            #     replacedsplit = chain.replace("}{", "} {").split(" ")
+            #     replacedsplit.reverse()
+            #     chain = "".join(replacedsplit)
+            #     subproofchain = chain.format(normalbase, strictbase)
+            # else:
+            normalbase = "$|\\hspace{0.35cm} $"
+            strictbase = "$\\Vert\\hspace{0.35cm} $"
+            chain = prooflines[i][self.subproofstatusindex]
+            subproofchain = chain.format(normalbase, strictbase)
+
+            #statement = subproofchain.format(normalbase, strictbase)
 
             if color == 1:
                 if i == 0:
@@ -1208,7 +1255,7 @@ class Proof:
                                     "$",
                                     self.color_available,
                                     prooflines[i][0].latex(),
-                                    statement,
+                                    #statement,
                                     "$",
                                 ]
                             )
@@ -1220,7 +1267,7 @@ class Proof:
                                             "$",
                                             self.color_available,
                                             prooflines[i][0].latex(),
-                                            statement,
+                                            #statement,
                                             "$",
                                         ]
                                     )
@@ -1230,7 +1277,7 @@ class Proof:
                                             "$",
                                             self.color_available,
                                             prooflines[i][0].latex(),
-                                            statement,
+                                            #statement,
                                             "$",
                                         ]
                                     )
@@ -1240,7 +1287,7 @@ class Proof:
                                             "$",
                                             self.color_unavailable,
                                             prooflines[i][0].latex(),
-                                            statement,
+                                            #statement,
                                             "$",
                                         ]
                                     )
@@ -1250,7 +1297,7 @@ class Proof:
                                         "$",
                                         self.color_available,
                                         prooflines[i][0].latex(),
-                                        statement,
+                                        #statement,
                                         "$",
                                     ]
                                 )
@@ -1260,7 +1307,7 @@ class Proof:
                                     "$",
                                     self.color_unavailable,
                                     prooflines[i][0].latex(),
-                                    statement,
+                                    #statement,
                                     "$",
                                 ]
                             )
@@ -1270,7 +1317,7 @@ class Proof:
                                 "$",
                                 self.color_conclusion,
                                 prooflines[i][0].latex(),
-                                statement,
+                                #statement,
                                 "$",
                             ]
                         )
@@ -1280,13 +1327,14 @@ class Proof:
                                 "$",
                                 self.color_conclusion,
                                 prooflines[i][0].latex(),
-                                statement,
+                                #statement,
                                 "$",
                             ]
                         )
                     else:
                         statement = "".join(
-                            ["$", prooflines[i][0].latex(), statement, "$"]
+                            #["$", prooflines[i][0].latex(), statement, "$"]
+                            ["$", prooflines[i][0].latex(), "$"]
                         )
             else:
                 if i == 0:
@@ -1301,10 +1349,15 @@ class Proof:
                     else:
                         statement = ""
                 else:
-                    statement = "".join(["$", prooflines[i][0].latex(), statement, "$"])
+                    #statement = "".join(["$", prooflines[i][0].latex(), statement, "$"])
+                    statement = "".join(["$", prooflines[i][0].latex(), "$"])
         else:
             statement = self.blankstatement
-        return statement
+            subproofchain = ""
+        #if leftright:
+        return "".join([subproofchain, statement])
+        # else:
+        #     return "".join([statement, subproofchain])
 
     def logstep(self, message: str):
         """This function adds a log message collected during the proof construction
@@ -1394,17 +1447,29 @@ class Proof:
                 ]
             )
 
-    def stringitem(self, prooflines: list, i: int):
+    def stringitem(self, prooflines: list, i: int, leftright: bool = False):
         """Formats the statement or item in a proof line so it can be displayed as a string.
         It includes indenting based on the level of the subordinate proofs.
         """
 
         normalbase = "   |"
         strictbase = "   ||"
-        subproofchain = prooflines[i][self.subproofstatusindex]
         statement = subproofchain.format(normalbase, strictbase)
-        statement = "".join([str(prooflines[i][self.statementindex]), statement])
-        return statement
+        if leftright:
+            chain = prooflines[i][self.subproofstatusindex]
+            replacedsplit = chain.replace("}{", "} {").split(" ")
+            replacedsplit.reverse()
+            chain = "".join(replacedsplit)
+            subproofchain = chain.format(normalbase, strictbase)
+            return "".join([subproofchain, statement])
+        else:
+            chain = prooflines[i][self.subproofstatusindex]
+            subproofchain = chain.format(normalbase, strictbase)
+            return "".join([str(prooflines[i][self.statementindex]), statement])
+        #subproofchain = prooflines[i][self.subproofstatusindex]
+        
+        #statement = "".join([str(prooflines[i][self.statementindex]), statement])
+        #return statement
 
     def substitute(self, originalstring: str, subs: list, displayname: str):
         """Substitute placeholders for strings representing the desired objects.  Then eval (evaluate) the resulting
@@ -1490,12 +1555,20 @@ class Proof:
     if he chooses to do so.
     """
 
+    def htmllatex(self, df, html: bool = True):
+        if html:
+            dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
+            return IPython.display.HTML(dfhtml)
+        else:
+            return df
+
+
     def metasubstitute(self, pattern: str):
         substitutedstring = pattern.format(*self.metaletters)
         reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
         return reconstructedobject
 
-    def axioms(self):
+    def axioms(self, html: bool = True):
         """display the axioms associated with the logic being used in the proof."""
 
         axiomcolumn = "".join([self.logic, " ", self.label_axioms])
@@ -1507,9 +1580,14 @@ class Proof:
             reconstructedobject = self.metasubstitute(i[1])
             table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
         df = pandas.DataFrame(table, index, headers)
-        return df
+        # if html:
+        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
+        #     return IPython.display.HTML(dfhtml)
+        # else:
+        #     return df
+        return self.htmllatex(df, html)
 
-    def connectives(self):
+    def connectives(self, html: bool = True):
         """display the connectives associated with the logic being used in the proof."""
 
         connectivecolumn = "".join([self.logic, " ", self.label_connectives])
@@ -1520,9 +1598,14 @@ class Proof:
             index.append("".join(["$", i[0], "$"]))
             table.append(i[1])
         df = pandas.DataFrame(table, index, headers)
-        return df
+        # if html:
+        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
+        #     return IPython.display.HTML(dfhtml)
+        # else:
+        #     return df
+        return self.htmllatex(df, html)
     
-    def definitions(self):
+    def definitions(self, html: bool = True):
         """display the definitions associated with the logic being used in the proof."""
 
         definitioncolumn = "".join([self.logic, " ", self.label_definitions])
@@ -1534,9 +1617,14 @@ class Proof:
             reconstructedobject = self.metasubstitute(i[1])
             table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
         df = pandas.DataFrame(table, index, headers)
-        return df
+        # if html:
+        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
+        #     return IPython.display.HTML(dfhtml)
+        # else:
+        #     return df
+        return self.htmllatex(df, html)
 
-    def rules(self):
+    def rules(self, html: bool = True):
         """display the transformation rules associated with the logic being used in the proof."""
 
         rulecolumn = "".join([self.logic, " ", self.label_transformationrules])
@@ -1548,9 +1636,14 @@ class Proof:
             reconstructedobject = self.metasubstitute(i[1])
             table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
         df = pandas.DataFrame(table, index, headers)
-        return df
+        # if html:
+        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
+        #     return IPython.display.HTML(dfhtml)
+        # else:
+        #     return df
+        return self.htmllatex(df, html)
 
-    def lemmas(self):
+    def lemmas(self, html: bool = True):
         """display the saved proofs associated with the logic being used in the current proof."""
 
         proofcolumn = "".join([self.logic, " ", self.label_lemmas])
@@ -1562,9 +1655,9 @@ class Proof:
             reconstructedobject = self.metasubstitute(i[1])
             table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
         df = pandas.DataFrame(table, index, headers)
-        return df
+        return self.htmllatex(df, html)
     
-    def symbols(self):
+    def symbols(self, html: bool = True):
         """display the symbols associated with the logic being used in the proof."""
 
         symbolcolumn = "".join([self.logic, " ", self.label_symbols])
@@ -1575,7 +1668,7 @@ class Proof:
             index.append("".join(["$", i[0], "$"]))
             table.append(i[1])
         df = pandas.DataFrame(table, index, headers)
-        return df
+        return self.htmllatex(df, html)
     
     # def item(self, n: int):
     #     """Retrieve the item in the nth line of the proof."""
@@ -1598,7 +1691,14 @@ class Proof:
             else:
                 print("{: >4} {}".format(self.log[i][1], self.log[i][0]))
 
-    def thislemma(self, name: str, prooflines: list, short: int = 1, latex: int = 1):
+    def thislemma(
+            self, 
+            name: str, 
+            prooflines: list, 
+            short: int = 1, 
+            latex: int = 1,
+            html: bool = True
+        ):
         """This function displays the proof lines of a saved proof called here a lemma.
 
         Parameters:
@@ -1638,10 +1738,13 @@ class Proof:
                     i=i,
                     status=self.complete,
                     saved=True,
-                    color=False,
+                    color=False
                 )
             else:
-                statement = self.stringitem(prooflines=prooflines, i=i)
+                statement = self.stringitem(
+                    prooflines=prooflines, 
+                    i=i
+                )
             if short == 1 or short == 2:
                 if prooflines[i][self.linesindex] != "":
                     rule = "".join(
@@ -1694,9 +1797,20 @@ class Proof:
 
         # Use pandas to display the proof lines.
         df = pandas.DataFrame(newp, index=indx, columns=columns)
-        return df
+        # if html:
+        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
+        #     return IPython.display.HTML(dfhtml)
+        # else:
+        #     return df
+        return self.htmllatex(df, html)
 
-    def thisproof(self, short: int = 0, flip: bool = True, color: int = 1, latex: int = 1):
+    def thisproof(
+            self, 
+            short: int = 0, 
+            flip: bool = True, 
+            color: int = 1, 
+            latex: int = 1,
+            html: bool = True):
         """This function displays the proof lines.
 
         Parameters:
@@ -1737,10 +1851,13 @@ class Proof:
                     i=i,
                     status=self.status,
                     saved=False,
-                    color=color,
+                    color=color
                 )
             else:
-                statement = self.stringitem(prooflines=self.lines, i=i)
+                statement = self.stringitem(
+                    prooflines=self.lines, 
+                    i=i
+                )
             if short == 1 or short == 2:
                 if self.lines[i][self.linesindex] != "":
                     if flip:
@@ -1811,7 +1928,12 @@ class Proof:
 
         # Use pandas to display the proof lines.
         df = pandas.DataFrame(newp, index=indx, columns=columns)
-        return df
+        # if html:
+        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
+        #     return IPython.display.HTML(dfhtml)
+        # else:
+        return self.htmllatex(df, html)
+    
 
     def proofdetailsnew(self, proofname: str, subs, latex: int = 1):
         """Display the details of a proof."""
@@ -2612,7 +2734,7 @@ class Proof:
         )
 
         # Report on the symbols used by the logic.
-        dfsymbols = self.symbols()
+        dfsymbols = self.symbols(html=False)
         if len(self.logicsymbols) > 0:
             symbols = "".join(
                 [
@@ -2625,7 +2747,7 @@ class Proof:
             symbols = "The logic contains no symbols.\n\n"
 
         # Report on the connectives used by the logic.
-        dfconnectives = self.connectives()
+        dfconnectives = self.connectives(html=False)
         if len(self.logicconnectives) > 0:
             connectives = "".join(
                 [
@@ -2638,7 +2760,7 @@ class Proof:
             connectives = "The logic contains no connectives.\n\n"
 
         # Report any axioms the logic might have
-        dfaxioms = self.axioms()
+        dfaxioms = self.axioms(html=False)
         if len(self.logicaxioms) > 0:
             axioms = "".join(
                 [
@@ -2651,7 +2773,7 @@ class Proof:
             axioms = "The logic contains no axioms.\n\n"
 
         # Report any definitions the logic might have.
-        dfdefinitions = self.definitions()
+        dfdefinitions = self.definitions(html=False)
         if len(self.logicdefinitions) > 0:
             definitions = "".join(
                 [
@@ -2663,7 +2785,7 @@ class Proof:
             definitions = "The logic contains no definitions.\n\n"
 
         # Report any rules the logic might have.
-        dfrules = self.rules()
+        dfrules = self.rules(html=False)
         if len(self.logicrules) > 0:
             rules = "".join(
                 [
@@ -2689,7 +2811,13 @@ class Proof:
         )   
     
 
-    def writelemma(self, displayname: str, short: int = 1):
+    def writelemma(
+            self, 
+            displayname: str, 
+            short: int = 1, 
+            html: bool = True,
+            alignment = "llll"
+        ):
         """Construct proof details for saved proofs called `lemmas` used in the current proof.  """
         beginlemma = "".join(
             [
@@ -2713,7 +2841,7 @@ class Proof:
             proofdetails.append(list(i))
         for i in proofdetails:
             i[self.statementindex] = self.metasubstitute(i[self.statementindex])
-        df = self.thislemma(name, proofdetails, short)
+        df = self.thislemma(name, proofdetails, short, html=html)
 
         lemmastatement = "".join(
             [
@@ -2723,107 +2851,89 @@ class Proof:
             ]
         )
         endlemma = "\n\\end{lemma*}\n\n"
+        # if leftright:
+        #     alignment = "llll"
+        # else:
+        #     alignment = "lrll"
         return "".join(
             [
                 lemmaintro,
                 beginlemma,
                 lemmastatement,
                 endlemma,
-                self.writecenter(df.to_latex(column_format="lrll")),
+                self.writecenter(df.to_latex(column_format=alignment)),
                 "\n\n"
             ]
         )
 
 
-    def writeproof(self, sectioning: str, name: str = "", short: int = 1):
+    def writeproof(
+            self, 
+            sectioning: str, 
+            name: str = "", 
+            short: int = 1,
+            alignment: str = "llll"
+        ):
         """Constructs an English version of the proof."""
 
-        begintheorem = "".join(
-            [
-                "\\begin{theorem*}[",
-                self.name,
-                "]\n"
-            ]
-        )
         goal = self.buildconclusionpremises().latex()
-        theoremstatement = "".join(
-            [
-                "The entailment $",
-                goal,
-                "$ can be derived. "
-            ]
-        )
-        endtheorem = "\n\\end{theorem*}\n\n"
         beginproof = "\\begin{proof}\n"
         endproof = "\\end{proof}"
         proofvariables = ""
-        variables = len(self.letters)
+        
+        # Gather the lemmas
         lemmalist = []
         for i in range(len(self.lines)):
             if self.lines[i][self.typeindex] == self.linetype_lemma:
                 lemmalist.append(self.lines[i][self.ruleindex])
         if len(lemmalist) == 0:
-            lemmas = "The proof is self contained without referencing other saved proofs.\n\n"
+            lemmas = self.write_withoutlemmas
         else:
-            lemmas = "The proof depends upon other saved proofs which will be presented first.\n\n"
+            lemmas = self.write_withlemmas
             for sp in lemmalist:
-                lemmas = "".join(
-                    [
-                        lemmas,
-                        self.writelemma(sp, short)
-                    ]
-                )
+                lemmas = self.write_lemmalist.format(lemmas, self.writelemma(sp, short, html=False))
 
-       # premises = len(self.premises)
+        # Gather the variables.
+        variables = len(self.letters)
         if variables > 0:
             if variables == 1:
-                proofvariables = "".join(
-                    [
-                        "    Let $",
-                        self.letters[0][0].latex(),
-                        "$ be an arbitrary proposition.\n\n"
-                    ]
+                proofvariables = self.write_variable_one.format(
+                    self.letters[0][0].latex()
                 )
             elif variables > 1:
-                proofvariables = "".join(
-                    [
-                        "let $",
-                        self.letters[0][0].latex(),
-                        "$"
-                    ]
+                proofvariables = self.write_variable_first.format(
+                    self.letters[0][0].latex()
                 )
                 for i in range(len(self.letters)):
                     if i > 0 and i < variables - 1:
-                        proofvariables += "".join(
-                            [
-                                ", $",
-                                self.letters[i][0].latex(),
-                                "$ "
-                            ]
+                        proofvariables += self.write_variable_many.format(
+                            self.letters[i][0].latex()
                         )
                     elif i == variables - 1:
-                        proofvariables += "".join(
-                            [
-                                " and $",
-                                self.letters[i][0].latex(),
-                                "$ be arbitrary propositions.\n\n"
-                            ]
+                        proofvariables += self.write_variable_last.format( 
+                            self.letters[i][0].latex()
                         )
 
+        # Gather the conclusion of the proof
         proofconclusion = ""
         if self.status == self.complete:
-            proofconclusion = (
-                f"We can derive ${self.goals_latex}$.  Hence, we have ${goal}$.\n\n"
+            proofconclusion = self.write_proofconclusion.format(
+                self.goals_latex, 
+                goal
             )
-        df = self.thisproof(short=short, color=0)
-        proof = "".join(
-                [
-                    "The following table shows the lines of the proof presented through ",
-                    self.writethanks(sectioning),
-                    ".\n\n",
-                    self.writecenter(df.to_latex(column_format="lrll")),
-                ]
-            )
+
+        # Gather premises
+        proofpremises = ""
+        premises = len(self.premises)
+        if premises == 0:
+            proofpremises = self.write_premises_none
+        else:
+            proofpremises = self.write_premises.format(premises)
+
+        # Gather the proof lines
+        df = self.thisproof(short=short, color=0, html=False)
+
+        # Go through the proof line by line based on the type of line
         linebyline = ""
         for i in range(1,len(self.lines)):
             if self.lines[i][self.linesindex] != "":
@@ -2833,155 +2943,96 @@ class Proof:
             referenceditems = ""
             referencedlineslength = len(referencedlines)
             if referencedlineslength > 0:
-                referenceditems = "".join(
-                    [
-                        "item $",
-                        self.lines[int(referencedlines[0])][self.statementindex].latex(),
-                        "$ on line ",
-                        referencedlines[0]
-                    ]
+                referenceditems = self.write_referenceditems_first.format(
+                    self.lines[int(referencedlines[0])][self.statementindex].latex(), 
+                    referencedlines[0]
                 )
                 for j in range(1, referencedlineslength):
                     if j < referencedlineslength - 1:
-                        referenceditems = "".join(
-                            [
-                                referenceditems,
-                                ", the item $",
-                                self.lines[int(referencedlines[j])][self.statementindex].latex(),
-                                "$ on line ",
-                                referencedlines[j]
-                            ]
+                        referenceditems = self.write_referenceditems_many.format(
+                            referenceditems, 
+                            self.lines[int(referencedlines[j])][self.statementindex].latex(), 
+                            referencedlines[j]
                         )
                     else:
-                        referenceditems = "".join(
-                                [
-                                    referenceditems,
-                                    " and the item $",
-                                    self.lines[int(referencedlines[referencedlineslength - 1])][self.statementindex].latex(),
-                                    "$ on line ",
-                                    referencedlines[referencedlineslength - 1]
-                                ]
-                            )
+                        referenceditems = self.write_referenceditems_last.format(
+                            referenceditems, self.lines[int(referencedlines[referencedlineslength - 1])][self.statementindex].latex(), 
+                            referencedlines[referencedlineslength - 1]
+                        )
             if self.lines[i][self.typeindex] == self.linetype_axiom:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "From the ",
-                        self.lines[i][self.ruleindex],
-                        " axiom we can assert the item $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        ".\n"
-                    ]
+                linebyline = self.write_axiom.format(
+                    linebyline, 
+                    self.lines[i][self.ruleindex], 
+                    self.lines[i][self.statementindex].latex(), 
+                    i
                 )
             elif self.lines[i][self.typeindex] == self.linetype_premise:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "We are given the premise $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        ".\n\n"
-                    ]
+                linebyline = self.write_premise.format(
+                    linebyline, 
+                    self.lines[i][self.statementindex].latex(), 
+                    i
                 )
             elif self.lines[i][self.typeindex] == self.linetype_definition:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "The ",
-                        referenceditems,
-                        " can be rewritten as $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        " by the ",
-                        self.lines[i][self.ruleindex],
-                        " definition.\n\n"
-                    ]
+                linebyline = self.write_definition(
+                    linebyline, 
+                    referenceditems, 
+                    self.lines[i][self.statementindex].latex(), 
+                    i, 
+                    self.lines[i][self.ruleindex]
                 )
             elif self.lines[i][self.typeindex] == self.linetype_rule:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "From the ",
-                        referenceditems,
-                        " using the ",
-                        self.lines[i][self.ruleindex],
-                        " rule we can derive the item $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        ".\n\n"
-                    ]
+                linebyline = self.write_rule.format(
+                    linebyline, 
+                    referenceditems, 
+                    self.lines[i][self.ruleindex], 
+                    self.lines[i][self.statementindex].latex(), 
+                    i
                 )
             elif self.lines[i][self.typeindex] == self.linetype_transformationrule:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "From the ",
-                        referenceditems,
-                        " using the ",
-                        self.lines[i][self.ruleindex],
-                        " rule we can derive the item $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        ".\n\n"
-                    ]
+                linebyline = self.write_transformationrule.format(
+                    linebyline, 
+                    referenceditems, 
+                    self.lines[i][self.ruleindex], 
+                    self.lines[i][self.statementindex].latex(), 
+                    i
                 )
             elif self.lines[i][self.typeindex] == self.linetype_substitution:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "From ",
-                        referenceditems,
-                        " using substitution we can derive the item $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        ".\n\n"
-                    ]
+                linebyline = self.write_substitution.format(
+                    linebyline, 
+                    referenceditems, 
+                    self.lines[i][self.statementindex].latex(), 
+                    i
                 )
             elif self.lines[i][self.typeindex] == self.linetype_hypothesis:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "As an hypothesis we assert item $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        ".\n\n"
-                    ]
+                linebyline = self.write_hypothesis.format(
+                    linebyline, 
+                    self.lines[i][self.statementindex].latex(), 
+                    i
                 )
             elif self.lines[i][self.typeindex] == self.linetype_lemma:
-                linebyline = "".join(
-                    [
-                        linebyline,
-                        "From ",
-                        referenceditems,
-                        " using ",
-                        self.lines[i][self.ruleindex],
-                        " we can assert the item $",
-                        self.lines[i][self.statementindex].latex(),
-                        "$ on line ",
-                        str(i),
-                        ".\n\n"
-                    ]
+                linebyline = self.write_lemma.format(
+                    linebyline, 
+                    referenceditems, 
+                    self.lines[i][self.ruleindex], 
+                    self.lines[i][self.statementindex].latex(), 
+                    i
                 )
             else:
                 pass
+        
+        #alignment = "llll"
+        # else:
+        #     alignment = "lrll"
         self.writtenproof = "".join(
             [
                 self.writelatexbegin(sectioning, name), 
                 lemmas,
-                begintheorem,
-                theoremstatement,
-                endtheorem,
-                proof,
+                self.write_theoremstatement.format(self.name, goal),
+                self.write_proofintro,
+                self.writecenter(df.to_latex(column_format=alignment)),
                 beginproof,
                 proofvariables, 
+                proofpremises,
                 linebyline, 
                 proofconclusion, 
                 endproof,
@@ -3863,7 +3914,8 @@ class Proof:
         if self.canproceed():
             self.level += 1
             self.subproofchain = "".join(
-                [self.label_subproofnormal, self.subproofchain]
+                #[self.label_subproofnormal, self.subproofchain]
+                [self.subproofchain, self.label_subproofnormal]
             )
             nextline = len(self.lines)
             self.currentproof = [nextline]
@@ -4066,7 +4118,8 @@ class Proof:
             subproof_status = self.subproof_status
             self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
             self.level -= 1
-            self.subproofchain = self.subproofchain[3:]
+            #self.subproofchain = self.subproofchain[3:]
+            self.subproofchain = self.subproofchain[:-3]
             antecedent, consequent, previousproofid, previoussubproofstatus = (
                 self.getproof(self.currentproofid)
             )
@@ -4192,7 +4245,8 @@ class Proof:
             self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
             self.level -= 1
             
-            self.subproofchain = self.subproofchain[3:]
+            #self.subproofchain = self.subproofchain[3:]
+            self.subproofchain = self.subproofchain[:-3]
             # antecedent, consequent, previousproofid, previoussubproofstatus = (
             #     self.getproof(self.currentproofid)
             # )
@@ -4299,7 +4353,8 @@ class Proof:
             line = len(self.lines) - 1
             self.prooflist[self.currentproofid][1].append(line)
             self.level -= 1
-            self.subproofchain = self.subproofchain[3:]
+            #self.subproofchain = self.subproofchain[3:]
+            self.subproofchain = self.subproofchain[:-3]
             previousproofid = self.getpreviousproofid(self.currentproofid)
             self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
@@ -4539,7 +4594,8 @@ class Proof:
         if self.canproceed():
             self.level += 1
             self.subproofchain = "".join(
-                [self.label_subproofstrict, self.subproofchain]
+                #[self.label_subproofstrict, self.subproofchain]
+                [self.subproofchain, self.label_subproofstrict]
             )
             nextline = len(self.lines)
             self.currentproof = [nextline]

@@ -52,12 +52,14 @@ def test_conjunction_elim_clean_1(input_n, expected):
     A = prf.proposition('A')
     B = prf.proposition('B')
     prf.setlogic()
+    
     prf.goal(Iff(And(A, B), And(B, A)))
+    
+    prf.opensubproof()
     prf.hypothesis(And(A, B))
     prf.rule('conj elim l', [A, B], [1], comment='The left side is the default.')
     prf.rule('conj elim r', [A, B], [1], comment='Now do the right side.')
-    #prf.conjunction_elim(1, side='left', comment='The left side is the default.')
-    #prf.conjunction_elim(1, side='right', comment='Now do the right side.')
+
     assert eval(input_n) == expected
 
 
@@ -125,12 +127,16 @@ def test_conjunction_elim_linescope_1(input_n, expected):
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(C)
+    
+    prf.opensubproof()
     prf.hypothesis(And(A, B))
+    prf.opensubproof()
     prf.hypothesis(C)
     prf.rule('conj elim l', [A, B], [1])
-    #prf.conjunction_elim(1, side="left")
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 

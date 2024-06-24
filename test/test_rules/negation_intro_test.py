@@ -57,6 +57,7 @@ def test_negation_intro_clean_1(input_n, expected):
     prf.goal(Not(Not(A)))
     prf.premise(A)
     
+    prf.opensubproof()
     prf.hypothesis(Not(A))
     prf.reiterate(1)
     prf.rule("neg elim", [A], [3, 2])
@@ -108,6 +109,7 @@ def test_negation_intro_clean_2(input_n, expected):
     
     prf.goal(Not(And(A, Not(A))))
     
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.addhypothesis(Not(A))
     prf.rule("neg elim", [A], [1, 2])
@@ -143,6 +145,8 @@ def test_implication_intro_notfalse_1(input_n, expected):
     prf.setlogic()
     
     prf.goal(Not(Not(A)))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule("neg intro", [A, A], [2])

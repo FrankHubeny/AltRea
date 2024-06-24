@@ -53,11 +53,15 @@ def test_disjunction_elim_clean_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 3, 3])
+
     assert eval(input_n) == expected
 
 
@@ -102,19 +106,25 @@ def test_disjunction_elim_clean_2(input_n, expected):
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Implies(B, A))
     prf.premise(Implies(C, A))
     prf.premise(Or(B, C))
+    
+    prf.opensubproof()
     prf.hypothesis(B)
     prf.reiterate(1)
     prf.rule('imp elim', [B, A], [4, 5])
     prf.implication_intro()
+    
+    prf.opensubproof()
     prf.hypothesis(C)
     prf.reiterate(2)
     prf.rule('imp elim', [C, A], [8, 9])
     prf.implication_intro()
     prf.rule('disj elim', [B, C, A], [3, 7, 11])
+
     assert eval(input_n) == expected
 
 
@@ -144,12 +154,16 @@ def test_disjunction_intro_nosuchline_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [10, 3, 3])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -179,12 +193,16 @@ def test_disjunction_intro_nosuchline_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, -10, 3])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -214,12 +232,16 @@ def test_disjunction_intro_notinteger_3(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 3, 3.1416])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -250,13 +272,18 @@ def test_disjunction_elim_linescope_1(input_n, expected):
     A = prf.proposition("A")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(C)
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 4, 4])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -286,12 +313,16 @@ def test_disjunction_elim_linescope_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 2, 3])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -321,12 +352,16 @@ def test_disjunction_elim_linescope_3(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 3, 2])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -353,16 +388,20 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_disjunction_elim_nodisjunction_1(input_n, expected):
+def test_disjunction_elim_premisesdontmatch_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(And(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 3, 3])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -389,16 +428,20 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_disjunction_elim_notimplication_1(input_n, expected):
+def test_disjunction_elim_premisesdontmatch_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 1, 3])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -425,16 +468,20 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_disjunction_elim_notimplication_2(input_n, expected):
+def test_disjunction_elim_premisesdontmatch_3(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Or(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('disj elim', [A, A, A], [1, 3, 1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -461,25 +508,31 @@ testdata = [
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_disjunction_elim_notsameconclusion_1(input_n, expected):
+def test_disjunction_elim_premisesdontmatch_4(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Implies(B, A))
     prf.premise(Implies(C, B))
     prf.premise(Or(B, C))
+    
+    prf.opensubproof()
     prf.hypothesis(B)
     prf.reiterate(1)
     prf.rule('imp elim', [B, A], [4, 5])
     prf.implication_intro()
+    
+    prf.opensubproof()
     prf.hypothesis(C)
     prf.reiterate(2)
     prf.rule('imp elim', [C, B], [8, 9])
     prf.implication_intro()
     prf.rule('disj elim', [B, C, A], [3, 7, 11])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
     

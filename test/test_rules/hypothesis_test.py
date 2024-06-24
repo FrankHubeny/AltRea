@@ -51,11 +51,15 @@ def test_hypothesis_clean_1(input_n, expected):
     A = prf.proposition('A')
     B = prf.proposition('B')
     prf.setlogic()
+    
     prf.goal(Implies(A, B))
     prf.premise(B)
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.reiterate(1)
     prf.implication_intro()
+
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -66,8 +70,8 @@ testdata = [
     ('len(prf.lines)', 2),
     #
     ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
-    ("prf.lines[1][prf.levelindex]", 0),
-    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.levelindex]", 1),
+    ("prf.lines[1][prf.proofidindex]", 1),
     ("prf.lines[1][prf.ruleindex]", t.hypothesis_name),
     ("prf.lines[1][prf.linesindex]", ""),
     ("prf.lines[1][prf.proofsindex]", ""),
@@ -78,8 +82,12 @@ def test_hypothesis_notwff_1(input_n, expected):
     prf = Proof()
     B = prf.proposition('B')
     prf.setlogic()
+    
     prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
+    
+    prf.opensubproof()
     prf.hypothesis('A')  
+
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -91,8 +99,8 @@ testdata = [
     ('len(prf.lines)', 2),
     #
     ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
-    ("prf.lines[1][prf.levelindex]", 0),
-    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.levelindex]", 1),
+    ("prf.lines[1][prf.proofidindex]", 1),
     ("prf.lines[1][prf.ruleindex]", t.hypothesis_name),
     ("prf.lines[1][prf.linesindex]", ""),
     ("prf.lines[1][prf.proofsindex]", ""),
@@ -103,7 +111,37 @@ def test_hypothesis_nogoal_1(input_n, expected):
     prf = Proof()
     A = prf.proposition('A')
     prf.setlogic()
-    #prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
-    prf.hypothesis(A)  
-    assert eval(input_n) == expected
     
+    #prf.goal(B, comment='There is a difference between the Wff A and the string "A"')
+    
+    prf.opensubproof()
+    prf.hypothesis(A)  
+
+    assert eval(input_n) == expected
+
+"""------------------------------------------------------------------------------
+                                stopped_unavailablesubproof
+------------------------------------------------------------------------------"""
+
+testdata = [
+    ('len(prf.lines)', 2),
+    #
+    ("str(prf.lines[1][prf.statementindex])", t.blankstatement),
+    ("prf.lines[1][prf.levelindex]", 0),
+    ("prf.lines[1][prf.proofidindex]", 0),
+    ("prf.lines[1][prf.ruleindex]", t.hypothesis_name),
+    ("prf.lines[1][prf.linesindex]", ""),
+    ("prf.lines[1][prf.proofsindex]", ""),
+    ("prf.lines[1][prf.commentindex]", t.stopped + t.colon_connector + t.stopped_unavailablesubproof),
+]
+@pytest.mark.parametrize("input_n,expected", testdata)
+def test_hypothesis_unavailablesubproof_1(input_n, expected):
+    prf = Proof()
+    A = prf.proposition('A')
+    prf.setlogic()
+    
+    prf.goal(A)
+    
+    prf.hypothesis(A)
+
+    assert eval(input_n) == expected

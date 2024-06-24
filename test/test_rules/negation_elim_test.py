@@ -153,11 +153,15 @@ def test_negation_elim_linescope_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(And(A, A))
     prf.premise(A)
+    
+    prf.opensubproof()
     prf.hypothesis(Not(A))
     prf.implication_intro()
     prf.rule("neg elim", [A], [2, 1])
+
     assert eval(input_n) == expected
 
 
@@ -187,11 +191,15 @@ def test_negation_elim_linescope_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(And(A, A))
     prf.premise(A)
+    
+    prf.opensubproof()
     prf.hypothesis(Not(A))
     prf.implication_intro()
     prf.rule("neg elim", [A], [1, 2])
+
     assert eval(input_n) == expected
 
 

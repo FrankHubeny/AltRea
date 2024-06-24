@@ -164,8 +164,12 @@ def test_necessary_elim_linescope_1(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(A)
+    
+    prf.opensubproof()
     prf.hypothesis(Necessary(B))
     prf.implication_intro()
     prf.rule("nec elim", [B], [1])
+
     assert eval(input_n) == expected

@@ -52,9 +52,13 @@ def test_implication_intro_clean_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Implies(A, A), comment="Reflexivity of Implication")
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
+
     assert eval(input_n) == expected
 
 
@@ -104,11 +108,16 @@ def test_implication_intro_clean_2(input_n, expected):
     D = prf.proposition("D")
     E = prf.proposition("E")
     prf.setlogic()
+    
     prf.goal(Implies(E, Implies(D, Implies(C, And(A, B)))))
     prf.premise(A)
     prf.premise(B)
+    
+    prf.opensubproof()
     prf.hypothesis(E)
+    prf.opensubproof()
     prf.hypothesis(D)
+    prf.opensubproof()
     prf.hypothesis(C)
     prf.reiterate(1)
     prf.reiterate(2)
@@ -116,6 +125,7 @@ def test_implication_intro_clean_2(input_n, expected):
     prf.implication_intro()
     prf.implication_intro()
     prf.implication_intro()
+
     assert eval(input_n) == expected
 
 
@@ -163,12 +173,16 @@ def test_implication_intro_clean_3(input_n, expected):
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(Implies(A, A))
+    
+    prf.opensubproof()
     prf.hypothesis(B)
     prf.addhypothesis(A)
     prf.addhypothesis(C)
     prf.rule("conj intro", [B, A], [1, 2])
     prf.implication_intro()
+
     assert eval(input_n) == expected
 
 

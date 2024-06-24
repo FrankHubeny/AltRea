@@ -158,12 +158,16 @@ def test_implication_elim_linescope_1(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(B, comment="Modus Ponens")
     prf.premise(Implies(A, B))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('imp elim', [A, B], [2, 1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -194,12 +198,16 @@ def test_implication_elim_linescope_2(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(B, comment="Modus Ponens")
     prf.premise(Implies(A, B))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule('imp elim', [A, B], [1, 2])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 

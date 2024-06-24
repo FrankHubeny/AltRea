@@ -120,8 +120,12 @@ def test_possibly_intro_linescope_1(input_n, expected):
     prf.setrestricted(True)
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule("pos intro", [A], [1])
+
     assert eval(input_n) == expected

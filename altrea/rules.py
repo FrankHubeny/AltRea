@@ -159,6 +159,12 @@ class Proof:
     substitution_name = "Substitution"
     rule_name = "Rule"
 
+    subproofavailable_not = "No"
+    subproofavailable_opennormal = "Open"
+    subproofavailable_openstrict = "Open Strict"
+    subproofavailable_closenormal = "Close"
+    subproofavailable_closestrict = "Close Strict"
+
     # This set of strings provide names for proof structures which need not be used with natural deduction.
 
     premise_name = "Premise"
@@ -276,6 +282,8 @@ class Proof:
     log_restrictednowff = '{0}: Only integers referencing statements can be used in restricted mode not "{1}" or "{2}".'
     stopped_ruleclass = "This inference rule is not part of the selected set of rules."
     log_ruleclass = '{0}: This inference rule "{1}" is part of the "{2}" set of rules not the selected "{3}" set of rules.'
+    stopped_unavailablesubproof = "The subproof is not available."
+    log_unavailablesubproof = '{0}: The subproof has the available status only of "{1}". '
 
     """Strings to log messages upon successful completion of tasks."""
 
@@ -316,7 +324,7 @@ class Proof:
         '{0}: Item "{1}" has been derived as the negation of the antecedent of "{2}".'
     )
     log_noproofs = "There are no saved proofs for logic {0}"
-    log_opensubproof = '{0}: A subproof was opened with the hypothesis "{1}".'
+    log_opensubproof = '{0}: Subproof {1} has been opened with status "{2}".'
     log_possibly_elim = '{0}: Item "{1}" has been derived from item "{2}".'
     log_premise = '{0}: Item "{1}" has been added to the premises.'
     log_proof = (
@@ -1368,11 +1376,40 @@ class Proof:
         if self.showlogging:
             print(message)
 
-    def opensubproof(self, item: Wff):
+    def opensubproof(self):
         """Open a subproof with an hypothesis."""
 
-        self.logstep(self.log_opensubproof.format(self.opensubproof_name.upper(), item))
-        self.hypothesis(item)
+        if self.canproceed():
+            self.level += 1
+            self.subproofchain = "".join(
+                #[self.label_subproofnormal, self.subproofchain]
+                [self.subproofchain, self.label_subproofnormal]
+            )
+            nextline = len(self.lines)
+            self.currentproof = [nextline]
+            self.currenthypotheses = [nextline]
+            self.subproof_status = self.subproof_normal
+            self.prooflist.append(
+                [
+                    self.level,
+                    self.currentproof,
+                    self.currentproofid,
+                    self.currenthypotheses,
+                    self.subproofchain,
+                ]
+            )
+            self.previousproofid = self.currentproofid
+            self.previousproofchain.append(self.currentproofid)
+            self.currentproofid = len(self.prooflist) - 1
+            self.subproofavailable = self.subproofavailable_opennormal
+
+        self.logstep(self.log_opensubproof.format(
+                self.opensubproof_name.upper(),
+                self.currentproofid,
+                self.subproof_status
+            )
+        )
+        #self.hypothesis(item)
 
     def reflines(self, *lines):
         """Convert integers to strings and join separated by commas."""
@@ -3909,30 +3946,49 @@ class Proof:
                             "",
                             comment,
                         )
+                    elif self.subproofavailable not in [
+                            self.subproofavailable_opennormal, 
+                            self.subproofavailable_openstrict
+                        ]:
+                        self.logstep(
+                            self.log_unavailablesubproof.format(
+                                self.hypothesis_name.upper(), 
+                                self.subproofavailable
+                            )
+                        )
+                        self.stopproof(
+                            self.stopped_unavailablesubproof,
+                            self.blankstatement,
+                            self.hypothesis_name,
+                            "",
+                            "",
+                            comment
+                        )
 
         # If no errors, perform task
         if self.canproceed():
-            self.level += 1
-            self.subproofchain = "".join(
-                #[self.label_subproofnormal, self.subproofchain]
-                [self.subproofchain, self.label_subproofnormal]
-            )
-            nextline = len(self.lines)
-            self.currentproof = [nextline]
-            self.currenthypotheses = [nextline]
-            self.subproof_status = self.subproof_normal
-            self.prooflist.append(
-                [
-                    self.level,
-                    self.currentproof,
-                    self.currentproofid,
-                    self.currenthypotheses,
-                    self.subproofchain,
-                ]
-            )
-            self.previousproofid = self.currentproofid
-            self.previousproofchain.append(self.currentproofid)
-            self.currentproofid = len(self.prooflist) - 1
+            # self.level += 1
+            # self.subproofchain = "".join(
+            #     #[self.label_subproofnormal, self.subproofchain]
+            #     [self.subproofchain, self.label_subproofnormal]
+            # )
+            # nextline = len(self.lines)
+            # self.currentproof = [nextline]
+            # self.currenthypotheses = [nextline]
+            # self.subproof_status = self.subproof_normal
+            # self.prooflist.append(
+            #     [
+            #         self.level,
+            #         self.currentproof,
+            #         self.currentproofid,
+            #         self.currenthypotheses,
+            #         self.subproofchain,
+            #     ]
+            # )
+            # self.previousproofid = self.currentproofid
+            # self.previousproofchain.append(self.currentproofid)
+            # self.currentproofid = len(self.prooflist) - 1
+            self.subproofavailable = self.subproofavailable_not
             self.logstep(
                 self.log_hypothesis.format(
                     self.hypothesis_name.upper(), self.currentproofid, hypothesis
@@ -4622,6 +4678,7 @@ class Proof:
                     hypothesis,
                 )
             )
+            self.subproofavailable = self.subproofavailable_openstrict
             if reiterate > 0:
                 self.reiterate(reiterate, comment)
             elif isinstance(addhypothesis, Wff):

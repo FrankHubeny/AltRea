@@ -53,10 +53,14 @@ def test_reiterate_clean_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
     prf.premise(A)
+    
+    prf.opensubproof()
     prf.hypothesis(Not(A))
     prf.reiterate(1)
+
     assert eval(input_n) == expected
 
 
@@ -84,10 +88,14 @@ def test_reiterate_nosuchline_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
     prf.premise(A)
+    
+    prf.opensubproof()
     prf.hypothesis(Not(A))
     prf.reiterate(10)
+
     assert eval(input_n) == expected
 
 
@@ -115,10 +123,14 @@ def test_reiterate_notreiteratescope_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.reiterate(1)
+
     assert eval(input_n) == expected
 
 
@@ -146,9 +158,13 @@ def test_reiterate_notreiteratescope_2(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.reiterate(1)
+
     assert eval(input_n) == expected
 
 
@@ -208,12 +224,18 @@ def test_reiterate_notreiteratescope_4(input_n, expected):
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
+    prf.opensubproof()
     prf.hypothesis(B)
     prf.implication_intro()
+    prf.opensubproof()
     prf.hypothesis(C)
     prf.reiterate(2)
+
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------

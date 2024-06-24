@@ -336,7 +336,10 @@ def test_definition_linescope_1(input_n, expected):
     A = prf.proposition('A')
     B = prf.proposition('B')
     prf.setlogic()
+    
     prf.goal(B)
+    
+    prf.opensubproof()
     prf.hypothesis(Implies(A, B))
     prf.addhypothesis(Implies(B, A))
     prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])

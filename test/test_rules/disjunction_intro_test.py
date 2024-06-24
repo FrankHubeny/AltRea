@@ -187,10 +187,14 @@ def test_disjunction_intro_linescope_1(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(Or(A, B))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.rule("disj intro r", [A, B], [1])
+
     assert eval(input_n) == expected
 
 

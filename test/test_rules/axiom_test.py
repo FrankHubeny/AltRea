@@ -616,9 +616,13 @@ def test_axiom_linescope_1(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(B)
+    
+    prf.opensubproof()
     prf.hypothesis(A)
     prf.implication_intro()
     prf.premise(Implies(A, B))
     prf.axiom("modus ponens", [A, B], [1, 3])
+
     assert eval(input_n) == expected

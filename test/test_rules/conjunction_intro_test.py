@@ -199,12 +199,16 @@ def test_conjunction_elim_linescope_1(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(And(A, B))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
+    prf.opensubproof()
     prf.hypothesis(B)
     prf.rule("conj intro", [A, B], [1, 2])
-    #prf.conjunction_intro(1, 2)
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 
@@ -235,12 +239,16 @@ def test_conjunction_elim_linescope_2(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(And(A, B))
+    
+    prf.opensubproof()
     prf.hypothesis(A)
+    prf.opensubproof()
     prf.hypothesis(B)
     prf.rule("conj intro", [A, B], [2, 1])
-    # prf.conjunction_intro(2, 1)
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
+
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------

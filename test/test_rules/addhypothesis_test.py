@@ -58,10 +58,15 @@ def test_addhypothesis_clean_1(input_n, expected):
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(B)
+    
+    prf.opensubproof()
     prf.hypothesis(A, comment="Each call to `hypothesis` creates a sub proof.")
+    prf.opensubproof()
     prf.hypothesis(C, comment="Now I have a sub sub proof.")
     prf.addhypothesis(B, comment="This adds a second hypothesis.")
+    
     assert eval(input_n) == expected
 
 

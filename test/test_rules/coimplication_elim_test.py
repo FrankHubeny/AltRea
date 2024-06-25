@@ -120,6 +120,7 @@ def test_coimplication_elim_linescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(Iff(Implies(A, B), Implies(B, A)))
+    prf.closesubproof()
     prf.implication_intro()
     prf.rule("coimp elim", [prf.item(1).left, prf.item(1).right], [1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")

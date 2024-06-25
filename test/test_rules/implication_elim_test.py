@@ -164,6 +164,7 @@ def test_implication_elim_linescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
     prf.rule('imp elim', [A, B], [2, 1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")
@@ -204,6 +205,7 @@ def test_implication_elim_linescope_2(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
     prf.rule('imp elim', [A, B], [1, 2])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")

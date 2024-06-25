@@ -769,6 +769,7 @@ def test_database_lemma_linescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
     prf.premise(Implies(A, B))
     prf.lemma("modusponens", [A, B], [1, 4])

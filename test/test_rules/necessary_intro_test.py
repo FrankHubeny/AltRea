@@ -46,10 +46,15 @@ def test_necessary_intro_clean_1(input_n, expected):
     prf.setrestricted(True)
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Necessary(A))
-    prf.openstrictsubproof(1)
+    
+    prf.openstrictsubproof()
+    prf.reiterate(1)
+    prf.closestrictsubproof()
     prf.necessary_intro()
+
     assert eval(input_n) == expected
 
 
@@ -77,11 +82,16 @@ def test_necessary_intro_clean_2(input_n, expected):
     prf.setrestricted(True)
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Necessary(A))
-    prf.openstrictsubproof(1)
+    
+    prf.openstrictsubproof()
+    prf.reiterate(1)
     prf.rule("nec elim", [A], [2])
+    prf.closestrictsubproof()
     prf.necessary_intro()
+
     assert eval(input_n) == expected
 
 
@@ -112,11 +122,15 @@ def test_necessary_intro_ruleclass_1(input_n, expected):
     prf.setrestricted(True)
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(A)
     prf.premise(Necessary(A))
-    prf.openstrictsubproof(1)
+    
+    prf.openstrictsubproof()
+    prf.reiterate(1)
     prf.proofrules = prf.rule_axiomatic
     prf.necessary_intro()
+
     assert eval(input_n) == expected
 
 

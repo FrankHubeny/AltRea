@@ -128,6 +128,7 @@ def test_reiterate_notreiteratescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
     prf.reiterate(1)
 
@@ -231,6 +232,7 @@ def test_reiterate_notreiteratescope_4(input_n, expected):
     prf.hypothesis(A)
     prf.opensubproof()
     prf.hypothesis(B)
+    prf.closesubproof()
     prf.implication_intro()
     prf.opensubproof()
     prf.hypothesis(C)
@@ -245,8 +247,8 @@ def test_reiterate_notreiteratescope_4(input_n, expected):
 # The line is not accessible because it is not in a proof from the previous proof chain.
 testdata = [
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
-    ("prf.lines[2][prf.levelindex]", 0),
-    ("prf.lines[2][prf.proofidindex]", 0),
+    ("prf.lines[2][prf.levelindex]", 1),
+    ("prf.lines[2][prf.proofidindex]", 1),
     #("prf.lines[2][prf.ruleindex]", t.reiterate_name),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
@@ -262,9 +264,13 @@ def test_reiterate_strict_notreiteratescope_5(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
     prf.premise(A)
-    prf.openstrictsubproof(1)
+    
+    prf.openstrictsubproof()
+    prf.reiterate(1)
+
     assert eval(input_n) == expected
 
 """------------------------------------------------------------------------------
@@ -292,9 +298,14 @@ def test_reiterate_strict_notreiteratescope_6(input_n, expected):
     A = prf.proposition("A")
     B = prf.proposition("B")
     prf.setlogic()
+    
     prf.goal(Not(Not(A)))
     prf.premise(Necessary(A))
     prf.premise(B)
-    prf.openstrictsubproof(1)
+    
+    prf.openstrictsubproof()
+    prf.reiterate(1)
     prf.reiterate(2)
+
     assert eval(input_n) == expected
+

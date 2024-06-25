@@ -58,6 +58,7 @@ def test_hypothesis_clean_1(input_n, expected):
     prf.opensubproof()
     prf.hypothesis(A)
     prf.reiterate(1)
+    prf.closesubproof()
     prf.implication_intro()
 
     assert eval(input_n) == expected

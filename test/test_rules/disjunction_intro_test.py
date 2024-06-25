@@ -192,6 +192,7 @@ def test_disjunction_intro_linescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
     prf.rule("disj intro r", [A, B], [1])
 

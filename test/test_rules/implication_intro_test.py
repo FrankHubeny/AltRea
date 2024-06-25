@@ -57,6 +57,7 @@ def test_implication_intro_clean_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
 
     assert eval(input_n) == expected
@@ -122,8 +123,11 @@ def test_implication_intro_clean_2(input_n, expected):
     prf.reiterate(1)
     prf.reiterate(2)
     prf.rule("conj intro", [A, B], [6, 7])
+    prf.closesubproof()
     prf.implication_intro()
+    prf.closesubproof()
     prf.implication_intro()
+    prf.closesubproof()
     prf.implication_intro()
 
     assert eval(input_n) == expected
@@ -181,13 +185,14 @@ def test_implication_intro_clean_3(input_n, expected):
     prf.addhypothesis(A)
     prf.addhypothesis(C)
     prf.rule("conj intro", [B, A], [1, 2])
+    prf.closesubproof()
     prf.implication_intro()
 
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                                Clean Run 4 Strict Subproof addhypothesis
+                                Clean Run 1 Strict Subproof 
 ------------------------------------------------------------------------------"""
 # Clean test
 testdata = [
@@ -212,7 +217,7 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", str(Implies(A, A))),
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", t.implication_intro_strict_name),
+    #("prf.lines[2][prf.ruleindex]", t.implication_intro_strict_name),
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", "1-1"),
     ("prf.lines[2][prf.commentindex]", "COMPLETE"),
@@ -224,15 +229,21 @@ def test_implication_intro_strict_clean_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()
+    
     prf.goal(Implies(A, A), comment="Strict Subproof")
-    prf.openstrictsubproof(addhypothesis=A)
+    
+    prf.openstrictsubproof()
+    prf.addhypothesis(A)
+    
+    prf.closestrictsubproof()
     prf.implication_intro()
+
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
                                   Stopped Run
-                              stopped_closemainproof
+                              stopped_unavailablesubproof
 ------------------------------------------------------------------------------"""
 
 # An attempt was made to close the main proof.  This can only be closed by completing the proof.
@@ -247,13 +258,13 @@ testdata = [
     ("prf.lines[2][prf.proofsindex]", ""),
     (
         "prf.lines[2][prf.commentindex]",
-        t.stopped + t.colon_connector + t.stopped_closemainproof,
+        t.stopped + t.colon_connector + t.stopped_unavailablesubproof,
     ),
 ]
 
 
 @pytest.mark.parametrize("input_n,expected", testdata)
-def test_implication_intro_notantecedent_2(input_n, expected):
+def test_implication_intro_unavailablesubproof_1(input_n, expected):
     prf = Proof()
     A = prf.proposition("A")
     prf.setlogic()

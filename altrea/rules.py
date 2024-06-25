@@ -136,6 +136,7 @@ class Proof:
     axiom_name = "Axiom"
     closenecessary_name = "Close Necessary"
     closepossibly_name = "Close Possibly"
+    closestrictsubproof_name = "Close Strict Subproof"
     closesubproof_name = "Close Subproof"
     definition_name = "Definition"
     entailment_name = "Entailment"
@@ -188,6 +189,8 @@ class Proof:
 
     stopped_closemainproof = "The main proof cannot be closed only completed."
     log_closemainproof = "{0}: The main proof cannot be closed only completed."
+    stopped_closewrongsubproof = "Attempting to close a subproof that is not open."
+    log_closewrongsubproof = '{0}: The current subproof is "{1}" but attempting to close a "{2}" subproof.'
     stopped_contradicted = "The goal has been contradicted."
     log_contradicted = 'The statement "{0}" contradicts the goal "{1}".'
     stopped_linescope = "Referenced item is out of scope."
@@ -199,7 +202,7 @@ class Proof:
     stopped_nodefinitionmatch = "The referenced line does not match the definition."
     log_nodefinitionmatch = '{0}: The referenced item "{1}" on line {2} does not match the definition "{3}".'
     stopped_nogoal = "The proof does not yet have a goal."
-    log_nogoal = '{0}: The proof needs a goal before a line with the item "{1}" can be added to it.'
+    log_nogoal = '{0}: The proof needs a goal before a line can be added to it.'
     stopped_nolines = "The list of lines is empty."
     log_nolines = '{0}: The list of lines "{1}" is empty.'
     stopped_nologic = "No logic has been declared for the proof."
@@ -297,7 +300,8 @@ class Proof:
     log_axiomsaved = '{0}: The axiom named "{1}" has been saved.'
     log_closenecessary = "{0}: The current subproof was closed deriving a Necessary item."
     log_closepossibly = "{0}: The current subproof was closed deriving a Possibly item."
-    log_closesubproof = "{0}: The current subproof was closed deriving an implication."
+    log_closestrictsubproof = '{0}: The current "{1}" subproof {2} has been closed.'
+    log_closesubproof = '{0}: The current "{1}" subproof {2} has been closed.'
     log_definition = '{0}: Item "{1}" has been added using the "{2}" definition.'
     log_definitionalreadyexists = (
         '{0}: A definition with the name "{1}" already exists.'
@@ -756,9 +760,10 @@ class Proof:
         self.previousproofchain = []
         self.previousproofid = -1
         self.currentproof = [1]
+        self.closedproofid = 0
         self.currentproofid = 0
         self.subproof_status = self.subproof_normal
-        self.subproofavailable = []
+        self.subproofavailable = self.subproofavailable_not
         self.subproofchain = ""
         self.proofdata = [[self.name, self.displayname, self.description]]
         self.proofdatafinal = []
@@ -921,10 +926,6 @@ class Proof:
         )  # \
         # and self.status != self.contradicted
 
-    def goodgoal(self):
-        """Check if the proof has at least one goal."""
-
-        return len(self.goals) > 0
 
     def checkitemlines(
         self, caller: str, displayname: str, comment: str, lineslist: list
@@ -1001,33 +1002,162 @@ class Proof:
                 break
         return s
 
-    def closenecessary(self, comment: str = ""):
-        """Call necessary_intro to close a subproof rather than viewing
-        subproofs as part of intelim rules.
-        """
+    # def closenecessary(self, comment: str = ""):
+    #     """Call necessary_intro to close a subproof rather than viewing
+    #     subproofs as part of intelim rules.
+    #     """
 
-        self.logstep(self.log_closenecessary.format(self.closenecessary_name.upper()))
+    #     self.logstep(self.log_closenecessary.format(self.closenecessary_name.upper()))
 
-        self.necessary_intro(comment)
+    #     self.necessary_intro(comment)
 
-    def closepossibly(self, comment: str = ""):
-        """Call possibly_elim to close a subproof rather than viewing
-        subproofs as part of intelim rules.
-        """
+    # def closepossibly(self, comment: str = ""):
+    #     """Call possibly_elim to close a subproof rather than viewing
+    #     subproofs as part of intelim rules.
+    #     """
 
-        self.logstep(self.log_closepossibly.format(self.closepossibly_name.upper()))
+    #     self.logstep(self.log_closepossibly.format(self.closepossibly_name.upper()))
 
-        self.possibly_elim(comment)
+    #     self.possibly_elim(comment)
+
+    def closestrictsubproof(self):
+        """Mark a strict subproof closed."""
+
+        # Look for errors
+        if self.canproceed():
+            if self.goodrule(
+                self.rule_naturaldeduction,
+                self.implication_intro_name,
+                self.implication_intro_name,
+                ""
+            ):
+                if self.currentproofid == 0:
+                    self.logstep(
+                        self.log_closemainproof.format(
+                            self.implication_intro_name.upper()
+                        )
+                    )
+                    self.stopproof(
+                        self.stopped_closemainproof,
+                        self.blankstatement,
+                        self.implication_intro_name,
+                        "",
+                        "",
+                    )
+        if self.canproceed():
+            if self.subproof_status != self.subproof_strict:
+                self.logstep(
+                        self.log_closewrongsubproof.format(
+                            self.closesubproof_name.upper(),
+                            self.subproof_status,
+                            self.subproof_strict
+                        )
+                    )
+                self.stopproof(
+                    self.stopped_closewrongsubproof,
+                    self.blankstatement,
+                    self.closesubproof_name,
+                    "",
+                    "",
+                )
+        # If no errors, perform task
+        if self.canproceed():
+            self.closedproofid = self.currentproofid
+            subproof_status = self.subproof_status
+            line = len(self.lines) - 1
+            self.prooflist[self.currentproofid][1].append(line)
+            self.level -= 1
+            #self.subproofchain = self.subproofchain[3:]
+            self.subproofchain = self.subproofchain[:-3]
+            previousproofid = self.getpreviousproofid(self.currentproofid)
+            self.currentproofid = previousproofid
+            self.currentproof = self.prooflist[previousproofid][1]
+            if len(self.previousproofchain) > 1:
+                self.previousproofchain.pop(len(self.previousproofchain) - 1)
+                self.previousproofid = self.previousproofchain[
+                    len(self.previousproofchain) - 1
+                ]
+            else:
+                self.previousproofchain = []
+                self.previousproofid = -1
+            self.subproofavailable = self.subproofavailable_closestrict
+            self.logstep(self.log_closestrictsubproof.format(
+                    self.closestrictsubproof_name.upper(), 
+                    subproof_status,
+                    self.closedproofid
+                )
+            )
 
 
-    def closesubproof(self, comment: str = ""):
-        """Call implication_intro to close a subproof rather than viewing
-        subproofs as part of intelim rules.
-        """
+    def closesubproof(self):
+        """Mark a normal subproof closed."""
 
-        self.logstep(self.log_closesubproof.format(self.closesubproof_name.upper()))
+        # Look for errors
+        if self.canproceed():
+            if self.goodrule(
+                self.rule_naturaldeduction,
+                self.implication_intro_name,
+                self.implication_intro_name,
+                ""
+            ):
+                if self.currentproofid == 0:
+                    self.logstep(
+                        self.log_closemainproof.format(
+                            self.closesubproof_name.upper()
+                        )
+                    )
+                    self.stopproof(
+                        self.stopped_closemainproof,
+                        self.blankstatement,
+                        self.closesubproof_name,
+                        "",
+                        "",
+                    )
+        if self.canproceed():
+            if self.subproof_status != self.subproof_normal:
+                self.logstep(
+                        self.log_closewrongsubproof.format(
+                            self.closesubproof_name.upper(),
+                            self.subproof_status,
+                            self.subproof_normal
+                        )
+                    )
+                self.stopproof(
+                    self.stopped_closewrongsubproof,
+                    self.blankstatement,
+                    self.closesubproof_name,
+                    "",
+                    "",
+                )
 
-        self.implication_intro(comment)
+        # If no errors, perform task
+        if self.canproceed():
+            self.closedproofid = self.currentproofid
+            subproof_status = self.subproof_status
+            self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
+            self.level -= 1
+            self.subproofchain = self.subproofchain[:-3]
+            antecedent, consequent, previousproofid, previoussubproofstatus = (
+                self.getproof(self.currentproofid)
+            )
+            self.currentproofid = previousproofid
+            self.subproof_status = previoussubproofstatus
+            self.currentproof = self.prooflist[previousproofid][1]
+            if len(self.previousproofchain) > 1:
+                self.previousproofchain.pop(len(self.previousproofchain) - 1)
+                self.previousproofid = self.previousproofchain[
+                    len(self.previousproofchain) - 1
+                ]
+            else:
+                self.previousproofchain = []
+                self.previousproofid = -1
+            self.subproofavailable = self.subproofavailable_closenormal
+            self.logstep(self.log_closesubproof.format(
+                    self.closesubproof_name.upper(), 
+                    self.subproof_status,
+                    self.closedproofid
+                )
+            )
 
 
     def getpreviousproofid(self, proofid: int) -> int:
@@ -1053,6 +1183,24 @@ class Proof:
         previoussubproofstatus = self.prooflist[previousproofid][4]
         return hypothesis, conclusion, previousproofid, previoussubproofstatus
     
+
+    def goodgoal(self, caller: str, displayname: str, comment: str):
+        """Check if the proof has at least one goal."""
+
+        if len(self.goals) == 0:
+            self.logstep(self.log_nogoal.format(caller.upper()))
+            self.stopproof(
+                self.stopped_nogoal,
+                self.blankstatement,
+                displayname,
+                "",
+                "",
+                comment,
+            )
+            return False
+        else:
+            return True
+
 
     def goodline(self, line: int, caller: str, displayname: str, comment: str):
         if not isinstance(line, int):
@@ -1169,6 +1317,28 @@ class Proof:
                 comment,
             )
             return False
+        
+    def goodsubproof(self, caller: str, displayname: str, comment: str):
+        """Check if the proof has at least one goal."""
+
+        if self.subproofavailable != self.subproofavailable_not:
+            self.logstep(
+                self.log_unavailablesubproof.format(
+                    caller.upper(), 
+                    self.subproofavailable
+                )
+            )
+            self.stopproof(
+                self.stopped_unavailablesubproof,
+                self.blankstatement,
+                displayname,
+                "",
+                "",
+                comment
+            )
+            return False
+        else:
+            return True
 
     def iscomplete(self, statement: Wff = None, comment: str = ""):
         """Check if the proof is complete or partially complete and if so leave a message."""
@@ -1382,7 +1552,6 @@ class Proof:
         if self.canproceed():
             self.level += 1
             self.subproofchain = "".join(
-                #[self.label_subproofnormal, self.subproofchain]
                 [self.subproofchain, self.label_subproofnormal]
             )
             nextline = len(self.lines)
@@ -1395,7 +1564,7 @@ class Proof:
                     self.currentproof,
                     self.currentproofid,
                     self.currenthypotheses,
-                    self.subproofchain,
+                    self.subproof_status,
                 ]
             )
             self.previousproofid = self.currentproofid
@@ -3628,9 +3797,28 @@ class Proof:
                             "",
                             comment,
                         )
+                    elif self.subproofavailable not in [
+                            self.subproofavailable_not, 
+                            self.subproofavailable_openstrict
+                        ]:
+                        self.logstep(
+                            self.log_unavailablesubproof.format(
+                                self.addhypothesis_name.upper(), 
+                                self.subproofavailable
+                            )
+                        )
+                        self.stopproof(
+                            self.stopped_unavailablesubproof,
+                            self.blankstatement,
+                            self.addhypothesis_name,
+                            "",
+                            "",
+                            comment
+                        )
 
         # If no errors, perform task
         if self.canproceed():
+            self.subproofavailable = self.subproofavailable_not
             nextline = len(self.lines)
             self.prooflist[self.currentproofid][3].append(nextline)
             self.logstep(
@@ -3714,6 +3902,15 @@ class Proof:
                 conclusionpremises.premises,
                 matchpremiselist,
             )
+
+        # Look for errors: Available subproof
+        if self.canproceed:
+            if self.goodsubproof(
+                self.axiom_name,
+                self.axiom_name,
+                comment
+            ):
+                pass
 
         # If no errors, perform task.
         if self.canproceed():
@@ -3805,6 +4002,15 @@ class Proof:
                 conclusionpremises.premises,
                 matchpremiselist,
             )
+
+        # Look for errors: Available subproof
+        if self.canproceed:
+            if self.goodsubproof(
+                self.definition_name,
+                self.definition_name,
+                comment
+            ):
+                pass
 
         # If no errors, perform task.
         if self.canproceed():
@@ -3930,40 +4136,34 @@ class Proof:
                 comment,
             ):
                 if self.goodobject(
-                    hypothesis, self.hypothesis_name, self.hypothesis_name, comment
+                    hypothesis, 
+                    self.hypothesis_name, 
+                    self.hypothesis_name, 
+                    comment
                 ):
-                    if not self.goodgoal():
-                        self.logstep(
-                            self.log_nogoal.format(
-                                self.hypothesis_name.upper(), hypothesis
+                    if self.goodgoal(
+                        self.hypothesis_name, 
+                        self.hypothesis_name, 
+                        comment
+                    ):
+                        if self.subproofavailable not in [
+                                self.subproofavailable_opennormal, 
+                                self.subproofavailable_openstrict
+                            ]:
+                            self.logstep(
+                                self.log_unavailablesubproof.format(
+                                    self.hypothesis_name.upper(), 
+                                    self.subproofavailable
+                                )
                             )
-                        )
-                        self.stopproof(
-                            self.stopped_nogoal,
-                            self.blankstatement,
-                            self.hypothesis_name,
-                            "",
-                            "",
-                            comment,
-                        )
-                    elif self.subproofavailable not in [
-                            self.subproofavailable_opennormal, 
-                            self.subproofavailable_openstrict
-                        ]:
-                        self.logstep(
-                            self.log_unavailablesubproof.format(
-                                self.hypothesis_name.upper(), 
-                                self.subproofavailable
+                            self.stopproof(
+                                self.stopped_unavailablesubproof,
+                                self.blankstatement,
+                                self.hypothesis_name,
+                                "",
+                                "",
+                                comment
                             )
-                        )
-                        self.stopproof(
-                            self.stopped_unavailablesubproof,
-                            self.blankstatement,
-                            self.hypothesis_name,
-                            "",
-                            "",
-                            comment
-                        )
 
         # If no errors, perform task
         if self.canproceed():
@@ -4154,44 +4354,62 @@ class Proof:
                 self.implication_intro_name,
                 comment,
             ):
-                if self.currentproofid == 0:
+                if self.subproofavailable not in [self.subproofavailable_closenormal, self.subproofavailable_closestrict]:
                     self.logstep(
-                        self.log_closemainproof.format(
-                            self.implication_intro_name.upper()
+                        self.log_unavailablesubproof.format(
+                            self.implication_intro_name.upper(), 
+                            self.subproofavailable
                         )
                     )
                     self.stopproof(
-                        self.stopped_closemainproof,
+                        self.stopped_unavailablesubproof,
                         self.blankstatement,
                         self.implication_intro_name,
                         "",
                         "",
+                        comment
                     )
+                
+                # if self.currentproofid == 0:
+                #     self.logstep(
+                #         self.log_closemainproof.format(
+                #             self.implication_intro_name.upper()
+                #         )
+                #     )
+                #     self.stopproof(
+                #         self.stopped_closemainproof,
+                #         self.blankstatement,
+                #         self.implication_intro_name,
+                #         "",
+                #         "",
+                #     )
 
         # If no errors, perform task
         if self.canproceed():
-            proofid = self.currentproofid
-            subproof_status = self.subproof_status
-            self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
-            self.level -= 1
-            #self.subproofchain = self.subproofchain[3:]
-            self.subproofchain = self.subproofchain[:-3]
+        #     proofid = self.currentproofid
+        #     subproof_status = self.subproof_status
+        #     self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
+        #     self.level -= 1
+        #     self.subproofchain = self.subproofchain[:-3]
             antecedent, consequent, previousproofid, previoussubproofstatus = (
-                self.getproof(self.currentproofid)
+                self.getproof(self.closedproofid)
             )
-            self.currentproofid = previousproofid
-            self.subproof_status = previoussubproofstatus
-            self.currentproof = self.prooflist[previousproofid][1]
-            if len(self.previousproofchain) > 1:
-                self.previousproofchain.pop(len(self.previousproofchain) - 1)
-                self.previousproofid = self.previousproofchain[
-                    len(self.previousproofchain) - 1
-                ]
-            else:
-                self.previousproofchain = []
-                self.previousproofid = -1
+            proofid = self.closedproofid
+            self.closedproofid = 0
+            self.subproofavailable = self.subproofavailable_not
+        #     self.currentproofid = previousproofid
+        #     self.subproof_status = previoussubproofstatus
+        #     self.currentproof = self.prooflist[previousproofid][1]
+        #     if len(self.previousproofchain) > 1:
+        #         self.previousproofchain.pop(len(self.previousproofchain) - 1)
+        #         self.previousproofid = self.previousproofchain[
+        #             len(self.previousproofchain) - 1
+        #         ]
+        #     else:
+        #         self.previousproofchain = []
+        #         self.previousproofid = -1
             implication = Implies(antecedent, consequent)
-            if subproof_status == self.subproof_strict:
+            if self.subproofavailable == self.subproofavailable_closestrict:
                 name = self.implication_intro_strict_name
                 message = self.log_implication_intro_strict
             else:
@@ -4230,50 +4448,44 @@ class Proof:
                 self.rule_naturaldeduction,
                 self.necessary_intro_name,
                 self.necessary_intro_name,
-                comment,
+                comment
             ):
-                # if len(lines) == 0:
-                #     self.logstep(
-                #         self.log_nolines.format(
-                #             self.necessary_intro_name.upper(), lines
-                #         )
-                #     )
-                #     self.stopproof(
-                #         self.stopped_nolines,
-                #         self.blankstatement,
-                #         self.necessary_intro_name,
-                #         "",
-                #         "",
-                #         comment,
-                #     )
-                # else:
-                #     for i in lines:
-                #         if not self.goodline(
-                #             i,
-                #             self.necessary_intro_name,
-                #             self.necessary_intro_name,
-                #             comment,
-                #         ):
-                #             break
-
-        # Look for specific errors
-        #if self.canproceed():
-                if self.subproof_status != self.subproof_strict:
+                if self.subproofavailable not in [ 
+                        self.subproofavailable_closestrict
+                    ]:
                     self.logstep(
-                        self.log_notstrictsubproof.format(
-                            self.necessary_intro_name.upper(),
-                            self.subproof_status,
-                            self.subproof_strict,
+                        self.log_unavailablesubproof.format(
+                            self.necessary_intro_name.upper(), 
+                            self.subproofavailable
                         )
                     )
                     self.stopproof(
-                        self.stopped_notstrictsubproof,
+                        self.stopped_unavailablesubproof,
                         self.blankstatement,
                         self.necessary_intro_name,
                         "",
                         "",
-                        comment,
+                        comment
                     )
+
+        # Look for specific errors
+        # if self.canproceed():
+        #     if self.subproof_status != self.subproof_strict:
+        #         self.logstep(
+        #             self.log_notstrictsubproof.format(
+        #                 self.necessary_intro_name.upper(),
+        #                 self.subproof_status,
+        #                 self.subproof_strict,
+        #             )
+        #         )
+        #         self.stopproof(
+        #             self.stopped_notstrictsubproof,
+        #             self.blankstatement,
+        #             self.necessary_intro_name,
+        #             "",
+        #             "",
+        #             comment,
+        #         )
 
         # If no errors, perform task
         if self.canproceed():
@@ -4298,32 +4510,32 @@ class Proof:
             #     self.previousproofid = -1
 
             # proofid = self.currentproofid
-            self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
-            self.level -= 1
+            # self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
+            # self.level -= 1
             
-            #self.subproofchain = self.subproofchain[3:]
-            self.subproofchain = self.subproofchain[:-3]
-            # antecedent, consequent, previousproofid, previoussubproofstatus = (
-            #     self.getproof(self.currentproofid)
-            # )
-            previousproofid = self.getpreviousproofid(self.currentproofid)
-            #previoussubproofstatus = self.getprevioussubproofstatus(self.currentproofid)
-            self.currentproofid = previousproofid
+            # #self.subproofchain = self.subproofchain[3:]
+            # self.subproofchain = self.subproofchain[:-3]
+            # # antecedent, consequent, previousproofid, previoussubproofstatus = (
+            # #     self.getproof(self.currentproofid)
+            # # )
+            # previousproofid = self.getpreviousproofid(self.currentproofid)
+            # #previoussubproofstatus = self.getprevioussubproofstatus(self.currentproofid)
+            # self.currentproofid = previousproofid
 
-            #self.subproof_status = previoussubproofstatus
-            self.subproof_status = self.prooflist[self.currentproofid][4]  #new
-            # antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
-            #
-            #self.currentproofid = previousproofid
-            self.currentproof = self.prooflist[previousproofid][1]
-            if len(self.previousproofchain) > 1:
-                self.previousproofchain.pop(len(self.previousproofchain) - 1)
-                self.previousproofid = self.previousproofchain[
-                    len(self.previousproofchain) - 1
-                ]
-            else:
-                self.previousproofchain = []
-                self.previousproofid = -1
+            # #self.subproof_status = previoussubproofstatus
+            # self.subproof_status = self.prooflist[self.currentproofid][4]  #new
+            # # antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
+            # #
+            # #self.currentproofid = previousproofid
+            # self.currentproof = self.prooflist[previousproofid][1]
+            # if len(self.previousproofchain) > 1:
+            #     self.previousproofchain.pop(len(self.previousproofchain) - 1)
+            #     self.previousproofid = self.previousproofchain[
+            #         len(self.previousproofchain) - 1
+            #     ]
+            # else:
+            #     self.previousproofchain = []
+            #     self.previousproofid = -1
             #for i in lines:
             index = len(self.lines) - 1
             statement = self.item(index)
@@ -4367,7 +4579,23 @@ class Proof:
                 self.possibly_elim_name,
                 comment,
             ):
-                pass
+                if self.subproofavailable not in [ 
+                        self.subproofavailable_closestrict
+                    ]:
+                    self.logstep(
+                        self.log_unavailablesubproof.format(
+                            self.possibly_elim_name.upper(), 
+                            self.subproofavailable
+                        )
+                    )
+                    self.stopproof(
+                        self.stopped_unavailablesubproof,
+                        self.blankstatement,
+                        self.possibly_elim_name,
+                        "",
+                        "",
+                        comment
+                    )
                 # if len(lines) == 0:
                 #     self.logstep(self.log_nolines.format(self.possibly_elim_name.upper(),
                 #                                          lines))
@@ -4386,42 +4614,42 @@ class Proof:
                 #             break
 
         # Look for specific errors
-        if self.canproceed():
-            if self.subproof_status != self.subproof_strict:
-                self.logstep(
-                    self.log_notstrictsubproof.format(
-                        self.possibly_elim_name.upper(),
-                        self.subproof_status,
-                        self.subproof_strict,
-                    )
-                )
-                self.stopproof(
-                    self.stopped_notstrictsubproof,
-                    self.blankstatement,
-                    self.possibly_elim_name,
-                    "",
-                    "",
-                    comment,
-                )
+        # if self.canproceed():
+        #     if self.subproof_status != self.subproof_strict:
+        #         self.logstep(
+        #             self.log_notstrictsubproof.format(
+        #                 self.possibly_elim_name.upper(),
+        #                 self.subproof_status,
+        #                 self.subproof_strict,
+        #             )
+        #         )
+        #         self.stopproof(
+        #             self.stopped_notstrictsubproof,
+        #             self.blankstatement,
+        #             self.possibly_elim_name,
+        #             "",
+        #             "",
+        #             comment,
+        #         )
 
         # If no errors, perform task
         if self.canproceed():
             line = len(self.lines) - 1
-            self.prooflist[self.currentproofid][1].append(line)
-            self.level -= 1
-            #self.subproofchain = self.subproofchain[3:]
-            self.subproofchain = self.subproofchain[:-3]
-            previousproofid = self.getpreviousproofid(self.currentproofid)
-            self.currentproofid = previousproofid
-            self.currentproof = self.prooflist[previousproofid][1]
-            if len(self.previousproofchain) > 1:
-                self.previousproofchain.pop(len(self.previousproofchain) - 1)
-                self.previousproofid = self.previousproofchain[
-                    len(self.previousproofchain) - 1
-                ]
-            else:
-                self.previousproofchain = []
-                self.previousproofid = -1
+            # self.prooflist[self.currentproofid][1].append(line)
+            # self.level -= 1
+            # #self.subproofchain = self.subproofchain[3:]
+            # self.subproofchain = self.subproofchain[:-3]
+            # previousproofid = self.getpreviousproofid(self.currentproofid)
+            # self.currentproofid = previousproofid
+            # self.currentproof = self.prooflist[previousproofid][1]
+            # if len(self.previousproofchain) > 1:
+            #     self.previousproofchain.pop(len(self.previousproofchain) - 1)
+            #     self.previousproofid = self.previousproofchain[
+            #         len(self.previousproofchain) - 1
+            #     ]
+            # else:
+            #     self.previousproofchain = []
+            #     self.previousproofid = -1
             statement = self.item(len(self.lines) - 1)
             possiblystatement = Possibly(statement)
             self.logstep(
@@ -4496,20 +4724,23 @@ class Proof:
                 comment,
             ):
                 if self.goodobject(
-                    premise, self.premise_name, self.premise_name, comment
+                    premise, 
+                    self.premise_name, 
+                    self.premise_name, 
+                    comment
                 ):
-                    if not self.goodgoal():
-                        self.logstep(
-                            self.log_nogoal.format(self.premise_name.upper(), premise)
-                        )
-                        self.stopproof(
-                            self.stopped_nogoal,
-                            self.blankstatement,
+                    if self.goodgoal(
+                        self.premise_name, 
+                        self.premise_name, 
+                        comment
+                    ):
+                        if self.goodsubproof(
                             self.premise_name,
-                            "",
-                            "",
-                            comment,
-                        )
+                            self.premise_name,
+                            comment
+                        ):
+                            pass
+                        
 
         # If no errors, perform task
         if self.canproceed():
@@ -4605,46 +4836,47 @@ class Proof:
                 self.openstrictsubproof_name,
                 comment,
             ):
-                if (
-                    reiterate > 0
-                    and reiterate < len(self.lines)
-                    and isinstance(reiterate, int)
-                ):
-                    statement = self.lines[reiterate][self.statementindex]
-                    if type(statement) != Necessary:
-                        self.logstep(
-                            self.log_notnecessary.format(
-                                self.openstrictsubproof_name.upper(),
-                                statement,
-                                reiterate,
-                            )
-                        )
-                        self.stopproof(
-                            self.stopped_notnecessary,
-                            self.blankstatement,
-                            self.openstrictsubproof_name,
-                            str(reiterate),
-                            "",
-                            comment,
-                        )
-                    else:
-                        pass
-                elif isinstance(addhypothesis, Wff):
-                    if self.goodobject(
-                        addhypothesis,
-                        self.openstrictsubproof_name,
-                        self.openstrictsubproof_name,
-                        comment,
-                    ):
-                        pass
-                elif isinstance(hypothesis, Wff):
-                    if self.goodobject(
-                        hypothesis,
-                        self.openstrictsubproof_name,
-                        self.openstrictsubproof_name,
-                        comment,
-                    ):
-                        pass
+                pass
+                # if (
+                #     reiterate > 0
+                #     and reiterate < len(self.lines)
+                #     and isinstance(reiterate, int)
+                # ):
+                #     statement = self.lines[reiterate][self.statementindex]
+                #     if type(statement) != Necessary:
+                #         self.logstep(
+                #             self.log_notnecessary.format(
+                #                 self.openstrictsubproof_name.upper(),
+                #                 statement,
+                #                 reiterate,
+                #             )
+                #         )
+                #         self.stopproof(
+                #             self.stopped_notnecessary,
+                #             self.blankstatement,
+                #             self.openstrictsubproof_name,
+                #             str(reiterate),
+                #             "",
+                #             comment,
+                #         )
+                #     else:
+                #         pass
+                # elif isinstance(addhypothesis, Wff):
+                #     if self.goodobject(
+                #         addhypothesis,
+                #         self.openstrictsubproof_name,
+                #         self.openstrictsubproof_name,
+                #         comment,
+                #     ):
+                #         pass
+                # elif isinstance(hypothesis, Wff):
+                #     if self.goodobject(
+                #         hypothesis,
+                #         self.openstrictsubproof_name,
+                #         self.openstrictsubproof_name,
+                #         comment,
+                #     ):
+                #         pass
 
         # If no errors, perform task
         if self.canproceed():
@@ -4662,7 +4894,7 @@ class Proof:
                     self.level,
                     self.currentproof,
                     self.currentproofid,
-                    [],  # self.currenthypotheses,
+                    [], #self.currenthypotheses,
                     self.subproof_status,
                 ]
             )
@@ -4679,12 +4911,12 @@ class Proof:
                 )
             )
             self.subproofavailable = self.subproofavailable_openstrict
-            if reiterate > 0:
-                self.reiterate(reiterate, comment)
-            elif isinstance(addhypothesis, Wff):
-                self.addhypothesis(addhypothesis, comment)
-            else:
-                self.hypothesis(hypothesis, comment)
+            # if reiterate > 0:
+            #     self.reiterate(reiterate, comment)
+            # elif isinstance(addhypothesis, Wff):
+            #     self.addhypothesis(addhypothesis, comment)
+            # else:
+            #     self.hypothesis(hypothesis, comment)
 
             # else:
             #     newcomment = comment
@@ -4750,6 +4982,24 @@ class Proof:
                         "",
                         comment,
                     )
+                # elif self.subproofavailable not in [
+                #             self.subproofavailable_not, 
+                #             self.subproofavailable_openstrict
+                #         ]:
+                #         self.logstep(
+                #             self.log_unavailablesubproof.format(
+                #                 self.reiterate_name.upper(), 
+                #                 self.subproofavailable
+                #             )
+                #         )
+                #         self.stopproof(
+                #             self.stopped_unavailablesubproof,
+                #             self.blankstatement,
+                #             self.reiterate_name,
+                #             "",
+                #             "",
+                #             comment
+                #         )
 
         # Look for specific errors
         if self.canproceed():
@@ -4790,6 +5040,7 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
+            self.subproofavailable = self.subproofavailable_not
             self.logstep(
                 self.log_reiterate.format(
                     self.reiterate_name.upper(), statement, line, self.currentproofid
@@ -5093,27 +5344,50 @@ class Proof:
 
         # Look for errors: Get the saved proof.
         if self.canproceed():
-            foundindex = -1
-            for i in range(len(self.logicrules)):
-                if self.logicrules[i][0] == name:
-                    foundindex = i
-                    break
-            if foundindex < 0:
-                self.logstep(
-                    self.log_notransformationrule.format(self.rule_name.upper(), name)
-                )
-                self.stopproof(
-                    self.stopped_notransformationrule,
-                    self.blankstatement,
-                    name,
-                    "",
-                    "",
-                    comment,
-                )
-            else:
-                pattern = self.logicrules[foundindex][1]
-                displayname = self.logicrules[foundindex][2]
-                description = self.logicrules[foundindex][3]
+            #if self.canproceed:
+            if self.goodsubproof(
+                self.rule_name,
+                self.rule_name,
+                comment
+            ):
+                foundindex = -1
+                for i in range(len(self.logicrules)):
+                    if self.logicrules[i][0] == name:
+                        foundindex = i
+                        break
+                if foundindex < 0:
+                    self.logstep(
+                        self.log_notransformationrule.format(self.rule_name.upper(), name)
+                    )
+                    self.stopproof(
+                        self.stopped_notransformationrule,
+                        self.blankstatement,
+                        name,
+                        "",
+                        "",
+                        comment,
+                    )
+                else:
+                    pattern = self.logicrules[foundindex][1]
+                    displayname = self.logicrules[foundindex][2]
+                    description = self.logicrules[foundindex][3]
+                # if self.subproofavailable not in [
+                #         self.subproofavailable_not
+                #     ]:
+                #     self.logstep(
+                #         self.log_unavailablesubproof.format(
+                #             self.rule_name.upper(), 
+                #             self.subproofavailable
+                #         )
+                #     )
+                #     self.stopproof(
+                #         self.stopped_unavailablesubproof,
+                #         self.blankstatement,
+                #         self.rule_name,
+                #         "",
+                #         "",
+                #         comment
+                #     )
 
         # Look for errors: Check the substitution values.
         if self.canproceed():
@@ -5140,6 +5414,15 @@ class Proof:
                 conclusionpremises.premises,
                 matchlist,
             )
+
+        # Look for errors: Available subproof
+        # if self.canproceed:
+        #     if self.goodsubproof(
+        #         self.rule_name,
+        #         self.rule_name,
+        #         comment
+        #     ):
+        #         pass
 
         # If no errors, perform task.
         if self.canproceed():
@@ -5245,6 +5528,26 @@ class Proof:
                 conclusionpremises.premises,
                 matchpremiselist,
             )
+
+        # Look for errors: Available subproof
+        if self.canproceed:
+            if self.subproofavailable not in [ 
+                    self.subproofavailable_not
+                ]:
+                self.logstep(
+                    self.log_unavailablesubproof.format(
+                        self.lemma_name.upper(), 
+                        self.subproofavailable
+                    )
+                )
+                self.stopproof(
+                    self.stopped_unavailablesubproof,
+                    self.blankstatement,
+                    self.lemma_name,
+                    "",
+                    "",
+                    comment
+                )
 
         # If no errors, perform task.
         if self.canproceed():

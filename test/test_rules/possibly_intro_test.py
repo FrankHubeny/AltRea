@@ -125,6 +125,7 @@ def test_possibly_intro_linescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
     prf.rule("pos intro", [A], [1])
 

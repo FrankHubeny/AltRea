@@ -621,6 +621,7 @@ def test_axiom_linescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
+    prf.closesubproof()
     prf.implication_intro()
     prf.premise(Implies(A, B))
     prf.axiom("modus ponens", [A, B], [1, 3])

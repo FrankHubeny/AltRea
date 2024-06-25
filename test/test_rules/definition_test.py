@@ -343,6 +343,7 @@ def test_definition_linescope_1(input_n, expected):
     prf.hypothesis(Implies(A, B))
     prf.addhypothesis(Implies(B, A))
     prf.rule("conj intro", [prf.item(1), prf.item(2)], [1, 2])
+    prf.closesubproof()
     prf.implication_intro()
     prf.definition('iff intro', [A, B], [3])
     

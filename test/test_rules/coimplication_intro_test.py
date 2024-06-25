@@ -118,6 +118,7 @@ def test_coimplication_intro_linescope_1(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(And(Implies(A, B), Implies(B, A)))
+    prf.closesubproof()
     prf.implication_intro()
     prf.rule("coimp intro", [A, B], [1])
     prf.hypothesis(A, comment="Nothing can be added after the proof is stopped.")

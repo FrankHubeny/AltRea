@@ -182,8 +182,8 @@ def test_implication_intro_clean_3(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(B)
-    prf.addhypothesis(A)
-    prf.addhypothesis(C)
+    prf.hypothesis(A)
+    prf.hypothesis(C)
     prf.rule("conj intro", [B, A], [1, 2])
     prf.closesubproof()
     prf.implication_intro()
@@ -233,7 +233,7 @@ def test_implication_intro_strict_clean_1(input_n, expected):
     prf.goal(Implies(A, A), comment="Strict Subproof")
     
     prf.openstrictsubproof()
-    prf.addhypothesis(A)
+    prf.hypothesis(A)
     
     prf.closestrictsubproof()
     prf.implication_intro()

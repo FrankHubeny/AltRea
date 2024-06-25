@@ -112,7 +112,7 @@ def test_negation_intro_clean_2(input_n, expected):
     
     prf.opensubproof()
     prf.hypothesis(A)
-    prf.addhypothesis(Not(A))
+    prf.hypothesis(Not(A))
     prf.rule("neg elim", [A], [1, 2])
     prf.closesubproof()
     prf.implication_intro()

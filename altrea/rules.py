@@ -290,9 +290,9 @@ class Proof:
 
     """Strings to log messages upon successful completion of tasks."""
 
-    log_addhypothesis = (
-        '{0}: Item "{1}" has been added as an hypothesis to subproof {2}.'
-    )
+    # log_addhypothesis = (
+    #     '{0}: Item "{1}" has been added as an hypothesis to subproof {2}.'
+    # )
     log_axiom = '{0}: Item "{1}" has been added through the "{2}" axiom.'
     log_axiomalreadyexists = '{0}: An axiom with the name "{1}" already exists.'
     log_axiomnotfound = '{0}: An axiom with the name "{1}" was not found.'
@@ -353,7 +353,7 @@ class Proof:
     
     log_ruleremoved = '{0}: The rule named "{1}" has been removed.'
     log_rulesaved = '{0}: The rule named "{1}" has been saved.'
-    log_strictsubproofstarted = '{0}: A strict subproof "{1}" has been started with either line {2}, additional hypothesis "{3}" or hypothesis "{4}".'
+    log_strictsubproofstarted = '{0}: A strict subproof "{1}" has been started.'
     log_substitute = '{0}: The placeholder(s) in the string "{1}" have been replaced with "{2}" to become "{3}".'
     log_substitution = (
         '{0}: The statement "{1}" on line "{2}" has been substituted with "{3}".'
@@ -1556,14 +1556,14 @@ class Proof:
             )
             nextline = len(self.lines)
             self.currentproof = [nextline]
-            self.currenthypotheses = [nextline]
+            #self.currenthypotheses = [nextline]
             self.subproof_status = self.subproof_normal
             self.prooflist.append(
                 [
                     self.level,
                     self.currentproof,
                     self.currentproofid,
-                    self.currenthypotheses,
+                    [], #self.currenthypotheses,
                     self.subproof_status,
                 ]
             )
@@ -3725,123 +3725,123 @@ class Proof:
     or define an hypotheses.
     """
 
-    def addhypothesis(self, hypothesis: Wff, comment: str = ""):
-        """Add to the currently opened subordinate proof a new hypothesis which will be a conjoint of the antecedent
-        of the resulting implication when the subproof is finished.
+    # def addhypothesis_old(self, hypothesis: Wff, comment: str = ""):
+    #     """Add to the currently opened subordinate proof a new hypothesis which will be a conjoint of the antecedent
+    #     of the resulting implication when the subproof is finished.
 
-        Parameters:
-            hypothesis: The hypothesis that will be added.
-            comment: An optional comment the user may add to this line of the proof.
+    #     Parameters:
+    #         hypothesis: The hypothesis that will be added.
+    #         comment: An optional comment the user may add to this line of the proof.
 
-        Examples:
-            To introduce an implication one needs an antecedent and a consequent.  The antecedent is
-            entered into the proof through an hypothesis which begins a subordinate proof.  Optionally,
-            additional hypotheses can be added through this function.  These additional hypotheses do
-            not start a subordinate proof.  Rather, they add to the current one.  After the conclusion
-            has been derived the subordinate proof is closed by calling `implication_intro` which
-            introduces an implication in the parent proof containing all of the hypotheses as conjoints
-            of an `And` object.  That process is illustrated in this example.  The comments are optional.
+    #     Examples:
+    #         To introduce an implication one needs an antecedent and a consequent.  The antecedent is
+    #         entered into the proof through an hypothesis which begins a subordinate proof.  Optionally,
+    #         additional hypotheses can be added through this function.  These additional hypotheses do
+    #         not start a subordinate proof.  Rather, they add to the current one.  After the conclusion
+    #         has been derived the subordinate proof is closed by calling `implication_intro` which
+    #         introduces an implication in the parent proof containing all of the hypotheses as conjoints
+    #         of an `And` object.  That process is illustrated in this example.  The comments are optional.
 
-            >>> from altrea. import Implies, And
-            >>> from altrea.rules import Proof
-            >>> pr = Proof()
-            >>> A = pr.proposition('A')
-            >>> B = pr.proposition('B')
-            >>> C = pr.proposition('C')
-            >>> pr.setlogic()
-            >>> pr.goal(Implies(And(A, C), B), 'The goal of the proof')
-            >>> pr.premise(B, 'A premise for the proof')
-            >>> pr.hypothesis(A, 'This opens a subproof with the hypothesis "A"')
-            >>> pr.addhypothesis(C, 'Add a second hypothesis without opening a subproof')
-            >>> pr.reiterate(1, 'Bring the premise on line 1 to the subproof')
-            >>> pr.implication_intro('Close the subproof with an implication in the main proof')
-            >>> pr.displayproof(short=1, latex=0)
-                    Item  ...                                                              Comment
-            (A & C) > B  ...                                                The goal of the proof
-            1            B  ...                                              A premise for the proof
-            2        A   |  ...                        This opens a subproof with the hypothesis "A"
-            3        C __|  ...                   Add a second hypothesis without opening a subproof
-            4        B   |  ...                          Bring the premise on line 1 to the subproof
-            5  (A & C) > B  ...  COMPLETE - Close the subproof with an implication in the main proof
+    #         >>> from altrea. import Implies, And
+    #         >>> from altrea.rules import Proof
+    #         >>> pr = Proof()
+    #         >>> A = pr.proposition('A')
+    #         >>> B = pr.proposition('B')
+    #         >>> C = pr.proposition('C')
+    #         >>> pr.setlogic()
+    #         >>> pr.goal(Implies(And(A, C), B), 'The goal of the proof')
+    #         >>> pr.premise(B, 'A premise for the proof')
+    #         >>> pr.hypothesis(A, 'This opens a subproof with the hypothesis "A"')
+    #         >>> pr.addhypothesis(C, 'Add a second hypothesis without opening a subproof')
+    #         >>> pr.reiterate(1, 'Bring the premise on line 1 to the subproof')
+    #         >>> pr.implication_intro('Close the subproof with an implication in the main proof')
+    #         >>> pr.displayproof(short=1, latex=0)
+    #                 Item  ...                                                              Comment
+    #         (A & C) > B  ...                                                The goal of the proof
+    #         1            B  ...                                              A premise for the proof
+    #         2        A   |  ...                        This opens a subproof with the hypothesis "A"
+    #         3        C __|  ...                   Add a second hypothesis without opening a subproof
+    #         4        B   |  ...                          Bring the premise on line 1 to the subproof
+    #         5  (A & C) > B  ...  COMPLETE - Close the subproof with an implication in the main proof
 
-        See Also:
-            - `hypothesis`
-            - `implication_intro`
-        """
+    #     See Also:
+    #         - `hypothesis`
+    #         - `implication_intro`
+    #     """
 
-        # Look for errors
-        if self.canproceed():
-            if self.goodrule(
-                self.rule_naturaldeduction,
-                self.addhypothesis_name,
-                self.addhypothesis_name,
-                comment,
-            ):
-                if self.goodobject(
-                    hypothesis,
-                    self.addhypothesis_name,
-                    self.addhypothesis_name,
-                    comment,
-                ):
-                    if self.currentproofid == 0:
-                        self.logstep(
-                            self.log_nosubproof.format(
-                                self.addhypothesis_name.upper(), hypothesis
-                            )
-                        )
-                        self.stopproof(
-                            self.stopped_nosubproof,
-                            self.blankstatement,
-                            self.hypothesis_name,
-                            "",
-                            "",
-                            comment,
-                        )
-                    elif self.subproofavailable not in [
-                            self.subproofavailable_not, 
-                            self.subproofavailable_openstrict
-                        ]:
-                        self.logstep(
-                            self.log_unavailablesubproof.format(
-                                self.addhypothesis_name.upper(), 
-                                self.subproofavailable
-                            )
-                        )
-                        self.stopproof(
-                            self.stopped_unavailablesubproof,
-                            self.blankstatement,
-                            self.addhypothesis_name,
-                            "",
-                            "",
-                            comment
-                        )
+        # # Look for errors
+        # if self.canproceed():
+        #     if self.goodrule(
+        #         self.rule_naturaldeduction,
+        #         self.addhypothesis_name,
+        #         self.addhypothesis_name,
+        #         comment,
+        #     ):
+        #         if self.goodobject(
+        #             hypothesis,
+        #             self.addhypothesis_name,
+        #             self.addhypothesis_name,
+        #             comment,
+        #         ):
+        #             if self.currentproofid == 0:
+        #                 self.logstep(
+        #                     self.log_nosubproof.format(
+        #                         self.addhypothesis_name.upper(), hypothesis
+        #                     )
+        #                 )
+        #                 self.stopproof(
+        #                     self.stopped_nosubproof,
+        #                     self.blankstatement,
+        #                     self.hypothesis_name,
+        #                     "",
+        #                     "",
+        #                     comment,
+        #                 )
+        #             elif self.subproofavailable not in [
+        #                     self.subproofavailable_not, 
+        #                     self.subproofavailable_openstrict
+        #                 ]:
+        #                 self.logstep(
+        #                     self.log_unavailablesubproof.format(
+        #                         self.addhypothesis_name.upper(), 
+        #                         self.subproofavailable
+        #                     )
+        #                 )
+        #                 self.stopproof(
+        #                     self.stopped_unavailablesubproof,
+        #                     self.blankstatement,
+        #                     self.addhypothesis_name,
+        #                     "",
+        #                     "",
+        #                     comment
+        #                 )
 
-        # If no errors, perform task
-        if self.canproceed():
-            self.subproofavailable = self.subproofavailable_not
-            nextline = len(self.lines)
-            self.prooflist[self.currentproofid][3].append(nextline)
-            self.logstep(
-                self.log_addhypothesis.format(
-                    self.addhypothesis_name.upper(), hypothesis, self.currentproofid
-                )
-            )
-            newcomment = self.iscomplete(hypothesis, comment)
-            self.lines.append(
-                [
-                    hypothesis,
-                    self.level,
-                    self.currentproofid,
-                    self.hypothesis_name,
-                    "",
-                    "",
-                    newcomment,
-                    self.linetype_hypothesis,
-                    self.subproofchain,
-                ]
-            )
-            #self.appendproofdata(hypothesis, self.hypothesis_tag)
-            self.appendproofdata(hypothesis)
+        # # If no errors, perform task
+        # if self.canproceed():
+        #     self.subproofavailable = self.subproofavailable_not
+        #     nextline = len(self.lines)
+        #     self.prooflist[self.currentproofid][3].append(nextline)
+        #     self.logstep(
+        #         self.log_addhypothesis.format(
+        #             self.addhypothesis_name.upper(), hypothesis, self.currentproofid
+        #         )
+        #     )
+        #     newcomment = self.iscomplete(hypothesis, comment)
+        #     self.lines.append(
+        #         [
+        #             hypothesis,
+        #             self.level,
+        #             self.currentproofid,
+        #             self.hypothesis_name,
+            #         "",
+            #         "",
+            #         newcomment,
+            #         self.linetype_hypothesis,
+            #         self.subproofchain,
+            #     ]
+            # )
+            # #self.appendproofdata(hypothesis, self.hypothesis_tag)
+            # self.appendproofdata(hypothesis)
 
     def axiom(
         self, name: str, subslist: list, premiselist: list = [], comment: str = ""
@@ -4148,8 +4148,9 @@ class Proof:
                     ):
                         if self.subproofavailable not in [
                                 self.subproofavailable_opennormal, 
-                                self.subproofavailable_openstrict
-                            ]:
+                                self.subproofavailable_openstrict,
+                                self.subproofavailable_not
+                            ] or self.level == 0:
                             self.logstep(
                                 self.log_unavailablesubproof.format(
                                     self.hypothesis_name.upper(), 
@@ -4189,6 +4190,8 @@ class Proof:
             # self.previousproofchain.append(self.currentproofid)
             # self.currentproofid = len(self.prooflist) - 1
             self.subproofavailable = self.subproofavailable_not
+            nextline = len(self.lines)
+            self.prooflist[self.currentproofid][3].append(nextline)
             self.logstep(
                 self.log_hypothesis.format(
                     self.hypothesis_name.upper(), self.currentproofid, hypothesis
@@ -4821,9 +4824,9 @@ class Proof:
 
     def openstrictsubproof(
         self,
-        reiterate: int = 0,
-        addhypothesis: Wff = None,
-        hypothesis: Wff = None,
+        # reiterate: int = 0,
+        # addhypothesis: Wff = None,
+        # hypothesis: Wff = None,
         comment: str = "",
     ):
         """Begin a strict subproof with either a reiterated line or an hypothesis."""
@@ -4887,7 +4890,7 @@ class Proof:
             )
             nextline = len(self.lines)
             self.currentproof = [nextline]
-            # self.currenthypotheses = [nextline]
+            #self.currenthypotheses = [nextline]
             self.subproof_status = self.subproof_strict
             self.prooflist.append(
                 [
@@ -4904,10 +4907,7 @@ class Proof:
             self.logstep(
                 self.log_strictsubproofstarted.format(
                     self.openstrictsubproof_name.upper(),
-                    self.currentproofid,
-                    reiterate,
-                    addhypothesis,
-                    hypothesis,
+                    self.currentproofid
                 )
             )
             self.subproofavailable = self.subproofavailable_openstrict

@@ -50,7 +50,7 @@ def test_possibly_elim_clean_1(input_n, expected):
     prf.goal(Possibly(A))
     
     prf.openstrictsubproof()
-    prf.addhypothesis(A)
+    prf.hypothesis(A)
     prf.closestrictsubproof()
     prf.possibly_elim()
 
@@ -96,7 +96,7 @@ def test_possibly_elim_ruleclass_1(input_n, expected):
     prf.goal(Possibly(A))
     
     prf.openstrictsubproof()
-    prf.addhypothesis(A)
+    prf.hypothesis(A)
     prf.proofrules = prf.rule_axiomatic
     prf.possibly_elim()
 

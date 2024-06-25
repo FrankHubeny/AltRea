@@ -97,7 +97,7 @@ def test_openclosestrictsubproof_clean_2(input_n, expected):
     prf.premise(Necessary(A))
     
     prf.openstrictsubproof()
-    prf.addhypothesis(C)
+    prf.hypothesis(C)
     prf.closestrictsubproof()
 
     assert eval(input_n) == expected
@@ -186,7 +186,7 @@ def test_openclosestrictsubproof_clean_4(input_n, expected):
     prf.openstrictsubproof()
     prf.reiterate(1)
     prf.openstrictsubproof()
-    prf.addhypothesis(B)
+    prf.hypothesis(B)
     prf.openstrictsubproof()
     prf.opensubproof()
     prf.hypothesis(B)

@@ -134,8 +134,8 @@ class Proof:
 
     addhypothesis_name = "Add Hypothesis"
     axiom_name = "Axiom"
-    closenecessary_name = "Close Necessary"
-    closepossibly_name = "Close Possibly"
+    # closenecessary_name = "Close Necessary"
+    # closepossibly_name = "Close Possibly"
     closestrictsubproof_name = "Close Strict Subproof"
     closesubproof_name = "Close Subproof"
     definition_name = "Definition"
@@ -465,29 +465,35 @@ class Proof:
 
     write_axiom = "{0}From the {1} axiom we can assert item ${2}$ on line {3}.\n\n"
     write_definition = "{0}The {1} can be rewritten as ${2}$ on line {3} by the {4} definition.\n\n"
-    write_hypothesis = "{0}As an hypothesis we assert item ${1}$ on line {2}.\n\n"
+    write_definition_norefs = "{0}We can write ${1}$ on line {2} by the {3} definition.\n\n"
+    write_hypothesis = "{0}\n\nWe assert the hypothesis ${1}$ on line {2} in order to derive ${3}$ on line {4}. "
     write_lemma = "{0}From {1} using {2} we can assert item ${3}$ on line {4}.\n\n"
     write_lemmalist = "{0}{1}"
-    write_premises_none = "The proof uses no premises.\n\n"
-    write_premises_one = "As a premise we are given ${0}$."
-    write_premises_first = "As premises we are given ${0}"
-    write_premises_many = ", ${0}"
-    write_premises_last = " and ${}$."
-    write_premise = "{0}We are given the premise ${1}$ on line {2}.\n\n"
+    write_premises_none = "The proof uses no premises. "
+    write_premises_one = "As a premise we are given ${0}$. "
+    write_premises_first = "As premises we are given ${0}$"
+    write_premises_many = ", ${0}$"
+    write_premises_last = " and ${}$.\n\n"
+    write_premise = "{0}We are given the premise ${1}$ on line {2}.\n"
     write_premises = "We are given {0} premises. "
-    write_proofconclusion = "We can derive ${0}$.  Hence, we have ${1}$.\n\n"
+    write_proofconclusion = "\n\nSince we can derive ${0}$, we have ${1}$.\n\n"
     write_proofintro = "The following table shows the lines of the proof.\n\n"
     write_referenceditems_first = "item ${0}$ on line {1}"
     write_referenceditems_many = "{0}, item ${1}$ on line {2}"
     write_referenceditems_last = "{0} and item ${1}$ on line {2}"
-    write_rule = "{0}From {1} using the {2} rule we can derive item ${3}$ on line {4}.\n\n"
-    write_substitution = "{0}From {1} using substitution we can derive item ${2}$ on line {3}.\n\n"
+    write_referenceditems_subproofs ="{0}subproofs {1}"
+    write_referenceditems_subproof_one ="{0}subproof {1}"
+    write_rule = "{0}From {1} using the {2} rule we can derive item ${3}$ on line {4}. "
+    write_rule_norefs = "{0}Using the {1} rule we can derive item ${2}$ on line {3}. "
+    write_substitution = "{0}From {1} using substitution we can derive item ${2}$ on line {3}. "
+    write_substitution = "{0}Using substitution we can derive item ${1}$ on line {2}. "
     write_theoremstatement = "\\begin{{theorem*}}[{0}]\n The entailment ${1}$ can be derived. \n\\end{{theorem*}}\n\n"
-    write_transformationrule = "{0}From the {1} using the {2} rule we can derive item ${3}$ on line {4}.\n\n"
-    write_variable_one = "Let ${0}$ be an arbitrary proposition.\n\n"
+    write_transformationrule = "{0}Using the {2} rule with {1} we can derive item ${3}$ on line {4}. "
+    write_transformationrule_norefs = "{0}Using the {1} rule we can derive item ${2}$ on line {3}. "
+    write_variable_one = "Let ${0}$ be an arbitrary proposition. "
     write_variable_first = "Let ${0}$"
     write_variable_many = ", ${0}$"
-    write_variable_last = " and ${0}$ be arbitrary propositions.\n\n"
+    write_variable_last = " and ${0}$ be arbitrary propositions. "
     write_withoutlemmas = "The proof is self contained without referencing other saved proofs.\n\n"
     write_withlemmas = "The proof references other saved proofs.\n\n"
 
@@ -776,6 +782,14 @@ class Proof:
                 self.subproof_status,
             ]
         ]
+        self.proofcodevariable = "proofcode"
+        self.proofcode = [
+            f'{self.proofcodevariable} = Proof(',
+            f'  "{self.name}",',
+            f'  "{self.displayname}",',
+            f'  "{self.description}"',
+            ')'
+        ]
         self.proofrules = self.rule_naturaldeduction
         self.level = self.lowestlevel
         self.status = ""
@@ -1060,18 +1074,22 @@ class Proof:
                     "",
                     "",
                 )
+
         # If no errors, perform task
         if self.canproceed():
+            #Log code
+            self.proofcode.append(f'{self.proofcodevariable}.closestrictsubproof()')
+
             self.closedproofid = self.currentproofid
             subproof_status = self.subproof_status
             line = len(self.lines) - 1
             self.prooflist[self.currentproofid][1].append(line)
             self.level -= 1
-            #self.subproofchain = self.subproofchain[3:]
             self.subproofchain = self.subproofchain[:-3]
             previousproofid = self.getpreviousproofid(self.currentproofid)
             self.currentproofid = previousproofid
             self.currentproof = self.prooflist[previousproofid][1]
+            self.subproof_status = self.prooflist[previousproofid][4]
             if len(self.previousproofchain) > 1:
                 self.previousproofchain.pop(len(self.previousproofchain) - 1)
                 self.previousproofid = self.previousproofchain[
@@ -1114,6 +1132,9 @@ class Proof:
                         "",
                     )
         if self.canproceed():
+            #Log code
+            self.proofcode.append(f'{self.proofcodevariable}.closesubproof()')
+
             if self.subproof_status != self.subproof_normal:
                 self.logstep(
                         self.log_closewrongsubproof.format(
@@ -1547,30 +1568,32 @@ class Proof:
             print(message)
 
     def opensubproof(self):
-        """Open a subproof with an hypothesis."""
+        """Open a subproof."""
 
         if self.canproceed():
+            #Log code
+            self.proofcode.append(f'{self.proofcodevariable}.opensubproof()')
+
             self.level += 1
             self.subproofchain = "".join(
                 [self.subproofchain, self.label_subproofnormal]
             )
             nextline = len(self.lines)
             self.currentproof = [nextline]
-            #self.currenthypotheses = [nextline]
             self.subproof_status = self.subproof_normal
+            self.previousproofid = self.currentproofid
+            self.previousproofchain.append(self.currentproofid)
+            self.currentproofid = len(self.prooflist)
+            self.subproofavailable = self.subproofavailable_opennormal
             self.prooflist.append(
                 [
-                    self.level,
-                    self.currentproof,
                     self.currentproofid,
-                    [], #self.currenthypotheses,
+                    self.currentproof,
+                    self.previousproofid,
+                    [], 
                     self.subproof_status,
                 ]
             )
-            self.previousproofid = self.currentproofid
-            self.previousproofchain.append(self.currentproofid)
-            self.currentproofid = len(self.prooflist) - 1
-            self.subproofavailable = self.subproofavailable_opennormal
 
         self.logstep(self.log_opensubproof.format(
                 self.opensubproof_name.upper(),
@@ -1578,7 +1601,7 @@ class Proof:
                 self.subproof_status
             )
         )
-        #self.hypothesis(item)
+
 
     def reflines(self, *lines):
         """Convert integers to strings and join separated by commas."""
@@ -3040,6 +3063,14 @@ class Proof:
                 "\n\n"
             ]
         )
+
+        # Gather the codelisting
+        codelisting = f"The following is a list of the code used to generate the lemma.\n\n\\begin{{lstlisting}}[language=Python, caption={displayname}]\n"
+        codelines = altrea.data.getproofcodelines(self.logic, name)
+        for i in codelines:
+            codelisting += "".join([i[0], "\n"])
+        codelisting += "\\end{lstlisting}\n\n"
+
         lemmaresult = self.metasubstitute(pattern).latex()
         pd = altrea.data.getproofdetails(self.logic, name)
         proofdetails = [[pattern, 0, 0, self.goal_name, "", "", "", "", "", ""]]
@@ -3067,6 +3098,7 @@ class Proof:
                 beginlemma,
                 lemmastatement,
                 endlemma,
+                codelisting,
                 self.writecenter(df.to_latex(column_format=alignment)),
                 "\n\n"
             ]
@@ -3129,23 +3161,38 @@ class Proof:
             )
 
         # Gather premises
-        proofpremises = ""
         premises = len(self.premises)
+        proofpremises = ""  
         if premises == 0:
             proofpremises = self.write_premises_none
+        elif premises == 1:
+            proofpremises = self.write_premises_one
         else:
-            proofpremises = self.write_premises.format(premises)
+            for i in range(len(self.premises)):
+                if i == 0:
+                    proofpremises += self.write_premises_first.format(self.premises[i].tree())
+                elif i >= 1 and i < premises-1:
+                    proofpremises += self.write_premises_many.format(self.premises[i].tree())
+                else:
+                    proofpremises += self.write_premises_last.format(self.premises[i].tree())
 
         # Gather the proof lines
         df = self.thisproof(short=short, color=0, html=False)
 
+        # Gather the codelisting
+        codelisting = f"The following is a list of the code used to generate the proof.\n\n\\begin{{lstlisting}}[language=Python, caption={self.displayname}]\n"
+        for i in self.proofcode:
+            codelisting += "".join([i, "\n"])
+        codelisting += "\\end{lstlisting}"
+
         # Go through the proof line by line based on the type of line
+        # First get the references to lines and proofs.
         linebyline = ""
         for i in range(1,len(self.lines)):
             if self.lines[i][self.linesindex] != "":
                 referencedlines = self.lines[i][self.linesindex].split(", ")
             else:
-                referencedlines = []
+                referencedlines = ""
             referenceditems = ""
             referencedlineslength = len(referencedlines)
             if referencedlineslength > 0:
@@ -3165,6 +3212,20 @@ class Proof:
                             referenceditems, self.lines[int(referencedlines[referencedlineslength - 1])][self.statementindex].latex(), 
                             referencedlines[referencedlineslength - 1]
                         )
+            elif self.lines[i][self.proofsindex] != "":
+                prooflist = self.lines[i][self.proofsindex].split(", ")
+                if len(prooflist) == 1:
+                    referenceditems = self.write_referenceditems_subproof_one.format(
+                        referenceditems,
+                        self.lines[i][self.proofsindex]
+                    )
+                else:
+                    referenceditems = self.write_referenceditems_subproofs.format(
+                        referenceditems,
+                        self.lines[i][self.proofsindex].replace(", ", " and ")
+                    )
+
+            # Format the text based on the line type
             if self.lines[i][self.typeindex] == self.linetype_axiom:
                 linebyline = self.write_axiom.format(
                     linebyline, 
@@ -3173,47 +3234,79 @@ class Proof:
                     i
                 )
             elif self.lines[i][self.typeindex] == self.linetype_premise:
-                linebyline = self.write_premise.format(
-                    linebyline, 
-                    self.lines[i][self.statementindex].latex(), 
-                    i
-                )
+                pass
             elif self.lines[i][self.typeindex] == self.linetype_definition:
-                linebyline = self.write_definition(
-                    linebyline, 
-                    referenceditems, 
-                    self.lines[i][self.statementindex].latex(), 
-                    i, 
-                    self.lines[i][self.ruleindex]
-                )
+                if referenceditems == "":
+                    linebyline = self.write_definition_norefs(
+                        linebyline, 
+                        self.lines[i][self.statementindex].latex(), 
+                        i, 
+                        self.lines[i][self.ruleindex]
+                    )
+                else:
+                    linebyline = self.write_definition(
+                        linebyline, 
+                        referenceditems, 
+                        self.lines[i][self.statementindex].latex(), 
+                        i, 
+                        self.lines[i][self.ruleindex]
+                    )
             elif self.lines[i][self.typeindex] == self.linetype_rule:
-                linebyline = self.write_rule.format(
-                    linebyline, 
-                    referenceditems, 
-                    self.lines[i][self.ruleindex], 
-                    self.lines[i][self.statementindex].latex(), 
-                    i
-                )
+                if referenceditems == "":
+                    linebyline = self.write_rule_norefs.format(
+                        linebyline, 
+                        self.lines[i][self.ruleindex], 
+                        self.lines[i][self.statementindex].latex(), 
+                        i
+                    )
+                else:
+                    linebyline = self.write_rule.format(
+                        linebyline, 
+                        referenceditems, 
+                        self.lines[i][self.ruleindex], 
+                        self.lines[i][self.statementindex].latex(), 
+                        i
+                    )
             elif self.lines[i][self.typeindex] == self.linetype_transformationrule:
-                linebyline = self.write_transformationrule.format(
-                    linebyline, 
-                    referenceditems, 
-                    self.lines[i][self.ruleindex], 
-                    self.lines[i][self.statementindex].latex(), 
-                    i
-                )
+                if referenceditems == "":
+                    linebyline = self.write_transformationrule_norefs.format(
+                        linebyline, 
+                        self.lines[i][self.ruleindex], 
+                        self.lines[i][self.statementindex].latex(), 
+                        i
+                    )
+                else:
+                    linebyline = self.write_transformationrule.format(
+                        linebyline, 
+                        referenceditems, 
+                        self.lines[i][self.ruleindex], 
+                        self.lines[i][self.statementindex].latex(), 
+                        i
+                    )
             elif self.lines[i][self.typeindex] == self.linetype_substitution:
-                linebyline = self.write_substitution.format(
-                    linebyline, 
-                    referenceditems, 
-                    self.lines[i][self.statementindex].latex(), 
-                    i
-                )
+                if referenceditems == "":
+                    linebyline = self.write_substitution_norefs.format(
+                        linebyline, 
+                        self.lines[i][self.statementindex].latex(), 
+                        i
+                    )
+                else:
+                    linebyline = self.write_substitution.format(
+                        linebyline, 
+                        referenceditems, 
+                        self.lines[i][self.statementindex].latex(), 
+                        i
+                    )
             elif self.lines[i][self.typeindex] == self.linetype_hypothesis:
+                proofid = self.lines[i][self.proofidindex]
+                lastline = self.prooflist[proofid][1][1]
+                lastitem = self.lines[lastline][self.statementindex]
                 linebyline = self.write_hypothesis.format(
                     linebyline, 
                     self.lines[i][self.statementindex].latex(), 
-                    i
+                    i,
+                    lastitem.latex(),
+                    lastline
                 )
             elif self.lines[i][self.typeindex] == self.linetype_lemma:
                 linebyline = self.write_lemma.format(
@@ -3226,9 +3319,7 @@ class Proof:
             else:
                 pass
         
-        #alignment = "llll"
-        # else:
-        #     alignment = "lrll"
+        # Assemble the pieces together
         self.writtenproof = "".join(
             [
                 self.writelatexbegin(sectioning, name), 
@@ -3242,6 +3333,7 @@ class Proof:
                 linebyline, 
                 proofconclusion, 
                 endproof,
+                codelisting,
                 self.writelatexend(sectioning)
             ]
         )
@@ -3553,7 +3645,7 @@ class Proof:
                         self.description,
                     ))
             else:
-                howmany = altrea.data.addproof(self.proofdatafinal)
+                howmany = altrea.data.addproof(self.proofdatafinal, self.proofcode)
                 if howmany == 0:
                     proof = [
                         self.name,
@@ -3914,6 +4006,10 @@ class Proof:
 
         # If no errors, perform task.
         if self.canproceed():
+             #Log code
+            subslisttree = [i.tree() for i in subslist]
+            self.proofcode.append(f'{self.proofcodevariable}.axiom("{name}", {subslisttree}, {str(premiselist)})'.replace("'", ""))
+
             self.logstep(
                 self.log_axiom.format(
                     self.axiom_name.upper(), conclusionpremises.conclusion, description
@@ -4014,6 +4110,10 @@ class Proof:
 
         # If no errors, perform task.
         if self.canproceed():
+            #Log code
+            subslisttree = [i.tree() for i in subslist]
+            self.proofcode.append(f'{self.proofcodevariable}.definition("{name}", {subslisttree}, {str(premiselist)})'.replace("'", ""))
+
             self.logstep(
                 self.log_definition.format(
                     self.definition_name.upper(),
@@ -4092,6 +4192,10 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
+            # Log code
+            self.proofcode.append(f'{self.proofcodevariable}.goal({goal.tree()})')
+
+            # Proceed with task
             self.goals.append(str(goal))
             self.goalswff.append(goal)
             if self.goals_string == "":
@@ -4168,6 +4272,9 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
+            # Log code
+            self.proofcode.append(f'{self.proofcodevariable}.hypothesis({hypothesis.tree()})')
+
             # self.level += 1
             # self.subproofchain = "".join(
             #     #[self.label_subproofnormal, self.subproofchain]
@@ -4389,6 +4496,9 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
+            #Log code
+            self.proofcode.append(f'{self.proofcodevariable}.implication_intro()')
+
         #     proofid = self.currentproofid
         #     subproof_status = self.subproof_status
         #     self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
@@ -4471,75 +4581,12 @@ class Proof:
                         comment
                     )
 
-        # Look for specific errors
-        # if self.canproceed():
-        #     if self.subproof_status != self.subproof_strict:
-        #         self.logstep(
-        #             self.log_notstrictsubproof.format(
-        #                 self.necessary_intro_name.upper(),
-        #                 self.subproof_status,
-        #                 self.subproof_strict,
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notstrictsubproof,
-        #             self.blankstatement,
-        #             self.necessary_intro_name,
-        #             "",
-        #             "",
-        #             comment,
-        #         )
-
         # If no errors, perform task
         if self.canproceed():
-            # proofid = self.currentproofid
-            # subproof_status = self.subproof_status
-            # self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
-            # self.level -= 1
-            # self.subproofchain = self.subproofchain[3:]
-            # antecedent, consequent, previousproofid, previoussubproofstatus = (
-            #     self.getproof(self.currentproofid)
-            # )
-            # self.currentproofid = previousproofid
-            # self.subproof_status = previoussubproofstatus
-            # self.currentproof = self.prooflist[previousproofid][1]
-            # if len(self.previousproofchain) > 1:
-            #     self.previousproofchain.pop(len(self.previousproofchain) - 1)
-            #     self.previousproofid = self.previousproofchain[
-            #         len(self.previousproofchain) - 1
-            #     ]
-            # else:
-            #     self.previousproofchain = []
-            #     self.previousproofid = -1
+            #Log code
+            self.proofcode.append(f'{self.proofcodevariable}.necessary_intro()')
 
-            # proofid = self.currentproofid
-            # self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
-            # self.level -= 1
-            
-            # #self.subproofchain = self.subproofchain[3:]
-            # self.subproofchain = self.subproofchain[:-3]
-            # # antecedent, consequent, previousproofid, previoussubproofstatus = (
-            # #     self.getproof(self.currentproofid)
-            # # )
-            # previousproofid = self.getpreviousproofid(self.currentproofid)
-            # #previoussubproofstatus = self.getprevioussubproofstatus(self.currentproofid)
-            # self.currentproofid = previousproofid
-
-            # #self.subproof_status = previoussubproofstatus
-            # self.subproof_status = self.prooflist[self.currentproofid][4]  #new
-            # # antecedent, consequent, previousproofid = self.getproof(self.currentproofid)
-            # #
-            # #self.currentproofid = previousproofid
-            # self.currentproof = self.prooflist[previousproofid][1]
-            # if len(self.previousproofchain) > 1:
-            #     self.previousproofchain.pop(len(self.previousproofchain) - 1)
-            #     self.previousproofid = self.previousproofchain[
-            #         len(self.previousproofchain) - 1
-            #     ]
-            # else:
-            #     self.previousproofchain = []
-            #     self.previousproofid = -1
-            #for i in lines:
+            self.subproofavailable = self.subproofavailable_not
             index = len(self.lines) - 1
             statement = self.item(index)
             necessarystatement = Necessary(statement)
@@ -4637,6 +4684,9 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
+            #Log code
+            self.proofcode.append(f'{self.proofcodevariable}.possibly_elim()')
+
             line = len(self.lines) - 1
             # self.prooflist[self.currentproofid][1].append(line)
             # self.level -= 1
@@ -4747,6 +4797,9 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
+            # Log code
+            self.proofcode.append(f'{self.proofcodevariable}.premise({premise.tree()})')
+
             self.premises.append(premise)
             nextline = len(self.lines)
             self.prooflist[self.currentproofid][3].append(nextline)
@@ -4816,6 +4869,9 @@ class Proof:
         self.objectdictionary.update({name: p})
         self.letters.append([p, name, latex])
         howmany = len(self.letters)
+        if latex == "":
+            latex = name
+        self.proofcode.append(f'{name} = {self.proofcodevariable}.proposition("{name}", "{latex}")')
         self.logstep(
             self.log_proposition.format(self.proposition_name.upper(), p, howmany)
         )
@@ -4824,9 +4880,6 @@ class Proof:
 
     def openstrictsubproof(
         self,
-        # reiterate: int = 0,
-        # addhypothesis: Wff = None,
-        # hypothesis: Wff = None,
         comment: str = "",
     ):
         """Begin a strict subproof with either a reiterated line or an hypothesis."""
@@ -4840,83 +4893,39 @@ class Proof:
                 comment,
             ):
                 pass
-                # if (
-                #     reiterate > 0
-                #     and reiterate < len(self.lines)
-                #     and isinstance(reiterate, int)
-                # ):
-                #     statement = self.lines[reiterate][self.statementindex]
-                #     if type(statement) != Necessary:
-                #         self.logstep(
-                #             self.log_notnecessary.format(
-                #                 self.openstrictsubproof_name.upper(),
-                #                 statement,
-                #                 reiterate,
-                #             )
-                #         )
-                #         self.stopproof(
-                #             self.stopped_notnecessary,
-                #             self.blankstatement,
-                #             self.openstrictsubproof_name,
-                #             str(reiterate),
-                #             "",
-                #             comment,
-                #         )
-                #     else:
-                #         pass
-                # elif isinstance(addhypothesis, Wff):
-                #     if self.goodobject(
-                #         addhypothesis,
-                #         self.openstrictsubproof_name,
-                #         self.openstrictsubproof_name,
-                #         comment,
-                #     ):
-                #         pass
-                # elif isinstance(hypothesis, Wff):
-                #     if self.goodobject(
-                #         hypothesis,
-                #         self.openstrictsubproof_name,
-                #         self.openstrictsubproof_name,
-                #         comment,
-                #     ):
-                #         pass
-
+            
         # If no errors, perform task
         if self.canproceed():
+            #Log code
+            self.proofcode.append(f'{self.proofcodevariable}.openstrictsubproof()')
+
             self.level += 1
             self.subproofchain = "".join(
-                #[self.label_subproofstrict, self.subproofchain]
                 [self.subproofchain, self.label_subproofstrict]
             )
             nextline = len(self.lines)
             self.currentproof = [nextline]
-            #self.currenthypotheses = [nextline]
             self.subproof_status = self.subproof_strict
+            self.previousproofid = self.currentproofid
+            self.previousproofchain.append(self.currentproofid)
+            self.currentproofid = len(self.prooflist)
+            self.subproofavailable = self.subproofavailable_openstrict
             self.prooflist.append(
                 [
-                    self.level,
-                    self.currentproof,
                     self.currentproofid,
-                    [], #self.currenthypotheses,
+                    self.currentproof,
+                    self.previousproofid,
+                    [], 
                     self.subproof_status,
                 ]
             )
-            self.previousproofid = self.currentproofid
-            self.previousproofchain.append(self.currentproofid)
-            self.currentproofid = len(self.prooflist) - 1
             self.logstep(
                 self.log_strictsubproofstarted.format(
                     self.openstrictsubproof_name.upper(),
                     self.currentproofid
                 )
             )
-            self.subproofavailable = self.subproofavailable_openstrict
-            # if reiterate > 0:
-            #     self.reiterate(reiterate, comment)
-            # elif isinstance(addhypothesis, Wff):
-            #     self.addhypothesis(addhypothesis, comment)
-            # else:
-            #     self.hypothesis(hypothesis, comment)
+            
 
             # else:
             #     newcomment = comment
@@ -5040,6 +5049,9 @@ class Proof:
 
         # If no errors, perform task
         if self.canproceed():
+            # Log code
+            self.proofcode.append(f'{self.proofcodevariable}.reiterate({str(line)})')
+
             self.subproofavailable = self.subproofavailable_not
             self.logstep(
                 self.log_reiterate.format(
@@ -5129,6 +5141,10 @@ class Proof:
 
         # If no errors, perform the task
         if self.canproceed():
+            # Log code
+            self.proofcode.append(f'{self.proofcodevariable}.setlogic("{logic}")')
+            self.proofcode.append(" ")
+
             # Create metavariables
             self.mvalpha = Wff("α", "\\alpha")
             self.metaletters.append(self.mvalpha.name)
@@ -5426,6 +5442,10 @@ class Proof:
 
         # If no errors, perform task.
         if self.canproceed():
+            #Log code
+            subslisttree = [i.tree() for i in subslist]
+            self.proofcode.append(f'{self.proofcodevariable}.rule("{name}", {subslisttree}, {str(lines)})'.replace("'", ""))
+
             self.logstep(
                 self.log_userule.format(
                     self.rule_name.upper(), conclusionpremises.conclusion, description
@@ -5551,6 +5571,10 @@ class Proof:
 
         # If no errors, perform task.
         if self.canproceed():
+            #Log code
+            subslisttree = [i.tree() for i in subslist]
+            self.proofcode.append(f'{self.proofcodevariable}.lemma("{name}", {subslisttree}, {str(premiselist)})'.replace("'", ""))
+
             self.logstep(
                 self.log_useproof.format(
                     self.lemma_name.upper(),

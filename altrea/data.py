@@ -248,6 +248,15 @@ def addlogic(
                         REFERENCES proofs(name)
                     )""")
         print(f"The proofdetails table has been created in {database}.")
+
+        # Create the proofcodelines table in the dbname database.
+        c.execute("""CREATE TABLE proofcodelines (
+                    name           TEXT NOT NULL,
+                    line           TEXT NOT NULL,
+                    FOREIGN KEY (name) 
+                        REFERENCES proofs(name)
+                    )""")
+        print(f"The proofcodelines table has been created in {database}.")
     else:
         print(f"The proof table already contains {howmany[0]} rows.")
 
@@ -653,7 +662,7 @@ def getdefinitions(logic: str):
         return rows
     
 
-def addproof(proofdata: list):
+def addproof(proofdata: list, proofcode: list):
     """Add a proof to a logic."""
 
     name = proofdata[0][0]
@@ -696,6 +705,15 @@ def addproof(proofdata: list):
         print(
             f'The proof details for "{name}" have been added to "{logic}".'
         )
+        statement = """INSERT INTO proofcodelines (
+            name, 
+            line 
+        ) VALUES (?, ?)"""
+        codelines = [(name, i) for i in proofcode]
+        c.executemany(statement, codelines)
+        print(
+            f'The proof code lines for "{name}" have been added to "{logic}".'
+        )
         connection.commit()
         connection.close()
     else:
@@ -713,6 +731,11 @@ def deleteproof(logic: str, name: str):
     c.execute(statement, (name,))
     print(
         f'The proof details for "{name}" have been deleted from proofdetails for "{logic}".'
+    )
+    statement = "DELETE FROM proofcodelines WHERE name=?"
+    c.execute(statement, (name,))
+    print(
+        f'The proof code lines for "{name}" have been deleted from proofcodelines for "{logic}".'
     )
     statement = "DELETE FROM proofs WHERE name=?"
     c.execute(statement, (name,))
@@ -759,6 +782,25 @@ def getproofdetails(logic: str, name: str):
         c.execute(statement, (name,))
     except Exception:
         print(f"The proofdetails table is not available for logic {logic}.")
+    else:
+        rows = c.fetchall()
+        connection.commit()
+        connection.close()
+        return rows
+    
+
+def getproofcodelines(logic: str, name: str):
+    database = getdatabase(logic)
+    connection = sqlite3.connect(database)
+    c = connection.cursor()
+    statement = """SELECT 
+        line 
+    FROM proofcodelines 
+    WHERE name=?"""
+    try:
+        c.execute(statement, (name,))
+    except Exception:
+        print(f"The proofcodelines table is not available for logic {logic}.")
     else:
         rows = c.fetchall()
         connection.commit()

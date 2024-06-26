@@ -42,16 +42,19 @@ def test_substitution_clean_1(input_n, expected):
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(C)
     prf.proofrules = prf.rule_naturaldeduction
     prf.premise(B)
+    
     prf.proofrules = prf.rule_axiomatic
     prf.substitution(1, [B], [Not(B)])
+
     assert eval(input_n) == expected
 
 
 """------------------------------------------------------------------------------
-                            stopped_rules
+                            stopped_ruleclass
 ------------------------------------------------------------------------------"""
 
 # Clean test substituting one letter for another.
@@ -81,7 +84,10 @@ def test_substitution_rules_ruleclass_1(input_n, expected):
     B = prf.proposition("B")
     C = prf.proposition("C")
     prf.setlogic()
+    
     prf.goal(C)
     prf.premise(B)
+    
     prf.substitution(1, [B], [Not(B)])
+
     assert eval(input_n) == expected

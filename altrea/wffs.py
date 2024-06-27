@@ -10,6 +10,7 @@ It contains the following classes:
 - `Iff` - A Wff with two arguments which are Wffs representing logical if and only if.
 """
 
+        
 class Wff:
     """The construction of a well formed formula consisting of one propositional variable.
     """
@@ -18,6 +19,7 @@ class Wff:
 
     lb = '('
     rb = ')'
+
 
     # default_and_connector = '&'
     # default_and_latexconnector = '\\wedge'
@@ -111,6 +113,23 @@ class Wff:
     
     def setmultivalue(self, value):
         self.multivalue = value
+
+class Connective(Wff):
+    def __init__(self, left: Wff, right: Wff, name: str, latexname: str = ''):
+        self.left = left
+        self.right = right
+        self.name = name
+        self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.name}'
+    
+    def latex(self):
+        if self.latexname == '':
+            return f'{self.name}'
+        else:
+            return f'{self.latexname}'
+        
 
 class And(Wff):
     """A well formed formula with two arguments which are also well formed formulas connected

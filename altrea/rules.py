@@ -141,14 +141,14 @@ class Proof:
     definition_name = "Definition"
     entailment_name = "Entailment"
     goal_name = "GOAL"
-    hypothesis_name = "Hypothesis"
-    implication_intro_name = "Implication Intro"
-    implication_intro_strict_name = "Strict Implication Intro"
-    necessary_intro_name = "Necessary Intro"
+    hypothesis_name = "Hypo"
+    implication_intro_name = "$\\supset~$I"
+    implication_intro_strict_name = "$\\prec~$"
+    necessary_intro_name = "$\\Box~$I"
     negation_intro_name = "Negation Intro"
     opensubproof_name = "Open Subproof"
-    possibly_elim_name = "Possibly Elim"
-    reiterate_name = "Reiteration"
+    possibly_elim_name = "$\\Diamond~$E"
+    reiterate_name = "Reit"
     removeaxiom_name = "Remove Axiom"
     removedefinition_name = "Remove Definition"
     removeproof_name = "Remove Proof"
@@ -466,7 +466,7 @@ class Proof:
     write_axiom = "{0}From the {1} axiom we can assert item ${2}$ on line {3}.\n\n"
     write_definition = "{0}The {1} can be rewritten as ${2}$ on line {3} by the {4} definition.\n\n"
     write_definition_norefs = "{0}We can write ${1}$ on line {2} by the {3} definition.\n\n"
-    write_hypothesis = "{0}\n\nWe assert the hypothesis ${1}$ on line {2} in order to derive ${3}$ on line {4}. "
+    write_hypothesis = "{0}\n\nWe assert the hypothesis ${1}$ on line {2} in order to derive ${3}$ on line {4}.  We now detail how that is done.\n\n"
     write_lemma = "{0}From {1} using {2} we can assert item ${3}$ on line {4}.\n\n"
     write_lemmalist = "{0}{1}"
     write_premises_none = "The proof uses no premises. "
@@ -484,6 +484,7 @@ class Proof:
     write_referenceditems_subproofs ="{0}subproofs {1}"
     write_referenceditems_subproof_one ="{0}subproof {1}"
     write_rule = "{0}From {1} using the {2} rule we can derive item ${3}$ on line {4}. "
+    Write_subproofconclusion = "This completes the subproof.\n\n"
     write_rule_norefs = "{0}Using the {1} rule we can derive item ${2}$ on line {3}. "
     write_substitution = "{0}From {1} using substitution we can derive item ${2}$ on line {3}. "
     write_substitution = "{0}Using substitution we can derive item ${1}$ on line {2}. "
@@ -1676,25 +1677,27 @@ class Proof:
                 ]
             )
 
-    def stringitem(self, prooflines: list, i: int, leftright: bool = False):
+    def stringitem(self, prooflines: list, i: int):
         """Formats the statement or item in a proof line so it can be displayed as a string.
         It includes indenting based on the level of the subordinate proofs.
         """
 
         normalbase = "   |"
         strictbase = "   ||"
-        statement = subproofchain.format(normalbase, strictbase)
-        if leftright:
-            chain = prooflines[i][self.subproofstatusindex]
-            replacedsplit = chain.replace("}{", "} {").split(" ")
-            replacedsplit.reverse()
-            chain = "".join(replacedsplit)
-            subproofchain = chain.format(normalbase, strictbase)
-            return "".join([subproofchain, statement])
-        else:
-            chain = prooflines[i][self.subproofstatusindex]
-            subproofchain = chain.format(normalbase, strictbase)
-            return "".join([str(prooflines[i][self.statementindex]), statement])
+        #statement = subproofchain.format(normalbase, strictbase)
+        statement = str(prooflines[i][self.statementindex])
+        # if leftright:
+        #     chain = prooflines[i][self.subproofstatusindex]
+        #     replacedsplit = chain.replace("}{", "} {").split(" ")
+        #     replacedsplit.reverse()
+        #     chain = "".join(replacedsplit)
+        #     subproofchain = chain.format(normalbase, strictbase)
+        #     return "".join([subproofchain, statement])
+        # else:
+        chain = prooflines[i][self.subproofstatusindex]
+        subproofchain = chain.format(normalbase, strictbase)
+        #return "".join([str(prooflines[i][self.statementindex]), statement])
+        return "".join([subproofchain, statement])
         #subproofchain = prooflines[i][self.subproofstatusindex]
         
         #statement = "".join([str(prooflines[i][self.statementindex]), statement])
@@ -1797,8 +1800,38 @@ class Proof:
         reconstructedobject = eval(substitutedstring, self.metaobjectdictionary)
         return reconstructedobject
 
-    def axioms(self, html: bool = True):
-        """display the axioms associated with the logic being used in the proof."""
+    def axioms(self, latex: bool = True, html: bool = True):
+        """Display the axioms associated with the logic being used in the proof.
+        
+        Parameters:
+            latex: Present a display through LaTeX
+            html: Present an html display
+
+        Examples:
+            This example shows the axioms available with the default logic.  To generate
+            this one needs to start a Proof instance which allows one to set a particular
+            logic.  The `setlogic` defines the metavariables, those Greek letters
+            in the listing below.
+
+            >>> from altrea.wffs import Wff, Or
+            >>> from altrea.rules import Proof
+            >>> 
+            >>> prf = Proof()
+            >>> prf.setlogic()
+            >>>
+            >>> prf.axioms(latex=0, html=False)
+                                        Axioms                   Description
+            explosion            {α, ~α}  ⊢  β                     Explosion
+            dneg intro             {α}  ⊢  ~~α  Double Negation Introduction
+            dneg elim              {~~α}  ⊢  α   Double Negation Elimination
+            lem                      ⊢  α | ~α        Law of Excluded Middle
+            wlem                   ⊢  ~α | ~~α   Weak Law of Excluded Middle
+            or to not and  {α | β}  ⊢  ~α & ~β       De Morgan Or To Not-And
+            not and to or  {~α & ~β}  ⊢  α | β       De Morgan Not-And To Or
+            and to not or  {α & β}  ⊢  ~α | ~β       De Morgan And To Not-Or
+            not or to and  {~α | ~β}  ⊢  α & β       De Morgan Not-Or To And
+            modus ponens      {α, α ⊃ β}  ⊢  β    Given A and A > B Derive B
+        """
 
         axiomcolumn = "".join([self.logic, " ", self.label_axioms])
         headers = [axiomcolumn, "Description"]
@@ -1807,7 +1840,10 @@ class Proof:
         for i in self.logicaxioms:
             index.append(i[0])
             reconstructedobject = self.metasubstitute(i[1])
-            table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
+            if latex:
+                table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
+            else:
+                table.append([str(reconstructedobject), i[3]])
         df = pandas.DataFrame(table, index, headers)
         # if html:
         #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
@@ -2036,7 +2072,7 @@ class Proof:
     def thisproof(
             self, 
             short: int = 0, 
-            flip: bool = True, 
+            flip: bool = False, 
             color: int = 1, 
             latex: int = 1,
             html: bool = True):
@@ -2927,7 +2963,7 @@ class Proof:
     def writecenter(self, text: str):
         return "".join(
             [
-                "\\begin{center}\n",
+                "\\begin{center}\n\\small\n",
                 text,
                 "\\end{center}\n"
             ]
@@ -3109,7 +3145,8 @@ class Proof:
             self, 
             sectioning: str, 
             name: str = "", 
-            short: int = 1,
+            short: int = 2,
+            flip: bool = False,
             alignment: str = "llll"
         ):
         """Constructs an English version of the proof."""
@@ -3170,14 +3207,14 @@ class Proof:
         else:
             for i in range(len(self.premises)):
                 if i == 0:
-                    proofpremises += self.write_premises_first.format(self.premises[i].tree())
+                    proofpremises += self.write_premises_first.format(self.premises[i].latex())
                 elif i >= 1 and i < premises-1:
-                    proofpremises += self.write_premises_many.format(self.premises[i].tree())
+                    proofpremises += self.write_premises_many.format(self.premises[i].latex())
                 else:
-                    proofpremises += self.write_premises_last.format(self.premises[i].tree())
+                    proofpremises += self.write_premises_last.format(self.premises[i].latex())
 
         # Gather the proof lines
-        df = self.thisproof(short=short, color=0, html=False)
+        df = self.thisproof(short=short, color=0, flip=flip, html=False)
 
         # Gather the codelisting
         codelisting = f"The following is a list of the code used to generate the proof.\n\n\\begin{{lstlisting}}[language=Python, caption={self.displayname}]\n"
@@ -3750,27 +3787,73 @@ class Proof:
         Parameters:
             conclusion: The conclusion that follows from the premises (if any).
             premises: A list of premises which entail the conclusion.
+            name: The name of the axiom, definition or rule that this entailment
+                will be assigned to.
+            displayname: The name displayed when this entailment is used.
+            description: A lengthier description that could store the source of the entailment
+                as well as a description of what it is intended to do.
+            kind: When this is not "" it will create the axiom, definition or rule
+                specified by this kind.  Acceptable values as `prf.label_axiom`,
+                `prf.label_definition` and `prf.label_rule`.
 
         Example:
-            This is example is meant to be run in a Jupyter notebook.  It will display
-            a table with two rows.  The first row shows the string version of
-            the entailment.  The second row shows the LaTeX version of the entailment.
+            In this example we will prove that every statement is true.  This is the
+            logic known as `trivialism`.  We only need two axioms which we will define
+            in the example.  We will need an axiom that allows us to construct a
+            contradiction.  That is done by the entailment named `contradicting`.
+            We will also need an axiom that will allow of to derive anything we
+            please from a contradiction.  That is called `exploding` below.
 
-            from IPython.display import display, Math
-            from altrea.wffs import And
-            from altrea.rules import Proof
-            p = Proof()
-            p.setlogic()
-            display(p.viewentailment(And(p.mvalpha, p.mvbeta)))
+            Let B be a variable standing for any proposition.  After the Contradiction
+            axiom is applied to a propositional variable C followed by the Exploding
+            axiom, we can derive B.  Since B was any proposition, in this logic, 
+            all propositions are derivable.
 
-            In this example, the premises are not empty.
+            Although these two axioms have been saved it is only to the currently 
+            instantiated Proof object.  The defaults will return when a new Proof
+            object is instantiated.  One can preserve this work by saving it to
+            a named object or save them to a logic already defined and provided
+            with AltRea.
 
-            from IPython.display import display, Math
-            from altrea.wffs import And
-            from altrea.rules import Proof
-            p = Proof()
-            p.setlogic()
-            display(p.viewentailment(And(p.mvalpha, p.mvbeta), [p.mvalpha, p.mvbeta]))
+            >>> from altrea.wffs import And, Not
+            >>> from altrea.rules import Proof
+            >>> 
+            >>> prf = Proof()
+            >>> prf.setrestricted(False)
+            >>> B = prf.proposition("B")
+            >>> C = prf.proposition("C")
+            >>> prf.setlogic()
+            >>> prf.goal(B)
+            >>> prf.entailment(
+            ...     And(prf.mvalpha, Not(prf.mvalpha)),
+            ...     [],
+            ...     name="contradicting",
+            ...     displayname= "Contradiction",
+            ...     description="Contradiction",
+            ...     kind=prf.label_axiom)
+            SAVE AXIOM: The axiom named "contradicting" has been saved.
+            SAVE AXIOM: The axiom named "contradicting" has been saved.
+            >>> prf.axiom("contradicting", [C])
+            >>> prf.rule("conj elim l", [C, Not(C)], [1])
+            >>> prf.rule("conj elim r", [C, Not(C)], [1])
+            >>> prf.entailment(
+            ...     prf.mvbeta,
+            ...     [prf.mvalpha, Not(prf.mvalpha)],
+            ...     name="exploding",
+            ...     displayname= "Explosion",
+            ...     description="Explosion",
+            ...     kind=prf.label_axiom)
+            SAVE AXIOM: The axiom named "exploding" has been saved.
+            SAVE AXIOM: The axiom named "exploding" has been saved.
+            >>> prf.axiom("exploding", [C, B], [2, 3])
+            >>>
+            >>> prf.thisproof(latex=0, short=1, html=False)
+                Item                       Rule   Comment
+                    B                       GOAL
+            1  C & ~C              Contradiction
+            2       C   1, Conjunction Elim Left
+            3      ~C  1, Conjunction Elim Right
+            4       B            2, 3, Explosion  COMPLETE
         """
 
         prop = ConclusionPremises(conclusion, premises)
@@ -3945,11 +4028,29 @@ class Proof:
             subslist: A list of wff object instances which will be used as substitutes in the order they are provided
                 for the string metavariables.
             premiselist: A list of integers referencing previous lines of the proof which will be matched to those required
-                to use the axiom.  This is only required if the axiom specifies premises that must be met before it can be used.
+                to use the axiom in the order the axiom specifies.  Some axioms require no premises.
             comment: An optional comment the user may add to this line of the proof.
 
         Examples:
+            The `lem`, Law of Excluded Middle, is an axiom provided by default if one does not specify any logic.
+            If one does specify a logic, this default will be removed, allowing only the axioms that one has
+            defined for the logic to be available.  This first example shows how the lem axiom can be used.
 
+            >>> from altrea.wffs import Wff, Or
+            >>> from altrea.rules import Proof
+            >>> 
+            >>> prf = Proof()
+            >>> prf.setrestricted(False)
+            >>> A = prf.proposition("A")
+            >>> prf.setlogic()
+            >>>
+            >>> prf.goal(A)
+            >>> prf.axiom("lem", [A], [])
+            >>>
+            >>> prf.thisproof(latex=0, short=1, html=False)
+                 Item  Rule Comment
+                    A  GOAL
+            1  A | ~A   LEM
         """
 
         # Look for errors: Find the axiom.

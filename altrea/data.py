@@ -277,6 +277,11 @@ def deletelogic(logic: str):
         connection = sqlite3.connect(database)
         c = connection.cursor()
 
+        # Drop the proofcodelines table.
+        statement = "DROP TABLE proofcodelines"
+        c.execute(statement)
+        print(f"The proofcodelines table for logic {logic} has been dropped.")
+
         # Drop the proofdetails table.
         statement = "DROP TABLE proofdetails"
         c.execute(statement)

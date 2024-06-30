@@ -10,6 +10,7 @@ It contains the following classes:
 - `Iff` - A Wff with two arguments which are Wffs representing logical if and only if.
 """
 
+#from altrea.fol import Domain, Variable, Thing, Couple
         
 class Wff:
     """The construction of a well formed formula consisting of one propositional variable.
@@ -1147,5 +1148,240 @@ class ConclusionPremises(Wff):
     # def getmultivalue(self):
     #     return self.multivalue
 
+class ThereExists(Wff):
 
+    is_variable = False
+    latexname = "\\exists "
+    name = "ThereExists "
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(
+            self, 
+            vars: list,
+            wff: Wff
+        ):
+        self.vars = vars
+        self.wff = wff
+        
+    def __str__(self):
+        return f'{self.name} {"".join([str(i) for i in self.vars])}{self.lb}{self.wff}{self.rb}'
+    
+    # def latex(self):
+    #     return f'{self.latexname}{"".join([i.latex() for i in self.vars])}~{self.lb}{self.wff.latex()}{self.rb}'
+    def latex(self):
+        return f'{self.latexname}{"".join([i.latex() for i in self.vars])}~{self.wff.latex()}'
+
+    def tree(self):
+        return f'{self.name} {"".join([str(i) for i in self.vars])}{self.lb}{self.wff}{self.rb}'
+    
+    def pattern(self, wfflist: list):
+        return f'{self.name} {"".join([i.pattern(wfflist) for i in self.vars])}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
+    
+    def getvalue(self):
+        return None 
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+    
+class ForAll(Wff):
+
+    is_variable = False
+    latexname = "~\\forall "
+    name = "ForAll "
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(
+            self, 
+            vars: list,
+            wff: Wff
+        ):
+        self.vars = vars
+        self.wff = wff
+        
+    def __str__(self):
+        return f'{self.name}{"".join([str(i) for i in self.vars])}{self.lb}{self.wff}{self.rb}'
+    
+    # def latex(self):
+    #     return f'{self.latexname}{"".join([i.latex() for i in self.vars])}~{self.lb}{self.wff.latex()}{self.rb}'
+    def latex(self):
+        return f'{self.latexname}{"".join([i.latex() for i in self.vars])}~{self.wff.latex()}'
+
+    def tree(self):
+        return f'{self.name}{"".join([str(i) for i in self.vars])}{self.lb}{self.wff}{self.rb}'
+    
+    def pattern(self, wfflist: list):
+        return f'{self.name}{"".join([i.pattern(wfflist) for i in self.vars])}{self.lb}{self.wff.pattern(wfflist)}{self.rb}'
+
+    def getvalue(self):
+        return None 
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+    
+
+class Relation(Wff):
+    """Define a relation for the variables or elements."""
+
+    lb = "{"
+    rb = "}"
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(self, elements: list, name: str, latexname: str = ""):
+        self.elements = elements
+        self.name = name
+        if latexname == "":
+            self.latexname = name
+        else:
+            self.latexname = "".join(["\\textbf", latexname])
+
+    def __str__(self):
+        return f'{self.name}{"".join([str(i) for i in self.elements])}'.replace("'", "")
+    
+    def latex(self):
+        return f'{self.latexname}{"".join([i.latex() for i in self.elements])}'
+
+    def tree(self):
+        return f'{self.name}{"".join([i.tree() for i in self.elements])}'
+    
+    def pattern(self, objectlist: list):
+        return f'{self.name}{"".join([i.pattern(objectlist) for i in self.elements])}'
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+
+class Couple(Wff):
+    """Assign a name to a specific thing."""
+
+    lb = "("
+    rb = ")"
+    c = ", "
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(self, left: Wff, right: Wff, name: str = "Couple", latexname: str = "Couple"):
+        self.left = left
+        self.right = right
+        self.name = name
+        self.latexname = latexname
+        # if latexname == "":
+        #     self.latexname = name
+        # else:
+        #     self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.lb}{self.left}{self.right}{self.rb}'
+    
+    def comma(self):
+        return f'{self.lb}{self.left}{self.c}{self.right}{self.rb}'
+    
+    def latex(self):
+        return f'{self.lb}{self.left.latex()}{self.right.latex()}{self.rb}'
+
+    def tree(self):
+        return f'{self.name}{self.lb}{self.left.tree()}{self.right.tree()}{self.rb}'
+    
+    def pattern(self, objectlist: list):
+        return f'{self.name}{self.left.pattern(objectlist)}{self.right.pattern(objectlist)}'
+    
+class Identity(Wff):
+    """Define a relation for the variables or elements."""
+
+    lb = "{"
+    rb = "}"
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(self, left, right, name: str = " = ", latexname: str = "~=~"):
+        self.left = left
+        self.right = right
+        self.name = name
+        self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.left}{self.name}{self.right}'
+    
+    def latex(self):
+        return f'{self.left.latex()}{self.latexname}{self.right.latex()}'
+
+    def tree(self):
+        return f'{self.left.tree()}{self.name}{self.right.tree()}'
+    
+    def pattern(self, objectlist: list):
+        return f'{self.left.pattern(objectlist)}{self.latexname}{self.right.pattern(objectlist)}'
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+    
+class Variable(Wff):
+    """Define a container for the specific elements."""
+
+    lb = "{"
+    rb = "}"
+
+    def __init__(self, name: str, latexname: str = ""):
+        self.name = name
+        if latexname == "":
+            self.latexname = name
+        else:
+            self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.name}'
+    
+    def latex(self):
+        return f'{self.latexname}'
+
+    def tree(self):
+        return f'{self.name}'
+    
+    # def pattern(self, objectlist: list):
+    #     return f'{self.name}'
+    
+class Thing(Wff):
+    """Assign a name to a specific thing."""
+
+    lb = "{"
+    rb = "}"
+
+    def __init__(self, name: str, latexname: str = ""):
+        self.name = name
+        if latexname == "":
+            self.latexname = name
+        else:
+            self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.name}'
+    
+    def latex(self):
+        return f'{self.latexname}'
+
+    def tree(self):
+        return f'{self.name}'
+    
+    def pattern(self, objectlist: list):
+        try:
+            idx = objectlist.index(self.name)
+        except ValueError:
+            idx = len(objectlist)
+            objectlist.append(self.name)
+        return ''.join(['{', str(idx), '}'])
+
+
+    
 

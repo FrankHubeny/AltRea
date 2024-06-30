@@ -81,8 +81,14 @@ from altrea.wffs import (
     ConsistentWith,
     StrictIff,
     StrictImplies,
+    ThereExists,
+    ForAll,
+    Thing,
+    Variable,
+    Couple,
 )
 import altrea.data
+#from altrea.fol import Thing, Domain, Variable
 
 
 class Proof:
@@ -146,6 +152,7 @@ class Proof:
     implication_intro_strict_name = "$\\prec~$"
     necessary_intro_name = "$\\Box~$I"
     negation_intro_name = "Negation Intro"
+    openstrictsubproof_name = "Open Strict Subproof"
     opensubproof_name = "Open Subproof"
     possibly_elim_name = "$\\Diamond~$E"
     reiterate_name = "Reit"
@@ -153,12 +160,14 @@ class Proof:
     removedefinition_name = "Remove Definition"
     removeproof_name = "Remove Proof"
     removerule_name = "Remove Rule"
+    rule_name = "Rule"
     saveaxiom_name = "Save Axiom"
     savedefinition_name = "Save Definition"
     saverule_name = "Save Rule"
-    openstrictsubproof_name = "Open Strict Subproof"
     substitution_name = "Substitution"
-    rule_name = "Rule"
+    thing_name = "Thing"
+    variable_name = "Variable"
+    
 
     subproofavailable_not = "No"
     subproofavailable_opennormal = "Open"
@@ -358,11 +367,13 @@ class Proof:
     log_substitution = (
         '{0}: The statement "{1}" on line "{2}" has been substituted with "{3}".'
     )
+    log_thing = '{0}: The name "{1}" refers to a thing in a domain with {2} so far having been defined for this proof.'
     log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
     log_userule = (
         '{0}: Item "{1}" has been added through the "{2}" transformation rule.'
     )
     log_vacuous = "The proof is vacuously over."
+    log_variable = '{0}: The name "{1}" refers to a variable ranging over a domain with {2} so far having been defined for this proof.'
 
     """Labels for various reports."""
 
@@ -799,6 +810,8 @@ class Proof:
         self.premises = []
         self.consequences = []
         self.letters = []
+        self.things = []
+        self.variables = []
         self.metaletters = []
         self.truths = []
         self.objectdictionary = {
@@ -815,6 +828,17 @@ class Proof:
             "StrictIff": StrictIff,
             "Definition": Definition,
             "Falsehood": Falsehood,
+            "Truth": Truth,
+            "ConclusionPremises": ConclusionPremises,
+            "Definition": Definition,
+            "ConsistentWith": ConsistentWith,
+            "StrictIff": StrictIff,
+            "StrictImplies": StrictImplies,
+            "ThereExists": ThereExists,
+            "ForAll": ForAll,
+            "Couple": Couple,
+            "Variable": Variable,
+            "Thing": Thing,
         }
         self.metaobjectdictionary = {
             "Implies": Implies,
@@ -830,6 +854,17 @@ class Proof:
             "StrictIff": StrictIff,
             "Definition": Definition,
             "Falsehood": Falsehood,
+            "Truth": Truth,
+            "ConclusionPremises": ConclusionPremises,
+            "Definition": Definition,
+            "ConsistentWith": ConsistentWith,
+            "StrictIff": StrictIff,
+            "StrictImplies": StrictImplies,
+            "ThereExists": ThereExists,
+            "ForAll": ForAll,
+            "Couple": Couple,
+            "Variable": Variable,
+            "Thing": Thing,
         }
         self.log = []
         self.latexwrittenproof = ""
@@ -1404,94 +1439,52 @@ class Proof:
 
         return self.lines[line][self.statementindex]
 
+    # def stringitem(self, prooflines: list, i: int):
+    #     """Formats the statement or item in a proof line so it can be displayed as a string.
+    #     It includes indenting based on the level of the subordinate proofs.
+    #     """
 
-    def latexitem(
+    #     normalbase = "|   "
+    #     strictbase = "||   "
+    #     statement = str(prooflines[i][self.statementindex])
+    #     chain = prooflines[i][self.subproofstatusindex]
+    #     subproofchain = chain.format(normalbase, strictbase)
+    #     return "".join([subproofchain, statement])
+
+    def formatitem(
         self, 
         prooflines: list, 
         i: int, 
         status: str, 
+        latex: bool = True,
         saved: bool = False, 
         color: int = 1
     ):
         """Formats a statement or item in a proof line for display as latex."""
 
         if prooflines[i][0] != self.blankstatement:
-            # normalbase = "$ \\hspace{0.35cm}|$"
-            # strictbase = "$ \\hspace{0.35cm}\\Vert$"
-            # if leftright:
-            #     normalbase = "$|\\hspace{0.35cm} $"
-            #     strictbase = "$\\Vert\\hspace{0.35cm} $"
-            #     chain = prooflines[i][self.subproofstatusindex]
-            #     replacedsplit = chain.replace("}{", "} {").split(" ")
-            #     replacedsplit.reverse()
-            #     chain = "".join(replacedsplit)
-            #     subproofchain = chain.format(normalbase, strictbase)
-            # else:
-            normalbase = "$|\\hspace{0.35cm} $"
-            strictbase = "$\\Vert\\hspace{0.35cm} $"
-            chain = prooflines[i][self.subproofstatusindex]
-            subproofchain = chain.format(normalbase, strictbase)
+            if latex:
+                normalbase = "$|\\hspace{0.35cm} $"
+                strictbase = "$\\Vert\\hspace{0.35cm} $"
+                chain = prooflines[i][self.subproofstatusindex]
+                subproofchain = chain.format(normalbase, strictbase)
 
-            #statement = subproofchain.format(normalbase, strictbase)
-
-            if color == 1:
-                if i == 0:
-                    if saved:
-                        statement = "".join(
-                            ["$\\color{blue}", prooflines[0][0].latex(), "$"]
-                        )
-                    else:
-                        if self.goals_latex != "":
+                if color == 1:
+                    if i == 0:
+                        if saved:
                             statement = "".join(
-                                ["$", self.color_conclusion, self.goals_latex, "$"]
+                                ["$\\color{blue}", prooflines[0][0].latex(), "$"]
                             )
                         else:
-                            statement = ""
-                else:
-                    if status != self.complete and status != self.stopped:
-                        if self.currentproofid == prooflines[i][2]:
-                            statement = "".join(
-                                [
-                                    "$",
-                                    self.color_available,
-                                    prooflines[i][0].latex(),
-                                    #statement,
-                                    "$",
-                                ]
-                            )
-                        elif prooflines[i][2] in self.previousproofchain:
-                            if self.subproof_status == self.subproof_strict:
-                                if self.label_subproofstrict in prooflines[i][8]:
-                                    statement = "".join(
-                                        [
-                                            "$",
-                                            self.color_available,
-                                            prooflines[i][0].latex(),
-                                            #statement,
-                                            "$",
-                                        ]
-                                    )
-                                elif i in self.necessarylines:
-                                    statement = "".join(
-                                        [
-                                            "$",
-                                            self.color_available,
-                                            prooflines[i][0].latex(),
-                                            #statement,
-                                            "$",
-                                        ]
-                                    )
-                                else:
-                                    statement = "".join(
-                                        [
-                                            "$",
-                                            self.color_unavailable,
-                                            prooflines[i][0].latex(),
-                                            #statement,
-                                            "$",
-                                        ]
-                                    )
+                            if self.goals_latex != "":
+                                statement = "".join(
+                                    ["$", self.color_conclusion, self.goals_latex, "$"]
+                                )
                             else:
+                                statement = ""
+                    else:
+                        if status != self.complete and status != self.stopped:
+                            if self.currentproofid == prooflines[i][2]:
                                 statement = "".join(
                                     [
                                         "$",
@@ -1501,63 +1494,111 @@ class Proof:
                                         "$",
                                     ]
                                 )
-                        else:
+                            elif prooflines[i][2] in self.previousproofchain:
+                                if self.subproof_status == self.subproof_strict:
+                                    if self.label_subproofstrict in prooflines[i][8]:
+                                        statement = "".join(
+                                            [
+                                                "$",
+                                                self.color_available,
+                                                prooflines[i][0].latex(),
+                                                #statement,
+                                                "$",
+                                            ]
+                                        )
+                                    elif i in self.necessarylines:
+                                        statement = "".join(
+                                            [
+                                                "$",
+                                                self.color_available,
+                                                prooflines[i][0].latex(),
+                                                #statement,
+                                                "$",
+                                            ]
+                                        )
+                                    else:
+                                        statement = "".join(
+                                            [
+                                                "$",
+                                                self.color_unavailable,
+                                                prooflines[i][0].latex(),
+                                                #statement,
+                                                "$",
+                                            ]
+                                        )
+                                else:
+                                    statement = "".join(
+                                        [
+                                            "$",
+                                            self.color_available,
+                                            prooflines[i][0].latex(),
+                                            #statement,
+                                            "$",
+                                        ]
+                                    )
+                            else:
+                                statement = "".join(
+                                    [
+                                        "$",
+                                        self.color_unavailable,
+                                        prooflines[i][0].latex(),
+                                        #statement,
+                                        "$",
+                                    ]
+                                )
+                        elif prooflines[i][6][0:8] == self.complete:
                             statement = "".join(
                                 [
                                     "$",
-                                    self.color_unavailable,
+                                    self.color_conclusion,
                                     prooflines[i][0].latex(),
                                     #statement,
                                     "$",
                                 ]
                             )
-                    elif prooflines[i][6][0:8] == self.complete:
-                        statement = "".join(
-                            [
-                                "$",
-                                self.color_conclusion,
-                                prooflines[i][0].latex(),
-                                #statement,
-                                "$",
-                            ]
-                        )
-                    elif prooflines[i][6][0:18] == self.partialcompletion:
-                        statement = "".join(
-                            [
-                                "$",
-                                self.color_conclusion,
-                                prooflines[i][0].latex(),
-                                #statement,
-                                "$",
-                            ]
-                        )
-                    else:
-                        statement = "".join(
-                            #["$", prooflines[i][0].latex(), statement, "$"]
-                            ["$", prooflines[i][0].latex(), "$"]
-                        )
-            else:
-                if i == 0:
-                    if saved:
-                        statement = "".join(
-                            ["$", prooflines[0][0].latex(), "$"]
-                        )
-                    elif self.goals_latex != "":
-                        statement = "".join(
-                            ["$", self.goals_latex, "$"]
-                        )
-                    else:
-                        statement = ""
+                        elif prooflines[i][6][0:18] == self.partialcompletion:
+                            statement = "".join(
+                                [
+                                    "$",
+                                    self.color_conclusion,
+                                    prooflines[i][0].latex(),
+                                    #statement,
+                                    "$",
+                                ]
+                            )
+                        else:
+                            statement = "".join(
+                                #["$", prooflines[i][0].latex(), statement, "$"]
+                                ["$", prooflines[i][0].latex(), "$"]
+                            )
                 else:
-                    #statement = "".join(["$", prooflines[i][0].latex(), statement, "$"])
-                    statement = "".join(["$", prooflines[i][0].latex(), "$"])
+                    if i == 0:
+                        if saved:
+                            statement = "".join(
+                                ["$", prooflines[0][0].latex(), "$"]
+                            )
+                        elif self.goals_latex != "":
+                            statement = "".join(
+                                ["$", self.goals_latex, "$"]
+                            )
+                        else:
+                            statement = ""
+                    else:
+                        statement = "".join(["$", prooflines[i][0].latex(), "$"])
+                return "".join([subproofchain, statement])
+            else:
+                normalbase = "|   "
+                strictbase = "||   "
+                statement = str(prooflines[i][self.statementindex])
+                chain = prooflines[i][self.subproofstatusindex]
+                subproofchain = chain.format(normalbase, strictbase)
+                return "".join([subproofchain, statement])
         else:
-            statement = self.blankstatement
-            subproofchain = ""
-        #if leftright:
-        return "".join([subproofchain, statement])
-        # else:
-        #     return "".join([statement, subproofchain])
+        #     statement = self.blankstatement
+        #     subproofchain = ""
+            return self.blankstatement
+        
+
 
     def logstep(self, message: str):
         """This function adds a log message collected during the proof construction
@@ -1677,31 +1718,8 @@ class Proof:
                 ]
             )
 
-    def stringitem(self, prooflines: list, i: int):
-        """Formats the statement or item in a proof line so it can be displayed as a string.
-        It includes indenting based on the level of the subordinate proofs.
-        """
+    
 
-        normalbase = "   |"
-        strictbase = "   ||"
-        #statement = subproofchain.format(normalbase, strictbase)
-        statement = str(prooflines[i][self.statementindex])
-        # if leftright:
-        #     chain = prooflines[i][self.subproofstatusindex]
-        #     replacedsplit = chain.replace("}{", "} {").split(" ")
-        #     replacedsplit.reverse()
-        #     chain = "".join(replacedsplit)
-        #     subproofchain = chain.format(normalbase, strictbase)
-        #     return "".join([subproofchain, statement])
-        # else:
-        chain = prooflines[i][self.subproofstatusindex]
-        subproofchain = chain.format(normalbase, strictbase)
-        #return "".join([str(prooflines[i][self.statementindex]), statement])
-        return "".join([subproofchain, statement])
-        #subproofchain = prooflines[i][self.subproofstatusindex]
-        
-        #statement = "".join([str(prooflines[i][self.statementindex]), statement])
-        #return statement
 
     def substitute(self, originalstring: str, subs: list, displayname: str):
         """Substitute placeholders for strings representing the desired objects.  Then eval (evaluate) the resulting
@@ -1998,17 +2016,21 @@ class Proof:
         newp = []
         for i in range(len(prooflines)):
             if latex == 1:
-                statement = self.latexitem(
+                statement = self.formatitem(
                     prooflines=prooflines,
                     i=i,
                     status=self.complete,
+                    latex=True,
                     saved=True,
                     color=False
                 )
             else:
-                statement = self.stringitem(
+                statement = self.formatitem(
                     prooflines=prooflines, 
-                    i=i
+                    i=i,
+                    status=self.complete,
+                    latex=False,
+                    saved=True
                 )
             if short == 1 or short == 2:
                 if prooflines[i][self.linesindex] != "":
@@ -2062,11 +2084,6 @@ class Proof:
 
         # Use pandas to display the proof lines.
         df = pandas.DataFrame(newp, index=indx, columns=columns)
-        # if html:
-        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
-        #     return IPython.display.HTML(dfhtml)
-        # else:
-        #     return df
         return self.htmllatex(df, html)
 
     def thisproof(
@@ -2111,17 +2128,20 @@ class Proof:
         newp = []
         for i in range(len(self.lines)):
             if latex == 1:
-                statement = self.latexitem(
+                statement = self.formatitem(
                     prooflines=self.lines,
                     i=i,
                     status=self.status,
+                    latex=True,
                     saved=False,
                     color=color
                 )
             else:
-                statement = self.stringitem(
+                statement = self.formatitem(
                     prooflines=self.lines, 
-                    i=i
+                    i=i,
+                    status=self.status,
+                    latex=False
                 )
             if short == 1 or short == 2:
                 if self.lines[i][self.linesindex] != "":
@@ -2220,7 +2240,7 @@ class Proof:
         newp = []
         if latex == 1:
             for i in range(len(newrows)):
-                item = self.latexitem(newrows, i, self.complete, saved=True)
+                item = self.formatitem(newrows, i, self.complete, latex=True, saved=True)
                 newp.append(
                     [
                         item,
@@ -2234,7 +2254,7 @@ class Proof:
                 )
         else:
             for i in range(len(newrows)):
-                item = self.stringitem(newrows, i)
+                item = self.formatitem(newrows, i, self.complete, latex=False)
                 newp.append(
                     [
                         item,
@@ -4978,6 +4998,31 @@ class Proof:
         )
         return p
 
+    def thing(self, name: str, latex: str = ""):
+        p = Thing(name, latex)
+        self.objectdictionary.update({name: p})
+        self.things.append([p, name, latex])
+        howmany = len(self.things)
+        if latex == "":
+            latex = name
+        self.proofcode.append(f'{name} = {self.proofcodevariable}.thing("{name}", "{latex}")')
+        self.logstep(
+            self.log_thing.format(self.thing_name.upper(), p, howmany)
+        )
+        return p
+    
+    def variable(self, name: str, latex: str = ""):
+        p = Variable(name, latex)
+        self.objectdictionary.update({name: p})
+        self.variables.append([p, name, latex])
+        howmany = len(self.variables)
+        if latex == "":
+            latex = name
+        self.proofcode.append(f'{name} = {self.proofcodevariable}.variable("{name}", "{latex}")')
+        self.logstep(
+            self.log_thing.format(self.variable_name.upper(), p, howmany)
+        )
+        return p
 
     def openstrictsubproof(
         self,

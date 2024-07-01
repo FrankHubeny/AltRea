@@ -506,14 +506,14 @@ class Implies(Wff):
         self.latexconnector = latexconnector
         self.treeconnector = treeconnector
         self.booleanvalue = None
-        leftmultivalue = self.left.getmultivalue()
-        rightmultivalue = self.right.getmultivalue()
-        if leftmultivalue == (False) or rightmultivalue == (True):
-            self.multivalue = (True)
-        elif leftmultivalue == (True) and rightmultivalue == (False):
-            self.multivalue = (False)
-        else:
-            self.multivalue = (True, False)
+        # self.leftmultivalue = self.left.getmultivalue()
+        # self.rightmultivalue = self.right.getmultivalue()
+        # if self.leftmultivalue == (False) or self.rightmultivalue == (True):
+        #     self.multivalue = (True)
+        # elif self.leftmultivalue == (True) and self.rightmultivalue == (False):
+        #     self.multivalue = (False)
+        # else:
+        #     self.multivalue = (True, False)
     
     def __str__(self):
         if self.left.is_variable and self.right.is_variable:
@@ -1275,10 +1275,6 @@ class Couple(Wff):
         self.right = right
         self.name = name
         self.latexname = latexname
-        # if latexname == "":
-        #     self.latexname = name
-        # else:
-        #     self.latexname = latexname
 
     def __str__(self):
         return f'{self.lb}{self.left}{self.right}{self.rb}'
@@ -1290,16 +1286,25 @@ class Couple(Wff):
         return f'{self.lb}{self.left.latex()}{self.right.latex()}{self.rb}'
 
     def tree(self):
-        return f'{self.name}{self.lb}{self.left.tree()}{self.right.tree()}{self.rb}'
+        return f'{self.name}{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
+    
+    def abbrev(self):
+        if isinstance(self.left, Couple):
+            return f'{self.lb}{self.left.left.abbrev()}{self.left.right}{self.right.abbrev()}{self.rb}'
+        elif isinstance(self.right, Couple):
+            return f'{self.right.left.abbrev()} {self.left} {self.right.right.abbrev()}'
+        else:
+            return f'{self.lb}{self.left}{self.right}{self.rb}'
     
     def pattern(self, objectlist: list):
-        return f'{self.name}{self.left.pattern(objectlist)}{self.right.pattern(objectlist)}'
+        return f'{self.name}{self.lb}{self.left.pattern(objectlist)}, {self.right.pattern(objectlist)}{self.rb}'
     
 class Identity(Wff):
     """Define a relation for the variables or elements."""
 
-    lb = "{"
-    rb = "}"
+    is_variable = False
+    lb = "("
+    rb = ")"
     booleanvalue = None
     multivalue = None
 
@@ -1316,10 +1321,10 @@ class Identity(Wff):
         return f'{self.left.latex()}{self.latexname}{self.right.latex()}'
 
     def tree(self):
-        return f'{self.left.tree()}{self.name}{self.right.tree()}'
+        return f'Identity{self.lb}{self.left.tree()}, {self.right.tree()}{self.rb}'
     
     def pattern(self, objectlist: list):
-        return f'{self.left.pattern(objectlist)}{self.latexname}{self.right.pattern(objectlist)}'
+        return f'Identity{self.lb}{self.left.pattern(objectlist)}, {self.right.pattern(objectlist)}{self.rb}'
     
     def setvalue(self):
         self.booleanvalue = None
@@ -1372,6 +1377,9 @@ class Thing(Wff):
         return f'{self.latexname}'
 
     def tree(self):
+        return f'{self.name}'
+    
+    def abbrev(self):
         return f'{self.name}'
     
     def pattern(self, objectlist: list):

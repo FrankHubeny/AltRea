@@ -86,6 +86,7 @@ from altrea.wffs import (
     Thing,
     Variable,
     Couple,
+    Identity,
 )
 import altrea.data
 #from altrea.fol import Thing, Domain, Variable
@@ -140,14 +141,13 @@ class Proof:
 
     addhypothesis_name = "Add Hypothesis"
     axiom_name = "Axiom"
-    # closenecessary_name = "Close Necessary"
-    # closepossibly_name = "Close Possibly"
     closestrictsubproof_name = "Close Strict Subproof"
     closesubproof_name = "Close Subproof"
     definition_name = "Definition"
     entailment_name = "Entailment"
     goal_name = "GOAL"
     hypothesis_name = "Hypo"
+    identity_elim_name = "Identity Elim"
     implication_intro_name = "$\\supset~$I"
     implication_intro_strict_name = "$\\prec~$"
     necessary_intro_name = "$\\Box~$I"
@@ -248,6 +248,8 @@ class Proof:
     log_notenoughsubs = '{0}: The metaformula "{1}" require more substution values than are provided in this list "{2}".'
     stopped_notfalse = "The referenced item is not false."
     log_notfalse = '{0}: The referenced item "{1}" on line {2} is not false.'
+    stopped_notidentity = "Not an identity."
+    log_notidentity = '{0}: The item "{1}" is either not an identity or "{2}" or "{3}" are not what are equated.'
     stopped_notimplication = "The referenced item is not an implication."
     log_notimplication = (
         '{0}: The referenced item "{1}" on line {2} is not an implication.'
@@ -299,9 +301,6 @@ class Proof:
 
     """Strings to log messages upon successful completion of tasks."""
 
-    # log_addhypothesis = (
-    #     '{0}: Item "{1}" has been added as an hypothesis to subproof {2}.'
-    # )
     log_axiom = '{0}: Item "{1}" has been added through the "{2}" axiom.'
     log_axiomalreadyexists = '{0}: An axiom with the name "{1}" already exists.'
     log_axiomnotfound = '{0}: An axiom with the name "{1}" was not found.'
@@ -321,6 +320,7 @@ class Proof:
     log_emptystrictsubproofstarted = "{0}: An empty strict subproof has been started."
     log_goal = '{0}: The goal "{1}" has been added to the goals.'
     log_hypothesis = '{0}: A new subproof {1} has been started with item "{2}".'
+    log_identity_elim = '{0}: In "{1}" replace "{2}" with "{3}" derived as identical on line {4}.'
     log_implication_intro = (
         '{0}: Item "{1}" has been derived upon closing subproof {2}.'
     )
@@ -467,6 +467,7 @@ class Proof:
     linetype_reiterate = "REIT"
     linetype_rule = "RULE"
     linetype_lemma = "LEMMA"
+    linetype_replace = "REPLACE"
     linetype_substitution = "SUB"
     linetype_transformationrule = "TR"
 
@@ -506,8 +507,9 @@ class Proof:
     write_variable_first = "Let ${0}$"
     write_variable_many = ", ${0}$"
     write_variable_last = " and ${0}$ be arbitrary propositions. "
-    write_withoutlemmas = "The proof is self contained without referencing other saved proofs.\n\n"
-    write_withlemmas = "The proof references other saved proofs.\n\n"
+    write_withoutlemmas = "The proof of the theorem does not require any lemmas.\n\n"
+    write_withlemma = "The proof of the theorem depends on the following lemma.\n\n"
+    write_withlemmas = "The proof of the theorem depends on the following lemmas.\n\n"
 
     def __init__(self, name: str = "", displayname: str = "", description: str = ""):
         """Create a Proof object with an optional name.
@@ -566,79 +568,96 @@ class Proof:
             (
                 "coimp elim", 
                 "ConclusionPremises(And(Implies({0}, {1}), Implies({1}, {0})), [Iff({0}, {1})])", 
-                "Coimplication Elim", 
+                "$\\equiv$ E", 
                 "Coimplication Elimination"
             ),
             (
                 "coimp intro", 
                 "ConclusionPremises(Iff({0}, {1}), [And(Implies({0}, {1}), Implies({1}, {0}))])", 
-                "Coimplication Intro", 
+                "$\\equiv$ I", 
                 "Coimplication Introduction"
             ),
             (
                 "conj elim l", 
                 "ConclusionPremises({0}, [And({0}, {1})])", 
-                "Conjunction Elim Left", 
+                "$\\wedge$ E-L", 
                 "Conjunction Elimination Left Side"
             ),
             (
                 "conj elim r", 
                 "ConclusionPremises({1}, [And({0}, {1})])", 
-                "Conjunction Elim Right", 
+                "$\\wedge$ E-R", 
                 "Conjunction Elimination Right Side"
             ),
             (
                 "conj intro", 
                 "ConclusionPremises(And({0}, {1}), [{0}, {1}])", 
-                "Conjunction Intro", 
+                "$\\wedge$ I", 
                 "Conjunction Introduction"
             ),
             (
                 "consistent intro", 
                 "ConclusionPremises(ConsistentWith({0}, {1}), [Possibly(And({0}, {1}))])", 
-                "Consistent With Intro", 
+                "$\\circ$ I", 
                 "Consistent With Introduction"
             ),
             (
                 "consistent elim", 
                 "ConclusionPremises(Possibly(And({0}, {1})), [ConsistentWith({0}, {1})])", 
-                "Consistent With Elim", 
+                "$\\circ$ E", 
                 "Consistent With Elimination"
             ),
             (
+                "coup elim l", 
+                "ConclusionPremises(Identity({0}, {2}), [Identity(Couple({0}, {1}),Couple({2}, {3}))])", 
+                "( ) E-L", 
+                "Couple Elimination"
+            ),
+            (
+                "coup elim r", 
+                "ConclusionPremises(Identity({1}, {3}), [Identity(Couple({0}, {1}),Couple({2}, {3}))])", 
+                "( ) E-R", 
+                "Couple Elimination"
+            ),
+            (
+                "coup intro", 
+                "ConclusionPremises(Identity(Couple({0}, {2}), Couple({1}, {3})), [Identity({0},{1}), Identity({2},{3})])", 
+                "( ) I", 
+                "Couple Introduction"),
+            (
                 "disj elim", 
                 "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, {2}), Implies({1}, {2})])", 
-                "Disjunction Elim", 
+                "$\\vee$ E", 
                 "Disjunction Elimination"
             ),
             (
                 "disj elim l", 
                 "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, {2}), Implies({1}, Falsehood())])", 
-                "Disjunction Elim Left", 
+                "$\vee$ E-L", 
                 "Disjunction Elimination Left"
             ),
             (
                 "disj elim r", 
                 "ConclusionPremises({2}, [Or({0}, {1}), Implies({0}, Falsehood()), Implies({1}, {2})])", 
-                "Disjunction Elim Right", 
+                "$\\vee$ E-R", 
                 "Disjunction Elimination Right"
             ),
             (
                 "disj intro l", 
                 "ConclusionPremises(Or({1}, {0}), [{0}])", 
-                "Disjunction Intro Left", 
+                "$\\lor$ I-L", 
                 "Disjunction Introduction Left Side"
             ),
             (
                 "disj intro r", 
                 "ConclusionPremises(Or({0}, {1}), [{0}])", 
-                "Disjunction Intro Right", 
+                "$\\lor$ I-R", 
                 "Disjunction Introduction Right Side"
             ),
             (
                 "imp elim", 
                 "ConclusionPremises({1}, [{0}, Implies({0}, {1})])", 
-                "Implication Elim", 
+                "$\\supset$ E", 
                 "Implication Elimination"),
             (
                 "modusponens",
@@ -649,50 +668,74 @@ class Proof:
             (
                 "nec elim", 
                 "ConclusionPremises({0}, [Necessary({0})])", 
-                "Necessary Elim", 
+                "$\\Box$ E", 
                 "Necessary Elimination"
             ),
             (
                 "neg elim", 
                 "ConclusionPremises(Falsehood(), [{0}, Not({0})])", 
-                "Negation Elim", 
+                "$\\lnot$ E", 
                 "Nenegation Elimination"
             ),
             (
                 "neg intro", 
                 "ConclusionPremises(Not({0}), [Implies({0}, Falsehood())])", 
-                "Negation Intro", 
+                "$\\lnot$ I", 
                 "Negation Introduction"
             ),
             (   
                 "pos intro", 
                 "ConclusionPremises(Possibly({0}), [{0}])", 
-                "Possibly Intro", 
+                "$\\Diamond$ I", 
                 "Possibly Introduction"
             ),
             (
                 "s coimp elim", 
                 "ConclusionPremises(Necessary(Iff({0}, {1})), [StrictIff({0}, {1})])", 
-                "Strict Coimplication Elim", 
+                "$\\backsimeq$ E", 
                 "Strict Coimplication Elimination"
             ),
             (
                 "s coimp intro", 
                 "ConclusionPremises(StrictIff({0}, {1}), [Necessary(Iff({0}, {1}))])", 
-                "Strict Coimplication Intro", 
+                "$\\backsimeq$ I", 
                 "Strict Coimplication Introduction"
             ),
             (
                 "s imp elim", 
                 "ConclusionPremises(Necessary(Implies({0}, {1})), [StrictImplies({0}, {1})])", 
-                "Strict Implication Elim", 
+                "$\\prec$ E", 
                 "Strict Implication Elimination"
             ),
             (
                 "s imp intro", 
                 "ConclusionPremises(StrictImplies({0}, {1}), [Necessary(Implies({0}, {1}))])", 
-                "Strict Implication Intro", 
+                "$\\prec$ I", 
                 "Strict Implication Introduction"
+            ),
+            (
+                "or not to not and",
+                "ConclusionPremises(Not(And({0}, {1})), [Or(Not({0}), Not({1}))])",
+                "De Morgan",
+                "De Morgan Or To Not-And",
+            ),
+            (
+                "not and to or not",
+                "ConclusionPremises(Or(Not({0}), Not({1})), [Not(And({0}, {1}))])",
+                "De Morgan",
+                "De Morgan Not-And To Or",
+            ),
+            (
+                "and not to not or",
+                "ConclusionPremises(Not(Or({0}, {1})), [And(Not({0}), Not({1}))])",
+                "De Morgan",
+                "De Morgan And To Not-Or",
+            ),
+            (
+                "or not to not and",
+                "ConclusionPremises(Not(And({0}, {1})), [Or(Not({0}), Not({1}))])",
+                "De Morgan",
+                "De Morgan Not-Or To And",
             ),
         ]
         self.logicaxiomsunrestricted = [
@@ -705,14 +748,26 @@ class Proof:
             (
                 "dneg intro",
                 "ConclusionPremises(Not(Not({0})), [{0}])",
-                "DN Intro",
+                "DN I",
                 "Double Negation Introduction",
             ),
             (
                 "dneg elim",
                 "ConclusionPremises({0}, [Not(Not({0}))])",
-                "DN Elim",
+                "DN E",
                 "Double Negation Elimination",
+            ),
+            (
+                "id lem", 
+                "ConclusionPremises(Or(Identity({0}, {1}), Not(Identity({0}, {1}))), [])", 
+                "id LEM", 
+                "Excluded Middle Identity"
+            ),
+            (
+                "id intro", 
+                "ConclusionPremises(Identity({0}, {0}), [])", 
+                "= I", 
+                "Identity Intro"
             ),
             (
                 "lem",
@@ -757,18 +812,31 @@ class Proof:
                 "Given A and A > B Derive B",
             ),
         ]
-        self.logicaxioms = []
+        self.logicaxioms = [
+            (
+                "id intro", 
+                "ConclusionPremises(Identity({0}, {0}), [])", 
+                "= I", 
+                "Identity Intro"
+            ),
+            (
+                "id lem", 
+                "ConclusionPremises(Or(Identity({0}, {1}), Not(Identity({0}, {1}))), [])", 
+                "id LEM", 
+                "Excluded Middle Identity"
+            ),
+        ]
         self.logicdefinitionsunrestricted = [
             (
                 "iff intro",
                 "ConclusionPremises(Iff({0}, {1}), [And(Implies({0}, {1}), Implies({1}, {0}))])",
-                "Iff Intro",
+                "\\equiv I",
                 "Coimplication Introduction",
             ),
             (
                 "iff elim",
                 "ConclusionPremises(And(Implies({0}, {1}), Implies({1}, {0})), [Iff({0}, {1})])",
-                "Iff Elim",
+                "\\equiv E",
                 "Coimplication Elimination",
             ),
         ]
@@ -839,6 +907,7 @@ class Proof:
             "Couple": Couple,
             "Variable": Variable,
             "Thing": Thing,
+            "Identity": Identity,
         }
         self.metaobjectdictionary = {
             "Implies": Implies,
@@ -865,6 +934,7 @@ class Proof:
             "Couple": Couple,
             "Variable": Variable,
             "Thing": Thing,
+            "Identity": Identity,
         }
         self.log = []
         self.latexwrittenproof = ""
@@ -1718,7 +1788,108 @@ class Proof:
                 ]
             )
 
-    
+    def identity_elim(self, wff: Wff, first: Wff, second: Wff, line: int, comment: str = ""):
+        """Replace one instance of a proposition, thing or variable with one that has been
+        derived to be identical with it."""
+        
+            # Look for errors
+        if self.canproceed():
+            if self.goodrule(
+                self.rule_naturaldeduction,
+                self.identity_elim_name,
+                self.identity_elim_name,
+                comment,
+            ):
+                if self.goodline(
+                    line,
+                    self.identity_elim_name,
+                    self.identity_elim_name,
+                    comment
+                ):
+                    item = self.item(line)
+                    if isinstance(item, Identity):
+                        if first == item.left or first == item.right:
+                            if second == item.left or second == item.right:
+                                pass
+                            else:
+                                self.logstep(
+                                    self.log_notidentity.format(
+                                        self.identity_elim_name.upper(), 
+                                        item,
+                                        first,
+                                        second
+                                    )
+                                )
+                                self.stopproof(
+                                    self.stopped_notidentity,
+                                    self.blankstatement,
+                                    self.identity_elim_name,
+                                    "",
+                                    "",
+                                    comment
+                                )
+                        else:
+                            self.logstep(
+                                self.log_notidentity.format(
+                                    self.identity_elim_name.upper(), 
+                                    item,
+                                    first,
+                                    second
+                                )
+                            )
+                            self.stopproof(
+                                self.stopped_notidentity,
+                                self.blankstatement,
+                                self.identity_elim_name,
+                                "",
+                                "",
+                                comment
+                            )
+                    else:
+                        self.logstep(
+                            self.log_notidentity.format(
+                                self.identity_elim_name.upper(), 
+                                item,
+                                first,
+                                second
+                            )
+                        )
+                        self.stopproof(
+                            self.stopped_notidentity,
+                            self.blankstatement,
+                            self.identity_elim_name,
+                            "",
+                            "",
+                            comment
+                        )
+
+        # If no errors, perform task
+        if self.canproceed():
+            # Log code
+            self.proofcode.append(f'{self.proofcodevariable}.identity_elim({wff}, {first}, {second}, {line})')
+
+            replaced = wff.tree().replace(first.tree(), second.tree(), 1)
+            evaluated = eval(replaced, self.objectdictionary)
+
+            #self.premises.append(premise)
+            #nextline = len(self.lines)
+            #self.prooflist[self.currentproofid][3].append(nextline)
+            self.logstep(self.log_identity_elim.format(self.identity_elim_name.upper(), wff, first, second, line))
+            newcomment = self.iscomplete(evaluated, comment)
+            self.lines.append(
+                [
+                    evaluated,
+                    0,
+                    self.currentproofid,
+                    self.identity_elim_name,
+                    "",
+                    "",
+                    newcomment,
+                    self.linetype_replace,
+                    self.subproofchain,
+                ]
+            )
+            self.appendproofdata(evaluated)
 
 
     def substitute(self, originalstring: str, subs: list, displayname: str):
@@ -1881,11 +2052,6 @@ class Proof:
             index.append("".join(["$", i[0], "$"]))
             table.append(i[1])
         df = pandas.DataFrame(table, index, headers)
-        # if html:
-        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
-        #     return IPython.display.HTML(dfhtml)
-        # else:
-        #     return df
         return self.htmllatex(df, html)
     
     def definitions(self, html: bool = True):
@@ -1900,11 +2066,6 @@ class Proof:
             reconstructedobject = self.metasubstitute(i[1])
             table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
         df = pandas.DataFrame(table, index, headers)
-        # if html:
-        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
-        #     return IPython.display.HTML(dfhtml)
-        # else:
-        #     return df
         return self.htmllatex(df, html)
 
     def rules(self, html: bool = True):
@@ -1919,11 +2080,6 @@ class Proof:
             reconstructedobject = self.metasubstitute(i[1])
             table.append(["".join(["$", reconstructedobject.latex(), "$"]), i[3]])
         df = pandas.DataFrame(table, index, headers)
-        # if html:
-        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
-        #     return IPython.display.HTML(dfhtml)
-        # else:
-        #     return df
         return self.htmllatex(df, html)
 
     def lemmas(self, html: bool = True):
@@ -1952,10 +2108,6 @@ class Proof:
             table.append(i[1])
         df = pandas.DataFrame(table, index, headers)
         return self.htmllatex(df, html)
-    
-    # def item(self, n: int):
-    #     """Retrieve the item in the nth line of the proof."""
-    #     return self.lines[n][self.statementindex]
 
     def displaylog(self):
         """Displays a log of the proof steps.  This will display the entire log that
@@ -2213,10 +2365,6 @@ class Proof:
 
         # Use pandas to display the proof lines.
         df = pandas.DataFrame(newp, index=indx, columns=columns)
-        # if html:
-        #     dfhtml = df.to_html().replace('<td>', '<td style="text-align:left">').replace('<th>', '<th style="text-align:center">')
-        #     return IPython.display.HTML(dfhtml)
-        # else:
         return self.htmllatex(df, html)
     
 
@@ -3144,10 +3292,6 @@ class Proof:
             ]
         )
         endlemma = "\n\\end{lemma*}\n\n"
-        # if leftright:
-        #     alignment = "llll"
-        # else:
-        #     alignment = "lrll"
         return "".join(
             [
                 lemmaintro,
@@ -3169,7 +3313,7 @@ class Proof:
             flip: bool = False,
             alignment: str = "llll"
         ):
-        """Constructs an English version of the proof."""
+        """Construct a natural language version of the proof."""
 
         goal = self.buildconclusionpremises().latex()
         beginproof = "\\begin{proof}\n"
@@ -3184,7 +3328,10 @@ class Proof:
         if len(lemmalist) == 0:
             lemmas = self.write_withoutlemmas
         else:
-            lemmas = self.write_withlemmas
+            if len(lemmalist) == 1:
+                lemmas = self.write_withlemma
+            else:
+                lemmas = self.write_withlemmas
             for sp in lemmalist:
                 lemmas = self.write_lemmalist.format(lemmas, self.writelemma(sp, short, html=False))
 

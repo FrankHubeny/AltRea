@@ -492,6 +492,10 @@ class Proof:
     write_hypothesis = "{0}\n\nWe assert the hypothesis ${1}$ on line {2} in order to derive ${3}$ on line {4}.  We now detail how that is done.\n\n"
     write_lemma = "{0}From {1} using {2} we can assert item ${3}$ on line {4}.\n\n"
     write_lemmalist = "{0}{1}"
+    write_predicate_one = "Let ${0}$ be an arbitrary predicate. "
+    write_predicate_first = "Let ${0}$"
+    write_predicate_many = ", ${0}$"
+    write_predicate_last = " and ${0}$ be arbitrary predicates in a domain. "
     write_premises_none = "The proof uses no premises. "
     write_premises_one = "As a premise we are given ${0}$. "
     write_premises_first = "As premises we are given ${0}$"
@@ -501,6 +505,10 @@ class Proof:
     write_premises = "We are given {0} premises. "
     write_proofconclusion = "\n\nSince we can derive ${0}$, we have ${1}$.\n\n"
     write_proofintro = "The following table shows the lines of the proof.\n\n"
+    write_proposition_one = "Let ${0}$ be an arbitrary proposition. "
+    write_proposition_first = "Let ${0}$"
+    write_proposition_many = ", ${0}$"
+    write_proposition_last = " and ${0}$ be arbitrary propositions. "
     write_referenceditems_first = "item ${0}$ on line {1}"
     write_referenceditems_many = "{0}, item ${1}$ on line {2}"
     write_referenceditems_last = "{0} and item ${1}$ on line {2}"
@@ -509,15 +517,19 @@ class Proof:
     write_rule = "{0}From {1} using the {2} rule we can derive item ${3}$ on line {4}. "
     Write_subproofconclusion = "This completes the subproof.\n\n"
     write_rule_norefs = "{0}Using the {1} rule we can derive item ${2}$ on line {3}. "
+    write_subject_one = "Let ${0}$ be an arbitrary subject or thing in a domain. "
+    write_subject_first = "Let ${0}$"
+    write_subject_many = ", ${0}$"
+    write_subject_last = " and ${0}$ be arbitrary subjects in a domain. "
     write_substitution = "{0}From {1} using substitution we can derive item ${2}$ on line {3}. "
     write_substitution = "{0}Using substitution we can derive item ${1}$ on line {2}. "
     write_theoremstatement = "\\begin{{theorem*}}[{0}]\n The entailment ${1}$ can be derived. \n\\end{{theorem*}}\n\n"
     write_transformationrule = "{0}Using the {2} rule with {1} we can derive item ${3}$ on line {4}. "
     write_transformationrule_norefs = "{0}Using the {1} rule we can derive item ${2}$ on line {3}. "
-    write_variable_one = "Let ${0}$ be an arbitrary proposition. "
+    write_variable_one = "Let ${0}$ be a variable ranging over a domain. "
     write_variable_first = "Let ${0}$"
     write_variable_many = ", ${0}$"
-    write_variable_last = " and ${0}$ be arbitrary propositions. "
+    write_variable_last = " and ${0}$ be variables ranging over a domain. "
     write_withoutlemmas = "The proof of the theorem does not require any lemmas.\n\n"
     write_withlemma = "The proof of the theorem depends on the following lemma.\n\n"
     write_withlemmas = "The proof of the theorem depends on the following lemmas.\n\n"
@@ -564,16 +576,20 @@ class Proof:
             ("\\top", "Tautology"),
         ]
         self.logicconnectives = [
-            ("\\wedge ", "Logical And"),
-            ("\\vee ", "Logical Or"),
-            ("\\lnot ", "Logical Not"),
-            ("\\supset ", "Logical (Material) Implication"),
-            ("\\equiv ", "Logical Coimplication (IFF)"),
-            ("\\Box ", "Modal Necessity"),
-            ("\\Diamond ", "Modal Possibility"),
-            ("\\prec ", "Modal Strict Implication"),
-            ("\\backsimeq ", "Modal Strict Coimplication"),
-            ("\\circ ", "Modal Consistent With"),
+            ("and", "&", "\\wedge~", "Logical And"),
+            ("or", "|", "\\vee~", "Logical Or"),
+            ("implies", ">", "\\supset~", "Material Implication"),
+            ("equiv", "≡", "\\equiv~", "Material Equivalence"),
+            # ("\\wedge ", "Logical And"),
+            # ("\\vee ", "Logical Or"),
+            # ("\\lnot ", "Logical Not"),
+            # ("\\supset ", "Logical (Material) Implication"),
+            # ("\\equiv ", "Logical Coimplication (IFF)"),
+            # ("\\Box ", "Modal Necessity"),
+            # ("\\Diamond ", "Modal Possibility"),
+            # ("\\prec ", "Modal Strict Implication"),
+            # ("\\backsimeq ", "Modal Strict Coimplication"),
+            # ("\\circ ", "Modal Consistent With"),
         ]
         self.logicrules = [
             (
@@ -3325,7 +3341,6 @@ class Proof:
         goal = self.buildconclusionpremises().latex()
         beginproof = "\\begin{proof}\n"
         endproof = "\\end{proof}"
-        proofvariables = ""
         
         # Gather the lemmas
         lemmalist = []
@@ -3342,26 +3357,94 @@ class Proof:
             for sp in lemmalist:
                 lemmas = self.write_lemmalist.format(lemmas, self.writelemma(sp, short, html=False))
 
-        # Gather the variables.
-        variables = len(self.letters)
-        if variables > 0:
-            if variables == 1:
-                proofvariables = self.write_variable_one.format(
+        # Gather the propositions.
+        propositions = len(self.letters)
+        proofpropositions = ""
+        if propositions > 0:
+            if propositions == 1:
+                proofpropositions = self.write_proposition_one.format(
                     self.letters[0][0].latex()
                 )
-            elif variables > 1:
-                proofvariables = self.write_variable_first.format(
+            elif propositions > 1:
+                proofpropositions = self.write_proposition_first.format(
                     self.letters[0][0].latex()
                 )
                 for i in range(len(self.letters)):
+                    if i > 0 and i < propositions - 1:
+                        proofpropositions += self.write_proposition_many.format(
+                            self.letters[i][0].latex()
+                        )
+                    elif i == propositions - 1:
+                        proofpropositions += self.write_proposition_last.format( 
+                            self.letters[i][0].latex()
+                        )
+
+        # Gather the subjects.
+        subjects = len(self.subjects)
+        proofsubjects = ""
+        if subjects > 0:
+            if subjects == 1:
+                proofsubjects = self.write_subject_one.format(
+                    self.subjects[0][0].latex()
+                )
+            elif subjects > 1:
+                proofsubjects = self.write_subject_first.format(
+                    self.subjects[0][0].latex()
+                )
+                for i in range(len(self.subjects)):
+                    if i > 0 and i < subjects - 1:
+                        proofsubjects += self.write_subject_many.format(
+                            self.subjects[i][0].latex()
+                        )
+                    elif i == subjects - 1:
+                        proofsubjects += self.write_subject_last.format( 
+                            self.subjects[i][0].latex()
+                        )
+
+        # Gather the variables.
+        variables = len(self.variables)
+        proofvariables = ""
+        if variables > 0:
+            if variables == 1:
+                proofvariables = self.write_variable_one.format(
+                    self.variables[0][0].latex()
+                )
+            elif variables > 1:
+                proofvariables = self.write_variable_first.format(
+                    self.variables[0][0].latex()
+                )
+                for i in range(len(self.variables)):
                     if i > 0 and i < variables - 1:
                         proofvariables += self.write_variable_many.format(
-                            self.letters[i][0].latex()
+                            self.variables[i][0].latex()
                         )
                     elif i == variables - 1:
                         proofvariables += self.write_variable_last.format( 
-                            self.letters[i][0].latex()
+                            self.variables[i][0].latex()
                         )
+
+        # Gather the predicates.
+        predicates = len(self.predicates)
+        proofpredicates = ""
+        if predicates > 0:
+            if predicates == 1:
+                proofpredicates = self.write_predicate_one.format(
+                    self.predicates[0][0].latex()
+                )
+            elif predicates > 1:
+                proofpredicates = self.write_predicate_first.format(
+                    self.predicates[0][0].latex()
+                )
+                for i in range(len(self.predicates)):
+                    if i > 0 and i < predicates - 1:
+                        proofpredicates += self.write_predicate_many.format(
+                            self.predicates[i][0].latex()
+                        )
+                    elif i == predicates - 1:
+                        proofpredicates += self.write_predicate_last.format( 
+                            self.predicates[i][0].latex()
+                        )
+
 
         # Gather the conclusion of the proof
         proofconclusion = ""
@@ -3539,7 +3622,10 @@ class Proof:
                 self.write_proofintro,
                 self.writecenter(df.to_latex(column_format=alignment)),
                 beginproof,
-                proofvariables, 
+                proofpropositions,
+                proofsubjects, 
+                proofvariables,
+                proofpredicates,
                 proofpremises,
                 linebyline, 
                 proofconclusion, 
@@ -5085,10 +5171,10 @@ class Proof:
         )
         return p
     
-    def connective(self, name: str, latex: str):
+    def connective(self, name: str, string: str, latex: str):
         p = Connective(name, latex)
         self.objectdictionary.update({name: p})
-        self.binaryconnectives.append([p, name, latex])
+        self.binaryconnectives.append([p, name, string, latex])
         howmany = len(self.binaryconnectives)
         if latex == "":
             latex = name
@@ -5489,6 +5575,10 @@ class Proof:
                     self.logicrules = altrea.data.getrules(logic)
                 except TypeError:
                     self.logicrules = []
+                try:
+                    self.logicconnectives = altrea.data.getconnectives(logic)
+                except TypeError:
+                    self.logicconnectives = []
             else:
                 self.setrestricted(self.restricted)
                 

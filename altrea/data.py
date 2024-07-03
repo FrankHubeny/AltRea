@@ -40,7 +40,7 @@ def createmetadatatables():
     try:
         c.execute("SELECT COUNT(*) FROM logics")
         rows = c.fetchone()
-        print(f"The logics table already has {rows} rows in it.")
+        print(f"The logics table already has {rows[0]} rows in it.")
     except sqlite3.OperationalError:
         # Create the logics table in the metadata database.
         c.execute("""CREATE TABLE logics (
@@ -49,16 +49,18 @@ def createmetadatatables():
                     description TEXT NOT NULL)""")
         print("The logics table has been created.")
 
-        # Create the connectors table in the metadata database.
-        c.execute("""CREATE TABLE connectors (
+        # Create the connectives table in the metadata database.
+        c.execute("""CREATE TABLE connectives (
                   logic       TEXT NOT NULL, 
                   name        TEXT NOT NULL, 
+                  str         TEXT NOT NULL,
+                  latex       TEXT NOT NULL,
                   description TEXT NOT NULL, 
                   UNIQUE(logic, name) ON CONFLICT REPLACE,
                   FOREIGN KEY (logic) REFERENCES logics(logic))""")
-        print("The connectors table has been created.")
+        print("The connectives table has been created.")
 
-        # Create the definitons table in the metadata database.
+        # Create the definitions table in the metadata database.
         c.execute("""CREATE TABLE definitions (
                 logic       TEXT NOT NULL,
                 name        TEXT NOT NULL,
@@ -118,7 +120,7 @@ def addlogic(
     logic: str,
     database: str,
     description: str,
-    connectors: list = [],
+    connectives: list = [],
     rules: list = [],
     definitions: list = [],
     axioms: list = [],
@@ -151,22 +153,26 @@ def addlogic(
         VALUES (?, ?, ?)"""
         database = "".join(["altrea/data/", database.replace(" ", "_"), ".db"])
         c.execute(statement, (logic, database, description))
-        print(f"The logics table has been loaded for logic {logic}.")
+        print(f'The logics table has been loaded for logic "{logic}" with {str(c.rowcount)} records.')
 
-    # Load the connectors table.
-    if len(connectors) > 0:
-        statement = """INSERT INTO connectors (
+    # Load the connectives table.
+    if len(connectives) > 0:
+        print(f"There are {len(connectives)} connectives to load.")
+        statement = """INSERT INTO connectives (
             logic, 
             name, 
+            str,
+            latex,
             description) 
-        VALUES (?, ?, ?)"""
-        c.executemany(statement, connectors)
-        print(f"The connectors table for logic {logic} has been loaded.")
+        VALUES (?, ?, ?, ?, ?)"""
+        c.executemany(statement, connectives)
+        print(f'The connectives table for logic "{logic}" has been loaded with {str(c.rowcount)} records.')
     else:
-        print("There were no connectors to load.")
+        print("There were no connectives to load.")
 
     # Load the rules table.
     if len(rules) > 0:
+        print(f"There are {len(rules)} rules to load.")
         statement = """INSERT INTO rules (
             logic, 
             name, 
@@ -175,12 +181,13 @@ def addlogic(
             description) 
         VALUES (?, ?, ?, ?, ?)"""
         c.executemany(statement, rules)
-        print(f"The rules table for logic {logic} has been loaded.")
+        print(f'The rules table for logic "{logic}" has been loaded with {str(c.rowcount)} records.')
     else:
         print("There were no rules to load.")
 
     # Load the definitions table.
     if len(definitions) > 0:
+        print(f"There are {len(definitions)} definitionss to load.")
         statement = """INSERT INTO definitions (
             logic, 
             name, 
@@ -189,12 +196,13 @@ def addlogic(
             description) 
         VALUES (?, ?, ?, ?, ?)"""
         c.executemany(statement, definitions)
-        print(f"The definitions table for logic {logic} has been loaded.")
+        print(f'The definitions table for logic "{logic}" has been loaded with {str(c.rowcount)} records.')
     else:
         print("There were no definitions to load.")
 
     # Load the axioms table.
     if len(axioms) > 0:
+        print(f"There are {len(axioms)} axioms to load.")
         statement = """INSERT INTO axioms (
             logic, 
             name, 
@@ -203,7 +211,7 @@ def addlogic(
             description) 
         VALUES (?, ?, ?, ?, ?)"""
         c.executemany(statement, axioms)
-        print(f"The axioms table for logic {logic} has been loaded.")
+        print(f'The axioms table for logic "{logic}" has been loaded with {str(c.rowcount)} records.')
     else:
         print("There were no axiomss to load.")
 
@@ -300,7 +308,7 @@ def deletelogic(logic: str):
         connection = sqlite3.connect(metadata)
         c = connection.cursor()
 
-        # Delete from the axioms table.
+        # Delete from the definitions table.
         statement = "DELETE FROM definitions WHERE logic=?"
         c.execute(statement, (logic,))
         print(f"Any definitions associated with {logic} have been deleted.")
@@ -315,10 +323,10 @@ def deletelogic(logic: str):
         c.execute(statement, (logic,))
         print(f"Any rules associated with {logic} have been deleted.")
 
-        # Delete from the connectors table.
-        statement = "DELETE FROM connectors WHERE logic=?"
+        # Delete from the connectives table.
+        statement = "DELETE FROM connectives WHERE logic=?"
         c.execute(statement, (logic,))
-        print(f"Any connectors associated with {logic} have been deleted.")
+        print(f"Any connectives associated with {logic} have been deleted.")
 
         # Delete from the logics table.
         statement = "DELETE FROM logics WHERE logic=?"
@@ -485,6 +493,113 @@ def getaxioms(logic: str):
         return rows
     
 
+def addconnective(logic: str, name: str, str: str, latex: str, description: str):
+    """Add a connective to a logic."""
+
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = "SELECT COUNT(*) FROM connectives WHERE logic=? AND name=?"
+    c.execute(
+        statement,
+        (
+            logic,
+            name,
+        ),
+    )
+    howmany = c.fetchone()
+    if howmany[0] == 0:
+        row = (logic, name, str, latex, description)
+        statement = """INSERT INTO axioms (
+            logic, 
+            name, 
+            str, 
+            latex, 
+            description
+        ) VALUES (?, ?, ?, ?, ?)"""
+        c.execute(statement, row)
+        connection.commit()
+        print(
+            f'The connective "{name}" represented by "{str}" and "{latex}" has been loaded to the "{logic}" database.'
+        )
+    else:
+        print(
+            f'There is already a connective by the name "{name}" in the "{logic}" database.'
+        )
+    connection.close()
+
+
+def deleteconnective(logic: str, name: str):
+    """Delete an axiom from a logic."""
+
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = "SELECT COUNT(*) FROM connectives WHERE logic=? AND name=?"
+    c.execute(
+        statement,
+        (
+            logic,
+            name,
+        ),
+    )
+    howmany = c.fetchone()
+    if howmany[0] > 0:
+        statement = "DELETE FROM connectives WHERE logic=? and name=?"
+        c.execute(
+            statement,
+            (
+                logic,
+                name,
+            ),
+        )
+        connection.commit()
+        print(f'The connective "{name}" has been deleted from the "{logic}" database.')
+    else:
+        print(f'There is no connective by the name "{name}" in the "{logic}" database.')
+    connection.close()
+
+
+def getconnective(logic: str, name: str):
+    """Retrieve a single connective by name."""
+
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = """SELECT 
+        str, 
+        latex,
+        description
+    FROM connectives 
+    WHERE logic=? 
+    AND name=?"""
+    c.execute(
+        statement,
+        (
+            logic,
+            name,
+        ),
+    )
+    str, latex, description = c.fetchone()
+    connection.commit()
+    connection.close()
+    return str, latex, description
+
+
+def getconnectives(logic: str):
+    """Retrieve the connectors of this logic."""
+
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = "SELECT name, str, latex, description FROM connectives WHERE logic=?"
+    try:
+        c.execute(statement, (logic,))
+    except TypeError:
+        print(f"The {logic} connectives could not be accessed.")
+    else:
+        rows = c.fetchall()
+        connection.commit()
+        connection.close()
+        return rows
+    
+
 def addrule(
     logic: str, name: str, pattern: str, displayname: str, description: str
 ):
@@ -571,9 +686,18 @@ def getrules(logic: str):
         return []
     else:
         rows = c.fetchall()
+        #print(f"The number of rules returned is {len(rows)}.")
         connection.commit()
         connection.close()
         return rows
+    
+def gethowmanyrules(logic: str):
+    connection = sqlite3.connect(metadata)
+    c = connection.cursor()
+    statement = "SELECT COUNT() FROM rules WHERE logic=?"
+    c.execute(statement, (logic,))
+    rows = c.fetchone()
+    return rows
 
 
 def adddefinition(
@@ -837,21 +961,7 @@ def getsavedproof(logic: str, name: str):
     return displayname, description, pattern
 
 
-def getconnectors(logic: str):
-    """Retrieve the connectors of this logic."""
 
-    connection = sqlite3.connect(metadata)
-    c = connection.cursor()
-    statement = "SELECT name, description FROM connectors WHERE logic=?"
-    try:
-        c.execute(statement, (logic,))
-    except TypeError:
-        print(f"The {logic} connectors could not be accessed.")
-    else:
-        rows = c.fetchall()
-        connection.commit()
-        connection.close()
-        return rows
 
 
 def savetofile(text: str, filename: str, directory: str = "./"):

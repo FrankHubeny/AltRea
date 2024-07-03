@@ -1385,21 +1385,22 @@ class Connective(Wff):
     booleanvalue = None
     multivalue = None
 
-    def __init__(self, name: str, latexname: str = ""):
+    def __init__(self, name: str, strname: str, latexname: str = ""):
         self.name = name
+        self.strname = strname
         if latexname == "":
-            self.latexname = name
+            self.latexname = strname
         else:
             self.latexname = latexname
 
     def __str__(self):
-        return f'{self.name}'
+        return f'{self.strname}'
     
     def latex(self):
         return f'{self.latexname}'
 
     def tree(self):
-        return f'Connective({self.name})'
+        return f'{self.name}'
     
     def abbrev(self):
         return f'{self.name}'
@@ -1471,26 +1472,25 @@ class Relation(Wff):
     def __init__(self, connective: Connective, left: Wff, right: Wff, fix: str = "infix"):
         self.left = left
         self.right = right
-        self.name = connective.name
-        self.latexname = connective.latexname
+        self.connective = connective
         self.fix = fix
 
     def __str__(self):
-        return f"{self.left} {self.name} {self.right}"
+        return f"{self.left} {self.connective.strname} {self.right}"
     
     def latex(self):
         if self.fix == "infix":
-            return f"{self.left.latex()}~{self.latexname}~{self.right.latex()}"
+            return f"{self.left.latex()}~{self.connective.latexname}~{self.right.latex()}"
         elif self.fix == "prefix":
-            return f"{self.latexname}~{self.left.latex()}~{self.right.latex()}"
+            return f"{self.connective.latexname}~{self.left.latex()}~{self.right.latex()}"
         else:
-            return f"{self.left.latex()}~{self.right.latex()}~{self.latexname}"
+            return f"{self.left.latex()}~{self.right.latex()}~{self.connective.latexname}"
 
     def tree(self):
-        return f"Relation({self.name}, {self.left.tree()}, {self.right.tree})"
+        return f"Relation({self.connective.tree()}, {self.left.tree()}, {self.right.tree()})"
     
     def pattern(self, objectlist: list):
-        return f"Relation({self.name}, {self.left.pattern(objectlist)}, {self.right.pattern(objectlist)})"
+        return f"Relation({self.connective.pattern(objectlist)}, {self.left.pattern(objectlist)}, {self.right.pattern(objectlist)})"
     
     def setvalue(self):
         self.booleanvalue = None

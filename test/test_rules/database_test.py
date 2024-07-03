@@ -19,9 +19,11 @@ logicname = "_test_"
 logicdisplay = "_testdisplay_"
 logicdescription = "_testdescription_"
 
-connectors = [
-    (logicname, "And", "Conjunction"),
-    (logicname, "Or", "Disjunction"),
+connectives = [
+    (logicname, "and", "&", "\\wedge~", "Logical And"),
+    (logicname, "or", "|", "\\vee~", "Logical Or"),
+    (logicname, "implies", ">", "\\supset~", "Material Implication"),
+    (logicname, "equiv", "≡", "\\equiv~", "Material Equivalence"),
 ]
 rules = [
     (
@@ -62,7 +64,7 @@ axioms = [
 altrea.data.deletelogic(logicname)
 # clean construction
 altrea.data.addlogic(
-    logicname, logicdisplay, logicdescription, connectors, rules, definitions, axioms
+    logicname, logicdisplay, logicdescription, connectives, rules, definitions, axioms
 )
 
 """------------------------------------------------------------------------------

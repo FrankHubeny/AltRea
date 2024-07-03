@@ -32,7 +32,7 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", str(Possibly(A))),
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", t.possibly_elim_name),
+    ("prf.lines[2][prf.ruleindex]", t.possibly_elim_rulename),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", t.complete),
@@ -75,7 +75,7 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", t.blankstatement),
     ("prf.lines[2][prf.levelindex]", 1),
     ("prf.lines[2][prf.proofidindex]", 1),
-    ("prf.lines[2][prf.ruleindex]", t.possibly_elim_name),
+    ("prf.lines[2][prf.ruleindex]", t.possibly_elim_name),  # stopped, so name not rulename
     ("prf.lines[2][prf.linesindex]", ""),
     ("prf.lines[2][prf.proofsindex]", ""),
     (

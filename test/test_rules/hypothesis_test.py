@@ -40,7 +40,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", str(Implies(A, B))),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.implication_intro_name),
+    ("prf.lines[4][prf.ruleindex]", t.implication_intro_rulename),
     ("prf.lines[4][prf.linesindex]", ""),
     ("prf.lines[4][prf.proofsindex]", "2-3"),
     ("prf.lines[4][prf.commentindex]", t.complete),

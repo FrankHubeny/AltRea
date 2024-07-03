@@ -32,7 +32,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", str(Necessary(Necessary(A)))),
     ("prf.lines[3][prf.levelindex]", 0),
     ("prf.lines[3][prf.proofidindex]", 0),
-    ("prf.lines[3][prf.ruleindex]", t.necessary_intro_name),
+    ("prf.lines[3][prf.ruleindex]", t.necessary_intro_rulename),
     ("prf.lines[3][prf.linesindex]", "2"),
     ("prf.lines[3][prf.proofsindex]", ""),
     ("prf.lines[3][prf.commentindex]", ""),
@@ -68,7 +68,7 @@ testdata = [
     ("str(prf.lines[4][prf.statementindex])", str((Necessary(A)))),
     ("prf.lines[4][prf.levelindex]", 0),
     ("prf.lines[4][prf.proofidindex]", 0),
-    ("prf.lines[4][prf.ruleindex]", t.necessary_intro_name),
+    ("prf.lines[4][prf.ruleindex]", t.necessary_intro_rulename),
     ("prf.lines[4][prf.linesindex]", "3"),
     ("prf.lines[4][prf.proofsindex]", ""),
     ("prf.lines[4][prf.commentindex]", ""),
@@ -105,7 +105,7 @@ testdata = [
     ("str(prf.lines[3][prf.statementindex])", t.blankstatement),
     ("prf.lines[3][prf.levelindex]", 1),
     ("prf.lines[3][prf.proofidindex]", 1),
-    ("prf.lines[3][prf.ruleindex]", t.necessary_intro_name),
+    ("prf.lines[3][prf.ruleindex]", t.necessary_intro_name), # stopped, so name, not rulename
     ("prf.lines[3][prf.linesindex]", ""),
     ("prf.lines[3][prf.proofsindex]", ""),
     (

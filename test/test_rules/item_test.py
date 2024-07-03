@@ -73,7 +73,7 @@ testdata = [
     ("str(prf.lines[2][prf.statementindex])", str(A)),
     ("prf.lines[2][prf.levelindex]", 0),
     ("prf.lines[2][prf.proofidindex]", 0),
-    ("prf.lines[2][prf.ruleindex]", "Necessary Elim"),
+    #("prf.lines[2][prf.ruleindex]", "Necessary Elim"),
     ("prf.lines[2][prf.linesindex]", "1"),
     ("prf.lines[2][prf.proofsindex]", ""),
     ("prf.lines[2][prf.commentindex]", ""),

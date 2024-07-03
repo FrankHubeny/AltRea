@@ -73,6 +73,7 @@ from altrea.wffs import (
     Wff,
     Necessary,
     Possibly,
+    Predicate,
     Proposition,
     Falsehood,
     Truth,
@@ -83,13 +84,14 @@ from altrea.wffs import (
     StrictImplies,
     ThereExists,
     ForAll,
-    Thing,
+    Subject,
+    Connective,
     Variable,
     Couple,
     Identity,
+    Relation,
 )
 import altrea.data
-#from altrea.fol import Thing, Domain, Variable
 
 
 class Proof:
@@ -141,6 +143,7 @@ class Proof:
 
     addhypothesis_name = "Add Hypothesis"
     axiom_name = "Axiom"
+    binaryconnective_name = "Binary Connective"
     closestrictsubproof_name = "Close Strict Subproof"
     closesubproof_name = "Close Subproof"
     definition_name = "Definition"
@@ -148,13 +151,19 @@ class Proof:
     goal_name = "GOAL"
     hypothesis_name = "Hypo"
     identity_elim_name = "Identity Elim"
-    implication_intro_name = "$\\supset~$I"
-    implication_intro_strict_name = "$\\prec~$"
-    necessary_intro_name = "$\\Box~$I"
-    negation_intro_name = "Negation Intro"
+    implication_intro_name = "Implication Intro"
+    implication_intro_rulename = "$\\supset~$I"
+    implication_intro_strict_name = "Strict Implication Intro"
+    implication_intro_strict_rulename = "$\\prec~$"
+    necessary_intro_name = "Necessary Intro"
+    necessary_intro_rulename = "$\\Box~$I"
+    # negation_intro_name = "Negation Intro"
+    # negation_intro_rulename = "$\\lnot~$"
     openstrictsubproof_name = "Open Strict Subproof"
     opensubproof_name = "Open Subproof"
-    possibly_elim_name = "$\\Diamond~$E"
+    possibly_elim_name = "Possibly Elim"
+    possibly_elim_rulename = "$\\Diamond~$E"
+    predicate_name = "Predicate"
     reiterate_name = "Reit"
     removeaxiom_name = "Remove Axiom"
     removedefinition_name = "Remove Definition"
@@ -164,8 +173,8 @@ class Proof:
     saveaxiom_name = "Save Axiom"
     savedefinition_name = "Save Definition"
     saverule_name = "Save Rule"
+    subject_name = "Subject"
     substitution_name = "Substitution"
-    thing_name = "Thing"
     variable_name = "Variable"
     
 
@@ -310,6 +319,7 @@ class Proof:
     log_closepossibly = "{0}: The current subproof was closed deriving a Possibly item."
     log_closestrictsubproof = '{0}: The current "{1}" subproof {2} has been closed.'
     log_closesubproof = '{0}: The current "{1}" subproof {2} has been closed.'
+    log_binaryconnective = '{0}: The name "{1}" refers to a binary connective with {2} so far having been defined for this proof.'
     log_definition = '{0}: Item "{1}" has been added using the "{2}" definition.'
     log_definitionalreadyexists = (
         '{0}: A definition with the name "{1}" already exists.'
@@ -339,6 +349,7 @@ class Proof:
     log_noproofs = "There are no saved proofs for logic {0}"
     log_opensubproof = '{0}: Subproof {1} has been opened with status "{2}".'
     log_possibly_elim = '{0}: Item "{1}" has been derived from item "{2}".'
+    log_predicate = '{0}: The name "{1}" refers to a predicate with {2} so far having been defined for this proof.'
     log_premise = '{0}: Item "{1}" has been added to the premises.'
     log_proof = (
         '{0}: A proof named "{1}" or "{2}" with description "{3}" has been started.'
@@ -367,7 +378,7 @@ class Proof:
     log_substitution = (
         '{0}: The statement "{1}" on line "{2}" has been substituted with "{3}".'
     )
-    log_thing = '{0}: The name "{1}" refers to a thing in a domain with {2} so far having been defined for this proof.'
+    log_subject = '{0}: The name "{1}" refers to a thing or subject in a domain with {2} so far having been defined for this proof.'
     log_useproof = '{0}: Item "{1}" has been added through the "{2}" saved proof.'
     log_userule = (
         '{0}: Item "{1}" has been added through the "{2}" transformation rule.'
@@ -878,63 +889,59 @@ class Proof:
         self.premises = []
         self.consequences = []
         self.letters = []
-        self.things = []
+        self.subjects = []
         self.variables = []
+        self.binaryconnectives = []
+        self.predicates = []
         self.metaletters = []
         self.truths = []
         self.objectdictionary = {
-            "Implies": Implies,
-            "Iff": Iff,
             "And": And,
-            "Or": Or,
-            "Not": Not,
-            "Necessary": Necessary,
-            "Possibly": Possibly,
             "ConclusionPremises": ConclusionPremises,
+            "Connective": Connective,
             "ConsistentWith": ConsistentWith,
-            "StrictImplies": StrictImplies,
-            "StrictIff": StrictIff,
+            "Couple": Couple,
             "Definition": Definition,
             "Falsehood": Falsehood,
-            "Truth": Truth,
-            "ConclusionPremises": ConclusionPremises,
-            "Definition": Definition,
-            "ConsistentWith": ConsistentWith,
-            "StrictIff": StrictIff,
-            "StrictImplies": StrictImplies,
-            "ThereExists": ThereExists,
             "ForAll": ForAll,
-            "Couple": Couple,
-            "Variable": Variable,
-            "Thing": Thing,
             "Identity": Identity,
+            "Iff": Iff,
+            "Implies": Implies,
+            "Necessary": Necessary,
+            "Not": Not,
+            "Or": Or,
+            "Possibly": Possibly,
+            "Relation": Relation,
+            "StrictImplies": StrictImplies,
+            "StrictIff": StrictIff,
+            "Subject": Subject,
+            "ThereExists": ThereExists,
+            "Truth": Truth,
+            "Variable": Variable,
         }
         self.metaobjectdictionary = {
-            "Implies": Implies,
-            "Iff": Iff,
             "And": And,
-            "Or": Or,
-            "Not": Not,
-            "Necessary": Necessary,
-            "Possibly": Possibly,
             "ConclusionPremises": ConclusionPremises,
+            "Connective": Connective,
             "ConsistentWith": ConsistentWith,
-            "StrictImplies": StrictImplies,
-            "StrictIff": StrictIff,
+            "Couple": Couple,
             "Definition": Definition,
             "Falsehood": Falsehood,
-            "Truth": Truth,
-            "ConclusionPremises": ConclusionPremises,
-            "Definition": Definition,
-            "ConsistentWith": ConsistentWith,
-            "StrictIff": StrictIff,
-            "StrictImplies": StrictImplies,
-            "ThereExists": ThereExists,
             "ForAll": ForAll,
-            "Couple": Couple,
-            "Variable": Variable,
-            "Thing": Thing,
             "Identity": Identity,
+            "Iff": Iff,
+            "Implies": Implies,
+            "Necessary": Necessary,
+            "Not": Not,
+            "Or": Or,
+            "Possibly": Possibly,
+            "Relation": Relation,
+            "StrictImplies": StrictImplies,
+            "StrictIff": StrictIff,
+            "Subject": Subject,
+            "ThereExists": ThereExists,
+            "Truth": Truth,
+            "Variable": Variable,
         }
         self.log = []
         self.latexwrittenproof = ""
@@ -4747,54 +4754,25 @@ class Proof:
                         "",
                         comment
                     )
-                
-                # if self.currentproofid == 0:
-                #     self.logstep(
-                #         self.log_closemainproof.format(
-                #             self.implication_intro_name.upper()
-                #         )
-                #     )
-                #     self.stopproof(
-                #         self.stopped_closemainproof,
-                #         self.blankstatement,
-                #         self.implication_intro_name,
-                #         "",
-                #         "",
-                #     )
 
         # If no errors, perform task
         if self.canproceed():
             #Log code
             self.proofcode.append(f'{self.proofcodevariable}.implication_intro()')
-
-        #     proofid = self.currentproofid
-        #     subproof_status = self.subproof_status
-        #     self.prooflist[self.currentproofid][1].append(len(self.lines) - 1)
-        #     self.level -= 1
-        #     self.subproofchain = self.subproofchain[:-3]
             antecedent, consequent, previousproofid, previoussubproofstatus = (
                 self.getproof(self.closedproofid)
             )
             proofid = self.closedproofid
             self.closedproofid = 0
             self.subproofavailable = self.subproofavailable_not
-        #     self.currentproofid = previousproofid
-        #     self.subproof_status = previoussubproofstatus
-        #     self.currentproof = self.prooflist[previousproofid][1]
-        #     if len(self.previousproofchain) > 1:
-        #         self.previousproofchain.pop(len(self.previousproofchain) - 1)
-        #         self.previousproofid = self.previousproofchain[
-        #             len(self.previousproofchain) - 1
-        #         ]
-        #     else:
-        #         self.previousproofchain = []
-        #         self.previousproofid = -1
             implication = Implies(antecedent, consequent)
             if self.subproofavailable == self.subproofavailable_closestrict:
                 name = self.implication_intro_strict_name
+                rulename = self.implication_intro_strict_rulename
                 message = self.log_implication_intro_strict
             else:
                 name = self.implication_intro_name
+                rulename = self.implication_intro_rulename
                 message = self.log_implication_intro
             self.logstep(message.format(name.upper(), implication, proofid))
             newcomment = self.iscomplete(implication, comment)
@@ -4803,7 +4781,7 @@ class Proof:
                     implication,
                     self.level,
                     self.currentproofid,
-                    name,
+                    rulename,
                     "",
                     self.refproof(proofid),
                     newcomment,
@@ -4860,7 +4838,7 @@ class Proof:
             necessarystatement = Necessary(statement)
             self.logstep(
                 self.log_necessary_intro.format(
-                    self.negation_intro_name.upper(), necessarystatement, statement
+                    self.necessary_intro_name.upper(), necessarystatement, statement
                 )
             )
             newcomment = self.iscomplete(necessarystatement, comment)
@@ -4869,7 +4847,7 @@ class Proof:
                     necessarystatement,
                     self.level,
                     self.currentproofid,
-                    self.necessary_intro_name,
+                    self.necessary_intro_rulename,
                     str(index), #self.reflines(i),
                     "",
                     newcomment,
@@ -4914,41 +4892,6 @@ class Proof:
                         "",
                         comment
                     )
-                # if len(lines) == 0:
-                #     self.logstep(self.log_nolines.format(self.possibly_elim_name.upper(),
-                #                                          lines))
-                #     self.stopproof(self.stopped_nolines,
-                #                    self.blankstatement,
-                #                    self.possibly_elim_name,
-                #                '',
-                #                '',
-                #                comment)
-                # else:
-                #     for i in lines:
-                #         if not self.goodline(i,
-                #                              self.possibly_elim_name,
-                #                              self.possibly_elim_name,
-                #                              comment):
-                #             break
-
-        # Look for specific errors
-        # if self.canproceed():
-        #     if self.subproof_status != self.subproof_strict:
-        #         self.logstep(
-        #             self.log_notstrictsubproof.format(
-        #                 self.possibly_elim_name.upper(),
-        #                 self.subproof_status,
-        #                 self.subproof_strict,
-        #             )
-        #         )
-        #         self.stopproof(
-        #             self.stopped_notstrictsubproof,
-        #             self.blankstatement,
-        #             self.possibly_elim_name,
-        #             "",
-        #             "",
-        #             comment,
-        #         )
 
         # If no errors, perform task
         if self.canproceed():
@@ -4956,21 +4899,6 @@ class Proof:
             self.proofcode.append(f'{self.proofcodevariable}.possibly_elim()')
 
             line = len(self.lines) - 1
-            # self.prooflist[self.currentproofid][1].append(line)
-            # self.level -= 1
-            # #self.subproofchain = self.subproofchain[3:]
-            # self.subproofchain = self.subproofchain[:-3]
-            # previousproofid = self.getpreviousproofid(self.currentproofid)
-            # self.currentproofid = previousproofid
-            # self.currentproof = self.prooflist[previousproofid][1]
-            # if len(self.previousproofchain) > 1:
-            #     self.previousproofchain.pop(len(self.previousproofchain) - 1)
-            #     self.previousproofid = self.previousproofchain[
-            #         len(self.previousproofchain) - 1
-            #     ]
-            # else:
-            #     self.previousproofchain = []
-            #     self.previousproofid = -1
             statement = self.item(len(self.lines) - 1)
             possiblystatement = Possibly(statement)
             self.logstep(
@@ -4984,7 +4912,7 @@ class Proof:
                     possiblystatement,
                     self.level,
                     self.currentproofid,
-                    self.possibly_elim_name,
+                    self.possibly_elim_rulename,
                     self.reflines(line),
                     "",
                     newcomment,
@@ -4998,7 +4926,6 @@ class Proof:
     def premise(
         self,
         premise: Wff,
-        # premise: And | Or | Not | Implies | Iff | Wff | Falsehood | Truth,
         comment: str = "",
     ):
         """Add a premise to the proof.
@@ -5145,16 +5072,42 @@ class Proof:
         )
         return p
 
-    def thing(self, name: str, latex: str = ""):
-        p = Thing(name, latex)
+    def subject(self, name: str, latex: str = ""):
+        p = Subject(name, latex)
         self.objectdictionary.update({name: p})
-        self.things.append([p, name, latex])
-        howmany = len(self.things)
+        self.subjects.append([p, name, latex])
+        howmany = len(self.subjects)
         if latex == "":
             latex = name
-        self.proofcode.append(f'{name} = {self.proofcodevariable}.thing("{name}", "{latex}")')
+        self.proofcode.append(f'{name} = {self.proofcodevariable}.subject("{name}", "{latex}")')
         self.logstep(
-            self.log_thing.format(self.thing_name.upper(), p, howmany)
+            self.log_subject.format(self.subject_name.upper(), p, howmany)
+        )
+        return p
+    
+    def connective(self, name: str, latex: str):
+        p = Connective(name, latex)
+        self.objectdictionary.update({name: p})
+        self.binaryconnectives.append([p, name, latex])
+        howmany = len(self.binaryconnectives)
+        if latex == "":
+            latex = name
+        self.proofcode.append(f'{name} = {self.proofcodevariable}.connective("{name}", "{latex}")')
+        self.logstep(
+            self.log_binaryconnective.format(self.binaryconnective_name.upper(), p, howmany)
+        )
+        return p
+    
+    def predicate(self, name: str, latex: str):
+        p = Predicate(name, latex)
+        self.objectdictionary.update({name: p})
+        self.predicates.append([p, name, latex])
+        howmany = len(self.predicates)
+        if latex == "":
+            latex = name
+        self.proofcode.append(f'{name} = {self.proofcodevariable}.predicate("{name}", "{latex}")')
+        self.logstep(
+            self.log_predicate.format(self.predicate_name.upper(), p, howmany)
         )
         return p
     

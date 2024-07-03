@@ -283,6 +283,8 @@ class Falsehood(Wff):
     """
 
     is_variable = True
+    booleanvalue = None
+    multivalue = None
     
     def __init__(self, 
                  #wff: Wff,
@@ -345,6 +347,7 @@ class Falsehood(Wff):
 
     def getmultivalue(self):
         return self.multivalue
+
 
 class Iff(Wff):
     """A well formed formula with two arguments which are also well formed formulas
@@ -1227,39 +1230,6 @@ class ForAll(Wff):
         return self.multivalue
     
 
-class Relation(Wff):
-    """Define a relation for the variables or elements."""
-
-    lb = "{"
-    rb = "}"
-    booleanvalue = None
-    multivalue = None
-
-    def __init__(self, elements: list, name: str, latexname: str = ""):
-        self.elements = elements
-        self.name = name
-        if latexname == "":
-            self.latexname = name
-        else:
-            self.latexname = "".join(["\\textbf", latexname])
-
-    def __str__(self):
-        return f'{self.name}{"".join([str(i) for i in self.elements])}'.replace("'", "")
-    
-    def latex(self):
-        return f'{self.latexname}{"".join([i.latex() for i in self.elements])}'
-
-    def tree(self):
-        return f'{self.name}{"".join([i.tree() for i in self.elements])}'
-    
-    def pattern(self, objectlist: list):
-        return f'{self.name}{"".join([i.pattern(objectlist) for i in self.elements])}'
-    
-    def setvalue(self):
-        self.booleanvalue = None
-
-    def getmultivalue(self):
-        return self.multivalue
 
 class Couple(Wff):
     """Assign a name to a specific thing."""
@@ -1299,6 +1269,8 @@ class Couple(Wff):
     def pattern(self, objectlist: list):
         return f'{self.name}{self.lb}{self.left.pattern(objectlist)}, {self.right.pattern(objectlist)}{self.rb}'
     
+
+
 class Identity(Wff):
     """Define a relation for the variables or elements."""
 
@@ -1337,6 +1309,8 @@ class Variable(Wff):
 
     lb = "{"
     rb = "}"
+    booleanvalue = None
+    multivalue = None
 
     def __init__(self, name: str, latexname: str = ""):
         self.name = name
@@ -1356,12 +1330,19 @@ class Variable(Wff):
     
     # def pattern(self, objectlist: list):
     #     return f'{self.name}'
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
     
-class Thing(Wff):
-    """Assign a name to a specific thing."""
+class Subject(Wff):
+    """Assign a name to a specific thing or subject in a domain."""
 
     lb = "{"
     rb = "}"
+    booleanvalue = None
+    multivalue = None
 
     def __init__(self, name: str, latexname: str = ""):
         self.name = name
@@ -1377,7 +1358,7 @@ class Thing(Wff):
         return f'{self.latexname}'
 
     def tree(self):
-        return f'{self.name}'
+        return f'Subject({self.name})'
     
     def abbrev(self):
         return f'{self.name}'
@@ -1389,7 +1370,159 @@ class Thing(Wff):
             idx = len(objectlist)
             objectlist.append(self.name)
         return ''.join(['{', str(idx), '}'])
-
-
     
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+    
+class Connective(Wff):
+    """Assign a name to a specific binary connective such as "and", "or", "implies"."""
+
+    lb = "{"
+    rb = "}"
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(self, name: str, latexname: str = ""):
+        self.name = name
+        if latexname == "":
+            self.latexname = name
+        else:
+            self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.name}'
+    
+    def latex(self):
+        return f'{self.latexname}'
+
+    def tree(self):
+        return f'Connective({self.name})'
+    
+    def abbrev(self):
+        return f'{self.name}'
+    
+    def pattern(self, objectlist: list):
+        try:
+            idx = objectlist.index(self.name)
+        except ValueError:
+            idx = len(objectlist)
+            objectlist.append(self.name)
+        return ''.join(['{', str(idx), '}'])
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+    
+class Predicate(Wff):
+    """Assign a name to a predicate."""
+
+    lb = "{"
+    rb = "}"
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(self, name: str, latexname: str = ""):
+        self.name = name
+        if latexname == "":
+            self.latexname = name
+        else:
+            self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.name}'
+    
+    def latex(self):
+        return f'{self.latexname}'
+
+    def tree(self):
+        return f'Predicate({self.name})'
+    
+    def abbrev(self):
+        return f'{self.name}'
+    
+    def pattern(self, objectlist: list):
+        try:
+            idx = objectlist.index(self.name)
+        except ValueError:
+            idx = len(objectlist)
+            objectlist.append(self.name)
+        return ''.join(['{', str(idx), '}'])
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+
+class Relation(Wff):
+    """Define a relation for the variables or elements."""
+
+    is_variable = False
+    lb = "{"
+    rb = "}"
+    booleanvalue = None
+    multivalue = None
+
+    def __init__(self, connective: Connective, left: Wff, right: Wff, fix: str = "infix"):
+        self.left = left
+        self.right = right
+        self.name = connective.name
+        self.latexname = connective.latexname
+        self.fix = fix
+
+    def __str__(self):
+        return f"{self.left} {self.name} {self.right}"
+    
+    def latex(self):
+        if self.fix == "infix":
+            return f"{self.left.latex()}~{self.latexname}~{self.right.latex()}"
+        elif self.fix == "prefix":
+            return f"{self.latexname}~{self.left.latex()}~{self.right.latex()}"
+        else:
+            return f"{self.left.latex()}~{self.right.latex()}~{self.latexname}"
+
+    def tree(self):
+        return f"Relation({self.name}, {self.left.tree()}, {self.right.tree})"
+    
+    def pattern(self, objectlist: list):
+        return f"Relation({self.name}, {self.left.pattern(objectlist)}, {self.right.pattern(objectlist)})"
+    
+    def setvalue(self):
+        self.booleanvalue = None
+
+    def getmultivalue(self):
+        return self.multivalue
+
+class Attribute(Wff):
+    """Assign a name to a specific thing."""
+
+    booleanvalue = None
+    multivalue = None
+    memberof = "$~\\epsilon~$"
+
+    def __init__(self, predicate: Predicate, subject: Wff, latexname: str = ""):
+        self.predicate = predicate
+        self.subject = subject
+        self.latexname = latexname
+
+    def __str__(self):
+        return f'{self.predicate}{self.subject}'
+    
+    def epsilon(self):
+        return f'{self.subject.latex()} {self.memberof} {self.predicate.latex()}'
+    
+    def latex(self):
+        return f'{self.predicate.latex()}{self.subject.latex()}'
+
+    def tree(self):
+        return f'Attribute({self.predicate.tree()}, {self.subject.tree()})'
+    
+    def pattern(self, objectlist: list):
+        return f'Attribute({self.predicate}, {self.subject.pattern(objectlist)})'
+
 
